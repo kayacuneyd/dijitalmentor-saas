@@ -63,3 +63,5 @@ pm2 save`; restarting by process name alone can preserve stale environment value
 - 2026-07-09: No rclone/SSH off-site target exists. Closed beta has consistent nightly local backups
   plus a passed restore drill, but no disaster-recovery copy; off-site backup remains mandatory
   before a paid public-launch resilience claim.
+- 2026-07-09: Phase 0 reproducible baseline is local commit `9fbf36d` on `master`; secrets,
+  databases, dependencies, and build output were excluded. It has not been pushed.

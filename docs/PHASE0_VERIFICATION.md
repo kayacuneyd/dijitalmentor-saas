@@ -7,13 +7,15 @@
 
 ## Baseline
 
-- Git branch/HEAD: `master` at `03437b3`.
-- Worktree at phase start: 7 modified paths and 27 untracked paths. Most application code has never
-  been committed; do not describe this as a clean or reproducible baseline yet.
-- Commit/push is intentionally deferred until the operator explicitly requests it, per
-  `docs/CONVENTIONS.md`.
+- Git branch: `master`.
+- Worktree at phase start: 7 modified paths and 27 untracked paths; most application code had never
+  been committed.
+- Reviewed baseline commit: `9fbf36d` (`Phase 0: establish verified production baseline`), 202
+  files. `.env`, `.secrets`, databases, dependencies, and build artifacts remained ignored; staged
+  content passed whitespace and common-secret-pattern checks.
+- The baseline is local and intentionally not pushed; publishing remains a separate external action.
 - Framework verification after the first Phase 0 changes:
-  - `npm test`: 25 files, 131 tests passed.
+  - `npm test`: 26 files, 133 tests passed.
   - `npm run check`: 0 errors and 0 warnings.
   - `npm run build`: adapter-node production build passed.
 

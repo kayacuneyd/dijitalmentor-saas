@@ -16,7 +16,10 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:5183/   # expect 200
 ```
 
 Stop with `pkill -f "vite dev"`. Note: `pgrep -f "vite dev"` matches its own shell — confirm
-shutdown with curl, not pgrep.
+shutdown with curl, not pgrep. In a sandboxed shell, `pkill -f "vite dev"` combined with an
+immediate restart in the same command can report a spurious nonzero exit even though it worked —
+if that happens, find the exact PID instead (`ss -ltnp | grep 5183`) and `kill <pid>`, or just
+split the stop and (re)start into two separate commands.
 
 ## Flows worth driving
 
@@ -111,6 +114,48 @@ link` log line (plain-form responses re-render with the error, don't rely on the
   redirect + 0 agent tokens in `ai_gate_log`; small copy edit → auto-applied via Sonnet; theme
   change → card → approve → applied via Opus; then `usage.cache_read_input_tokens > 0` on the
   second heavy call and the Ops-card counters move.
+
+## Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2)
+
+`/new` is anonymous-reachable: a fixed 14-question script (+2 conditional contact steps) collects
+answers before the sign-in gate, which now sits at `POST /api/onboarding/finish` instead of the
+page load. Free-text answers (~8 of the questions) pass through a Groq on-topic guard with no
+force/override path.
+
+- Unit surface (`npm test`): `questions.test.ts` (script shape, conditional visibility,
+  `nextQuestion` sequencing, per-question schemas), `compose.test.ts` (description composition,
+  language steering, raw escape-hatch passthrough verbatim), `onboardingGuard.test.ts` (mocked
+  `RunToolCall`: on-topic pass, off-topic + reply, repair-once, `AIInvalidOutputError`), `session.test.ts`
+  (pending record lifecycle, cross-device `linkPendingToUser` via URL token vs cookie, sweep),
+  endpoint tests in `answer/server.test.ts` + `finish/server.test.ts` (validation, guard
+  block/fail-open, rate-limit buckets, ownership).
+- `POST /api/onboarding/answer` `{questionId, value}` → `{ok, nextQuestionId|null, done}`; invalid
+  shape → 400; off-topic guarded answer → `{ok:false, kind:'off_topic', message}` (400, answer NOT
+  saved); `questionId:'rawDescription'` (≥30 chars) is the escape hatch, unguarded, always
+  `done:true`. Guard fails OPEN on `AIUnavailableError`/`AIInvalidOutputError` (no `GROQ_API_KEY`
+  in dev → every guarded answer logs to `error_events` with `source:'onboarding-guard'` and is
+  accepted anyway — expected, not a bug).
+- `POST /api/onboarding/finish` — 401 signed-out (**the abuse gate now lives here**); 404 no
+  pending cookie; 400 if required questions aren't all answered (unless `rawDescription` present);
+  200 `{ok, description}` on a signed-in, complete pending record — client then POSTs that
+  `description` to the UNCHANGED `/api/sites`, exactly like the plain-textarea flow.
+- Cross-device magic-link handoff: answer a few questions anonymously → `sk_pending` cookie set →
+  `POST /login` (same cookie present) → the returned/dev-echoed link carries `&p=<rawPendingToken>`
+  → open that link in a **different** cookie jar/browser context → `/login/verify` resolves the `p`
+  query param (not the cookie), links the record, redirects to `/new` (not `/dashboard`), and
+  re-issues `sk_pending` on that new device — `/new` then SSRs the resumed answers.
+- Real-browser (playwright-core, same recipe as elsewhere in this doc): answer all questions via
+  the choice/multi-choice/text/list_text controls → toggle the "kendi cümlelerimle anlatmak
+  istiyorum" escape hatch open/closed without losing progress → complete → anonymous click on
+  "Ücretsiz Başla" goes to `/login` → send + open the dev-echo link in a second browser context →
+  resumed answers visible on `/new` → "Siteni oluştur" → `/api/sites` (no AI key in dev → visible
+  503 error, not a hang — that's the thing to prove, not a live generation). Also check 375px:
+  `document.documentElement.scrollWidth - clientWidth === 0` with the escape-hatch textarea open.
+  No force/override control should exist anywhere on the page (`/yine de gönder|force/i` should not
+  match the body) — that absence is the point of this feature, verify it stays absent.
+- Daily sweep: `sqlite3 local.db` insert a `pending_onboarding` row with `expires_at` in the past →
+  `POST /api/admin/tasks/daily` with `x-cron-token` → response `sweptOnboarding >= 1` and the row
+  is gone.
 
 ## Beta launch + hybrid onboarding (beta-launch spec)
 

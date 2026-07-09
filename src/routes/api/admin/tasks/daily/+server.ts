@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { getSetting } from '$lib/server/config';
 import { sweepExpiredCustomDomains } from '$lib/server/ops';
+import { sweepExpiredOnboarding } from '$lib/server/onboarding/session';
 import { fulfillPendingReservations } from '$lib/server/reservations';
 import type { RequestHandler } from './$types';
 
@@ -20,8 +21,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const sweptDomains = await sweepExpiredCustomDomains();
 	const fulfilled = await fulfillPendingReservations();
+	const sweptOnboarding = sweepExpiredOnboarding();
 	console.log(
-		`[ops] daily sweep: ${sweptDomains.length} domain(s) detached, ${fulfilled.length} reservation(s) processed`
+		`[ops] daily sweep: ${sweptDomains.length} domain(s) detached, ${fulfilled.length} reservation(s) processed, ${sweptOnboarding} pending onboarding record(s) expired`
 	);
-	return json({ ok: true, sweptDomains, fulfilled });
+	return json({ ok: true, sweptDomains, fulfilled, sweptOnboarding });
 };

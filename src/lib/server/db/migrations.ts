@@ -245,6 +245,27 @@ export const migrations: Migration[] = [
 				`CREATE INDEX IF NOT EXISTS error_events_created_idx ON error_events (created_at)`
 			);
 		}
+	},
+	{
+		version: 9,
+		name: 'pending-onboarding',
+		up(client) {
+			// Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a short-lived,
+			// anonymous-reachable record of in-progress answers, claimed by a user account
+			// at magic-link verify time. No IP column — rateLimit() keys stay in-memory only.
+			client.exec(`CREATE TABLE IF NOT EXISTS pending_onboarding (
+				id text PRIMARY KEY,
+				token_hash text UNIQUE NOT NULL,
+				current_step integer NOT NULL DEFAULT 0,
+				answers text NOT NULL DEFAULT '{}',
+				status text NOT NULL DEFAULT 'in_progress',
+				linked_user_id text,
+				generated_site_id text,
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL,
+				expires_at integer NOT NULL
+			)`);
+		}
 	}
 ];
 

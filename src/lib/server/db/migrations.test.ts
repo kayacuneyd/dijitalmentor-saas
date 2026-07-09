@@ -66,6 +66,13 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				.prepare(`SELECT 1 FROM pragma_table_info('ai_usage') WHERE name='estimated_cost_microusd'`)
 				.get()
 		).toBeTruthy();
+		// v9: guided onboarding Q&A pending records
+		expect(tables(client)).toContain('pending_onboarding');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('pending_onboarding') WHERE name='token_hash'`)
+				.get()
+		).toBeTruthy();
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

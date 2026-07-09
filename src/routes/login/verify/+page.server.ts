@@ -6,6 +6,7 @@ import {
 	isBetaAllowed,
 	setSessionCookie
 } from '$lib/server/auth';
+import { linkPendingToUser } from '$lib/server/onboarding/session';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ url, cookies }) => {
@@ -18,5 +19,14 @@ export const load: PageServerLoad = ({ url, cookies }) => {
 
 	const user = getOrCreateUser(email);
 	setSessionCookie(cookies, createSession(user.id));
-	redirect(303, '/dashboard');
+
+	// Guided onboarding handoff: resume the in-progress Q&A on /new instead of
+	// dropping the visitor on /dashboard, when a pending record exists — via the
+	// `p` URL param (cross-device) or the `sk_pending` cookie (same-browser).
+	const pending = linkPendingToUser({
+		cookies,
+		urlToken: url.searchParams.get('p'),
+		userId: user.id
+	});
+	redirect(303, pending ? '/new' : '/dashboard');
 };

@@ -234,6 +234,33 @@ export const gateSchema = gateObjectSchema.superRefine((gate, ctx) => {
 });
 export type GateResult = z.infer<typeof gateSchema>;
 
+// ---------------------------------------------------------------------------
+// Guided onboarding topic-guard (Hostinger Horizons roadmap Phase 2) — binary
+// on-topic classification only. Unlike the chat gatekeeper above, this has no
+// question/help_request branches and no override: onboarding never answers a
+// meta-question, it only ever redirects back to the specific question asked.
+// ---------------------------------------------------------------------------
+
+/** Plain object shape — used for the tool input_schema (refinements are not JSON-schema-able). */
+export const onboardingGuardObjectSchema = z.strictObject({
+	onTopic: z.boolean(),
+	reply: z
+		.string()
+		.trim()
+		.max(300)
+		.optional()
+		.describe(
+			'required when onTopic=false: a same-language message that declines and restates the exact question the visitor still needs to answer'
+		)
+});
+
+export const onboardingGuardSchema = onboardingGuardObjectSchema.superRefine((result, ctx) => {
+	if (!result.onTopic && !result.reply) {
+		ctx.addIssue({ code: 'custom', message: 'onTopic=false requires a reply' });
+	}
+});
+export type OnboardingGuardResult = z.infer<typeof onboardingGuardSchema>;
+
 /** JSON schema for a tool definition (Claude tool-use input_schema). */
 export function toInputSchema(schema: z.ZodType): Record<string, unknown> {
 	return z.toJSONSchema(schema, { target: 'draft-2020-12', reused: 'inline' }) as Record<

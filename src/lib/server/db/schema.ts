@@ -205,6 +205,29 @@ export const errorEvents = sqliteTable(
 	(table) => [index('error_events_created_idx').on(table.createdAt)]
 );
 
+// Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a short-lived, anonymous
+// pending record of in-progress answers. `tokenHash` identifies it via either the
+// `sk_pending` cookie or the magic-link URL fallback param — never the raw token.
+// Claimed (`linkedUserId` set) at /login/verify, consumed once /api/onboarding/finish
+// hands the composed description to the unchanged /api/sites contract.
+export const pendingOnboarding = sqliteTable('pending_onboarding', {
+	id: text('id').primaryKey(),
+	tokenHash: text('token_hash').notNull().unique(),
+	currentStep: integer('current_step').notNull().default(0),
+	answers: text('answers', { mode: 'json' }).notNull().default('{}'),
+	// in_progress | completed | consumed
+	status: text('status').notNull().default('in_progress'),
+	linkedUserId: text('linked_user_id'),
+	generatedSiteId: text('generated_site_id'),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+});
+
 // R2 object index. The object bytes live in Cloudflare; this table provides
 // tenant ownership, quota accounting, and a future media-library listing.
 export const mediaAssets = sqliteTable(

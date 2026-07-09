@@ -1,4 +1,4 @@
-# Constitution — Dijital Mentor
+# Constitution — saaskaya
 
 Non-negotiable principles for building this project. **When in doubt, re-read this file.**
 If a request conflicts with a principle here, **stop and flag it** before proceeding.
@@ -27,7 +27,7 @@ If a request conflicts with a principle here, **stop and flag it** before procee
    and preview use subdomains / localhost. Registration only ever happens **after payment**.
 
 6. **Record decisions.** Any non-obvious decision or trade-off is written to `docs/PROGRESS.md` before
-   moving on. Future sessions must be able to reconstruct *why*, not just *what*.
+   moving on. Future sessions must be able to reconstruct _why_, not just _what_.
 
 7. **Verify, don't assume.** Every change is driven end-to-end (the `verify` / `run` skills) before it is
    called done. Errors are diagnosed from the **actual log/output**, never guessed — see the debug loop
@@ -48,5 +48,6 @@ local publish`, on a **seed tenant**, with **no auth, no billing, no domains**. 
 until this loop is real and impressive.
 
 ## Amending this constitution
+
 Principles change only by an explicit, logged decision in `docs/PROGRESS.md` that names the principle and
 the reason. Don't silently drift.

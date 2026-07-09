@@ -6,6 +6,7 @@ This project's **canonical rules live in `CLAUDE.md` and `docs/`**. This file on
 tool follows the same source of truth — do not duplicate rules here.
 
 **Before editing anything:**
+
 1. Read [`CLAUDE.md`](./CLAUDE.md) — product, stack, the 5 operating rules, non-goals.
 2. Read [`docs/CONSTITUTION.md`](./docs/CONSTITUTION.md) — non-negotiable principles — and
    [`docs/CONVENTIONS.md`](./docs/CONVENTIONS.md) — how to write code here.

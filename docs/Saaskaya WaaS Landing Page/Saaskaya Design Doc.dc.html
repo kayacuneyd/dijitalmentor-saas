@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@600;700&family=Lora:wght@600;700&family=Poppins:wght@600;700&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#ece7dd;font-family:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif;color:#171614;-webkit-font-smoothing:antialiased}
+  *{box-sizing:border-box}
+  a{color:inherit}
+  button{font:inherit;color:inherit}
+  input,textarea,select{font:inherit;color:inherit}
+  /* one direct-manipulation-friendly reset: gap-based flows only */
+  .card{background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:14px;box-shadow:0 1px 0 rgba(0,0,0,.03),0 24px 40px -32px rgba(0,0,0,.15)}
+  /* editable placeholder stripe */
+  .ph{background:repeating-linear-gradient(135deg,rgba(0,0,0,.05) 0 8px,rgba(0,0,0,.02) 8px 16px);color:rgba(0,0,0,.35);font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;display:flex;align-items:center;justify-content:center;text-align:center}
+  /* remove chrome default focus for clean design doc */
+  button:focus,input:focus,textarea:focus,select:focus{outline:none}
+</style>
+</helmet>
+
+<div style="padding:56px 64px 120px;max-width:none;">
+
+  <!-- ============ DOC HEADER ============ -->
+  <header style="max-width:960px;margin:0 auto 48px;display:flex;flex-direction:column;gap:16px;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:36px;height:36px;border-radius:9px;background:#171614;display:flex;align-items:center;justify-content:center;color:#f3ecdd;font-family:'Instrument Serif',serif;font-size:22px;line-height:1;padding-bottom:2px;">s</div>
+      <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,0,0,.55);">Design Doc · v0.1 · Original UI, DaisyUI-adjacent</div>
+    </div>
+    <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:64px;line-height:1;letter-spacing:-.01em;">saaskaya <span style="color:rgba(0,0,0,.35);font-style:italic;">— seven surfaces</span></h1>
+    <p style="margin:0;max-width:640px;font-size:15px;line-height:1.55;color:rgba(0,0,0,.65);">Describe yourself → AI fills a validated JSON site → edit copy live → publish on your own domain. Schematic mockups of every SaaS surface plus a public-site playground across the three niche presets and three viewports. The editor and playground are wired.</p>
+    <nav style="display:flex;flex-wrap:wrap;gap:6px 6px;margin-top:4px;">
+      <a href="#p1" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">01 landing</a>
+      <a href="#p2" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">02 describe</a>
+      <a href="#p3" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">03 login</a>
+      <a href="#p4" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">04 dashboard</a>
+      <a href="#p5" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">05 messages</a>
+      <a href="#p6" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#171614;color:#f3ecdd;border-color:#171614;">06 editor ★</a>
+      <a href="#p7" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#fbfaf7;">07 admin</a>
+      <a href="#p8" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:5px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;text-decoration:none;background:#171614;color:#f3ecdd;border-color:#171614;">08 public site ★</a>
+    </nav>
+  </header>
+
+  <!-- ============ PAGE 01 · LANDING ============ -->
+  <section id="p1" data-screen-label="01 Landing" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">01</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Landing / <span style="color:rgba(0,0,0,.4);">/</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">first impression · demo sites</span>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <!-- browser chrome -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.06);background:#f3efe6;">
+        <div style="display:flex;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#e0ded8;"></span><span style="width:10px;height:10px;border-radius:50%;background:#e0ded8;"></span><span style="width:10px;height:10px;border-radius:50%;background:#e0ded8;"></span></div>
+        <div style="flex:1;text-align:center;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.4);">saaskaya.app</div>
+        <div style="width:40px;"></div>
+      </div>
+      <!-- content -->
+      <div style="padding:64px 80px 80px;position:relative;">
+        <!-- nav -->
+        <div style="position:absolute;top:20px;right:24px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(0,0,0,.5);">signed out</span>
+          <button style="border:1px solid rgba(0,0,0,.12);background:transparent;border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;">Sign in</button>
+        </div>
+        <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:20px;align-items:flex-start;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:44px;height:44px;border-radius:11px;background:#171614;display:flex;align-items:center;justify-content:center;color:#f3ecdd;font-family:'Instrument Serif',serif;font-size:28px;padding-bottom:3px;">s</div>
+            <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:56px;line-height:1;">saaskaya</h1>
+          </div>
+          <p style="margin:0;font-size:17px;line-height:1.5;color:rgba(0,0,0,.7);">WaaS / progressive CMS — describe yourself, get a multilingual site as validated JSON, edit it live, publish it on your own domain.</p>
+          <button style="background:#171614;color:#f3ecdd;border:0;padding:14px 20px;border-radius:10px;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px;">Describe yourself → get your site <span style="opacity:.5;">↗</span></button>
+
+          <div style="height:1px;background:rgba(0,0,0,.08);width:100%;margin:24px 0 4px;"></div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(0,0,0,.5);">Demo sites</div>
+
+          <div style="width:100%;display:flex;flex-direction:column;gap:10px;">
+            <!-- demo card 1 · law -->
+            <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#fbfaf7;">
+              <div style="width:34px;height:34px;border-radius:8px;background:#1e3a5f;flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><a href="#" style="font-weight:600;font-size:14px;text-decoration:none;">Demir Hukuk Bürosu</a><span style="font-size:10.5px;padding:2px 7px;background:#1e3a5f;color:#fff;border-radius:4px;font-family:'IBM Plex Mono',ui-monospace,monospace;">law</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.55);margin-top:3px;">4 pages<span style="opacity:.4;">·</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">TR</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">EN</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">DE</span></div>
+              </div>
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+            </div>
+            <!-- demo card 2 · psych -->
+            <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#fbfaf7;">
+              <div style="width:34px;height:34px;border-radius:8px;background:#2f6f6a;flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><a href="#" style="font-weight:600;font-size:14px;text-decoration:none;">Serenlik Terapi</a><span style="font-size:10.5px;padding:2px 7px;background:#2f6f6a;color:#fff;border-radius:4px;font-family:'IBM Plex Mono',ui-monospace,monospace;">psych</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.55);margin-top:3px;">6 pages<span style="opacity:.4;">·</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">TR</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">EN</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">DE</span></div>
+              </div>
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+            </div>
+            <!-- demo card 3 · dental -->
+            <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;background:#fbfaf7;">
+              <div style="width:34px;height:34px;border-radius:8px;background:#0e7490;flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><a href="#" style="font-weight:600;font-size:14px;text-decoration:none;">Beyaz Diş Kliniği</a><span style="font-size:10.5px;padding:2px 7px;background:#0e7490;color:#fff;border-radius:4px;font-family:'IBM Plex Mono',ui-monospace,monospace;">dental</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.55);margin-top:3px;">5 pages<span style="opacity:.4;">·</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">TR</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">EN</span><span style="padding:1px 5px;border:1px solid rgba(0,0,0,.15);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;">DE</span></div>
+              </div>
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 02 · DESCRIBE ============ -->
+  <section id="p2" data-screen-label="02 Describe" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">02</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Describe yourself / <span style="color:rgba(0,0,0,.4);">/new</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">the hero interaction · textarea is the product</span>
+    </div>
+    <div class="card" style="padding:80px;">
+      <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;">
+        <a href="#p1" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← saaskaya</a>
+        <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:42px;line-height:1.05;">Describe yourself.</h1>
+        <p style="margin:0;font-size:15px;line-height:1.55;color:rgba(0,0,0,.68);">Who are you, what do you do, who are your clients? Write it in your own language — the AI builds a multilingual site (TR/EN/DE) from it. You can edit everything afterwards.</p>
+        <div style="position:relative;">
+          <textarea rows="9" style="width:100%;padding:16px 18px;border:1px solid rgba(0,0,0,.14);border-radius:12px;background:#fff;font-size:14.5px;line-height:1.55;resize:vertical;font-family:inherit;">Ben Av. Zeynep Demir. İstanbul&#39;da 12 yıldır aile hukuku ve boşanma davalarına bakıyorum. Ofisim Kadıköy&#39;de, danışanlarımın çoğu velayet ve mal paylaşımı konularında bana geliyor. Hızlı, dürüst ve anlaşılır bir hukuki süreç sunuyorum…</textarea>
+          <div style="position:absolute;bottom:10px;right:14px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);">247 / min. 30</div>
+        </div>
+        <button style="background:#171614;color:#f3ecdd;border:0;padding:16px 22px;border-radius:11px;font-size:15px;font-weight:500;cursor:pointer;">Generate my site</button>
+        <p style="margin:0;font-size:12px;color:rgba(0,0,0,.5);line-height:1.5;">The AI fills a fixed, validated site structure — it never writes code. Generation uses your monthly AI budget; direct text and color edits in the editor are always free.</p>
+      </div>
+    </div>
+
+    <!-- busy state variant -->
+    <div style="display:flex;align-items:baseline;gap:12px;margin-top:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:rgba(0,0,0,.08);border-radius:5px;">02.b</span>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">busy state — mid-generation</span>
+    </div>
+    <div class="card" style="padding:60px 80px;">
+      <div style="max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;">
+        <div style="padding:16px 18px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#f3efe6;font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.55);">Ben Av. Zeynep Demir. İstanbul&#39;da 12 yıldır aile hukuku…</div>
+          <button disabled="" style="background:#171614;color:#f3ecdd;border:0;padding:16px 22px;border-radius:11px;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:12px;opacity:.85;">
+            <span style="width:16px;height:16px;border:2px solid #f3ecdd;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;"></span>
+            Building your site — this takes about a minute…
+          </button>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+        <div style="display:flex;flex-direction:column;gap:6px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11.5px;color:rgba(0,0,0,.5);">
+          <div>✓ reading description</div>
+          <div>✓ picking niche preset · <span style="color:#1e3a5f;font-weight:500;">law</span></div>
+          <div>✓ drafting pages · home, about, services, contact</div>
+          <div style="color:#171614;">↳ writing TR / EN / DE content…</div>
+          <div style="opacity:.4;">  validating against Site schema</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 03 · LOGIN ============ -->
+  <section id="p3" data-screen-label="03 Login" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">03</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Sign in / <span style="color:rgba(0,0,0,.4);">/login</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">magic-link · two states</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="card" style="padding:56px 48px;">
+        <div style="max-width:340px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+          <a href="#p1" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← saaskaya</a>
+          <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;">Sign in</h1>
+          <p style="margin:0;font-size:14px;color:rgba(0,0,0,.68);line-height:1.5;">No password — we email you a one-time sign-in link. First sign-in creates your account.</p>
+          <input type="email" placeholder="you@example.com" style="padding:14px 16px;border:1px solid rgba(0,0,0,.14);border-radius:10px;font-size:15px;background:#fff;" />
+          <button style="background:#171614;color:#f3ecdd;border:0;padding:14px;border-radius:10px;font-size:14.5px;font-weight:500;cursor:pointer;">Email me a sign-in link</button>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);text-align:center;margin-top:4px;">03.a · form</div>
+        </div>
+      </div>
+      <div class="card" style="padding:56px 48px;">
+        <div style="max-width:340px;margin:0 auto;display:flex;flex-direction:column;gap:16px;">
+          <a href="#p1" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← saaskaya</a>
+          <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:36px;">Check your inbox</h1>
+          <div style="padding:14px 16px;border-radius:10px;background:#e8f0e2;border:1px solid #c7d9b8;display:flex;gap:10px;align-items:flex-start;">
+            <span style="color:#3d6a1f;font-size:16px;line-height:1;">✓</span>
+            <div style="font-size:13px;line-height:1.5;color:#264012;">Sign-in link sent to <b>zeynep@demir.av.tr</b>. Valid for 15 minutes.</div>
+          </div>
+          <div style="padding:12px 14px;border-radius:9px;background:#fdf5e6;border:1px dashed rgba(0,0,0,.15);font-size:12px;color:rgba(0,0,0,.65);">
+            <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:rgba(0,0,0,.5);">Dev mode</span><br>
+            <a href="#" style="color:#171614;">Open your sign-in link →</a>
+          </div>
+          <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);text-align:center;margin-top:4px;">03.b · sent</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 04 · DASHBOARD ============ -->
+  <section id="p4" data-screen-label="04 Dashboard" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">04</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Dashboard / <span style="color:rgba(0,0,0,.4);">/dashboard</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">sites list · plan · domains</span>
+    </div>
+    <div class="card" style="padding:48px 56px;">
+      <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:28px;">
+        <!-- header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <a href="#p1" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← saaskaya</a>
+            <h1 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;line-height:1;">Your sites</h1>
+            <div style="font-size:13px;color:rgba(0,0,0,.55);">zeynep@demir.av.tr</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button style="background:#171614;color:#f3ecdd;border:0;padding:8px 14px;border-radius:9px;font-size:13px;cursor:pointer;">+ New site</button>
+            <button style="background:transparent;border:1px solid rgba(0,0,0,.14);padding:8px 14px;border-radius:9px;font-size:13px;cursor:pointer;">⚙ Settings</button>
+            <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:8px 10px;font-size:13px;cursor:pointer;">Sign out</button>
+          </div>
+        </div>
+
+        <!-- plan -->
+        <div style="background:#f3efe6;border:1px solid rgba(0,0,0,.06);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:13.5px;color:rgba(0,0,0,.6);">Plan</span>
+            <span style="font-size:11.5px;padding:3px 9px;background:#dfe9d3;color:#3d6a1f;border-radius:999px;font-weight:600;">Pro · active</span>
+            <span style="font-size:12.5px;color:rgba(0,0,0,.5);">renews Aug 12, 2026</span>
+          </div>
+          <a href="#" style="font-size:12.5px;color:rgba(0,0,0,.6);">Manage billing →</a>
+        </div>
+
+        <!-- alert -->
+        <div style="padding:12px 16px;border-radius:10px;background:#e8f0e2;border:1px solid #c7d9b8;font-size:13px;color:#264012;display:flex;align-items:center;gap:10px;">
+          <span>✓</span> Published <b>Demir Hukuk Bürosu</b> as v7.
+        </div>
+
+        <!-- site list -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <!-- site 1 -->
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;background:#fbfaf7;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:3px;background:#1e3a5f;"></span><span style="font-weight:600;font-size:15px;">Demir Hukuk Bürosu</span><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);">site_0f2a</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.5);">updated 2h ago<span style="opacity:.4;">·</span><span style="font-size:11px;padding:2px 7px;background:#dfe9d3;color:#3d6a1f;border-radius:999px;font-weight:600;">live · v7</span></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Preview</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Republish</button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;">View live ↗</button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;position:relative;">✉ Messages <span style="background:#b8532f;color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;margin-left:2px;">3</span></button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;">⬇ Export</button>
+              <button style="background:transparent;border:0;color:#b8532f;padding:6px 10px;font-size:12px;cursor:pointer;margin-left:auto;">Unpublish</button>
+            </div>
+            <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:rgba(0,0,0,.5);">Domain</span>
+              <a href="#" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;color:#171614;">demirhukuk.av.tr</a>
+              <span style="font-size:11px;padding:2px 7px;background:#dfe9d3;color:#3d6a1f;border-radius:4px;">TLS ✓</span>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.4);font-size:11.5px;margin-left:auto;cursor:pointer;">Remove</button>
+            </div>
+          </div>
+
+          <!-- site 2 -->
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;background:#fbfaf7;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:3px;background:#2f6f6a;"></span><span style="font-weight:600;font-size:15px;">Serenlik Terapi</span><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);">site_8b1c</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.5);">updated yesterday<span style="opacity:.4;">·</span><span style="font-size:11px;padding:2px 7px;background:rgba(0,0,0,.08);border-radius:999px;font-weight:500;color:rgba(0,0,0,.6);">draft only</span></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Preview</button>
+              <button style="background:transparent;border:1px solid #171614;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Publish</button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;">✉ Messages</button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;">⬇ Export</button>
+            </div>
+            <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:12px;color:rgba(0,0,0,.5);">Domain</span>
+              <input placeholder="yourdomain.com" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:12px;padding:5px 10px;border:1px solid rgba(0,0,0,.12);border-radius:6px;background:#fff;width:180px;" />
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Attach</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Register &amp; attach</button>
+            </div>
+          </div>
+
+          <!-- site 3 · dental -->
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:14px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;background:#fbfaf7;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;"><span style="width:10px;height:10px;border-radius:3px;background:#0e7490;"></span><span style="font-weight:600;font-size:15px;">Beyaz Diş Kliniği</span><span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.4);">site_44de</span></div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(0,0,0,.5);">updated 5d ago<span style="opacity:.4;">·</span><span style="font-size:11px;padding:2px 7px;background:#dfe9d3;color:#3d6a1f;border-radius:999px;font-weight:600;">live · v3</span></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button style="background:#171614;color:#f3ecdd;border:0;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Edit</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Preview</button>
+              <button style="background:transparent;border:1px solid rgba(0,0,0,.12);padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Republish</button>
+              <button style="background:transparent;border:0;color:rgba(0,0,0,.55);padding:6px 10px;font-size:12px;cursor:pointer;">✉ Messages</button>
+            </div>
+            <div style="border-top:1px solid rgba(0,0,0,.06);padding-top:12px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px;color:rgba(0,0,0,.5);">Domain</span>
+              <a href="#" style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:13px;">beyazdis.com</a>
+              <span style="font-size:11px;padding:2px 7px;background:#dfe9d3;color:#3d6a1f;border-radius:4px;">TLS ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 05 · MESSAGES ============ -->
+  <section id="p5" data-screen-label="05 Messages" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">05</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Messages / <span style="color:rgba(0,0,0,.4);">/dashboard/[siteId]/messages</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">contact-form inbox · read-only</span>
+    </div>
+    <div class="card" style="padding:48px 56px;">
+      <div style="max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:22px;">
+        <div>
+          <a href="#p4" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← dashboard</a>
+          <h1 style="margin:8px 0 4px;font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;line-height:1;">Messages</h1>
+          <div style="font-size:13px;color:rgba(0,0,0,.55);">Contact-form submissions for <b>Demir Hukuk Bürosu</b> · 3 unread</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:16px 20px;background:#fbfaf7;position:relative;">
+            <span style="position:absolute;left:-6px;top:20px;width:8px;height:8px;border-radius:50%;background:#b8532f;"></span>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+              <div style="font-weight:600;font-size:14.5px;">Mehmet Yılmaz</div>
+              <div style="font-size:11.5px;color:rgba(0,0,0,.45);">2h ago · <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">TR</span></div>
+            </div>
+            <a href="mailto:mehmet@example.com" style="font-size:13px;color:#b8532f;text-decoration:none;">mehmet@example.com</a>
+            <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.75);white-space:pre-line;">Merhaba, boşanma davası için bir randevu almak istiyorum. Uygun olduğunuz günleri paylaşabilir misiniz?</p>
+          </div>
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:16px 20px;background:#fbfaf7;position:relative;">
+            <span style="position:absolute;left:-6px;top:20px;width:8px;height:8px;border-radius:50%;background:#b8532f;"></span>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+              <div style="font-weight:600;font-size:14.5px;">Sarah Klein</div>
+              <div style="font-size:11.5px;color:rgba(0,0,0,.45);">yesterday · <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">DE</span></div>
+            </div>
+            <a href="#" style="font-size:13px;color:#b8532f;text-decoration:none;">s.klein@kanzlei-berlin.de</a>
+            <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.75);white-space:pre-line;">Sehr geehrte Frau Demir, ich vertrete eine Mandantin mit Immobilien in Istanbul und möchte einen Termin vereinbaren.</p>
+          </div>
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:16px 20px;background:#fbfaf7;position:relative;">
+            <span style="position:absolute;left:-6px;top:20px;width:8px;height:8px;border-radius:50%;background:#b8532f;"></span>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+              <div style="font-weight:600;font-size:14.5px;">James Whitby</div>
+              <div style="font-size:11.5px;color:rgba(0,0,0,.45);">3d ago · <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">EN</span></div>
+            </div>
+            <a href="#" style="font-size:13px;color:#b8532f;text-decoration:none;">james@whitby-legal.co.uk</a>
+            <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.75);white-space:pre-line;">Referred by K. Aslan. Need cross-border custody advice — client is UK/TR dual national. Best number to reach you?</p>
+          </div>
+          <div style="border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:16px 20px;background:transparent;opacity:.7;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;">
+              <div style="font-weight:600;font-size:14.5px;">Elif Kaya</div>
+              <div style="font-size:11.5px;color:rgba(0,0,0,.45);">2 weeks ago · <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">TR</span></div>
+            </div>
+            <div style="font-size:13px;color:rgba(0,0,0,.5);">elif.kaya@…</div>
+            <p style="margin:8px 0 0;font-size:13.5px;line-height:1.55;color:rgba(0,0,0,.55);">Teşekkürler, dava bitti — çok yardımcı oldunuz.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 06 · EDITOR ============ -->
+  <section id="p6" data-screen-label="06 Editor" style="max-width:1440px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">06</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Editor / <span style="color:rgba(0,0,0,.4);">/editor/[siteId]</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">wired · try the tabs, viewport, chat, publish</span>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;height:820px;display:flex;">
+
+      <!-- SIDEBAR -->
+      <aside style="width:384px;flex-shrink:0;border-right:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;background:#fbfaf7;">
+        <!-- header -->
+        <div style="padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;gap:4px;">
+          <a href="#p1" style="font-size:11px;color:rgba(0,0,0,.4);text-decoration:none;">saaskaya</a>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <div style="font-weight:600;font-size:14.5px;">Demir Hukuk Bürosu</div>
+            <span style="font-size:10.5px;padding:3px 8px;border-radius:999px;font-weight:600;background:{{ saveBadgeBg }};color:{{ saveBadgeFg }};font-family:'IBM Plex Mono',ui-monospace,monospace;">{{ saveBadgeText }}</span>
+          </div>
+        </div>
+
+        <!-- tabs -->
+        <div style="padding:12px 12px 0;display:flex;gap:2px;flex-wrap:wrap;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+            <button onClick="{{ pickTab }}" data-tab="{{ t.id }}" style="flex:1;min-width:56px;padding:6px 8px;font-size:11px;border:0;border-radius:6px;background:{{ t.bg }};color:{{ t.fg }};cursor:pointer;font-weight:500;">{{ t.name }}</button>
+          </sc-for>
+        </div>
+
+        <!-- tab content -->
+        <div style="flex:1;overflow-y:auto;padding:18px;">
+
+          <sc-if value="{{ isChat }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:12px;height:100%;">
+              <div style="font-size:11px;color:rgba(0,0,0,.5);line-height:1.5;">Ask for creative or structural changes. Plain text and color edits are faster in the Content and Theme tabs — they never use the AI.</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:8px;overflow-y:auto;min-height:200px;">
+                <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="3">
+                  <div style="align-self:{{ m.align }};max-width:82%;padding:9px 12px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:12.5px;line-height:1.45;">{{ m.text }}</div>
+                </sc-for>
+                <sc-if value="{{ chatBusy }}" hint-placeholder-val="{{ false }}">
+                  <div style="align-self:flex-start;padding:9px 14px;border-radius:12px 12px 12px 3px;background:#f0ece3;font-size:12.5px;display:flex;gap:4px;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.4);animation:dot 1.2s infinite;"></span>
+                    <span style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.4);animation:dot 1.2s infinite .2s;"></span>
+                    <span style="width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.4);animation:dot 1.2s infinite .4s;"></span>
+                  </div>
+                  <style>@keyframes dot{0%,60%,100%{opacity:.25}30%{opacity:1}}</style>
+                </sc-if>
+              </div>
+              <form onSubmit="{{ sendChat }}" style="display:flex;gap:6px;">
+                <input value="{{ chatInput }}" onChange="{{ setChatInput }}" placeholder="e.g. Add a pricing FAQ…" style="flex:1;padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:7px;background:#fff;" />
+                <button type="submit" style="background:#171614;color:#f3ecdd;border:0;padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer;">Send</button>
+              </form>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isContent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <select style="padding:6px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:7px;background:#fff;"><option>Home · /</option><option>About · /about</option><option>Services · /services</option><option>Contact · /contact</option></select>
+              <div style="font-size:11px;color:rgba(0,0,0,.5);line-height:1.5;">Editing <b style="font-family:'IBM Plex Mono',ui-monospace,monospace;">{{ locale }}</b> copy — switch the locale in the toolbar. Edits go straight to the draft (no AI).</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="border:1px solid rgba(0,0,0,.09);border-radius:9px;background:#fff;">
+                  <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:600;">Hero <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);font-weight:400;">§hero_1 ▾</span></div>
+                  <div style="padding:0 12px 12px;display:flex;flex-direction:column;gap:8px;">
+                    <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Headline</label>
+                    <input value="Aile hukukunda 12 yıllık deneyim." style="padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;" />
+                    <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Subheadline</label>
+                    <textarea rows="2" style="padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:inherit;resize:vertical;">Boşanma, velayet, mal paylaşımı — dürüst ve anlaşılır bir hukuki süreç.</textarea>
+                    <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">CTA label</label>
+                    <input value="Randevu al" style="padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;" />
+                  </div>
+                </div>
+                <div style="border:1px solid rgba(0,0,0,.09);border-radius:9px;background:#fff;padding:10px 12px;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;color:rgba(0,0,0,.75);">Services <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);font-weight:400;">§srv_1 ▸</span></div>
+                <div style="border:1px solid rgba(0,0,0,.09);border-radius:9px;background:#fff;padding:10px 12px;font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;color:rgba(0,0,0,.75);">Contact <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);font-weight:400;">§ctc_1 ▸</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isTheme }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Niche preset</label>
+              <div style="display:flex;gap:4px;padding:3px;background:#efeae1;border-radius:8px;">
+                <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3">
+                  <button onClick="{{ pickPreset }}" data-preset="{{ p.id }}" style="flex:1;padding:6px 8px;font-size:11.5px;border:0;border-radius:6px;background:{{ p.bg }};color:{{ p.fg }};cursor:pointer;font-weight:500;text-transform:capitalize;">{{ p.id }}</button>
+                </sc-for>
+              </div>
+
+              <fieldset style="border:1px solid rgba(0,0,0,.1);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <legend style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;padding:0 6px;">Brand colors</legend>
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:28px;border-radius:5px;background:{{ presetColorPrimary }};border:1px solid rgba(0,0,0,.1);"></div><div style="flex:1;"><div style="font-size:12px;font-weight:500;">Primary</div><div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">{{ presetColorPrimary }}</div></div></div>
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:28px;border-radius:5px;background:{{ presetColorSecondary }};border:1px solid rgba(0,0,0,.1);"></div><div style="flex:1;"><div style="font-size:12px;font-weight:500;">Secondary</div><div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">{{ presetColorSecondary }}</div></div></div>
+                <div style="display:flex;align-items:center;gap:10px;"><div style="width:36px;height:28px;border-radius:5px;background:{{ presetColorAccent }};border:1px solid rgba(0,0,0,.1);"></div><div style="flex:1;"><div style="font-size:12px;font-weight:500;">Accent</div><div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">{{ presetColorAccent }}</div></div></div>
+              </fieldset>
+
+              <fieldset style="border:1px solid rgba(0,0,0,.1);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <legend style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;padding:0 6px;">Fonts</legend>
+                <div><label style="font-size:10.5px;color:rgba(0,0,0,.5);">Heading</label><input value="{{ presetFontHead }}" style="width:100%;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;margin-top:3px;" /></div>
+                <div><label style="font-size:10.5px;color:rgba(0,0,0,.5);">Body</label><input value="{{ presetFontBody }}" style="width:100%;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;margin-top:3px;" /></div>
+              </fieldset>
+
+              <div>
+                <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Corner radius</label>
+                <div style="display:flex;gap:4px;margin-top:6px;">
+                  <button style="flex:1;padding:6px;font-size:11px;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:4px;">none</button>
+                  <button style="flex:1;padding:6px;font-size:11px;border:1px solid #171614;background:#171614;color:#f3ecdd;border-radius:4px;">sm</button>
+                  <button style="flex:1;padding:6px;font-size:11px;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:6px;">md</button>
+                  <button style="flex:1;padding:6px;font-size:11px;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:10px;">lg</button>
+                  <button style="flex:1;padding:6px;font-size:11px;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;">full</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPages }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;flex-direction:column;gap:2px;background:#efeae1;padding:6px;border-radius:9px;">
+                <button style="text-align:left;padding:8px 12px;font-size:12.5px;border:0;background:#171614;color:#f3ecdd;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Home<span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;opacity:.6;">/</span></button>
+                <button style="text-align:left;padding:8px 12px;font-size:12.5px;border:0;background:transparent;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">About<span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.4);">/about</span></button>
+                <button style="text-align:left;padding:8px 12px;font-size:12.5px;border:0;background:transparent;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Services<span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.4);">/services</span></button>
+                <button style="text-align:left;padding:8px 12px;font-size:12.5px;border:0;background:transparent;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">Contact<span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.4);">/contact</span></button>
+              </div>
+              <fieldset style="border:1px solid rgba(0,0,0,.1);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <legend style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;padding:0 6px;">Add page</legend>
+                <input placeholder="about-us" style="padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" />
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
+                  <input placeholder="TR" style="padding:6px 8px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;" />
+                  <input placeholder="EN" style="padding:6px 8px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;" />
+                  <input placeholder="DE" style="padding:6px 8px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;" />
+                </div>
+                <button style="background:#171614;color:#f3ecdd;border:0;padding:7px 12px;border-radius:7px;font-size:12px;cursor:pointer;align-self:flex-start;">Add page</button>
+                <div style="font-size:10.5px;color:rgba(0,0,0,.5);line-height:1.5;">New pages start with a hero and are added to the nav.</div>
+              </fieldset>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isLangs }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <fieldset style="border:1px solid rgba(0,0,0,.1);border-radius:9px;padding:12px;display:flex;flex-direction:column;gap:8px;">
+                <legend style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;padding:0 6px;">Editing locale</legend>
+                <div style="display:flex;gap:0;border:1px solid rgba(0,0,0,.12);border-radius:8px;overflow:hidden;">
+                  <sc-for list="{{ locales }}" as="l" hint-placeholder-count="3">
+                    <button onClick="{{ pickLocale }}" data-locale="{{ l.id }}" style="flex:1;padding:8px;font-size:12px;border:0;background:{{ l.bg }};color:{{ l.fg }};cursor:pointer;font-weight:500;font-family:'IBM Plex Mono',ui-monospace,monospace;">{{ l.id }}</button>
+                  </sc-for>
+                </div>
+                <div style="font-size:10.5px;color:rgba(0,0,0,.5);line-height:1.5;">The Content tab and the preview follow this locale.</div>
+              </fieldset>
+              <div>
+                <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Default locale</label>
+                <select style="width:100%;margin-top:6px;padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:7px;background:#fff;"><option>TR</option><option>EN</option><option>DE</option></select>
+              </div>
+              <div>
+                <label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Enabled locales</label>
+                <div style="display:flex;gap:6px;margin-top:6px;"><span style="font-size:11px;padding:3px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;font-family:'IBM Plex Mono',ui-monospace,monospace;">TR</span><span style="font-size:11px;padding:3px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;font-family:'IBM Plex Mono',ui-monospace,monospace;">EN</span><span style="font-size:11px;padding:3px 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;font-family:'IBM Plex Mono',ui-monospace,monospace;">DE</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div><label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Site name</label><input value="Demir Hukuk Bürosu" style="width:100%;margin-top:6px;padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:7px;background:#fff;" /></div>
+              <div><label style="font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.08em;">Contact email</label><input type="email" value="info@demirhukuk.av.tr" style="width:100%;margin-top:6px;padding:7px 10px;font-size:12.5px;border:1px solid rgba(0,0,0,.14);border-radius:7px;background:#fff;" /></div>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(0,0,0,.09);border-radius:9px;background:#fff;">
+                <div><div style="font-size:12.5px;font-weight:500;">Show "Powered by saaskaya"</div><div style="font-size:10.5px;color:rgba(0,0,0,.5);">Small badge in the footer.</div></div>
+                <span style="width:34px;height:20px;background:#171614;border-radius:999px;position:relative;flex-shrink:0;"><span style="position:absolute;top:2px;right:2px;width:16px;height:16px;background:#f3ecdd;border-radius:50%;"></span></span>
+              </label>
+              <div style="padding:10px 12px;background:#f3efe6;border-radius:9px;font-size:11.5px;color:rgba(0,0,0,.6);line-height:1.5;">Domain: <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">demirhukuk.av.tr</span></div>
+            </div>
+          </sc-if>
+
+        </div>
+      </aside>
+
+      <!-- PREVIEW SECTION -->
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;background:#efeae1;">
+        <!-- toolbar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.06);background:#fbfaf7;flex-wrap:wrap;">
+          <div style="display:flex;gap:2px;padding:3px;background:#efeae1;border-radius:8px;">
+            <sc-for list="{{ viewports }}" as="v" hint-placeholder-count="3">
+              <button onClick="{{ pickViewport }}" data-vp="{{ v.id }}" style="padding:5px 12px;font-size:11.5px;border:0;border-radius:6px;background:{{ v.bg }};color:{{ v.fg }};cursor:pointer;font-weight:500;">{{ v.name }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <select value="{{ locale }}" onChange="{{ setLocale }}" style="padding:5px 10px;font-size:11.5px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;"><option value="TR">TR</option><option value="EN">EN</option><option value="DE">DE</option></select>
+            <button onClick="{{ saveNow }}" style="padding:5px 10px;font-size:11.5px;border:1px solid rgba(0,0,0,.14);background:#fff;border-radius:6px;cursor:pointer;">Save now</button>
+            <button style="padding:5px 10px;font-size:11.5px;border:0;background:transparent;color:rgba(0,0,0,.6);cursor:pointer;">Open ↗</button>
+            <button onClick="{{ publish }}" style="padding:5px 12px;font-size:11.5px;border:0;background:{{ publishBg }};color:#fff;border-radius:6px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:6px;">
+              <sc-if value="{{ publishing }}" hint-placeholder-val="{{ false }}"><span style="width:10px;height:10px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;"></span></sc-if>
+              {{ publishText }}
+            </button>
+          </div>
+        </div>
+        <!-- preview area -->
+        <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px;">
+          <div style="width:{{ vpWidth }};max-width:100%;transition:width .25s ease;background:#fff;border-radius:12px;box-shadow:0 12px 40px -20px rgba(0,0,0,.25);overflow:hidden;border:1px solid rgba(0,0,0,.08);">
+            <!-- mini law hero preview -->
+            <div style="background:#1e3a5f;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;color:#fff;">
+              <div style="font-family:'Playfair Display',serif;font-weight:600;font-size:16px;">Demir Hukuk Bürosu</div>
+              <div style="display:flex;gap:12px;font-size:11px;opacity:.85;font-family:'Inter',sans-serif;"><span>Ana Sayfa</span><span>Hakkımda</span><span>Hizmetler</span><span>İletişim</span></div>
+            </div>
+            <div style="background:linear-gradient(180deg,#f6f2ec,#fbfaf7);padding:48px 32px 44px;text-align:center;">
+              <h3 style="margin:0 0 12px;font-family:'Playfair Display',serif;font-weight:700;font-size:32px;color:#1e3a5f;line-height:1.05;">{{ heroTitle }}</h3>
+              <p style="margin:0 auto 20px;max-width:420px;font-family:'Inter',sans-serif;font-size:13.5px;color:#3a4a5f;line-height:1.55;">{{ heroSub }}</p>
+              <button style="background:#1e3a5f;color:#fff;border:0;padding:11px 20px;border-radius:5px;font-size:13px;font-family:'Inter',sans-serif;">{{ heroCta }} →</button>
+            </div>
+            <div style="padding:32px;">
+              <h4 style="margin:0 0 4px;font-family:'Playfair Display',serif;font-weight:700;color:#1e3a5f;font-size:20px;">{{ srvTitle }}</h4>
+              <div style="width:32px;height:2px;background:#b08d57;margin-bottom:16px;"></div>
+              <div style="display:grid;grid-template-columns:{{ gridCols }};gap:12px;">
+                <div style="border:1px solid rgba(0,0,0,.08);border-radius:4px;padding:14px;"><div style="font-family:'Playfair Display',serif;font-weight:700;color:#1e3a5f;font-size:14.5px;margin-bottom:4px;">Boşanma</div><div style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(0,0,0,.6);line-height:1.5;">Anlaşmalı ve çekişmeli süreçler.</div></div>
+                <div style="border:1px solid rgba(0,0,0,.08);border-radius:4px;padding:14px;"><div style="font-family:'Playfair Display',serif;font-weight:700;color:#1e3a5f;font-size:14.5px;margin-bottom:4px;">Velayet</div><div style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(0,0,0,.6);line-height:1.5;">Çocuğun yararı önceliğiyle.</div></div>
+                <div style="border:1px solid rgba(0,0,0,.08);border-radius:4px;padding:14px;"><div style="font-family:'Playfair Display',serif;font-weight:700;color:#1e3a5f;font-size:14.5px;margin-bottom:4px;">Mal paylaşımı</div><div style="font-family:'Inter',sans-serif;font-size:12px;color:rgba(0,0,0,.6);line-height:1.5;">Hakkaniyetli çözümler.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 07 · ADMIN ============ -->
+  <section id="p7" data-screen-label="07 Admin" style="max-width:1200px;margin:0 auto 72px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">07</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Admin settings / <span style="color:rgba(0,0,0,.4);">/admin/settings</span></h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">credentials · db-first · env fallback</span>
+    </div>
+    <div class="card" style="padding:48px 56px;">
+      <div style="max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:24px;">
+        <div>
+          <a href="#p4" style="font-size:12.5px;color:rgba(0,0,0,.45);text-decoration:none;">← dashboard</a>
+          <h1 style="margin:8px 0 4px;font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;line-height:1;">Credentials &amp; settings</h1>
+          <p style="margin:0;max-width:600px;font-size:13.5px;color:rgba(0,0,0,.6);line-height:1.55;">Values saved here live in the database and win over .env — no redeploy needed. Secrets are write-only: once saved, only the last characters are shown.</p>
+        </div>
+
+        <!-- system status -->
+        <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:20px 22px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:20px;">System status</div>
+            <span style="font-size:11.5px;padding:3px 10px;background:#dfe9d3;color:#3d6a1f;border-radius:999px;font-weight:600;">● healthy</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px 24px;font-size:12.5px;">
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">Database</div><div>ok · 42.8 MB</div></div>
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">Disk</div><div>ok · 71% free</div></div>
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">App uptime</div><div>12d 4h</div></div>
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">Sites / users</div><div>1,847 / 923</div></div>
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">Last backup</div><div>3h ago</div></div>
+            <div><div style="color:rgba(0,0,0,.5);margin-bottom:2px;">Queue</div><div>0 pending</div></div>
+          </div>
+        </div>
+
+        <!-- alert -->
+        <div style="padding:10px 14px;border-radius:9px;background:#e8f0e2;border:1px solid #c7d9b8;font-size:12.5px;color:#264012;">✓ Saved <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">ANTHROPIC_API_KEY</span>.</div>
+
+        <!-- credential groups -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <!-- AI -->
+          <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:18px 20px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:12px;">AI</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Anthropic API key</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">ANTHROPIC_API_KEY</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input type="password" placeholder="•••••••••3f2" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button><button style="padding:6px 8px;font-size:11.5px;background:transparent;color:#b8532f;border:0;cursor:pointer;">Clear</button></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Monthly AI budget (USD)</div><span style="font-size:10px;padding:1px 6px;background:rgba(0,0,0,.08);color:rgba(0,0,0,.5);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">env</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">AI_BUDGET_MONTHLY_USD</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input value="250" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Email -->
+          <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:18px 20px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:12px;">Email</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Resend API key</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">RESEND_API_KEY</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input type="password" placeholder="•••••••••a71" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button><button style="padding:6px 8px;font-size:11.5px;background:transparent;color:#b8532f;border:0;cursor:pointer;">Clear</button></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">From address</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">EMAIL_FROM</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input value="hello@saaskaya.app" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Billing -->
+          <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:18px 20px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:12px;">Billing</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Stripe secret</div><span style="font-size:10px;padding:1px 6px;background:rgba(0,0,0,.08);color:rgba(0,0,0,.5);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">not set</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">STRIPE_SECRET_KEY</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input type="password" placeholder="sk_live_…" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Pro plan price ID</div><span style="font-size:10px;padding:1px 6px;background:rgba(0,0,0,.08);color:rgba(0,0,0,.5);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">not set</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">STRIPE_PRICE_PRO</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input placeholder="price_…" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Domains -->
+          <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:18px 20px;">
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:12px;">Domains</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Caddy admin URL</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">CADDY_ADMIN_URL</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input value="http://caddy:2019" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Porkbun API key</div><span style="font-size:10px;padding:1px 6px;background:rgba(0,0,0,.08);color:rgba(0,0,0,.5);border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">not set</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">PORKBUN_API_KEY</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input type="password" placeholder="pk1_…" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+            </div>
+          </div>
+          <!-- Ops -->
+          <div style="background:#fbfaf7;border:1px solid rgba(0,0,0,.09);border-radius:12px;padding:18px 20px;grid-column:span 2;">
+            <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:12px;">Ops</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">R2 access key</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">R2_ACCESS_KEY</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input type="password" placeholder="•••••••••8de" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;"><div style="font-size:12px;font-weight:500;">Backup schedule (cron)</div><span style="font-size:10px;padding:1px 6px;background:#171614;color:#f3ecdd;border-radius:3px;font-family:'IBM Plex Mono',ui-monospace,monospace;">db</span></div>
+                <div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.45);">BACKUP_CRON</div>
+                <div style="display:flex;gap:4px;margin-top:2px;"><input value="0 3 * * *" style="flex:1;padding:6px 10px;font-size:12px;border:1px solid rgba(0,0,0,.14);border-radius:6px;background:#fff;font-family:'IBM Plex Mono',ui-monospace,monospace;" /><button style="padding:6px 10px;font-size:11.5px;background:#171614;color:#f3ecdd;border:0;border-radius:6px;cursor:pointer;">Save</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PAGE 08 · PUBLIC SITE ============ -->
+  <section id="p8" data-screen-label="08 Public site" style="max-width:1600px;margin:0 auto 40px;display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;padding:3px 8px;background:#171614;color:#f3ecdd;border-radius:5px;">08</span>
+      <h2 style="margin:0;font-family:'Instrument Serif',serif;font-weight:400;font-size:28px;">Public site playground</h2>
+      <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.5);">every block variant · switch preset + viewport</span>
+    </div>
+
+    <!-- controls -->
+    <div class="card" style="padding:12px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:16px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.1em;">Preset</span>
+        <div style="display:flex;gap:2px;padding:3px;background:#efeae1;border-radius:8px;">
+          <sc-for list="{{ pubPresets }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ pickPubPreset }}" data-p="{{ p.id }}" style="padding:5px 12px;font-size:11.5px;border:0;border-radius:6px;background:{{ p.bg }};color:{{ p.fg }};cursor:pointer;font-weight:500;text-transform:capitalize;">{{ p.name }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.1em;">Viewport</span>
+        <div style="display:flex;gap:2px;padding:3px;background:#efeae1;border-radius:8px;">
+          <sc-for list="{{ pubViewports }}" as="v" hint-placeholder-count="3">
+            <button onClick="{{ pickPubViewport }}" data-v="{{ v.id }}" style="padding:5px 12px;font-size:11.5px;border:0;border-radius:6px;background:{{ v.bg }};color:{{ v.fg }};cursor:pointer;font-weight:500;">{{ v.name }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.5);text-transform:uppercase;letter-spacing:.1em;">Locale</span>
+        <div style="display:flex;gap:2px;padding:3px;background:#efeae1;border-radius:8px;">
+          <sc-for list="{{ pubLocales }}" as="l" hint-placeholder-count="3">
+            <button onClick="{{ pickPubLocale }}" data-l="{{ l.id }}" style="padding:5px 12px;font-size:11.5px;border:0;border-radius:6px;background:{{ l.bg }};color:{{ l.fg }};cursor:pointer;font-weight:500;font-family:'IBM Plex Mono',ui-monospace,monospace;">{{ l.id }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin-left:auto;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;color:rgba(0,0,0,.5);">theme <span style="color:{{ pubPrimary }};">■</span> <span style="color:{{ pubSecondary }};">■</span> <span style="color:{{ pubAccent }};">■</span> · {{ pubHeadFont }} + {{ pubBodyFont }}</div>
+    </div>
+
+    <!-- device -->
+    <div style="display:flex;justify-content:center;padding:24px 0;">
+      <div style="width:{{ pubVpWidth }};max-width:100%;transition:width .3s ease;background:#fff;border-radius:14px;box-shadow:0 24px 60px -30px rgba(0,0,0,.35);overflow:hidden;border:1px solid rgba(0,0,0,.1);">
+        <!-- SITE HEADER -->
+        <div style="background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;">
+          <div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:17px;">{{ pubSiteName }}</div>
+          <div style="display:flex;gap:16px;align-items:center;font-family:{{ pubBodyFont }};font-size:12.5px;color:rgba(0,0,0,.7);">
+            <span>{{ tNav1 }}</span><span>{{ tNav2 }}</span><span>{{ tNav3 }}</span><span>{{ tNav4 }}</span>
+            <span style="padding:2px 8px;border:1px solid rgba(0,0,0,.15);border-radius:999px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10.5px;">{{ pubLocale }} ▾</span>
+          </div>
+        </div>
+
+        <!-- BLOCK 1a · HERO centered gradient -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Hero · centered · gradient</div>
+        <div style="background:linear-gradient(180deg,{{ pubPrimary }}22,#fff 60%,{{ pubSecondary }}22);padding:64px 32px 72px;text-align:center;">
+          <h1 style="margin:0 0 14px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:44px;line-height:1.05;letter-spacing:-.01em;">{{ tHeroTitle }}</h1>
+          <p style="margin:0 auto 24px;max-width:520px;font-family:{{ pubBodyFont }};font-size:15px;color:rgba(0,0,0,.7);line-height:1.55;">{{ tHeroSub }}</p>
+          <button style="background:{{ pubPrimary }};color:#fff;border:0;padding:12px 22px;border-radius:{{ pubRadius }};font-family:{{ pubBodyFont }};font-size:14px;font-weight:600;cursor:pointer;">{{ tHeroCta }} →</button>
+        </div>
+
+        <!-- BLOCK 1b · HERO split -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Hero · split · image</div>
+        <div style="background:{{ pubPrimary }}0f;display:grid;grid-template-columns:{{ pubSplitCols }};gap:0;">
+          <div style="padding:48px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px;">
+            <h2 style="margin:0;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:32px;line-height:1.1;">{{ tSplitTitle }}</h2>
+            <p style="margin:0;font-family:{{ pubBodyFont }};font-size:14px;color:rgba(0,0,0,.65);line-height:1.55;">{{ tSplitSub }}</p>
+            <button style="align-self:flex-start;background:{{ pubPrimary }};color:#fff;border:0;padding:10px 18px;border-radius:{{ pubRadius }};font-family:{{ pubBodyFont }};font-size:13.5px;font-weight:600;cursor:pointer;">{{ tHeroCta }}</button>
+          </div>
+          <div class="ph" style="aspect-ratio:4/3;min-height:200px;">[ hero photo · 1200×900 ]</div>
+        </div>
+
+        <!-- BLOCK 2 · About text-image -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ About · text-image</div>
+        <div style="padding:56px 32px;display:grid;grid-template-columns:{{ pubSplitCols }};gap:32px;align-items:center;">
+          <div class="ph" style="aspect-ratio:1/1;border-radius:{{ pubRadius }};">[ portrait · 800×800 ]</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="width:32px;height:2px;background:{{ pubSecondary }};"></div>
+            <h2 style="margin:0;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:28px;">{{ tAboutTitle }}</h2>
+            <p style="margin:0;font-family:{{ pubBodyFont }};font-size:14px;color:rgba(0,0,0,.7);line-height:1.65;">{{ tAboutBody }}</p>
+          </div>
+        </div>
+
+        <!-- BLOCK 3a · Services grid -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Services · grid · 3-col</div>
+        <div style="padding:56px 32px;background:{{ pubPrimary }}08;">
+          <div style="text-align:center;margin-bottom:36px;">
+            <h2 style="margin:0 0 8px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:32px;">{{ tSrvTitle }}</h2>
+            <p style="margin:0;font-family:{{ pubBodyFont }};font-size:14px;color:rgba(0,0,0,.6);">{{ tSrvIntro }}</p>
+          </div>
+          <div style="display:grid;grid-template-columns:{{ pubSrvCols }};gap:16px;">
+            <div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:{{ pubRadius }};padding:20px;"><div style="width:36px;height:36px;border-radius:{{ pubRadius }};background:{{ pubSecondary }}33;margin-bottom:14px;"></div><h3 style="margin:0 0 6px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:17px;">{{ tSrv1 }}</h3><p style="margin:0 0 10px;font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.65);line-height:1.55;">{{ tSrv1Body }}</p><span style="font-family:{{ pubBodyFont }};font-size:11.5px;padding:3px 10px;border:1px solid {{ pubSecondary }};color:{{ pubPrimary }};border-radius:999px;">{{ tSrv1Price }}</span></div>
+            <div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:{{ pubRadius }};padding:20px;"><div style="width:36px;height:36px;border-radius:{{ pubRadius }};background:{{ pubSecondary }}33;margin-bottom:14px;"></div><h3 style="margin:0 0 6px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:17px;">{{ tSrv2 }}</h3><p style="margin:0 0 10px;font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.65);line-height:1.55;">{{ tSrv2Body }}</p><span style="font-family:{{ pubBodyFont }};font-size:11.5px;padding:3px 10px;border:1px solid {{ pubSecondary }};color:{{ pubPrimary }};border-radius:999px;">{{ tSrv2Price }}</span></div>
+            <div style="background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:{{ pubRadius }};padding:20px;"><div style="width:36px;height:36px;border-radius:{{ pubRadius }};background:{{ pubSecondary }}33;margin-bottom:14px;"></div><h3 style="margin:0 0 6px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:17px;">{{ tSrv3 }}</h3><p style="margin:0 0 10px;font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.65);line-height:1.55;">{{ tSrv3Body }}</p><span style="font-family:{{ pubBodyFont }};font-size:11.5px;padding:3px 10px;border:1px solid {{ pubSecondary }};color:{{ pubPrimary }};border-radius:999px;">{{ tSrv3Price }}</span></div>
+          </div>
+        </div>
+
+        <!-- BLOCK 3b · Services list -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Services · list</div>
+        <div style="padding:48px 32px;">
+          <div style="display:flex;flex-direction:column;">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid rgba(0,0,0,.08);"><div><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:16px;margin-bottom:3px;">{{ tSrv1 }}</div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.6);">{{ tSrv1Body }}</div></div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:{{ pubAccent }};font-weight:600;white-space:nowrap;">{{ tSrv1Price }}</div></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid rgba(0,0,0,.08);"><div><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:16px;margin-bottom:3px;">{{ tSrv2 }}</div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.6);">{{ tSrv2Body }}</div></div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:{{ pubAccent }};font-weight:600;white-space:nowrap;">{{ tSrv2Price }}</div></div>
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:16px 0;"><div><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:16px;margin-bottom:3px;">{{ tSrv3 }}</div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.6);">{{ tSrv3Body }}</div></div><div style="font-family:{{ pubBodyFont }};font-size:13px;color:{{ pubAccent }};font-weight:600;white-space:nowrap;">{{ tSrv3Price }}</div></div>
+          </div>
+        </div>
+
+        <!-- BLOCK 4 · Gallery grid -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Gallery · grid</div>
+        <div style="padding:48px 32px;">
+          <h2 style="margin:0 0 24px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:28px;text-align:center;">{{ tGalTitle }}</h2>
+          <div style="display:grid;grid-template-columns:{{ pubGalCols }};gap:8px;">
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 01 ]</div>
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 02 ]</div>
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 03 ]</div>
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 04 ]</div>
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 05 ]</div>
+            <div class="ph" style="aspect-ratio:4/3;border-radius:{{ pubRadius }};">[ ofis · 06 ]</div>
+          </div>
+        </div>
+
+        <!-- BLOCK 8 · Team grid -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Team · cards</div>
+        <div style="padding:48px 32px;background:{{ pubPrimary }}08;">
+          <h2 style="margin:0 0 24px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:28px;text-align:center;">{{ tTeamTitle }}</h2>
+          <div style="display:grid;grid-template-columns:{{ pubTeamCols }};gap:16px;">
+            <div style="background:#fff;border-radius:{{ pubRadius }};box-shadow:0 8px 24px -16px rgba(0,0,0,.15);overflow:hidden;"><div class="ph" style="aspect-ratio:1/1;">[ member 1 ]</div><div style="padding:14px 16px;"><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:15px;">Zeynep Demir</div><div style="font-family:{{ pubBodyFont }};font-size:12px;color:rgba(0,0,0,.55);">{{ tRole1 }}</div></div></div>
+            <div style="background:#fff;border-radius:{{ pubRadius }};box-shadow:0 8px 24px -16px rgba(0,0,0,.15);overflow:hidden;"><div class="ph" style="aspect-ratio:1/1;">[ member 2 ]</div><div style="padding:14px 16px;"><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:15px;">Ali Kaya</div><div style="font-family:{{ pubBodyFont }};font-size:12px;color:rgba(0,0,0,.55);">{{ tRole2 }}</div></div></div>
+            <div style="background:#fff;border-radius:{{ pubRadius }};box-shadow:0 8px 24px -16px rgba(0,0,0,.15);overflow:hidden;"><div class="ph" style="aspect-ratio:1/1;">[ member 3 ]</div><div style="padding:14px 16px;"><div style="font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:15px;">Selin Öz</div><div style="font-family:{{ pubBodyFont }};font-size:12px;color:rgba(0,0,0,.55);">{{ tRole3 }}</div></div></div>
+          </div>
+        </div>
+
+        <!-- BLOCK 7 · FAQ accordion -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ FAQ · accordion</div>
+        <div style="padding:48px 32px;">
+          <h2 style="margin:0 0 24px;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:28px;text-align:center;">{{ tFaqTitle }}</h2>
+          <div style="max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:6px;">
+            <details style="border:1px solid rgba(0,0,0,.1);border-radius:{{ pubRadius }};padding:14px 18px;background:#fff;" open=""><summary style="cursor:pointer;font-family:{{ pubBodyFont }};font-weight:600;color:{{ pubPrimary }};font-size:14px;list-style:none;display:flex;justify-content:space-between;">{{ tFaq1Q }}<span style="opacity:.4;">−</span></summary><p style="margin:10px 0 0;font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.65);line-height:1.6;">{{ tFaq1A }}</p></details>
+            <details style="border:1px solid rgba(0,0,0,.1);border-radius:{{ pubRadius }};padding:14px 18px;background:#fff;"><summary style="cursor:pointer;font-family:{{ pubBodyFont }};font-weight:600;color:{{ pubPrimary }};font-size:14px;list-style:none;display:flex;justify-content:space-between;">{{ tFaq2Q }}<span style="opacity:.4;">+</span></summary></details>
+            <details style="border:1px solid rgba(0,0,0,.1);border-radius:{{ pubRadius }};padding:14px 18px;background:#fff;"><summary style="cursor:pointer;font-family:{{ pubBodyFont }};font-weight:600;color:{{ pubPrimary }};font-size:14px;list-style:none;display:flex;justify-content:space-between;">{{ tFaq3Q }}<span style="opacity:.4;">+</span></summary></details>
+          </div>
+        </div>
+
+        <!-- BLOCK 6 · CTA banner -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ CTA · banner</div>
+        <div style="background:{{ pubPrimary }};padding:56px 32px;text-align:center;color:#fff;">
+          <h2 style="margin:0 0 10px;font-family:{{ pubHeadFont }};font-weight:700;font-size:32px;">{{ tCtaTitle }}</h2>
+          <p style="margin:0 auto 22px;max-width:500px;font-family:{{ pubBodyFont }};font-size:14.5px;opacity:.85;line-height:1.55;">{{ tCtaSub }}</p>
+          <button style="background:{{ pubSecondary }};color:{{ pubPrimary }};border:0;padding:12px 24px;border-radius:{{ pubRadius }};font-family:{{ pubBodyFont }};font-size:14px;font-weight:700;cursor:pointer;">{{ tHeroCta }}</button>
+        </div>
+
+        <!-- BLOCK 5 · Contact split -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Contact · split · form</div>
+        <div style="padding:56px 32px;display:grid;grid-template-columns:{{ pubSplitCols }};gap:32px;">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <h2 style="margin:0;font-family:{{ pubHeadFont }};font-weight:700;color:{{ pubPrimary }};font-size:28px;">{{ tContactTitle }}</h2>
+            <p style="margin:0;font-family:{{ pubBodyFont }};font-size:13.5px;color:rgba(0,0,0,.65);line-height:1.55;">{{ tContactSub }}</p>
+            <div style="display:flex;flex-direction:column;gap:10px;font-family:{{ pubBodyFont }};font-size:13px;color:rgba(0,0,0,.75);margin-top:8px;">
+              <div style="display:flex;gap:10px;align-items:center;"><span style="width:24px;height:24px;border-radius:50%;background:{{ pubSecondary }}44;color:{{ pubPrimary }};display:flex;align-items:center;justify-content:center;font-size:12px;">✉</span> info@demirhukuk.av.tr</div>
+              <div style="display:flex;gap:10px;align-items:center;"><span style="width:24px;height:24px;border-radius:50%;background:{{ pubSecondary }}44;color:{{ pubPrimary }};display:flex;align-items:center;justify-content:center;font-size:12px;">☎</span> +90 216 555 04 12</div>
+              <div style="display:flex;gap:10px;align-items:flex-start;"><span style="width:24px;height:24px;border-radius:50%;background:{{ pubSecondary }}44;color:{{ pubPrimary }};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">◎</span> Bağdat Cad. No:142, Kadıköy / İstanbul</div>
+            </div>
+          </div>
+          <form style="display:flex;flex-direction:column;gap:10px;">
+            <input placeholder="{{ tFormName }}" style="padding:11px 14px;font-size:13.5px;border:1px solid rgba(0,0,0,.15);border-radius:{{ pubRadius }};background:#fff;font-family:{{ pubBodyFont }};" />
+            <input type="email" placeholder="{{ tFormEmail }}" style="padding:11px 14px;font-size:13.5px;border:1px solid rgba(0,0,0,.15);border-radius:{{ pubRadius }};background:#fff;font-family:{{ pubBodyFont }};" />
+            <textarea rows="4" placeholder="{{ tFormMsg }}" style="padding:11px 14px;font-size:13.5px;border:1px solid rgba(0,0,0,.15);border-radius:{{ pubRadius }};background:#fff;font-family:{{ pubBodyFont }};resize:vertical;"></textarea>
+            <button type="button" style="background:{{ pubPrimary }};color:#fff;border:0;padding:12px;border-radius:{{ pubRadius }};font-family:{{ pubBodyFont }};font-size:14px;font-weight:600;cursor:pointer;align-self:flex-start;padding:11px 22px;">{{ tFormSubmit }} →</button>
+          </form>
+        </div>
+
+        <!-- BLOCK 9 · Footer columns -->
+        <div style="padding:8px 24px 4px;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:rgba(0,0,0,.35);letter-spacing:.1em;text-transform:uppercase;">§ Footer · columns</div>
+        <footer style="background:#131313;color:#e0dbcf;padding:40px 32px 24px;">
+          <div style="display:grid;grid-template-columns:{{ pubFooterCols }};gap:24px;">
+            <div><div style="font-family:{{ pubHeadFont }};font-weight:700;color:#fff;font-size:17px;margin-bottom:8px;">{{ pubSiteName }}</div><div style="font-family:{{ pubBodyFont }};font-size:12.5px;opacity:.7;line-height:1.6;max-width:220px;">{{ tFootTag }}</div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;">{{ tFootCol1 }}</div><span style="font-family:{{ pubBodyFont }};font-size:13px;">{{ tNav1 }}</span><span style="font-family:{{ pubBodyFont }};font-size:13px;">{{ tNav2 }}</span><span style="font-family:{{ pubBodyFont }};font-size:13px;">{{ tNav3 }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><div style="font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;">{{ tFootCol2 }}</div><span style="font-family:{{ pubBodyFont }};font-size:13px;opacity:.8;">info@demirhukuk.av.tr</span><span style="font-family:{{ pubBodyFont }};font-size:13px;opacity:.8;">+90 216 555 04 12</span></div>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.1);margin-top:28px;padding-top:16px;display:flex;justify-content:space-between;font-family:{{ pubBodyFont }};font-size:11.5px;opacity:.5;flex-wrap:wrap;gap:8px;">
+            <span>© 2026 {{ pubSiteName }}</span>
+            <span style="font-family:'IBM Plex Mono',ui-monospace,monospace;">powered by saaskaya</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </section>
+
+  <footer style="max-width:960px;margin:80px auto 0;padding-top:32px;border-top:1px solid rgba(0,0,0,.08);display:flex;justify-content:space-between;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:11px;color:rgba(0,0,0,.4);">
+    <span>saaskaya · design doc</span>
+    <span>7 surfaces · 9 blocks · 3 presets · 3 locales</span>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    tab: 'chat',
+    locale: 'TR',
+    viewport: 'desktop',
+    saveState: 'saved',
+    chatInput: '',
+    chatBusy: false,
+    chat: [
+      { role: 'user', text: 'Make the hero background a warm cream instead of the gradient.' },
+      { role: 'assistant', text: 'Done — swapped hero background to cream (#fdf6ec). The primary CTA stays navy for contrast. Preview updated.' },
+      { role: 'user', text: 'Add a pricing FAQ with 3 questions.' },
+      { role: 'assistant', text: 'Added an FAQ section below Services with three items on fees, packages, and consultation. You can edit copy in the Content tab.' },
+    ],
+    published: true,
+    publishVer: 7,
+    publishing: false,
+    editorPreset: 'law',
+
+    // public playground
+    pubPreset: 'law',
+    pubViewport: 'desktop',
+    pubLocale: 'TR',
+  };
+
+  PRESETS = {
+    law:    { primary: '#1e3a5f', secondary: '#b08d57', accent: '#27548a', head: "'Playfair Display', serif", body: "'Inter', sans-serif", radius: '4px', name: 'Demir Hukuk Bürosu' },
+    psych:  { primary: '#2f6f6a', secondary: '#9ec5ab', accent: '#e8998d', head: "'Lora', serif",             body: "'Open Sans', sans-serif", radius: '14px', name: 'Serenlik Terapi' },
+    dental: { primary: '#0e7490', secondary: '#38bdf8', accent: '#f59e0b', head: "'Poppins', sans-serif",     body: "'Roboto', sans-serif", radius: '10px', name: 'Beyaz Diş Kliniği' },
+  };
+
+  COPY = {
+    law: {
+      TR: { heroTitle: 'Aile hukukunda 12 yıllık deneyim.', heroSub: 'Boşanma, velayet, mal paylaşımı — dürüst ve anlaşılır bir hukuki süreç.', heroCta: 'Randevu al',
+            splitTitle: 'İstanbul\u2019da güvenilir hukuki danışmanlık.', splitSub: 'Kadıköy ofisimizde birebir görüşme veya çevrimiçi konsültasyon.',
+            aboutTitle: 'Av. Zeynep Demir', aboutBody: 'İstanbul Barosu\u2019na kayıtlıyım. 2013\u2019ten bu yana Kadıköy\u2019deki ofisimde aile hukuku ve boşanma davalarına odaklanıyorum. 200+ tamamlanmış dava. Danışanlarımın çoğu velayet, nafaka ve mal paylaşımı konularında geliyor.',
+            srvTitle: 'Hizmetlerimiz', srvIntro: 'Aile hukukunda uçtan uca destek.',
+            srv1: 'Boşanma davası', srv1Body: 'Anlaşmalı ve çekişmeli süreçler.', srv1Price: '15.000 ₺\u2019den',
+            srv2: 'Velayet ve nafaka', srv2Body: 'Çocuğun yararı önceliğiyle çözümler.', srv2Price: '12.000 ₺\u2019den',
+            srv3: 'Mal paylaşımı', srv3Body: 'Değer tespiti ve hakkaniyetli paylaşım.', srv3Price: 'Danışın',
+            galTitle: 'Ofisimizden',
+            teamTitle: 'Ekibimiz', role1: 'Kurucu ortak', role2: 'Kıdemli avukat', role3: 'Hukuk asistanı',
+            faqTitle: 'Sıkça sorulanlar',
+            faq1Q: 'İlk görüşme ücretli mi?', faq1A: 'İlk 30 dakikalık ön görüşme ücretsizdir. Sonrasında saatlik veya dava başına ücretlendirme yaparız.',
+            faq2Q: 'Ne kadar sürer?', faq3Q: 'Uzaktan çalışıyor musunuz?',
+            ctaTitle: 'Sizi dinlemeye hazırız.', ctaSub: 'Ücretsiz ön görüşme için randevu alın — 30 dakika.',
+            contactTitle: 'İletişim', contactSub: 'Genellikle aynı gün geri döneriz.',
+            formName: 'Adınız', formEmail: 'E-posta', formMsg: 'Kısaca durumunuzu anlatın…', formSubmit: 'Gönder',
+            nav1: 'Ana Sayfa', nav2: 'Hakkımda', nav3: 'Hizmetler', nav4: 'İletişim',
+            footTag: 'Kadıköy\u2019de aile hukuku ve boşanma danışmanlığı.', footCol1: 'Menü', footCol2: 'Bize ulaşın' },
+      EN: { heroTitle: '12 years of family law experience.', heroSub: 'Divorce, custody, marital property — honest, plain-language legal work.', heroCta: 'Book a consult',
+            splitTitle: 'Trusted family law in Istanbul.', splitSub: 'In-person at our Kadıköy office, or an online consultation.',
+            aboutTitle: 'Zeynep Demir, Attorney', aboutBody: 'Member of the Istanbul Bar. Since 2013 I\u2019ve run a Kadıköy practice focused on family law and divorce. 200+ cases closed. Most clients come to me for custody, alimony, and marital-property matters.',
+            srvTitle: 'What I do', srvIntro: 'End-to-end support in family law.',
+            srv1: 'Divorce', srv1Body: 'Both uncontested and contested processes.', srv1Price: 'from ₺15,000',
+            srv2: 'Custody & alimony', srv2Body: 'Solutions built around the child\u2019s interest.', srv2Price: 'from ₺12,000',
+            srv3: 'Marital property', srv3Body: 'Valuation and equitable division.', srv3Price: 'inquire',
+            galTitle: 'From the office',
+            teamTitle: 'The team', role1: 'Founding partner', role2: 'Senior associate', role3: 'Paralegal',
+            faqTitle: 'Frequently asked',
+            faq1Q: 'Is the first meeting paid?', faq1A: 'The first 30-minute consultation is free. After that we bill hourly or per case.',
+            faq2Q: 'How long does a case take?', faq3Q: 'Do you work remotely?',
+            ctaTitle: 'Ready to talk?', ctaSub: 'Book a free 30-minute consultation to start.',
+            contactTitle: 'Get in touch', contactSub: 'We usually reply the same day.',
+            formName: 'Your name', formEmail: 'Email', formMsg: 'Briefly describe your situation…', formSubmit: 'Send',
+            nav1: 'Home', nav2: 'About', nav3: 'Services', nav4: 'Contact',
+            footTag: 'Family law and divorce advisory, Kadıköy.', footCol1: 'Menu', footCol2: 'Reach us' },
+      DE: { heroTitle: '12 Jahre Erfahrung im Familienrecht.', heroSub: 'Scheidung, Sorgerecht, Vermögensteilung — ehrlich und verständlich.', heroCta: 'Termin buchen',
+            splitTitle: 'Verlässliches Familienrecht in Istanbul.', splitSub: 'Persönlich in Kadıköy oder als Online-Beratung.',
+            aboutTitle: 'RA\u2019in Zeynep Demir', aboutBody: 'Mitglied der Rechtsanwaltskammer Istanbul. Seit 2013 führe ich meine Kanzlei in Kadıköy mit Schwerpunkt Familienrecht und Scheidung. Über 200 abgeschlossene Fälle.',
+            srvTitle: 'Was wir tun', srvIntro: 'Umfassende Beratung im Familienrecht.',
+            srv1: 'Scheidung', srv1Body: 'Einvernehmlich oder streitig.', srv1Price: 'ab ₺15.000',
+            srv2: 'Sorgerecht & Unterhalt', srv2Body: 'Zum Wohl des Kindes.', srv2Price: 'ab ₺12.000',
+            srv3: 'Vermögensteilung', srv3Body: 'Bewertung und faire Aufteilung.', srv3Price: 'auf Anfrage',
+            galTitle: 'Aus dem Büro',
+            teamTitle: 'Das Team', role1: 'Gründungspartnerin', role2: 'Senior Associate', role3: 'Rechtsassistenz',
+            faqTitle: 'Häufige Fragen',
+            faq1Q: 'Ist das Erstgespräch kostenpflichtig?', faq1A: 'Die ersten 30 Minuten sind kostenlos. Danach rechnen wir stündlich oder fallbezogen ab.',
+            faq2Q: 'Wie lange dauert ein Verfahren?', faq3Q: 'Arbeiten Sie remote?',
+            ctaTitle: 'Reden wir.', ctaSub: 'Buchen Sie ein kostenloses 30-minütiges Erstgespräch.',
+            contactTitle: 'Kontakt', contactSub: 'Wir antworten meist noch am selben Tag.',
+            formName: 'Ihr Name', formEmail: 'E-Mail', formMsg: 'Beschreiben Sie kurz Ihr Anliegen…', formSubmit: 'Senden',
+            nav1: 'Startseite', nav2: 'Über mich', nav3: 'Leistungen', nav4: 'Kontakt',
+            footTag: 'Familienrecht und Scheidungsberatung, Kadıköy.', footCol1: 'Menü', footCol2: 'Kontakt' },
+    },
+    psych: {
+      TR: { heroTitle: 'Zihniniz için sakin bir alan.', heroSub: 'Bireysel terapi, çift terapisi ve yetişkin danışmanlığı — çevrimiçi ve İstanbul\u2019da.', heroCta: 'Seans rezerve et',
+            splitTitle: 'Sakin, güvenli ve yargılanmayan.', splitSub: 'İlk seansta beraber hedef belirleriz.',
+            aboutTitle: 'Uzm. Psk. Deniz Aslan', aboutBody: '9 yıldır kliniğimde bilişsel davranışçı terapi ve şema terapi çalışıyorum. Nişantaşı\u2019nda çalışıyorum ve online seanslar da veriyorum.',
+            srvTitle: 'Terapi seansları', srvIntro: 'Size en uygun formatta çalışıyoruz.',
+            srv1: 'Bireysel terapi', srv1Body: 'Kaygı, depresyon, ilişki güçlükleri.', srv1Price: '2.400 ₺ / seans',
+            srv2: 'Çift terapisi', srv2Body: 'İletişim ve bağlanma çalışması.', srv2Price: '3.200 ₺ / seans',
+            srv3: 'Online seanslar', srv3Body: 'Zoom üzerinden güvenli görüşme.', srv3Price: '2.200 ₺ / seans',
+            galTitle: 'Kliniğimizden',
+            teamTitle: 'Ekibimiz', role1: 'Klinik psikolog', role2: 'Aile terapisti', role3: 'Kabul & koordinasyon',
+            faqTitle: 'Sıkça sorulanlar',
+            faq1Q: 'Kaç seans gerekiyor?', faq1A: 'Genellikle 8–16 seans arası. İlk 3 seansta beraber bir plan çıkarıyoruz.',
+            faq2Q: 'Sigortam kapsıyor mu?', faq3Q: 'İptal politikası nasıl?',
+            ctaTitle: 'Küçük bir adım atmaya hazır mısınız?', ctaSub: 'Ücretsiz 15 dakikalık ön görüşme rezervasyonu.',
+            contactTitle: 'İletişim', contactSub: 'Gizliliğinize saygı duyarız.',
+            formName: 'Adınız', formEmail: 'E-posta', formMsg: 'Kısaca ne için başvurduğunuz…', formSubmit: 'Gönder',
+            nav1: 'Ana Sayfa', nav2: 'Hakkımızda', nav3: 'Seanslar', nav4: 'İletişim',
+            footTag: 'Nişantaşı\u2019nda bireysel ve çift terapisi.', footCol1: 'Menü', footCol2: 'Bize ulaşın' },
+      EN: { heroTitle: 'A calm space for your mind.', heroSub: 'Individual therapy, couples work, and adult counselling — in Istanbul and online.', heroCta: 'Book a session',
+            splitTitle: 'Calm, safe, non-judgemental.', splitSub: 'We set goals together in the first session.',
+            aboutTitle: 'Deniz Aslan, MA', aboutBody: '9 years of practice in CBT and schema therapy. I work from Nişantaşı and also offer online sessions in English and Turkish.',
+            srvTitle: 'Therapy sessions', srvIntro: 'We\u2019ll pick the format that suits you.',
+            srv1: 'Individual therapy', srv1Body: 'Anxiety, depression, relationships.', srv1Price: '₺2,400 / session',
+            srv2: 'Couples therapy', srv2Body: 'Communication and attachment.', srv2Price: '₺3,200 / session',
+            srv3: 'Online sessions', srv3Body: 'Confidential Zoom sessions.', srv3Price: '₺2,200 / session',
+            galTitle: 'From the practice',
+            teamTitle: 'The team', role1: 'Clinical psychologist', role2: 'Family therapist', role3: 'Intake & scheduling',
+            faqTitle: 'Frequently asked',
+            faq1Q: 'How many sessions does it take?', faq1A: 'Usually 8–16 sessions. We\u2019ll build a plan together over the first three.',
+            faq2Q: 'Do you take insurance?', faq3Q: 'What\u2019s the cancellation policy?',
+            ctaTitle: 'Ready to take a small step?', ctaSub: 'Book a free 15-minute intro call.',
+            contactTitle: 'Get in touch', contactSub: 'Everything you share is confidential.',
+            formName: 'Your name', formEmail: 'Email', formMsg: 'A short note about what brings you…', formSubmit: 'Send',
+            nav1: 'Home', nav2: 'About', nav3: 'Sessions', nav4: 'Contact',
+            footTag: 'Individual and couples therapy in Nişantaşı.', footCol1: 'Menu', footCol2: 'Reach us' },
+      DE: { heroTitle: 'Ein ruhiger Raum für Ihren Geist.', heroSub: 'Einzel-, Paar- und Erwachsenentherapie — in Istanbul und online.', heroCta: 'Termin buchen',
+            splitTitle: 'Ruhig, sicher, wertungsfrei.', splitSub: 'Im ersten Gespräch legen wir Ziele fest.',
+            aboutTitle: 'Deniz Aslan, M.A.', aboutBody: '9 Jahre Praxis in CBT und Schematherapie. Ich arbeite in Nişantaşı und biete Sitzungen auf Deutsch und Türkisch an.',
+            srvTitle: 'Sitzungen', srvIntro: 'Wir wählen das passende Format.',
+            srv1: 'Einzeltherapie', srv1Body: 'Angst, Depression, Beziehungen.', srv1Price: '₺2.400 / Sitzung',
+            srv2: 'Paartherapie', srv2Body: 'Kommunikation und Bindung.', srv2Price: '₺3.200 / Sitzung',
+            srv3: 'Online-Sitzungen', srv3Body: 'Vertrauliche Zoom-Gespräche.', srv3Price: '₺2.200 / Sitzung',
+            galTitle: 'Aus der Praxis',
+            teamTitle: 'Das Team', role1: 'Klinische Psychologin', role2: 'Familientherapeut', role3: 'Empfang & Termine',
+            faqTitle: 'Häufige Fragen',
+            faq1Q: 'Wie viele Sitzungen brauche ich?', faq1A: 'Meist 8–16 Sitzungen. Wir erstellen in den ersten drei einen Plan.',
+            faq2Q: 'Wird das von der Kasse übernommen?', faq3Q: 'Wie ist die Stornoregelung?',
+            ctaTitle: 'Bereit für einen kleinen Schritt?', ctaSub: 'Kostenloses 15-Minuten-Erstgespräch.',
+            contactTitle: 'Kontakt', contactSub: 'Ihre Angaben bleiben vertraulich.',
+            formName: 'Ihr Name', formEmail: 'E-Mail', formMsg: 'Kurz zu Ihrem Anliegen…', formSubmit: 'Senden',
+            nav1: 'Startseite', nav2: 'Über uns', nav3: 'Sitzungen', nav4: 'Kontakt',
+            footTag: 'Einzel- und Paartherapie in Nişantaşı.', footCol1: 'Menü', footCol2: 'Kontakt' },
+    },
+    dental: {
+      TR: { heroTitle: 'Modern ve ağrısız diş bakımı.', heroSub: 'Estetik diş hekimliği, implant ve ortodonti — çocuklar için özel klinik.', heroCta: 'Randevu al',
+            splitTitle: 'Ataşehir\u2019de yeni nesil bir diş kliniği.', splitSub: 'Şeffaf fiyatlar, aynı gün panoramik röntgen.',
+            aboutTitle: 'Dr. Emre Yıldız & ekibi', aboutBody: 'Ataşehir\u2019deki kliniğimizde 6 diş hekimi ve 4 diş sağlığı uzmanı çalışıyor. CEREC ile aynı günde porselen kaplama, dijital ortodonti planlama, uyku terapisiyle çocuk hekimliği.',
+            srvTitle: 'Tedavilerimiz', srvIntro: 'Estetik ve fonksiyonel diş sağlığı.',
+            srv1: 'İmplant', srv1Body: 'Straumann & Nobel — 5 yıl garanti.', srv1Price: '18.500 ₺\u2019den',
+            srv2: 'Şeffaf plak', srv2Body: 'Invisalign onaylı klinik.', srv2Price: '65.000 ₺\u2019den',
+            srv3: 'Diş beyazlatma', srv3Body: 'Ofis içi tek seans.', srv3Price: '4.800 ₺',
+            galTitle: 'Kliniğimizden',
+            teamTitle: 'Hekimlerimiz', role1: 'Kurucu, cerrahi', role2: 'Ortodonti', role3: 'Pedodonti',
+            faqTitle: 'Sıkça sorulanlar',
+            faq1Q: 'Anlaşmalı sigortalar var mı?', faq1A: 'Allianz, Anadolu ve AXA ile doğrudan anlaşmalıyız. Diğer poliçelerde geri ödeme evrakı hazırlıyoruz.',
+            faq2Q: 'Aynı gün tedavi mümkün mü?', faq3Q: 'Çocuklar için sedasyon var mı?',
+            ctaTitle: 'Gülümsemeniz için 20 dakika.', ctaSub: 'Ücretsiz muayene + panoramik röntgen.',
+            contactTitle: 'İletişim', contactSub: 'Randevu değişiklikleri için WhatsApp.',
+            formName: 'Adınız', formEmail: 'E-posta', formMsg: 'Hangi tedavi için başvuruyorsunuz?', formSubmit: 'Randevu iste',
+            nav1: 'Ana Sayfa', nav2: 'Klinik', nav3: 'Tedaviler', nav4: 'İletişim',
+            footTag: 'Ataşehir\u2019de estetik ve implant diş kliniği.', footCol1: 'Menü', footCol2: 'Bize ulaşın' },
+      EN: { heroTitle: 'Modern, painless dentistry.', heroSub: 'Cosmetic dentistry, implants and orthodontics — with a dedicated kids\u2019 clinic.', heroCta: 'Book a visit',
+            splitTitle: 'A new-generation dental clinic in Ataşehir.', splitSub: 'Transparent pricing. Same-day panoramic x-ray.',
+            aboutTitle: 'Dr. Emre Yıldız & team', aboutBody: 'Our Ataşehir clinic runs 6 dentists and 4 hygienists. Same-day porcelain crowns with CEREC, digital orthodontic planning, sedation-supported paediatric care.',
+            srvTitle: 'Treatments', srvIntro: 'Aesthetic and functional dental care.',
+            srv1: 'Implants', srv1Body: 'Straumann & Nobel — 5-year guarantee.', srv1Price: 'from ₺18,500',
+            srv2: 'Clear aligners', srv2Body: 'Invisalign-approved clinic.', srv2Price: 'from ₺65,000',
+            srv3: 'Whitening', srv3Body: 'One in-office session.', srv3Price: '₺4,800',
+            galTitle: 'From the clinic',
+            teamTitle: 'The dentists', role1: 'Founder, surgery', role2: 'Orthodontics', role3: 'Paediatric',
+            faqTitle: 'Frequently asked',
+            faq1Q: 'Do you accept insurance?', faq1A: 'We\u2019re in-network with Allianz, Anadolu and AXA. For others we prepare reimbursement paperwork.',
+            faq2Q: 'Same-day treatment?', faq3Q: 'Do you offer sedation for kids?',
+            ctaTitle: '20 minutes for your smile.', ctaSub: 'Free exam + panoramic x-ray.',
+            contactTitle: 'Get in touch', contactSub: 'WhatsApp for appointment changes.',
+            formName: 'Your name', formEmail: 'Email', formMsg: 'What treatment are you asking about?', formSubmit: 'Request visit',
+            nav1: 'Home', nav2: 'Clinic', nav3: 'Treatments', nav4: 'Contact',
+            footTag: 'Cosmetic and implant dentistry in Ataşehir.', footCol1: 'Menu', footCol2: 'Reach us' },
+      DE: { heroTitle: 'Moderne, schmerzarme Zahnmedizin.', heroSub: 'Ästhetische Zahnheilkunde, Implantate und Kieferorthopädie — mit eigener Kinderabteilung.', heroCta: 'Termin buchen',
+            splitTitle: 'Zahnklinik neuer Generation in Ataşehir.', splitSub: 'Transparente Preise, Panoramaröntgen am selben Tag.',
+            aboutTitle: 'Dr. Emre Yıldız & Team', aboutBody: 'In unserer Klinik in Ataşehir arbeiten 6 Zahnärzte und 4 Dentalhygieniker. CEREC-Kronen am selben Tag, digitale KFO-Planung, Sedierung in der Kinderzahnheilkunde.',
+            srvTitle: 'Behandlungen', srvIntro: 'Ästhetische und funktionelle Zahnmedizin.',
+            srv1: 'Implantate', srv1Body: 'Straumann & Nobel — 5 Jahre Garantie.', srv1Price: 'ab ₺18.500',
+            srv2: 'Aligner', srv2Body: 'Invisalign-zertifizierte Praxis.', srv2Price: 'ab ₺65.000',
+            srv3: 'Bleaching', srv3Body: 'Eine Sitzung in der Praxis.', srv3Price: '₺4.800',
+            galTitle: 'Aus der Klinik',
+            teamTitle: 'Unsere Zahnärzte', role1: 'Gründer, Chirurgie', role2: 'Kieferorthopädie', role3: 'Kinderzahnheilkunde',
+            faqTitle: 'Häufige Fragen',
+            faq1Q: 'Werden Krankenkassen akzeptiert?', faq1A: 'Direktabrechnung mit Allianz, Anadolu und AXA. Für andere Policen bereiten wir die Erstattungsunterlagen vor.',
+            faq2Q: 'Behandlung am selben Tag?', faq3Q: 'Gibt es Sedierung für Kinder?',
+            ctaTitle: '20 Minuten für Ihr Lächeln.', ctaSub: 'Kostenlose Untersuchung + Panoramaröntgen.',
+            contactTitle: 'Kontakt', contactSub: 'WhatsApp für Terminänderungen.',
+            formName: 'Ihr Name', formEmail: 'E-Mail', formMsg: 'Um welche Behandlung geht es?', formSubmit: 'Termin anfragen',
+            nav1: 'Startseite', nav2: 'Klinik', nav3: 'Behandlungen', nav4: 'Kontakt',
+            footTag: 'Ästhetische und Implantat-Zahnmedizin in Ataşehir.', footCol1: 'Menü', footCol2: 'Kontakt' },
+    },
+  };
+
+  componentDidMount() {
+    // simulate autosave cycle for the "Unsaved" → "Saving" → "Saved" indicator
+    this._saveTimer = null;
+  }
+
+  triggerAutosave() {
+    this.setState({ saveState: 'dirty' });
+    clearTimeout(this._saveTimer);
+    this._saveTimer = setTimeout(() => {
+      this.setState({ saveState: 'saving' });
+      setTimeout(() => this.setState({ saveState: 'saved' }), 700);
+    }, 900);
+  }
+
+  pickTab = (e) => this.setState({ tab: e.currentTarget.dataset.tab });
+  pickViewport = (e) => this.setState({ viewport: e.currentTarget.dataset.vp });
+  pickLocale = (e) => { this.setState({ locale: e.currentTarget.dataset.locale }); this.triggerAutosave(); };
+  setLocale = (e) => { this.setState({ locale: e.target.value }); this.triggerAutosave(); };
+  pickPreset = (e) => { this.setState({ editorPreset: e.currentTarget.dataset.preset }); this.triggerAutosave(); };
+
+  setChatInput = (e) => this.setState({ chatInput: e.target.value });
+  sendChat = (e) => {
+    e.preventDefault();
+    const text = this.state.chatInput.trim();
+    if (!text) return;
+    const chat = [...this.state.chat, { role: 'user', text }];
+    this.setState({ chat, chatInput: '', chatBusy: true });
+    setTimeout(() => {
+      const reply = { role: 'assistant', text: 'Got it — I\u2019ll update the draft. The change will show up in the preview in a moment.' };
+      this.setState({ chat: [...chat, reply], chatBusy: false });
+    }, 1400);
+  };
+
+  saveNow = () => {
+    this.setState({ saveState: 'saving' });
+    setTimeout(() => this.setState({ saveState: 'saved' }), 500);
+  };
+
+  publish = () => {
+    this.setState({ publishing: true });
+    setTimeout(() => this.setState({
+      publishing: false,
+      published: true,
+      publishVer: (this.state.publishVer || 0) + 1,
+    }), 1400);
+  };
+
+  // public playground
+  pickPubPreset = (e) => this.setState({ pubPreset: e.currentTarget.dataset.p });
+  pickPubViewport = (e) => this.setState({ pubViewport: e.currentTarget.dataset.v });
+  pickPubLocale = (e) => this.setState({ pubLocale: e.currentTarget.dataset.l });
+
+  renderVals() {
+    const st = this.state;
+    const tabs = [
+      { id: 'chat', name: 'Chat' },
+      { id: 'content', name: 'Content' },
+      { id: 'theme', name: 'Theme' },
+      { id: 'pages', name: 'Pages' },
+      { id: 'langs', name: 'Langs' },
+      { id: 'settings', name: 'Settings' },
+    ].map(t => ({
+      ...t,
+      bg: st.tab === t.id ? '#171614' : 'transparent',
+      fg: st.tab === t.id ? '#f3ecdd' : 'rgba(0,0,0,.6)',
+    }));
+
+    const editorPreset = this.PRESETS[st.editorPreset];
+    const editorCopy = this.COPY[st.editorPreset][st.locale];
+
+    const chatMessages = st.chat.map(m => ({
+      text: m.text,
+      align: m.role === 'user' ? 'flex-end' : 'flex-start',
+      bg: m.role === 'user' ? '#171614' : '#f0ece3',
+      fg: m.role === 'user' ? '#f3ecdd' : '#171614',
+      radius: m.role === 'user' ? '12px 12px 3px 12px' : '12px 12px 12px 3px',
+    }));
+
+    const saveMap = {
+      saved:  { text: '● Saved',  bg: '#dfe9d3', fg: '#3d6a1f' },
+      dirty:  { text: '● Unsaved', bg: '#f6e5c9', fg: '#7a5410' },
+      saving: { text: '● Saving…', bg: '#d9e6f2', fg: '#1e3a5f' },
+    };
+    const sv = saveMap[st.saveState];
+
+    const vpMap = { mobile: '375px', tablet: '768px', desktop: '100%' };
+    const viewports = [
+      { id: 'mobile', name: 'Mobile' },
+      { id: 'tablet', name: 'Tablet' },
+      { id: 'desktop', name: 'Desktop' },
+    ].map(v => ({ ...v, bg: st.viewport === v.id ? '#171614' : 'transparent', fg: st.viewport === v.id ? '#f3ecdd' : 'rgba(0,0,0,.65)' }));
+
+    const presets = ['law', 'psych', 'dental'].map(p => ({
+      id: p,
+      bg: st.editorPreset === p ? '#171614' : 'transparent',
+      fg: st.editorPreset === p ? '#f3ecdd' : 'rgba(0,0,0,.6)',
+    }));
+
+    const locales = ['TR', 'EN', 'DE'].map(l => ({
+      id: l,
+      bg: st.locale === l ? '#171614' : '#fff',
+      fg: st.locale === l ? '#f3ecdd' : 'rgba(0,0,0,.6)',
+    }));
+
+    // public playground
+    const pubPreset = this.PRESETS[st.pubPreset];
+    const pubCopy = this.COPY[st.pubPreset][st.pubLocale];
+    const pubPresets = [
+      { id: 'law', name: 'law' }, { id: 'psych', name: 'psych' }, { id: 'dental', name: 'dental' },
+    ].map(p => ({ ...p, bg: st.pubPreset === p.id ? '#171614' : 'transparent', fg: st.pubPreset === p.id ? '#f3ecdd' : 'rgba(0,0,0,.6)' }));
+    const pubViewports = [
+      { id: 'mobile', name: 'Mobile 375' },
+      { id: 'tablet', name: 'Tablet 768' },
+      { id: 'desktop', name: 'Desktop' },
+    ].map(v => ({ ...v, bg: st.pubViewport === v.id ? '#171614' : 'transparent', fg: st.pubViewport === v.id ? '#f3ecdd' : 'rgba(0,0,0,.6)' }));
+    const pubLocales = ['TR', 'EN', 'DE'].map(l => ({ id: l, bg: st.pubLocale === l ? '#171614' : 'transparent', fg: st.pubLocale === l ? '#f3ecdd' : 'rgba(0,0,0,.6)' }));
+
+    const pubVpWidth = { mobile: '390px', tablet: '760px', desktop: '1080px' }[st.pubViewport];
+    const isMobile = st.pubViewport === 'mobile';
+    const splitCols = isMobile ? '1fr' : '1fr 1fr';
+    const srvCols = isMobile ? '1fr' : 'repeat(3, 1fr)';
+    const galCols = isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)';
+    const teamCols = isMobile ? '1fr 1fr' : 'repeat(3, 1fr)';
+    const footerCols = isMobile ? '1fr' : '1.4fr 1fr 1fr';
+
+    return {
+      // editor sidebar
+      tabs, isChat: st.tab === 'chat', isContent: st.tab === 'content', isTheme: st.tab === 'theme',
+      isPages: st.tab === 'pages', isLangs: st.tab === 'langs', isSettings: st.tab === 'settings',
+      saveBadgeText: sv.text, saveBadgeBg: sv.bg, saveBadgeFg: sv.fg,
+      chatMessages, chatBusy: st.chatBusy, chatInput: st.chatInput,
+      setChatInput: this.setChatInput, sendChat: this.sendChat,
+      pickTab: this.pickTab,
+      // editor theme tab
+      presets, pickPreset: this.pickPreset,
+      presetColorPrimary: editorPreset.primary,
+      presetColorSecondary: editorPreset.secondary,
+      presetColorAccent: editorPreset.accent,
+      presetFontHead: editorPreset.head.replace(/['"]/g,'').split(',')[0],
+      presetFontBody: editorPreset.body.replace(/['"]/g,'').split(',')[0],
+      // editor lang tab
+      locales, pickLocale: this.pickLocale,
+      locale: st.locale, setLocale: this.setLocale,
+      // toolbar
+      viewports, pickViewport: this.pickViewport,
+      vpWidth: vpMap[st.viewport],
+      saveNow: this.saveNow, publish: this.publish, publishing: st.publishing,
+      publishBg: st.publishing ? '#8f8a80' : '#3d6a1f',
+      publishText: st.publishing ? 'Publishing…' : (st.published ? `Republish · v${st.publishVer} live` : 'Publish'),
+      // preview mini
+      heroTitle: editorCopy.heroTitle, heroSub: editorCopy.heroSub, heroCta: editorCopy.heroCta,
+      srvTitle: editorCopy.srvTitle,
+      gridCols: st.viewport === 'mobile' ? '1fr' : 'repeat(3, 1fr)',
+
+      // public playground
+      pubPresets, pickPubPreset: this.pickPubPreset,
+      pubViewports, pickPubViewport: this.pickPubViewport,
+      pubLocales, pickPubLocale: this.pickPubLocale,
+      pubVpWidth,
+      pubPrimary: pubPreset.primary, pubSecondary: pubPreset.secondary, pubAccent: pubPreset.accent,
+      pubHeadFont: pubPreset.head, pubBodyFont: pubPreset.body, pubRadius: pubPreset.radius,
+      pubSiteName: pubPreset.name, pubLocale: st.pubLocale,
+      pubSplitCols: splitCols, pubSrvCols: srvCols, pubGalCols: galCols, pubTeamCols: teamCols, pubFooterCols: footerCols,
+      // copy
+      tHeroTitle: pubCopy.heroTitle, tHeroSub: pubCopy.heroSub, tHeroCta: pubCopy.heroCta,
+      tSplitTitle: pubCopy.splitTitle, tSplitSub: pubCopy.splitSub,
+      tAboutTitle: pubCopy.aboutTitle, tAboutBody: pubCopy.aboutBody,
+      tSrvTitle: pubCopy.srvTitle, tSrvIntro: pubCopy.srvIntro,
+      tSrv1: pubCopy.srv1, tSrv1Body: pubCopy.srv1Body, tSrv1Price: pubCopy.srv1Price,
+      tSrv2: pubCopy.srv2, tSrv2Body: pubCopy.srv2Body, tSrv2Price: pubCopy.srv2Price,
+      tSrv3: pubCopy.srv3, tSrv3Body: pubCopy.srv3Body, tSrv3Price: pubCopy.srv3Price,
+      tGalTitle: pubCopy.galTitle,
+      tTeamTitle: pubCopy.teamTitle, tRole1: pubCopy.role1, tRole2: pubCopy.role2, tRole3: pubCopy.role3,
+      tFaqTitle: pubCopy.faqTitle, tFaq1Q: pubCopy.faq1Q, tFaq1A: pubCopy.faq1A, tFaq2Q: pubCopy.faq2Q, tFaq3Q: pubCopy.faq3Q,
+      tCtaTitle: pubCopy.ctaTitle, tCtaSub: pubCopy.ctaSub,
+      tContactTitle: pubCopy.contactTitle, tContactSub: pubCopy.contactSub,
+      tFormName: pubCopy.formName, tFormEmail: pubCopy.formEmail, tFormMsg: pubCopy.formMsg, tFormSubmit: pubCopy.formSubmit,
+      tNav1: pubCopy.nav1, tNav2: pubCopy.nav2, tNav3: pubCopy.nav3, tNav4: pubCopy.nav4,
+      tFootTag: pubCopy.footTag, tFootCol1: pubCopy.footCol1, tFootCol2: pubCopy.footCol2,
+    };
+  }
+}
+</script>
+</body>
+</html>

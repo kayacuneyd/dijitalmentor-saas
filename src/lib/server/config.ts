@@ -1,0 +1,319 @@
+import { eq } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
+import { db } from '$lib/server/db';
+import { appSettings } from '$lib/server/db/schema';
+
+/**
+ * Operator-managed credentials & config (M5). Resolution order: DB (set by the
+ * super admin at /admin/settings) → environment variable → undefined. Everything
+ * that needs a credential reads through here, so keys can be added/rotated live
+ * without touching `.env` or redeploying.
+ */
+
+export type SettingDef = {
+	key: string;
+	label: string;
+	group: 'AI' | 'AI Providers' | 'Email' | 'Billing' | 'Domains' | 'Media' | 'Ops';
+	secret: boolean;
+	help?: string;
+};
+
+/** The registry drives the /admin/settings UI — add a row here to expose a new key. */
+export const SETTING_DEFS: SettingDef[] = [
+	{ key: 'ANTHROPIC_API_KEY', label: 'Anthropic API key', group: 'AI', secret: true },
+	{
+		key: 'AI_MODEL',
+		label: 'Model id (generation + medium/high-risk edits)',
+		group: 'AI',
+		secret: false,
+		help: 'default claude-opus-4-8'
+	},
+	{
+		key: 'AI_MODEL_LIGHT',
+		label: 'Model id (low-risk edits)',
+		group: 'AI',
+		secret: false,
+		help: 'default claude-sonnet-5 — risk-routed Layer 2'
+	},
+	{
+		key: 'GATEKEEPER_MODEL',
+		label: 'Gatekeeper model id (Layer 1 triage)',
+		group: 'AI',
+		secret: false,
+		help: 'default claude-haiku-4-5 — classify/distill before the patch agent'
+	},
+	{
+		key: 'AI_MONTHLY_TOKEN_LIMIT',
+		label: 'Monthly token backstop / account',
+		group: 'AI',
+		secret: false,
+		help: 'default 500000 — abuse ceiling; plans are enforced in credits below'
+	},
+	{
+		key: 'AI_EDITS_FREE',
+		label: 'AI chat edits / month (Free)',
+		group: 'AI',
+		secret: false,
+		help: 'default 10'
+	},
+	{
+		key: 'AI_EDITS_PRO',
+		label: 'AI chat edits / month (Pro)',
+		group: 'AI',
+		secret: false,
+		help: 'default 50'
+	},
+	{
+		key: 'AI_GENERATIONS_FREE',
+		label: 'Site generations / month (Free)',
+		group: 'AI',
+		secret: false,
+		help: 'default 1'
+	},
+	{
+		key: 'AI_GENERATIONS_PRO',
+		label: 'Site generations / month (Pro)',
+		group: 'AI',
+		secret: false,
+		help: 'default 5'
+	},
+	{
+		key: 'GATEKEEPER_PROVIDER',
+		label: 'Gatekeeper provider',
+		group: 'AI Providers',
+		secret: false,
+		help: 'groq / anthropic; beta default groq'
+	},
+	{ key: 'GROQ_API_KEY', label: 'Groq API key', group: 'AI Providers', secret: true },
+	{
+		key: 'GROQ_MODEL',
+		label: 'Groq gatekeeper model',
+		group: 'AI Providers',
+		secret: false,
+		help: 'default llama-3.3-70b-versatile'
+	},
+	{
+		key: 'AI_PROVIDER',
+		label: 'Layer-2 provider',
+		group: 'AI Providers',
+		secret: false,
+		help: 'deepseek / anthropic; beta default deepseek'
+	},
+	{ key: 'DEEPSEEK_API_KEY', label: 'DeepSeek API key', group: 'AI Providers', secret: true },
+	{
+		key: 'DEEPSEEK_MODEL_LIGHT',
+		label: 'DeepSeek light model',
+		group: 'AI Providers',
+		secret: false,
+		help: 'default deepseek-v4-flash'
+	},
+	{
+		key: 'DEEPSEEK_MODEL_HEAVY',
+		label: 'DeepSeek heavy model',
+		group: 'AI Providers',
+		secret: false,
+		help: 'default deepseek-v4-pro'
+	},
+	{
+		key: 'AI_GLOBAL_MONTHLY_BUDGET_USD',
+		label: 'Global monthly AI budget (USD)',
+		group: 'AI Providers',
+		secret: false,
+		help: 'hard application backstop; default 5'
+	},
+	{
+		key: 'EMAIL_PROVIDER',
+		label: 'Email provider',
+		group: 'Email',
+		secret: false,
+		help: 'smtp / resend / unset = dev echo'
+	},
+	{ key: 'RESEND_API_KEY', label: 'Resend API key', group: 'Email', secret: true },
+	{
+		key: 'SMTP_HOST',
+		label: 'SMTP host',
+		group: 'Email',
+		secret: false,
+		help: 'e.g. smtp.hostinger.com'
+	},
+	{
+		key: 'SMTP_PORT',
+		label: 'SMTP port',
+		group: 'Email',
+		secret: false,
+		help: '465 (SSL) or 587 (STARTTLS); default 465'
+	},
+	{
+		key: 'SMTP_USER',
+		label: 'SMTP user',
+		group: 'Email',
+		secret: true,
+		help: 'e.g. noreply@saaskaya.com'
+	},
+	{ key: 'SMTP_PASS', label: 'SMTP password', group: 'Email', secret: true },
+	{
+		key: 'EMAIL_FROM',
+		label: 'From address',
+		group: 'Email',
+		secret: false,
+		help: 'e.g. saaskaya <noreply@yourdomain.com>; falls back to SMTP user / onboarding@resend.dev'
+	},
+	{ key: 'STRIPE_SECRET_KEY', label: 'Stripe secret key', group: 'Billing', secret: true },
+	{ key: 'STRIPE_WEBHOOK_SECRET', label: 'Stripe webhook secret', group: 'Billing', secret: true },
+	{
+		key: 'STRIPE_PRICE_ID',
+		label: 'Stripe price id (subscription)',
+		group: 'Billing',
+		secret: false
+	},
+	{
+		key: 'PAYMENT_MODE',
+		label: 'Domain payment mode',
+		group: 'Billing',
+		secret: false,
+		help: 'disabled / bank_only / hybrid / stripe_only; default bank_only'
+	},
+	{
+		key: 'DOMAIN_PRICE_EUR',
+		label: 'Domain price (EUR)',
+		group: 'Billing',
+		secret: false,
+		help: 'shown on the reservation card; default 15'
+	},
+	{
+		key: 'DOMAIN_PRICE_TRY',
+		label: 'Domain price (TRY)',
+		group: 'Billing',
+		secret: false,
+		help: 'bank-transfer equivalent shown to the user; default 500'
+	},
+	{
+		key: 'BANK_IBAN',
+		label: 'Bank IBAN (bank transfer)',
+		group: 'Billing',
+		secret: false,
+		help: 'shown to users choosing bank transfer'
+	},
+	{
+		key: 'BANK_ACCOUNT_HOLDER',
+		label: 'Bank account holder',
+		group: 'Billing',
+		secret: false
+	},
+	{ key: 'PORKBUN_API_KEY', label: 'Porkbun API key', group: 'Domains', secret: true },
+	{ key: 'PORKBUN_SECRET_KEY', label: 'Porkbun secret key', group: 'Domains', secret: true },
+	{
+		key: 'SERVER_IP',
+		label: 'Server IPv4',
+		group: 'Domains',
+		secret: false,
+		help: 'used to verify DNS + create A records'
+	},
+	{
+		key: 'DOMAIN_PROVISION',
+		label: 'Auto-provision nginx+TLS (1 = on)',
+		group: 'Domains',
+		secret: false,
+		help: 'runs scripts/provision-domain.sh on attach'
+	},
+	{
+		key: 'R2_ENDPOINT',
+		label: 'R2 S3 endpoint',
+		group: 'Media',
+		secret: false,
+		help: 'https://<account-id>.r2.cloudflarestorage.com'
+	},
+	{ key: 'R2_ACCESS_KEY_ID', label: 'R2 access key id', group: 'Media', secret: true },
+	{ key: 'R2_SECRET_ACCESS_KEY', label: 'R2 secret access key', group: 'Media', secret: true },
+	{
+		key: 'R2_BUCKET',
+		label: 'R2 bucket',
+		group: 'Media',
+		secret: false,
+		help: 'default saaskaya-media'
+	},
+	{
+		key: 'R2_PUBLIC_BASE_URL',
+		label: 'R2 public CDN URL',
+		group: 'Media',
+		secret: false,
+		help: 'https://cdn.saaskaya.com'
+	},
+	{
+		key: 'BETA_MODE',
+		label: 'Closed beta (1 = invite-only)',
+		group: 'Ops',
+		secret: false,
+		help: 'when on, only emails in /admin/invites can sign in'
+	},
+	{
+		key: 'GRACE_DAYS',
+		label: 'Grace period after cancellation (days)',
+		group: 'Ops',
+		secret: false,
+		help: 'default 30 — see docs/POLICY.md'
+	},
+	{
+		key: 'CRON_TOKEN',
+		label: 'Cron token (x-cron-token for /api/admin/tasks/daily)',
+		group: 'Ops',
+		secret: true
+	},
+	{
+		key: 'ALERT_EMAIL',
+		label: 'Alert email (monitoring)',
+		group: 'Ops',
+		secret: false,
+		help: 'scripts/monitor.sh mails here on downtime (needs Resend key)'
+	},
+	{
+		key: 'MONITOR_AUTORESTART',
+		label: 'Auto-restart on failed health check (1 = on)',
+		group: 'Ops',
+		secret: false,
+		help: 'scripts/monitor.sh runs "pm2 restart saaskaya"'
+	},
+	{
+		key: 'BACKUP_REMOTE',
+		label: 'Off-site backup target',
+		group: 'Ops',
+		secret: false,
+		help: 'rclone remote (remote:path) or scp target (user@host:path); empty = local only'
+	}
+];
+
+const KNOWN_KEYS = new Set(SETTING_DEFS.map((d) => d.key));
+
+/** DB value wins; env var is the fallback; empty strings count as unset. */
+export function getSetting(key: string): string | undefined {
+	const row = db.select().from(appSettings).where(eq(appSettings.key, key)).get();
+	const value = row?.value ?? env[key];
+	return value ? value : undefined;
+}
+
+export function setSetting(key: string, value: string): void {
+	if (!KNOWN_KEYS.has(key)) throw new Error(`unknown setting "${key}"`);
+	db.insert(appSettings)
+		.values({ key, value, updatedAt: new Date() })
+		.onConflictDoUpdate({ target: appSettings.key, set: { value, updatedAt: new Date() } })
+		.run();
+}
+
+export function clearSetting(key: string): void {
+	if (!KNOWN_KEYS.has(key)) throw new Error(`unknown setting "${key}"`);
+	db.delete(appSettings).where(eq(appSettings.key, key)).run();
+}
+
+/** For the admin UI: never returns the full secret value. */
+export function maskValue(value: string | undefined, secret: boolean): string {
+	if (!value) return '';
+	if (!secret) return value;
+	return value.length <= 6 ? '••••' : `••••${value.slice(-4)}`;
+}
+
+/** Where the current value comes from, for display: 'db' | 'env' | ''. */
+export function settingSource(key: string): 'db' | 'env' | '' {
+	const row = db.select().from(appSettings).where(eq(appSettings.key, key)).get();
+	if (row?.value) return 'db';
+	return env[key] ? 'env' : '';
+}

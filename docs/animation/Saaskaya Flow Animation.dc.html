@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #ece7dd; color: #171614; font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+    a { color: #b8532f; text-decoration: none; }
+    a:hover { color: #8f3d20; }
+
+    @keyframes sk-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes sk-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(184,83,47,.45); } 50% { box-shadow: 0 0 0 14px rgba(184,83,47,0); } }
+    @keyframes sk-grid-move { from { transform: translateZ(-400px) translateY(0); } to { transform: translateZ(-400px) translateY(120px); } }
+    @keyframes sk-scan { 0% { transform: translateX(-120%) skewX(-18deg); } 100% { transform: translateX(220%) skewX(-18deg); } }
+    @keyframes sk-cursor-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes sk-bubble-in { from { opacity: 0; transform: translateZ(-80px) translateY(12px); } to { opacity: 1; transform: translateZ(0) translateY(0); } }
+    @keyframes sk-block-drop { from { opacity: 0; transform: translateY(-30px) rotateX(40deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
+    @keyframes sk-confetti { 0% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0; } }
+    @keyframes sk-scene-in { from { opacity: 0; transform: translateZ(-60px); } to { opacity: 1; transform: translateZ(0); } }
+    @keyframes sk-domain-zoom { 0% { transform: scale(.9) translateZ(-40px); } 50% { transform: scale(1.05) translateZ(40px); } 100% { transform: scale(1) translateZ(0); } }
+    @keyframes sk-progress-pop { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .sk-anim { animation: none !important; }
+    }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; background: #ece7dd; padding: 48px 24px; display: flex; flex-direction: column; align-items: center; gap: 32px;">
+
+  <div style="max-width: 1160px; width: 100%; display: flex; flex-direction: column; gap: 8px;">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #8a8377;">saaskaya · progressive CMS</div>
+    <h1 style="font-family: 'Instrument Serif', serif; font-weight: 400; font-size: clamp(38px, 5.4vw, 68px); line-height: 1.02; margin: 0; letter-spacing: -.01em;">Describe yourself. <em style="color: #b8532f;">Get a live site.</em></h1>
+    <p style="font-family: 'IBM Plex Sans', sans-serif; font-size: 17px; line-height: 1.5; color: #4a4640; margin: 8px 0 0; max-width: 640px;">Tell saaskaya who you are — in your own words. It generates a multilingual site, previews it in three viewports, and publishes to your domain.</p>
+  </div>
+
+  <div ref="stage" data-screen-label="Scene {{ sceneIndex1 }} · {{ sceneLabel }}" style="max-width: 1160px; width: 100%; aspect-ratio: 16 / 9; perspective: 1200px; perspective-origin: 50% 45%; position: relative; border-radius: 20px; overflow: hidden; background: linear-gradient(180deg, #f2ede3 0%, #e6dfd1 100%); border: 1px solid rgba(0,0,0,.09); box-shadow: 0 40px 60px -40px rgba(30,20,10,.35);">
+
+    <!-- scene chrome: label + progress -->
+    <div style="position: absolute; top: 16px; left: 20px; z-index: 40; display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #6b6459;">
+      <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #b8532f;"></span>
+      <span>0{{ sceneIndex1 }} / 05 · {{ sceneLabel }}</span>
+    </div>
+    <div style="position: absolute; top: 16px; right: 20px; z-index: 40; display: flex; gap: 6px;">
+      <sc-for list="{{ dots }}" as="d" hint-placeholder-count="5">
+        <span style="width: 22px; height: 3px; border-radius: 2px; background: {{ d.bg }};"></span>
+      </sc-for>
+    </div>
+
+    <!-- ============ SCENE 1: Describe yourself ============ -->
+    <sc-if value="{{ isScene0 }}" hint-placeholder-val="{{ true }}">
+    <div class="sk-anim" style="position: absolute; inset: 0; transform-style: preserve-3d; animation: sk-scene-in .8s ease-out both;">
+      <!-- perspective grid -->
+      <div style="position: absolute; inset: 0; overflow: hidden;">
+        <div class="sk-anim" style="position: absolute; left: 50%; top: 100%; width: 2400px; height: 1800px; margin-left: -1200px; transform-origin: 50% 0%; transform: translateZ(-400px) rotateX(64deg); background-image: linear-gradient(rgba(184,83,47,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(184,83,47,.18) 1px, transparent 1px); background-size: 80px 80px; animation: sk-grid-move 4s linear infinite; mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%);"></div>
+      </div>
+
+      <!-- textarea card -->
+      <div style="position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); width: min(640px, 78%); background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); border-radius: 14px; box-shadow: 0 24px 40px -32px rgba(30,20,10,.6); padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #8a8377;">tell saaskaya about you</div>
+          <div style="display: flex; gap: 5px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #e6dfd1;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #e6dfd1;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #e6dfd1;"></span>
+          </div>
+        </div>
+        <div style="min-height: 96px; font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1.35; color: #171614;">
+          {{ typedText }}<span class="sk-anim" style="display: inline-block; width: 2px; height: 22px; background: #b8532f; vertical-align: -3px; margin-left: 2px; animation: sk-cursor-blink 1s steps(1) infinite;"></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.06);">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8a8377;">TR · EN · DE</div>
+          <button class="sk-anim" style="font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; background: #b8532f; color: #fbfaf7; border: none; border-radius: 10px; padding: 10px 18px; cursor: pointer; animation: sk-pulse 1.8s ease-out infinite;">Generate my site →</button>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ SCENE 2: AI generates ============ -->
+    <sc-if value="{{ isScene1 }}" hint-placeholder-val="{{ true }}">
+    <div class="sk-anim" style="position: absolute; inset: 0; transform-style: preserve-3d; animation: sk-scene-in .8s ease-out both; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 60px 56px 36px;">
+      <!-- chat -->
+      <div style="display: flex; flex-direction: column; gap: 12px; justify-content: center; transform: rotateY(6deg); transform-origin: right center;">
+        <div class="sk-anim" style="align-self: flex-end; max-width: 78%; background: #171614; color: #fbfaf7; padding: 10px 14px; border-radius: 14px 14px 4px 14px; font-size: 13px; line-height: 1.4; animation: sk-bubble-in .5s ease-out .1s both;">Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve arabuluculuk yapıyorum.</div>
+        <div class="sk-anim" style="align-self: flex-start; max-width: 82%; background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); padding: 10px 14px; border-radius: 14px 14px 14px 4px; font-size: 13px; line-height: 1.4; color: #2a2620; animation: sk-bubble-in .5s ease-out .7s both;">Anladım. Sana <em style="color:#1e3a5f; font-family:'Instrument Serif',serif; font-style:normal; font-size:14px;">law</em> preset'iyle üç dilli bir site hazırlıyorum. Hizmetler, Hakkımda, İletişim.</div>
+        <div class="sk-anim" style="align-self: flex-end; max-width: 62%; background: #171614; color: #fbfaf7; padding: 10px 14px; border-radius: 14px 14px 4px 14px; font-size: 13px; line-height: 1.4; animation: sk-bubble-in .5s ease-out 1.3s both;">Referanslar bölümü de ekle.</div>
+      </div>
+
+      <!-- schema stack -->
+      <div style="position: relative; transform: rotateY(-8deg) rotateX(4deg); transform-origin: left center; display: flex; flex-direction: column; gap: 10px; justify-content: center;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #8a8377; margin-bottom: 4px;">site schema · validated json</div>
+        <sc-for list="{{ schemaBlocks }}" as="b" hint-placeholder-count="5">
+          <div class="sk-anim" style="background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); border-radius: 12px; padding: 12px 14px; box-shadow: 0 24px 40px -32px rgba(30,20,10,.5); display: flex; justify-content: space-between; align-items: center; animation: sk-block-drop .5s cubic-bezier(.2,.9,.3,1.1) both; animation-delay: {{ b.delay }};">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-family: 'Instrument Serif', serif; font-size: 18px;">{{ b.title }}</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8377;">{{ b.meta }}</div>
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #1e3a5f;">{{ b.tag }}</div>
+          </div>
+        </sc-for>
+
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #4a4640;">
+          <sc-for list="{{ progress }}" as="p" hint-placeholder-count="4">
+            <div class="sk-anim" style="display: flex; gap: 8px; animation: sk-progress-pop .4s ease-out both; animation-delay: {{ p.delay }};">
+              <span style="color: {{ p.color }};">{{ p.mark }}</span>
+              <span>{{ p.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ SCENE 3: Live preview (3 devices) ============ -->
+    <sc-if value="{{ isScene2 }}" hint-placeholder-val="{{ true }}">
+    <div class="sk-anim" style="position: absolute; inset: 0; transform-style: preserve-3d; animation: sk-scene-in .8s ease-out both; display: flex; align-items: center; justify-content: center; gap: 28px; padding: 40px;">
+
+      <!-- mobile (back left) -->
+      <div style="transform: rotateY(28deg) translateZ(-60px); transform-origin: right center; width: 130px; height: 260px; background: #171614; border-radius: 22px; padding: 8px; box-shadow: 0 30px 40px -20px rgba(30,20,10,.5);">
+        <div style="width: 100%; height: 100%; background: #fbfaf7; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;">
+          <div style="height: 44px; background: linear-gradient(120deg, #1e3a5f, #3a5a80);"></div>
+          <div style="padding: 10px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; width: 60%; background: #171614; border-radius: 3px;"></div>
+            <div style="height: 4px; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 4px; width: 80%; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 4px; width: 50%; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 30px; background: #f2ede3; border-radius: 4px; margin-top: 6px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- desktop (front center) -->
+      <div style="position: relative; transform: translateZ(60px); width: 460px; height: 300px; background: #171614; border-radius: 12px; padding: 8px 8px 22px; box-shadow: 0 40px 60px -20px rgba(30,20,10,.6); overflow: hidden;">
+        <div style="width: 100%; height: 100%; background: #fbfaf7; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; position: relative;">
+          <div style="height: 20px; background: #f2ede3; display: flex; align-items: center; padding: 0 8px; gap: 5px; border-bottom: 1px solid rgba(0,0,0,.05);">
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #d97070;"></span>
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #e6c168;"></span>
+            <span style="width: 7px; height: 7px; border-radius: 50%; background: #7dbf7a;"></span>
+            <span style="margin-left: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #8a8377;">demirhukuk.av.tr</span>
+          </div>
+          <div style="height: 90px; background: linear-gradient(120deg, #1e3a5f, #3a5a80); position: relative; padding: 18px 22px; color: #fbfaf7;">
+            <div style="font-family: 'Instrument Serif', serif; font-size: 20px; line-height: 1.1;">Aile hukukunda<br>güvenilir eller.</div>
+            <div style="position: absolute; top: 14px; right: 22px; display: flex; gap: 12px; font-family: 'IBM Plex Sans', sans-serif; font-size: 9px; opacity: .9;"><span>Hizmetler</span><span>Hakkımda</span><span>İletişim</span></div>
+          </div>
+          <div style="flex: 1; padding: 14px 22px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; width: 40%; background: #171614; border-radius: 3px;"></div>
+            <div style="height: 4px; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 4px; width: 88%; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 4px; width: 76%; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px;">
+              <div style="height: 34px; background: #f2ede3; border-radius: 4px;"></div>
+              <div style="height: 34px; background: #f2ede3; border-radius: 4px;"></div>
+              <div style="height: 34px; background: #f2ede3; border-radius: 4px;"></div>
+            </div>
+          </div>
+          <!-- scan light -->
+          <div class="sk-anim" style="position: absolute; top: 0; left: 0; width: 30%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation: sk-scan 3.2s ease-in-out infinite; pointer-events: none;"></div>
+        </div>
+      </div>
+
+      <!-- tablet (back right) -->
+      <div style="transform: rotateY(-28deg) translateZ(-60px); transform-origin: left center; width: 200px; height: 260px; background: #171614; border-radius: 14px; padding: 8px; box-shadow: 0 30px 40px -20px rgba(30,20,10,.5);">
+        <div style="width: 100%; height: 100%; background: #fbfaf7; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+          <div style="height: 52px; background: linear-gradient(120deg, #1e3a5f, #3a5a80);"></div>
+          <div style="padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="height: 6px; width: 55%; background: #171614; border-radius: 3px;"></div>
+            <div style="height: 4px; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="height: 4px; width: 82%; background: #e6dfd1; border-radius: 2px;"></div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
+              <div style="height: 40px; background: #f2ede3; border-radius: 4px;"></div>
+              <div style="height: 40px; background: #f2ede3; border-radius: 4px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- viewport labels -->
+      <div style="position: absolute; bottom: 24px; left: 0; right: 0; display: flex; justify-content: center; gap: 44px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .12em; color: #8a8377; text-transform: uppercase;">
+        <span>375</span><span style="color:#b8532f;">desktop</span><span>768</span>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ SCENE 4: Edit ============ -->
+    <sc-if value="{{ isScene3 }}" hint-placeholder-val="{{ true }}">
+    <div class="sk-anim" style="position: absolute; inset: 0; transform-style: preserve-3d; animation: sk-scene-in .8s ease-out both; padding: 56px 48px 36px; display: grid; grid-template-columns: 220px 1fr; gap: 20px;">
+      <!-- sidebar, tilted -->
+      <div style="transform: translateX(-6px) rotateY(8deg); transform-origin: right center; background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); border-radius: 12px; padding: 16px 14px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 24px 40px -32px rgba(30,20,10,.5);">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: #8a8377;">editor</div>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="padding: 8px 10px; border-radius: 8px; font-size: 12px; color: #4a4640;">Chat</div>
+          <div style="padding: 8px 10px; border-radius: 8px; font-size: 12px; color: #4a4640;">Content</div>
+          <div style="padding: 8px 10px; border-radius: 8px; background: #ece7dd; font-size: 12px; font-weight: 500; color: #171614;">Theme</div>
+        </div>
+        <div style="border-top: 1px solid rgba(0,0,0,.06); padding-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8377;">PRESET</div>
+          <div style="display: flex; gap: 8px;">
+            <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: {{ p.opacity }};">
+                <span style="width: 28px; height: 28px; border-radius: 8px; background: {{ p.color }}; border: 2px solid {{ p.border }};"></span>
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: #6b6459;">{{ p.name }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(0,0,0,.06); padding-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8377;">LOCALE</div>
+          <div style="display: flex; gap: 6px;">
+            <sc-for list="{{ locales }}" as="l" hint-placeholder-count="3">
+              <span style="padding: 4px 8px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; background: {{ l.bg }}; color: {{ l.fg }}; border: 1px solid {{ l.border }};">{{ l.code }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <!-- preview -->
+      <div style="background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); border-radius: 12px; overflow: hidden; box-shadow: 0 24px 40px -32px rgba(30,20,10,.5); display: flex; flex-direction: column;">
+        <div style="height: 80px; background: {{ editHeroBg }}; padding: 16px 20px; color: #fbfaf7; display: flex; flex-direction: column; justify-content: center; transition: background .5s ease;">
+          <div style="font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1;">{{ editHeadline }}</div>
+          <div style="font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; opacity: .85; margin-top: 4px;">{{ editSub }}</div>
+        </div>
+        <div style="padding: 18px 22px; flex: 1; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #8a8377;">EDITING · body copy</div>
+          <div style="font-family: 'Instrument Serif', serif; font-size: 18px; line-height: 1.35; color: #171614;">{{ editBody }}<span class="sk-anim" style="display:inline-block; width:2px; height:18px; background:#b8532f; vertical-align:-3px; margin-left:2px; animation: sk-cursor-blink 1s steps(1) infinite;"></span></div>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <div style="height: 6px; width: 40%; background: #e6dfd1; border-radius: 3px;"></div>
+            <div style="height: 6px; width: 30%; background: #e6dfd1; border-radius: 3px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ SCENE 5: Publish ============ -->
+    <sc-if value="{{ isScene4 }}" hint-placeholder-val="{{ true }}">
+    <div class="sk-anim" style="position: absolute; inset: 0; transform-style: preserve-3d; animation: sk-scene-in .8s ease-out both; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+      <!-- confetti -->
+      <div style="position: absolute; inset: 0; pointer-events: none;">
+        <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="18">
+          <span class="sk-anim" style="position: absolute; left: {{ c.x }}; top: 52%; width: {{ c.size }}; height: {{ c.size }}; background: {{ c.color }}; border-radius: 2px; --dx: {{ c.dx }}; --dy: {{ c.dy }}; --r: {{ c.r }}; animation: sk-confetti 2s ease-out {{ c.delay }} forwards;"></span>
+        </sc-for>
+      </div>
+
+      <div class="sk-anim" style="position: relative; background: #fbfaf7; border: 1px solid rgba(0,0,0,.09); border-radius: 16px; padding: 28px 34px; box-shadow: 0 40px 60px -30px rgba(30,20,10,.55); display: flex; flex-direction: column; gap: 16px; min-width: 420px; animation: sk-domain-zoom 1.6s cubic-bezier(.3,.9,.3,1.1) both;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <!-- lock icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2f6f6a" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4a4640; letter-spacing: .04em;">https://<span style="color:#171614; font-weight:500;">demirhukuk.av.tr</span></div>
+          <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #e6f4ec; color: #2f6f6a; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #2f6f6a; box-shadow: 0 0 8px #2f6f6a;"></span>Live
+          </span>
+        </div>
+        <div style="font-family: 'Instrument Serif', serif; font-size: 34px; line-height: 1.05; color: #171614;">Yayında.</div>
+        <div style="display: flex; gap: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .1em; color: #6b6459; text-transform: uppercase; padding-top: 12px; border-top: 1px solid rgba(0,0,0,.06);">
+          <span>TLS ✓</span><span>Caddy ✓</span><span>TR · EN · DE</span>
+        </div>
+        <div style="position: absolute; bottom: -14px; right: 18px; background: #171614; color: #fbfaf7; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; padding: 5px 10px; border-radius: 6px;">powered by saaskaya</div>
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+
+  <div style="max-width: 1160px; width: 100%; display: flex; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8a8377; letter-spacing: .12em; text-transform: uppercase;">
+    <span>~20s loop · auto-play</span>
+    <span>respects prefers-reduced-motion</span>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { scene: 0, typed: '' };
+    this.SCENES = [
+      { label: 'Describe yourself' },
+      { label: 'AI generates' },
+      { label: 'Live preview' },
+      { label: 'Edit' },
+      { label: 'Publish' },
+    ];
+    this.FULL_TEXT = "Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve arabuluculuk yapıyorum. Türkçe, İngilizce, Almanca danışmanlık veriyorum.";
+    this.EDIT_STATES = [
+      { locale: 'TR', headline: 'Aile hukukunda güvenilir eller.', sub: 'İstanbul · 12 yıl deneyim', body: '12 yıldır ailelere hukuki destek sunuyorum. Empatiyle, netlikle.', preset: 0 },
+      { locale: 'EN', headline: 'A steady hand in family law.', sub: 'Istanbul · 12 years', body: 'Twelve years supporting families through legal transitions. Clear, humane.', preset: 0 },
+      { locale: 'DE', headline: 'Verlässlich im Familienrecht.', sub: 'Istanbul · 12 Jahre', body: 'Zwölf Jahre lang begleite ich Familien durch rechtliche Übergänge.', preset: 1 },
+      { locale: 'DE', headline: 'Verlässlich im Familienrecht.', sub: 'Istanbul · 12 Jahre', body: 'Zwölf Jahre lang begleite ich Familien durch rechtliche Übergänge.', preset: 2 },
+    ];
+    this.PRESET_COLORS = ['#1e3a5f', '#2f6f6a', '#0e7490'];
+    this.PRESET_NAMES = ['law', 'psych', 'dental'];
+    this.reduced = false;
+  }
+
+  componentDidMount() {
+    this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.reduced) return;
+
+    // scene loop (4s per scene)
+    this.sceneTimer = setInterval(() => {
+      this.setState(s => ({ scene: (s.scene + 1) % 5, typed: '' }));
+    }, 4000);
+
+    // typewriter for scene 1
+    this.typeTimer = setInterval(() => {
+      const s = this.state;
+      if (s.scene === 0) {
+        if (s.typed.length < this.FULL_TEXT.length) {
+          this.setState({ typed: this.FULL_TEXT.slice(0, s.typed.length + 1) });
+        }
+      }
+    }, 45);
+
+    // edit-scene cycler
+    this.editTimer = setInterval(() => {
+      this.editIdx = ((this.editIdx || 0) + 1) % this.EDIT_STATES.length;
+      this.forceUpdate();
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.sceneTimer);
+    clearInterval(this.typeTimer);
+    clearInterval(this.editTimer);
+  }
+
+  renderVals() {
+    const scene = this.reduced ? 0 : this.state.scene;
+    const editState = this.EDIT_STATES[this.editIdx || 0];
+    const heroColor = this.PRESET_COLORS[editState.preset];
+
+    // schema blocks with staggered delays
+    const schemaBlocks = [
+      { title: 'Hero', meta: 'headline · CTA · locale switcher', tag: 'hero.v1', delay: '0.1s' },
+      { title: 'Services', meta: '4 items · Aile · Boşanma · Arabuluculuk · Vesayet', tag: 'grid.v2', delay: '0.5s' },
+      { title: 'About', meta: 'bio · timeline · references', tag: 'prose.v1', delay: '0.9s' },
+      { title: 'Contact', meta: 'form · map · calendar', tag: 'form.v1', delay: '1.3s' },
+    ];
+
+    const progress = [
+      { mark: '✓', label: 'reading intake', color: '#2f6f6a', delay: '0.2s' },
+      { mark: '✓', label: 'picking preset · law', color: '#2f6f6a', delay: '0.7s' },
+      { mark: '✓', label: 'drafting pages', color: '#2f6f6a', delay: '1.2s' },
+      { mark: '↳', label: 'writing TR / EN / DE', color: '#b8532f', delay: '1.7s' },
+    ];
+
+    // scene indicator dots
+    const dots = [0,1,2,3,4].map(i => ({
+      bg: i === scene ? '#b8532f' : 'rgba(23,22,20,.15)'
+    }));
+
+    // presets
+    const presets = this.PRESET_NAMES.map((name, i) => ({
+      name,
+      color: this.PRESET_COLORS[i],
+      border: i === editState.preset ? '#171614' : 'transparent',
+      opacity: i === editState.preset ? 1 : 0.55,
+    }));
+
+    // locales
+    const locales = ['TR','EN','DE'].map(code => ({
+      code,
+      bg: code === editState.locale ? '#171614' : 'transparent',
+      fg: code === editState.locale ? '#fbfaf7' : '#4a4640',
+      border: code === editState.locale ? '#171614' : 'rgba(0,0,0,.12)',
+    }));
+
+    // confetti
+    const colors = ['#b8532f', '#1e3a5f', '#2f6f6a', '#0e7490', '#171614'];
+    const confetti = Array.from({length: 22}, (_, i) => {
+      const angle = (i / 22) * Math.PI * 2;
+      const dist = 180 + Math.random() * 160;
+      return {
+        x: (48 + (Math.random() - .5) * 6) + '%',
+        size: (4 + Math.random() * 5).toFixed(1) + 'px',
+        color: colors[i % colors.length],
+        dx: (Math.cos(angle) * dist).toFixed(0) + 'px',
+        dy: (Math.sin(angle) * dist - 40).toFixed(0) + 'px',
+        r: (Math.random() * 720 - 360).toFixed(0) + 'deg',
+        delay: (Math.random() * 0.6).toFixed(2) + 's',
+      };
+    });
+
+    return {
+      sceneIndex1: scene + 1,
+      sceneLabel: this.SCENES[scene].label,
+      isScene0: scene === 0,
+      isScene1: scene === 1,
+      isScene2: scene === 2,
+      isScene3: scene === 3,
+      isScene4: scene === 4,
+      typedText: this.state.typed || (this.reduced ? this.FULL_TEXT : ''),
+      dots,
+      schemaBlocks,
+      progress,
+      presets,
+      locales,
+      editHeroBg: `linear-gradient(120deg, ${heroColor}, ${heroColor}dd)`,
+      editHeadline: editState.headline,
+      editSub: editState.sub,
+      editBody: editState.body,
+      confetti,
+    };
+  }
+}
+</script>
+</body>
+</html>

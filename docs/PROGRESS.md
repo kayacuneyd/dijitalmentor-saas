@@ -11,6 +11,15 @@ done and _why_. This file is the antidote to forgetting completed steps.
 
 ## Current milestone
 
+**Phase 1 done — GTM nişi, fiyatlandırma, unit economics ve yasal temel.** Hostinger Horizons
+roadmap'inin Phase 1 exit gate'i tamamlandı: launch nişi **psikologlar** olarak seçildi (erişim,
+içerik riski, lead değeri dengesi); Free/Pro/Premium (0₺/299₺/599₺) fiyatlandırma tablosu ve unit
+economics (~%46 brüt marj @ 10 müşteri) belgelendi; 6 yasal sayfa (privacy, terms, kvkk,
+acceptable-use, refund, disclaimer) Türkçe-first KVKK/GDPR uyumlu olarak yayınlandı; landing IA
+Türkçe niş-odaklı yeniden yazıldı. **Operatör bekleyenler:** yasal metinler taslak (hukuki gözden
+geçirme önerilir), Stripe price ID'leri, PAYMENT_MODE/IBAN/domain fiyat production ayarları,
+Premium insan incelemesi iş akışı. Phase 2 (guided first-run) sıradaki.
+
 **M6 done — all planned milestones (M0–M6) complete.** Migration runner (versioned/idempotent/
 resumable, per-tenant-ready), nightly backups + restore drill, health endpoint + cron watchdog,
 cancellation policy (grace window, daily sweep, export, `docs/POLICY.md`), plus all four audit

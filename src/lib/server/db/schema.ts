@@ -228,6 +228,31 @@ export const pendingOnboarding = sqliteTable('pending_onboarding', {
 	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
 });
 
+// Privacy-safe guided-onboarding funnel telemetry. Stores event names and ids
+// only — never raw answers, generated descriptions, credentials, or user copy.
+export const onboardingEvents = sqliteTable(
+	'onboarding_events',
+	{
+		id: text('id').primaryKey(),
+		pendingId: text('pending_id'),
+		userId: text('user_id'),
+		siteId: text('site_id'),
+		event: text('event').notNull(),
+		route: text('route'),
+		source: text('source'),
+		durationMs: integer('duration_ms'),
+		errorId: text('error_id'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [
+		index('onboarding_events_created_idx').on(table.createdAt),
+		index('onboarding_events_pending_idx').on(table.pendingId),
+		index('onboarding_events_site_idx').on(table.siteId)
+	]
+);
+
 // R2 object index. The object bytes live in Cloudflare; this table provides
 // tenant ownership, quota accounting, and a future media-library listing.
 export const mediaAssets = sqliteTable(
@@ -249,4 +274,23 @@ export const mediaAssets = sqliteTable(
 		uniqueIndex('media_assets_object_key_unique').on(table.objectKey),
 		index('media_assets_site_created_idx').on(table.siteId, table.createdAt)
 	]
+);
+
+// Audit trail shared by every /admin/customers action (subscription override, AI
+// credit top-up, domain detach, unpublish). A flat "who did what to whom, when"
+// record, not a quota ledger — quota adjustments themselves live in ai_usage.
+export const adminActions = sqliteTable(
+	'admin_actions',
+	{
+		id: text('id').primaryKey(),
+		adminEmail: text('admin_email').notNull(),
+		targetUserId: text('target_user_id').notNull(),
+		// subscription_override | ai_topup | domain_detach | unpublish
+		action: text('action').notNull(),
+		detail: text('detail').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('admin_actions_target_idx').on(table.targetUserId, table.createdAt)]
 );

@@ -1,7 +1,7 @@
 import { desc, eq, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { db } from './index';
-import { contactSubmissions } from './schema';
+import { contactSubmissions, sites } from './schema';
 import type { Locale } from '$lib/schema/site';
 
 /** Contact-form submissions from published sites (PLAN §7): always stored, email is best-effort. */
@@ -36,4 +36,23 @@ export function countSubmissions(siteId: string): number {
 		.where(eq(contactSubmissions.siteId, siteId))
 		.get();
 	return row?.n ?? 0;
+}
+
+/** Admin customer detail (/admin/customers/[userId]): all of one owner's messages, across every site they have. */
+export function listSubmissionsForOwner(ownerUserId: string) {
+	return db
+		.select({
+			id: contactSubmissions.id,
+			siteId: contactSubmissions.siteId,
+			name: contactSubmissions.name,
+			email: contactSubmissions.email,
+			message: contactSubmissions.message,
+			locale: contactSubmissions.locale,
+			createdAt: contactSubmissions.createdAt
+		})
+		.from(contactSubmissions)
+		.innerJoin(sites, eq(sites.id, contactSubmissions.siteId))
+		.where(eq(sites.ownerUserId, ownerUserId))
+		.orderBy(desc(contactSubmissions.createdAt))
+		.all();
 }

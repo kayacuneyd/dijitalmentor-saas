@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { generateSite } from '$lib/server/ai/generate';
 import { AIInvalidOutputError, AIUnavailableError, QuotaExceededError } from '$lib/server/ai/llm';
-import { assertWithinQuota, recordUsage } from '$lib/server/ai/usage';
+import { assertWithinQuota, recordUsage, tenantIdForUser } from '$lib/server/ai/usage';
 import { saveDraft } from '$lib/server/db/repo';
 import { recordError } from '$lib/server/error-log';
 import type { RequestHandler } from './$types';
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const id = `site-${crypto.randomUUID().slice(0, 8)}`;
 	// Quota is per account, not per site — otherwise regenerating resets the budget.
-	const tenantId = `tenant-${locals.user.id}`;
+	const tenantId = tenantIdForUser(locals.user.id);
 
 	try {
 		// One generation = 1 generation credit (plan-tier limit; admins bypass credits).

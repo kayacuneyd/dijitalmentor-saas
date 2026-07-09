@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { desc, eq, lt } from 'drizzle-orm';
+import { error, redirect } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
@@ -37,6 +38,12 @@ export function isAdminEmail(email: string): boolean {
 		.map((e) => e.trim().toLowerCase())
 		.filter(Boolean)
 		.includes(normalizeEmail(email));
+}
+
+/** Route guard for every /admin/* page load and action. */
+export function requireAdmin(locals: App.Locals): void {
+	if (!locals.user) redirect(303, '/login');
+	if (!locals.user.isAdmin) error(403, 'Super admin only.');
 }
 
 // --- magic-link tokens ------------------------------------------------------

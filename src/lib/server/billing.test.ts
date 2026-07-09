@@ -1,6 +1,12 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { handleStripeEvent, hasActiveSubscription, verifyStripeSignature } from './billing';
+import {
+	handleStripeEvent,
+	hasActiveSubscription,
+	overrideSubscription,
+	subscriptionState,
+	verifyStripeSignature
+} from './billing';
 import { getOrCreateUser } from './auth';
 import { createReservation, getReservation } from './reservations';
 
@@ -92,5 +98,25 @@ describe('handleStripeEvent → subscription status', () => {
 		expect(getReservation(created.reservation.id)?.status).toBe('paid');
 		// crucially, the one-time domain payment did not flip the user to Pro
 		expect(hasActiveSubscription(user.id)).toBe(false);
+	});
+});
+
+describe('overrideSubscription (admin support gesture, bypasses Stripe)', () => {
+	it('comps a free user to Pro', () => {
+		const user = getOrCreateUser('override-comp@example.com');
+		expect(subscriptionState(user.id)).toEqual({ state: 'free' });
+		overrideSubscription(user.id, 'active');
+		expect(subscriptionState(user.id)).toEqual({ state: 'active' });
+	});
+
+	it('reverts a subscriber to Free, clearing subscriptionEndsAt so no stale grace applies', () => {
+		const user = getOrCreateUser('override-revert@example.com');
+		handleStripeEvent({
+			type: 'checkout.session.completed',
+			data: { object: { client_reference_id: user.id, customer: 'cus_override_revert' } }
+		});
+		expect(subscriptionState(user.id)).toEqual({ state: 'active' });
+		overrideSubscription(user.id, 'free');
+		expect(subscriptionState(user.id)).toEqual({ state: 'free' });
 	});
 });

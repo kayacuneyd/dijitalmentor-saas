@@ -1,14 +1,15 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
-import { addInvite, betaModeOn, listInvites, setInviteStatus } from '$lib/server/auth';
+import {
+	addInvite,
+	betaModeOn,
+	listInvites,
+	requireAdmin,
+	setInviteStatus
+} from '$lib/server/auth';
 import { setSetting } from '$lib/server/config';
 import { sendBetaInvitation } from '$lib/server/email';
 import type { Actions, PageServerLoad } from './$types';
-
-function requireAdmin(locals: App.Locals) {
-	if (!locals.user) redirect(303, '/login');
-	if (!locals.user.isAdmin) error(403, 'Super admin only.');
-}
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireAdmin(locals);

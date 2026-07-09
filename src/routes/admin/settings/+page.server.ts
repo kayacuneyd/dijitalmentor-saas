@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import {
 	clearSetting,
@@ -8,6 +8,7 @@ import {
 	setSetting,
 	settingSource
 } from '$lib/server/config';
+import { requireAdmin } from '$lib/server/auth';
 import { gateStats, healthCheck, opsStatus } from '$lib/server/ops';
 import { globalMonthlyBudgetMicrousd, globalMonthlySpendMicrousd } from '$lib/server/ai/usage';
 import {
@@ -18,11 +19,6 @@ import {
 } from '$lib/server/reservations';
 import { listRecentErrors, resolveError, unresolvedErrorCount } from '$lib/server/error-log';
 import type { Actions, PageServerLoad } from './$types';
-
-function requireAdmin(locals: App.Locals) {
-	if (!locals.user) redirect(303, '/login');
-	if (!locals.user.isAdmin) error(403, 'Super admin only.');
-}
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireAdmin(locals);

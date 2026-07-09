@@ -33,6 +33,7 @@
 	canvasLabel="saaskaya.app / admin"
 >
 	{#snippet actions()}
+		<a href="/admin/customers" class="sk-btn sk-btn-secondary sk-btn-sm">Customers</a>
 		<a href="/admin/invites" class="sk-btn sk-btn-secondary sk-btn-sm">Beta invites</a>
 	{/snippet}
 

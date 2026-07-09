@@ -266,6 +266,57 @@ export const migrations: Migration[] = [
 				expires_at integer NOT NULL
 			)`);
 		}
+	},
+	{
+		version: 10,
+		name: 'onboarding-events',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS onboarding_events (
+				id text PRIMARY KEY,
+				pending_id text,
+				user_id text,
+				site_id text,
+				event text NOT NULL,
+				route text,
+				source text,
+				duration_ms integer,
+				error_id text,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS onboarding_events_created_idx
+				ON onboarding_events (created_at)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS onboarding_events_pending_idx
+				ON onboarding_events (pending_id)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS onboarding_events_site_idx
+				ON onboarding_events (site_id)`
+			);
+		}
+	},
+	{
+		version: 11,
+		name: 'admin-customer-panel',
+		up(client) {
+			// Audit trail shared by every /admin/customers action (subscription
+			// override, AI credit top-up, domain detach, unpublish) — a flat
+			// "who did what to whom, when" record, not a quota ledger.
+			client.exec(`CREATE TABLE IF NOT EXISTS admin_actions (
+				id text PRIMARY KEY,
+				admin_email text NOT NULL,
+				target_user_id text NOT NULL,
+				action text NOT NULL,
+				detail text NOT NULL,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS admin_actions_target_idx
+				ON admin_actions (target_user_id, created_at)`
+			);
+		}
 	}
 ];
 

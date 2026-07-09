@@ -78,6 +78,20 @@ export const SETTING_DEFS: SettingDef[] = [
 		help: 'default 5'
 	},
 	{
+		key: 'AI_BUDGET_FREE_USD',
+		label: 'Per-tenant monthly AI $ cap (Free)',
+		group: 'AI',
+		secret: false,
+		help: 'default 1 — real dollar safety net alongside the credit limits above'
+	},
+	{
+		key: 'AI_BUDGET_PRO_USD',
+		label: 'Per-tenant monthly AI $ cap (Pro)',
+		group: 'AI',
+		secret: false,
+		help: 'default 4 — real dollar safety net alongside the credit limits above'
+	},
+	{
 		key: 'GATEKEEPER_PROVIDER',
 		label: 'Gatekeeper provider',
 		group: 'AI Providers',

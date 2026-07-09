@@ -95,6 +95,42 @@ link` log line (plain-form responses re-render with the error, don't rely on the
   (prod only). **Direct-port curls to :3021 must send `x-forwarded-proto`** — without it form
   POSTs 403 (CSRF origin mismatch); nginx always adds it in real traffic.
 
+## Per-tenant $ AI budget cap + admin customer panel
+
+Genuine per-tenant monthly dollar cap ($4 Pro / $1 Free by default, `AI_BUDGET_FREE_USD`/
+`AI_BUDGET_PRO_USD` settings) alongside the existing credit-count limits — a silent safety net,
+not a replacement; `/pricing` and the credit counts are unchanged. Plus `/admin/customers`, the
+first general customer-management surface (previously only `/admin/invites` and `/admin/settings`
+existed).
+
+- Unit surface (`npm test`): `usage.test.ts` ($ cap trips independent of token/global backstops,
+  Free vs Pro tiers, **not** bypassed by `isAdmin`, `grantAiTopUp` decrements/unblocks a thrown
+  quota check); `customers.test.ts` (`listCustomers`/`getCustomerDetail` shape, site counts,
+  usage-by-tenant matching); `billing.test.ts` (`overrideSubscription` flips `subscriptionState`);
+  `contact.test.ts` (`listSubmissionsForOwner` aggregates across 2+ sites of one owner, excludes
+  another owner's); `page.server.test.ts` files under `admin/customers/` (guard cases via
+  `isRedirect`/`isHttpError` from `@sveltejs/kit`, 404 on unknown customer); `actions.test.ts`
+  (all 4 admin actions, DB-state assertions, `admin_actions` audit row per action).
+- `/account` now shows an "AI usage this month" card (edits X/Y, generations X/Y, `$spent/$cap`) —
+  previously no per-tenant usage was visible anywhere, only a reactive 429 toast.
+- `/admin/customers`: signed-out → 303; non-admin → 403; admin → 200, lists every real user
+  (`users` table — seeds never appear here) with plan/site-count/this-month usage.
+  `/admin/customers/{userId}`: 404 unknown id; shows sites, AI usage, aggregated contact
+  submissions across all their sites, and the admin action log.
+- Four actions, each `requireAdmin`-gated and logged to `admin_actions` (`adminEmail`,
+  `targetUserId`, `action`, `detail`, `createdAt`): `?/overrideSubscription` (`next=active|free`,
+  bypasses Stripe — the UI warns if the customer has a live `stripeCustomerId`, since a real
+  subscription isn't cancelled by this and the next webhook can overwrite it); `?/topUp`
+  (`edits`/`generations`/`usdWaived` + **required** `reason` — rejects with no reason or all-zero
+  amounts); `?/detachDomain` (`siteId`, reuses `detachSiteDomain`, sends a courtesy email,
+  best-effort like the automated sweep); `?/unpublish` (`siteId`, reuses `unpublishSite`, same
+  courtesy-email treatment). **Curl gotcha**: form actions return HTTP 200 at the transport layer
+  even on `fail()` — check the JSON envelope's `"status"` field (`{"type":"failure","status":400,...}`),
+  not the curl-reported status code (same nuance already noted for `/login`'s plain-form responses).
+- Real-browser (playwright-core): admin login → `/admin/customers` list renders count → open a
+  customer detail → submit the top-up form → success banner renders; `reason` input has the
+  `required` attribute (client-side guard); 375px viewport has zero horizontal overflow.
+
 ## Two-layer chat gatekeeper (V2.2 Phase 1)
 
 - Unit surface (`npm test`, mocked `RunToolCall`): gate schema fixtures, repair, outline

@@ -32,6 +32,26 @@ export function creditLimits(ownerUserId?: string | null): { edit: number; gener
 		: { edit: intSetting('AI_EDITS_FREE', 10), generation: intSetting('AI_GENERATIONS_FREE', 1) };
 }
 
+/** The one place the `tenant-<userId>` id format is constructed. */
+export function tenantIdForUser(userId: string): string {
+	return `tenant-${userId}`;
+}
+
+/**
+ * Real per-tenant monthly dollar cap — a safety net alongside the credit-count
+ * limits above (which stay the customer-facing promise on /pricing). Guards
+ * against actual $ cost drifting from the assumptions those counts were sized on
+ * (provider price changes, unusually large sites/edits).
+ */
+export function tenantMonthlyBudgetMicrousd(ownerUserId?: string | null): number {
+	const pro = ownerUserId ? subscriptionState(ownerUserId).state !== 'free' : false;
+	const key = pro ? 'AI_BUDGET_PRO_USD' : 'AI_BUDGET_FREE_USD';
+	const fallback = pro ? 4 : 1;
+	const configured = Number(getSetting(key) || fallback);
+	const usd = Number.isFinite(configured) && configured > 0 ? configured : fallback;
+	return Math.round(usd * 1_000_000);
+}
+
 const currentMonth = () => new Date().toISOString().slice(0, 7); // 'YYYY-MM'
 
 export type MonthlyUsage = TokenUsage & {
@@ -98,6 +118,41 @@ export function recordUsage(tenantId: string, usage: TokenUsage, credit?: Credit
 		.run();
 }
 
+export type TopUpGrant = { edits?: number; generations?: number; usdWaived?: number };
+
+/**
+ * Admin support gesture (/admin/customers): waives counted usage for the
+ * current month via a signed-delta update — the same PK/upsert idiom as
+ * `recordUsage`. Counters may go negative; every enforcement check above is a
+ * `used >= limit` comparison, so a negative count simply reads as banked
+ * headroom (no clamping needed for enforcement, only when *displaying* a
+ * used-count, e.g. `Math.max(0, ...)`).
+ */
+export function grantAiTopUp(tenantId: string, grant: TopUpGrant): void {
+	const edits = grant.edits ?? 0;
+	const generations = grant.generations ?? 0;
+	const microusd = Math.round((grant.usdWaived ?? 0) * 1_000_000);
+	db.insert(aiUsage)
+		.values({
+			tenantId,
+			month: currentMonth(),
+			inputTokens: 0,
+			outputTokens: 0,
+			editCount: -edits,
+			generationCount: -generations,
+			estimatedCostMicrousd: -microusd
+		})
+		.onConflictDoUpdate({
+			target: [aiUsage.tenantId, aiUsage.month],
+			set: {
+				editCount: sql`${aiUsage.editCount} - ${edits}`,
+				generationCount: sql`${aiUsage.generationCount} - ${generations}`,
+				estimatedCostMicrousd: sql`${aiUsage.estimatedCostMicrousd} - ${microusd}`
+			}
+		})
+		.run();
+}
+
 /**
  * Gate every Layer-2 AI call. `kind` checks the plan's credit limit for the
  * site owner; the token backstop always applies. Admins bypass credit limits
@@ -116,6 +171,14 @@ export function assertWithinQuota(
 	if (usage.inputTokens + usage.outputTokens >= monthlyTokenLimit()) {
 		throw new QuotaExceededError(
 			'Monthly AI budget is used up for this site — it resets next month.'
+		);
+	}
+	// Real-dollar backstop (not bypassed by isAdmin, same as the token backstop
+	// above — admin smoke tests still spend real provider money).
+	const tenantCapMicrousd = tenantMonthlyBudgetMicrousd(opts.ownerUserId);
+	if (usage.estimatedCostMicrousd >= tenantCapMicrousd) {
+		throw new QuotaExceededError(
+			`This site's monthly AI $ cap ($${(tenantCapMicrousd / 1_000_000).toFixed(2)}) is reached — it resets next month. Direct text/color edits in the editor stay free.`
 		);
 	}
 	if (!opts.kind || opts.isAdmin) return;

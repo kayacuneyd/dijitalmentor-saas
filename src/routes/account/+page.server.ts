@@ -1,5 +1,11 @@
 import { redirect } from '@sveltejs/kit';
 import { billingConfigured, subscriptionState } from '$lib/server/billing';
+import {
+	creditLimits,
+	getMonthlyUsage,
+	tenantIdForUser,
+	tenantMonthlyBudgetMicrousd
+} from '$lib/server/ai/usage';
 import { listSitesByOwner } from '$lib/server/db/repo';
 import { countSubmissions } from '$lib/server/db/contact';
 import { getDomainForSite } from '$lib/server/domains';
@@ -21,6 +27,11 @@ export const load: PageServerLoad = ({ locals }) => {
 			sites: sites.length,
 			published: sites.filter((site) => site.publishedVersion).length,
 			messages: sites.reduce((sum, site) => sum + site.messageCount, 0)
+		},
+		aiUsage: {
+			usage: getMonthlyUsage(tenantIdForUser(locals.user.id)),
+			limits: creditLimits(locals.user.id),
+			budgetUsd: tenantMonthlyBudgetMicrousd(locals.user.id) / 1_000_000
 		}
 	};
 };

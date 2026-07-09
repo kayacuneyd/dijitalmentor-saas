@@ -4,6 +4,10 @@
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
 	let { data } = $props();
+
+	const spentUsd = $derived(data.aiUsage.usage.estimatedCostMicrousd / 1_000_000);
+	const spendRatio = $derived(data.aiUsage.budgetUsd > 0 ? spentUsd / data.aiUsage.budgetUsd : 0);
+	const spendTone = $derived(spendRatio >= 1 ? 'error' : spendRatio >= 0.8 ? 'warning' : 'success');
 </script>
 
 <svelte:head>
@@ -81,6 +85,37 @@
 
 	<AppCard>
 		<div class="flex flex-col gap-4">
+			<div class="flex flex-wrap items-center justify-between gap-3">
+				<div>
+					<h2 class="font-semibold">AI usage this month</h2>
+					<p class="text-sm text-[var(--sk-muted)]">
+						Direct text/color edits in the editor are always free — these limits are only for
+						AI-generated changes.
+					</p>
+				</div>
+				<StatusPill tone={spendTone}>
+					${spentUsd.toFixed(2)} / ${data.aiUsage.budgetUsd.toFixed(2)}
+				</StatusPill>
+			</div>
+			<dl class="grid gap-3 text-sm sm:grid-cols-2">
+				<div>
+					<dt class="text-[var(--sk-faint)]">Edits</dt>
+					<dd class="font-medium">
+						{data.aiUsage.usage.editCount} / {data.aiUsage.limits.edit}
+					</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Site generations</dt>
+					<dd class="font-medium">
+						{data.aiUsage.usage.generationCount} / {data.aiUsage.limits.generation}
+					</dd>
+				</div>
+			</dl>
+		</div>
+	</AppCard>
+
+	<AppCard>
+		<div class="flex flex-col gap-4">
 			<div>
 				<h2 class="font-semibold">Profile</h2>
 				<p class="text-sm text-[var(--sk-muted)]">
@@ -146,10 +181,7 @@
 				published versions and messages from the database; backups age out under the retention
 				policy.
 			</p>
-			<a
-				href="mailto:admin@saaskaya.com"
-				class="sk-btn sk-btn-secondary sk-btn-sm w-fit"
-			>
+			<a href="mailto:admin@saaskaya.com" class="sk-btn sk-btn-secondary sk-btn-sm w-fit">
 				Request deletion
 			</a>
 		</div>

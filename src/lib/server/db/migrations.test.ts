@@ -24,6 +24,7 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'custom_domains',
 				'ai_usage',
 				'error_events',
+				'onboarding_events',
 				'media_assets',
 				'schema_migrations'
 			])
@@ -73,6 +74,24 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				.prepare(`SELECT 1 FROM pragma_table_info('pending_onboarding') WHERE name='token_hash'`)
 				.get()
 		).toBeTruthy();
+		// v10: privacy-safe onboarding funnel telemetry
+		expect(tables(client)).toContain('onboarding_events');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('onboarding_events') WHERE name='duration_ms'`)
+				.get()
+		).toBeTruthy();
+		// v11: admin customer-panel action audit trail
+		expect(tables(client)).toContain('admin_actions');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('admin_actions') WHERE name='target_user_id'`)
+				.get()
+		).toBeTruthy();
+		const adminActionsIdx = client
+			.prepare(`SELECT 1 FROM sqlite_master WHERE type='index' AND name='admin_actions_target_idx'`)
+			.get();
+		expect(adminActionsIdx).toBeTruthy();
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

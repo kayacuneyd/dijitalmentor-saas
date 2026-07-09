@@ -205,3 +205,21 @@ export function subscriptionState(userId: string): SubscriptionState {
 export function hasActiveSubscription(userId: string): boolean {
 	return subscriptionState(userId).state !== 'free';
 }
+
+/**
+ * Admin support gesture (/admin/customers): manually comp Pro or revert to
+ * Free, bypassing Stripe. NOTE: if the user has a live `stripeCustomerId`,
+ * this does not cancel their real subscription — the next webhook event
+ * (renewal/cancellation) can silently overwrite this override. The caller is
+ * responsible for surfacing that risk to the admin before calling this for a
+ * user with a Stripe customer on file.
+ */
+export function overrideSubscription(userId: string, next: 'active' | 'free'): void {
+	db.update(users)
+		.set({
+			subscriptionStatus: next === 'active' ? 'active' : null,
+			...(next === 'free' ? { subscriptionEndsAt: null } : {})
+		})
+		.where(eq(users.id, userId))
+		.run();
+}

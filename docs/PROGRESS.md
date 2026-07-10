@@ -5,6 +5,26 @@ done and _why_. This file is the antidote to forgetting completed steps.
 
 ## 2026-07-10
 
+**Phase 2 closure sprint + public site + support + i18n + admin inbox deployed.** User asked to deploy
+all uncommitted changes. Committed 207 files (19,198 insertions, 1,665 deletions) as `50b00da` covering:
+public acquisition site (about, blog, contact, templates, pricing), support system (inquiries, admin
+inbox/support, account support), i18n infrastructure + language switcher + TR/EN content, admin dashboard
+with inbox/revenue tracking/activity/alerts, preview parity fixes, UX revision (public shell, header/footer,
+SEO head, flow animation), new server modules (activity, alerts, chatLog, inquiries, revenue, support,
+siteDeletion, previewParity), onboarding directions/support/telemetry, quality/site quality scoring,
+kits (psych), editor completion checklist/page ops, save tracker store, sparkline, typing indicator,
+chat/message bubbles, updated legal/login/dashboard/editor/account/profile pages, production deploy script,
+and stale screenshot cleanup.
+
+Verification before deploy: `npm run check` 0 errors/warnings, `npm run test` 62 files / 389 tests passing.
+Deploy: `npm run deploy:production -- --skip-check --skip-tests` (check/test already run separately).
+Build succeeded (8.92s), release `20260710T143841Z` created, `current` switched atomically, PM2 restarted
+and saved. Production smoke passed: `https://saaskaya.com` (mobile + desktop, public read-only surface).
+Post-deploy: PM2 online (89.5mb, stable), `/api/health` returned 200. Old release `20260710T104557Z`
+cleaned up. Git pushed to origin/master.
+
+## 2026-07-10
+
 **Current workspace state redeployed on request.** User asked to deploy everything not yet deployed.
 Ran the atomic `npm run deploy:production` flow against the current dirty workspace state. Verification:
 deploy `npm run check` passed with 0 errors/warnings, full `npm test` passed (61 files / 383 tests),

@@ -16,8 +16,8 @@
 	</p>
 	<ul>
 		<li>
-			İptal, Stripe üzerinden veya <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>
-			adresine yazarak yapılır
+			İptal, aktif ödeme sağlayıcısının müşteri/checkout akışı üzerinden veya
+			<a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a> adresine yazarak yapılır
 		</li>
 		<li>İptal sonrası 30 günlük grace dönemi başlar (özellikler aktif kalır)</li>
 		<li>Grace dönemi sonunda özel domain ayrılır; alt alan adı yayını devam eder</li>
@@ -49,8 +49,14 @@
 	<h2>3. İade Prosedürü</h2>
 	<ul>
 		<li>İade talebi <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>'a yazılır</li>
-		<li>İade, orijinal ödeme yöntemine (Stripe → kart, banka havalesi → IBAN) yapılır</li>
-		<li>İade süresi: Stripe 5–10 iş günü, banka havalesi 1–3 iş günü</li>
+		<li>
+			Kart/abonelik ödemeleri Creem Merchant of Record veya aktif ödeme sağlayıcısı üzerinden
+			orijinal ödeme yöntemine iade edilir; banka havalesi iadeleri IBAN'a yapılır
+		</li>
+		<li>
+			İade süresi ödeme sağlayıcısına ve bankaya göre değişir; kart iadelerinde tipik süre birkaç iş
+			gününden 10 iş gününe kadar uzayabilir, banka havalesinde hedef süre 1–3 iş günüdür
+		</li>
 		<li>İade tutarı, ödeme yapılan tutardır (kısmi kullanım kesintisi 14 gün cayma içinde yok)</li>
 	</ul>
 
@@ -69,7 +75,7 @@
 	<h2>5. Başarısız Ödeme</h2>
 	<p>Ödeme başarısız olursa (kart reddi, yetersiz bakiye):</p>
 	<ul>
-		<li>Stripe 3 gün boyunca 4 kez yeniden dener</li>
+		<li>Aktif ödeme sağlayıcısının retry/dunning kuralları uygulanır</li>
 		<li>Tüm denemeler başarısız olursa abonelik "past_due" durumuna geçer</li>
 		<li>30 gün grace dönemi boyunca özellikler aktif kalır</li>
 		<li>Grace sonunda domain ayrılır; site alt alan adında yayında kalır</li>
@@ -96,5 +102,11 @@
 	<h2>8. İletişim</h2>
 	<p>
 		İptal ve iade talepleri: <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>
+	</p>
+
+	<p class="sk-callout">
+		<strong>Creem notu:</strong> Creem checkout'unda satıcı/Merchant of Record olarak Creem göründüğünde,
+		kart iadeleri, chargeback'ler, vergi/fatura düzeltmeleri ve ödeme sağlayıcısı kayıtları Creem süreçlerine
+		tabi olabilir. saaskaya destek ekibi, uygulama erişimi ve hizmet kaydını buna göre günceller.
 	</p>
 </LegalShell>

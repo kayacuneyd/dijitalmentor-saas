@@ -2,16 +2,21 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 
+	// Self-hosted (no Google Fonts CDN request from a SaaS page — no third-party
+	// tracking beacon, no render-blocking cross-origin fetch). Tenant-theme fonts
+	// (Playfair/Lora/Poppins/Open Sans/Roboto/Inter) are self-hosted separately in
+	// SiteRenderer.svelte so SaaS pages never pay for weights only tenant sites use.
+	import '@fontsource/nunito/latin.css';
+	import '@fontsource/nunito/latin-ext.css';
+	import '@fontsource/nunito/latin-800.css';
+	import '@fontsource/nunito/latin-ext-800.css';
+	import '@fontsource/ibm-plex-mono/latin.css';
+	import '@fontsource/ibm-plex-mono/latin-ext.css';
+
 	let { children } = $props();
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link
-		href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@600;700&family=Lora:wght@600;700&family=Poppins:wght@600;700&family=Open+Sans:wght@400;600&family=Roboto:wght@400;500&display=swap"
-		rel="stylesheet"
-	/>
 </svelte:head>
 {@render children()}

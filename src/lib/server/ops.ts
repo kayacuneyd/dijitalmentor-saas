@@ -3,7 +3,7 @@ import { gte, sql } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { db } from '$lib/server/db';
 import { aiGateLog, customDomains, sites, users } from '$lib/server/db/schema';
-import { hasActiveSubscription } from '$lib/server/billing';
+import { hasActiveSiteSubscription } from '$lib/server/billing';
 import { detachSiteDomain } from '$lib/server/domains';
 import { sendEmail } from '$lib/server/email';
 
@@ -154,7 +154,7 @@ export async function sweepExpiredCustomDomains(): Promise<
 	const swept: { siteId: string; domain: string; ownerUserId: string }[] = [];
 	for (const row of rows) {
 		if (!row.ownerUserId) continue; // seeds/demos never carry paid features
-		if (hasActiveSubscription(row.ownerUserId)) continue;
+		if (hasActiveSiteSubscription(row.siteId, row.ownerUserId)) continue;
 		detachSiteDomain(row.siteId);
 		swept.push({ siteId: row.siteId, domain: row.domain, ownerUserId: row.ownerUserId });
 		const owner = db
@@ -166,7 +166,7 @@ export async function sweepExpiredCustomDomains(): Promise<
 			await sendEmail({
 				to: owner.email,
 				subject: `Custom domain removed: ${row.domain}`,
-				text: `Your saaskaya subscription (incl. the grace period) has ended, so the custom domain ${row.domain} was detached per our cancellation policy.\n\nYour site stays published on its saaskaya subdomain, and you can export your data from the dashboard at any time. Re-subscribe to reattach the domain.`
+				text: `The Pro subscription for this saaskaya site (incl. the grace period) has ended, so the custom domain ${row.domain} was detached per our cancellation policy.\n\nYour site stays published on its saaskaya subdomain. Re-activate Pro for this site to reattach the domain.`
 			});
 		}
 	}

@@ -1,5 +1,9 @@
 import { redirect } from '@sveltejs/kit';
-import { billingConfigured, subscriptionState } from '$lib/server/billing';
+import {
+	billingConfigured,
+	hasActiveSiteSubscription,
+	subscriptionState
+} from '$lib/server/billing';
 import {
 	creditLimits,
 	getMonthlyUsage,
@@ -15,6 +19,7 @@ export const load: PageServerLoad = ({ locals }) => {
 	if (!locals.user) redirect(303, '/login');
 	const sites = listSitesByOwner(locals.user.id).map((site) => ({
 		...site,
+		canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
 		domain: getDomainForSite(site.id),
 		messageCount: countSubmissions(site.id)
 	}));

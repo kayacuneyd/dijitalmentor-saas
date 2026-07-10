@@ -4,7 +4,9 @@ import { overrideSubscription } from '$lib/server/billing';
 import { grantAiTopUp, tenantIdForUser } from '$lib/server/ai/usage';
 import { getCustomerDetail, logAdminAction } from '$lib/server/customers';
 import { detachSiteDomain, getDomainForSite } from '$lib/server/domains';
-import { unpublishSite } from '$lib/server/db/repo';
+import { getDraft, getOrSeedDraft, publishDraft, unpublishSite } from '$lib/server/db/repo';
+import { deleteSiteCascade } from '$lib/server/siteDeletion';
+import { siteQualityCheck } from '$lib/quality/siteQuality';
 import { sendEmail } from '$lib/server/email';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -73,6 +75,33 @@ export const actions: Actions = {
 		return { domainDetached: siteId };
 	},
 
+	publish: async ({ request, locals, params }) => {
+		requireAdmin(locals);
+		const siteId = String((await request.formData()).get('siteId') ?? '');
+		if (!siteId) return fail(400, { message: 'Missing siteId.' });
+		const draft = getOrSeedDraft(siteId);
+		if (!draft) return fail(404, { message: 'Site not found.' });
+		// Admins don't bypass quality — same gate the owner's own publish goes through.
+		const quality = siteQualityCheck(draft);
+		if (!quality.canPublish) {
+			return fail(422, {
+				message: `Publish blocked by quality checks: ${quality.blockers[0]?.message ?? 'unknown issue'}`
+			});
+		}
+		const version = publishDraft(siteId);
+		if (version === null) return fail(404, { message: 'Site not found.' });
+		logAdminAction(locals.user!.email, params.userId, 'publish', `${siteId} → v${version}`);
+		const customer = getCustomerDetail(params.userId);
+		if (customer) {
+			await sendEmail({
+				to: customer.email,
+				subject: `Site published: ${siteId}`,
+				text: `Our support team published your site (${siteId}) on your behalf. Contact support if you have questions.`
+			});
+		}
+		return { published: siteId };
+	},
+
 	unpublish: async ({ request, locals, params }) => {
 		requireAdmin(locals);
 		const siteId = String((await request.formData()).get('siteId') ?? '');
@@ -88,5 +117,30 @@ export const actions: Actions = {
 			});
 		}
 		return { unpublished: siteId };
+	},
+
+	deleteSite: async ({ request, locals, params }) => {
+		requireAdmin(locals);
+		const siteId = String((await request.formData()).get('siteId') ?? '');
+		if (!siteId) return fail(400, { message: 'Missing siteId.' });
+		const siteName = getDraft(siteId)?.settings.siteName ?? siteId;
+		const result = await deleteSiteCascade(siteId);
+		if (!result.ok) {
+			const message =
+				result.reason === 'reservation-in-progress'
+					? 'Bu sitede devam eden bir domain rezervasyonu/kaydı var — önce onu çöz.'
+					: 'Site bulunamadı.';
+			return fail(409, { message });
+		}
+		logAdminAction(locals.user!.email, params.userId, 'site_delete', `${siteName} (${siteId})`);
+		const customer = getCustomerDetail(params.userId);
+		if (customer) {
+			await sendEmail({
+				to: customer.email,
+				subject: `Site deleted: ${siteName}`,
+				text: `Our support team permanently deleted your site "${siteName}" (${siteId}) at your request, or as part of account cleanup. This cannot be undone. Contact support if you have questions.`
+			});
+		}
+		return { siteDeleted: siteName };
 	}
 };

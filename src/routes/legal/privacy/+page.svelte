@@ -20,7 +20,7 @@
 	<ul>
 		<li>E-posta adresi (giriş ve iletişim için)</li>
 		<li>Abonelik durumu (Pro/Premium, ödeme dönemi sonu)</li>
-		<li>Stripe müşteri kimliği (kart bilgileri bizde saklanmaz, Stripe'da kalır)</li>
+		<li>Ödeme sağlayıcısı müşteri kimliği (kart bilgileri bizde saklanmaz)</li>
 		<li>Site anahtarları ve sahiplik ilişkisi</li>
 	</ul>
 	<h3>Site içeriği</h3>
@@ -67,7 +67,15 @@
 			<strong>AI sağlayıcılar:</strong> site açıklamanız ve sohbet mesajları DeepSeek/Anthropic'e işlenmek
 			üzere gönderilir (KVKK/GDPR uyumlu aktarım)
 		</li>
-		<li><strong>Stripe:</strong> ödeme işleme (kart verisi bizde değil)</li>
+		<li>
+			<strong>Creem:</strong> abonelik ve dijital ürün ödemelerinde Merchant of Record/ödeme satıcısı
+			olarak checkout, vergi/fatura ve ödeme işleme süreçlerini yürütür. Kart verileri saaskaya sunucularında
+			saklanmaz.
+		</li>
+		<li>
+			<strong>Stripe:</strong> Stripe'ın aktif ödeme sağlayıcısı olduğu geçmiş/geçiş akışlarında ödeme
+			işleme için kullanılabilir. Kart verileri saaskaya sunucularında saklanmaz.
+		</li>
 		<li><strong>Cloudflare R2:</strong> yüklediğiniz görseller</li>
 		<li><strong>Resend/SMTP:</strong> transactional e-posta (magic link, bildirimler)</li>
 		<li><strong>Domain kayıtçıları (Porkbun/NameSilo):</strong> domain tescil için WHOIS verisi</li>
@@ -122,5 +130,10 @@
 	<h2>12. İletişim</h2>
 	<p>
 		Soru ve başvurular: <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>
+	</p>
+
+	<p class="sk-callout">
+		<strong>Hukuki gözden geçirme:</strong> Bu metin operasyonel taslaktır. Ücretli genel lansman öncesinde
+		Almanya, Türkiye ve hedef satış ülkeleri için profesyonel hukuki/muhasebe onayı alınmalıdır.
 	</p>
 </LegalShell>

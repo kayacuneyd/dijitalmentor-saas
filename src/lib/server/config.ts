@@ -172,6 +172,13 @@ export const SETTING_DEFS: SettingDef[] = [
 		secret: false,
 		help: 'e.g. saaskaya <noreply@yourdomain.com>; falls back to SMTP user / onboarding@resend.dev'
 	},
+	{
+		key: 'BETA_ENTRY_CODE',
+		label: 'Public beta entry code',
+		group: 'Ops',
+		secret: false,
+		help: 'optional code required by /beta?code=...; leave empty for an open self-serve beta form'
+	},
 	{ key: 'STRIPE_SECRET_KEY', label: 'Stripe secret key', group: 'Billing', secret: true },
 	{ key: 'STRIPE_WEBHOOK_SECRET', label: 'Stripe webhook secret', group: 'Billing', secret: true },
 	{
@@ -179,6 +186,28 @@ export const SETTING_DEFS: SettingDef[] = [
 		label: 'Stripe price id (subscription)',
 		group: 'Billing',
 		secret: false
+	},
+	{
+		key: 'PAYMENT_PROVIDER',
+		label: 'Primary payment provider',
+		group: 'Billing',
+		secret: false,
+		help: 'stripe / creem; unset keeps Stripe unless only Creem is configured'
+	},
+	{ key: 'CREEM_API_KEY', label: 'Creem API key', group: 'Billing', secret: true },
+	{ key: 'CREEM_WEBHOOK_SECRET', label: 'Creem webhook secret', group: 'Billing', secret: true },
+	{
+		key: 'CREEM_PRO_PRODUCT_ID',
+		label: 'Creem Pro product id',
+		group: 'Billing',
+		secret: false
+	},
+	{
+		key: 'CREEM_TEST_MODE',
+		label: 'Creem test mode (1 = test API)',
+		group: 'Billing',
+		secret: false,
+		help: 'uses https://test-api.creem.io/v1/checkouts when set to 1'
 	},
 	{
 		key: 'PAYMENT_MODE',
@@ -200,6 +229,13 @@ export const SETTING_DEFS: SettingDef[] = [
 		group: 'Billing',
 		secret: false,
 		help: 'bank-transfer equivalent shown to the user; default 500'
+	},
+	{
+		key: 'PRO_PRICE_EUR',
+		label: 'Pro subscription price (EUR/month)',
+		group: 'Billing',
+		secret: false,
+		help: 'default 17 — used only for the /admin MRR estimate; no per-tier breakdown (Premium is not an enforced tier yet)'
 	},
 	{
 		key: 'BANK_IBAN',
@@ -275,10 +311,10 @@ export const SETTING_DEFS: SettingDef[] = [
 	},
 	{
 		key: 'ALERT_EMAIL',
-		label: 'Alert email (monitoring)',
+		label: 'Alert email (monitoring + new support tickets)',
 		group: 'Ops',
 		secret: false,
-		help: 'scripts/monitor.sh mails here on downtime (needs Resend key)'
+		help: 'scripts/monitor.sh mails here on downtime, and a new support ticket mails here too (needs Resend key)'
 	},
 	{
 		key: 'MONITOR_AUTORESTART',

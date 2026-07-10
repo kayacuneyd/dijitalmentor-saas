@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
-	import PageShell from '$lib/ui/PageShell.svelte';
+	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
 	let { data, form } = $props();
@@ -14,15 +14,12 @@
 	<title>Beta invites · saaskaya admin</title>
 </svelte:head>
 
-<PageShell
-	backHref="/admin/settings"
-	backLabel="settings"
+<AdminShell
 	title="Beta invites"
 	description="Invite customers by email and control access to the closed beta."
-	max="max-w-3xl"
-	canvasLabel="saaskaya.app / admin"
+	active="/admin/invites"
 >
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div>
 				<p class="text-sm font-medium">Closed beta access</p>
@@ -67,7 +64,7 @@
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
 
-	<AppCard>
+	<AppCard class="p-4">
 		<form method="POST" action="?/send" use:enhance class="flex flex-wrap items-end gap-2">
 			<div class="flex flex-1 flex-col gap-1">
 				<label for="email" class="text-xs text-[var(--sk-faint)]">Email</label>
@@ -93,7 +90,7 @@
 		</form>
 	</AppCard>
 
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<h2 class="sk-display text-2xl leading-none">{data.invites.length} invite(s)</h2>
 			{#if data.invites.length === 0}
@@ -135,4 +132,4 @@
 			{/if}
 		</div>
 	</AppCard>
-</PageShell>
+</AdminShell>

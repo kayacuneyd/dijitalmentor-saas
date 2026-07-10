@@ -3,11 +3,23 @@ import { canManageSite } from '$lib/server/auth';
 import {
 	billingConfigured,
 	createDomainCheckoutSession,
-	hasActiveSubscription,
+	hasActiveSiteSubscription,
+	PRO_SITE_PRICE_EUR_MONTHLY,
+	siteSubscriptionState,
 	subscriptionState
 } from '$lib/server/billing';
 import { countSubmissions } from '$lib/server/db/contact';
-import { getSiteMeta, listSitesByOwner, publishDraft, unpublishSite } from '$lib/server/db/repo';
+import { siteQualityCheck } from '$lib/quality/siteQuality';
+import {
+	getDraft,
+	getSiteMeta,
+	listSitesByOwner,
+	publishDraft,
+	setSiteIdentity,
+	unpublishSite,
+	validatePublicHandle
+} from '$lib/server/db/repo';
+import { deleteSiteCascade } from '$lib/server/siteDeletion';
 import {
 	attachSiteDomain,
 	checkDomainAvailability,
@@ -24,8 +36,7 @@ import {
 import {
 	cancelReservation,
 	createReservation,
-	domainPriceEur,
-	domainPriceTry,
+	customerDomainGate,
 	getReservation,
 	listReservationsByUser,
 	paymentMode,
@@ -40,7 +51,10 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	const reservations = listReservationsByUser(locals.user.id);
 	const sites = listSitesByOwner(locals.user.id).map((site) => ({
 		...site,
-		liveUrl: `${url.protocol}//${site.id}.${url.host}`,
+		plan: siteSubscriptionState(site.id, locals.user!.id),
+		canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
+		liveUrl: `${url.protocol}//${site.publicHandle ?? site.id}.${url.host}`,
+		previewUrl: `/preview/${site.id}?locale=${site.defaultLocale}&source=persisted`,
 		domain: getDomainForSite(site.id),
 		messageCount: countSubmissions(site.id),
 		reservation: reservations.find(
@@ -55,10 +69,9 @@ export const load: PageServerLoad = ({ locals, url }) => {
 		subscribed: subscription.state !== 'free',
 		billingConfigured: billingConfigured(),
 		porkbunConfigured: porkbunConfigured(),
+		proSitePriceEur: PRO_SITE_PRICE_EUR_MONTHLY,
 		payment: {
 			mode: paymentMode(),
-			priceEur: domainPriceEur(),
-			priceTry: domainPriceTry(),
 			iban: getSetting('BANK_IBAN') ?? '',
 			accountHolder: getSetting('BANK_ACCOUNT_HOLDER') ?? ''
 		}
@@ -75,9 +88,9 @@ function requireManageableSite(user: App.Locals['user'], siteId: string) {
 }
 
 /** Custom domains are a paid feature (constitution §5: only ever after payment). */
-function requirePaidDomainAccess(user: NonNullable<App.Locals['user']>) {
-	if (!hasActiveSubscription(user.id) && !user.isAdmin) {
-		error(402, 'Custom domains need an active subscription.');
+function requirePaidDomainAccess(user: NonNullable<App.Locals['user']>, siteId: string) {
+	if (!hasActiveSiteSubscription(siteId, user.id) && !user.isAdmin) {
+		error(402, 'Custom domains need an active Pro subscription for this site.');
 	}
 }
 
@@ -85,10 +98,55 @@ export const actions: Actions = {
 	publish: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
 		const siteId = String((await request.formData()).get('siteId') ?? '');
-		requireManageableSite(locals.user, siteId);
+		const meta = requireManageableSite(locals.user, siteId);
+		if (!meta.publishedVersion) {
+			return fail(400, {
+				message:
+					'İlk yayın yalnızca editörden yapılır. Böylece son taslak kaydedilip aynı gövdeyle yayınlanır.',
+				siteId
+			});
+		}
+		const handle = validatePublicHandle(meta.publicHandle ?? '');
+		if (!handle.ok) {
+			return fail(400, {
+				message: 'Yayına almadan önce site adı ve public subdomain adımını tamamla.',
+				siteId
+			});
+		}
+		const draft = getDraft(siteId);
+		if (!draft) return fail(404, { message: 'Site not found.', siteId });
+		const quality = siteQualityCheck(draft);
+		if (!quality.canPublish) {
+			return fail(422, {
+				message: quality.blockers[0]?.message ?? 'Yayın için kalite engelleri var.',
+				siteId
+			});
+		}
 		const version = publishDraft(siteId);
 		if (version === null) return fail(404, { message: 'Site not found.' });
 		return { published: siteId, version };
+	},
+	updateIdentity: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+		const form = await request.formData();
+		const siteId = String(form.get('siteId') ?? '');
+		requireManageableSite(locals.user, siteId);
+		const result = setSiteIdentity({
+			siteId,
+			siteName: String(form.get('siteName') ?? ''),
+			publicHandle: String(form.get('publicHandle') ?? ''),
+			contactEmail: String(form.get('contactEmail') ?? '')
+		});
+		if (!result.ok) {
+			return fail(result.reason === 'not-found' ? 404 : 400, {
+				identityMessage: result.message,
+				siteId
+			});
+		}
+		return {
+			identitySaved: siteId,
+			identityMessage: `${result.site.settings.siteName} için subdomain kaydedildi: ${result.publicHandle}.saaskaya.com`
+		};
 	},
 	// --- domain reservation + hybrid payment (beta-launch spec) ---------------
 	reserveDomain: async ({ request, locals }) => {
@@ -104,22 +162,41 @@ export const actions: Actions = {
 		const method = String(form.get('paymentMethod') ?? 'bank_transfer') as PaymentMethod;
 		requireManageableSite(locals.user, siteId);
 		if (!validateDomain(domain)) {
-			return fail(400, { domainMessage: 'That does not look like a valid domain.', siteId });
+			return fail(400, {
+				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				siteId
+			});
+		}
+		const gate = await customerDomainGate(domain);
+		if (gate.status === 'unavailable') {
+			return fail(409, {
+				domainMessage: 'Bu domain uygun değil. Başka bir ad dene.',
+				siteId
+			});
 		}
 		const result = createReservation({
 			userId: locals.user.id,
 			siteId,
 			domain,
-			paymentMethod: method
+			paymentMethod: method,
+			initialStatus: gate.status === 'manual_review' ? 'manual_review' : 'pending',
+			operatorNotes: gate.status === 'manual_review' ? gate.note : null
 		});
 		if (!result.ok) {
 			const msg =
 				result.reason === 'domain-taken'
-					? 'That domain is already reserved.'
-					: 'Could not reserve that domain.';
+					? 'Bu domain zaten rezerve edilmiş.'
+					: 'Domain rezerve edilemedi — adı kontrol edip tekrar dene.';
 			return fail(result.reason === 'domain-taken' ? 409 : 400, { domainMessage: msg, siteId });
 		}
-		return { reserved: result.reservation.domain, siteId };
+		return {
+			reserved: result.reservation.domain,
+			siteId,
+			domainMessage:
+				gate.status === 'manual_review'
+					? 'Bu domain manuel inceleme gerektiriyor. Sizinle iletişime geçeceğiz.'
+					: 'Bu domain uygun. Bu site için Pro adımına devam edebilirsin.'
+		};
 	},
 	reportTransfer: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
@@ -161,40 +238,68 @@ export const actions: Actions = {
 		unpublishSite(siteId);
 		return { unpublished: siteId };
 	},
+	deleteSite: async ({ request, locals }) => {
+		if (!locals.user) redirect(303, '/login');
+		const form = await request.formData();
+		const siteId = String(form.get('siteId') ?? '');
+		const confirmName = String(form.get('confirmName') ?? '');
+		requireManageableSite(locals.user, siteId);
+		const draft = getDraft(siteId);
+		const expectedName = draft?.settings.siteName ?? '';
+		if (!expectedName || confirmName !== expectedName) {
+			return fail(400, { deleteMessage: 'Site adı eşleşmedi — silme iptal edildi.', siteId });
+		}
+		const result = await deleteSiteCascade(siteId);
+		if (!result.ok) {
+			const message =
+				result.reason === 'reservation-in-progress'
+					? 'Bu sitede devam eden bir domain rezervasyonu/kaydı var — önce onu çöz.'
+					: 'Site bulunamadı.';
+			return fail(409, { deleteMessage: message, siteId });
+		}
+		return { deleted: expectedName };
+	},
 	attachDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
 		const meta = requireManageableSite(locals.user, siteId);
-		requirePaidDomainAccess(locals.user);
+		requirePaidDomainAccess(locals.user, siteId);
 		if (!validateDomain(domain)) {
-			return fail(400, { domainMessage: 'That does not look like a valid domain.', siteId });
+			return fail(400, {
+				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				siteId
+			});
 		}
 		const dns = await dnsPointsHere(domain);
 		if (!dns.ok) {
 			return fail(400, {
-				domainMessage: `DNS does not point here yet (A record → ${dns.resolved?.join(', ') || 'none'}). Point it at the server IP first.`,
+				domainMessage:
+					'Domainin henüz bize yönlenmemiş. Domain sağlayıcının panelinden A kaydını sunucu IP adresimize yönlendirip tekrar dene.',
 				siteId
 			});
 		}
 		const attached = attachSiteDomain(siteId, domain, meta.ownerUserId);
 		if (!attached.ok && attached.reason === 'domain-taken') {
 			return fail(409, {
-				domainMessage: 'That domain is already attached to another site.',
+				domainMessage: 'Bu domain zaten başka bir siteye bağlı.',
 				siteId
 			});
 		}
-		if (!attached.ok) return fail(404, { domainMessage: 'Site not found.', siteId });
+		if (!attached.ok) return fail(404, { domainMessage: 'Site bulunamadı.', siteId });
 		const provision = await provisionDomain(domain);
+		if (provision.ran && !provision.ok) {
+			console.error(`[domains] provisioning failed for ${domain}: ${provision.output}`);
+		}
 		return {
 			domainAttached: domain,
 			siteId,
 			provision: provision.ran
 				? provision.ok
-					? 'TLS + vhost provisioned.'
-					: `Provisioning failed: ${provision.output?.slice(0, 300)}`
-				: 'Saved. Auto-provisioning is off (DOMAIN_PROVISION setting).'
+					? 'Güvenlik sertifikası hazırlandı — siten birkaç dakika içinde bu adreste açılır.'
+					: 'Domain kaydedildi ancak kurulum tamamlanamadı — ekibimiz durumu inceliyor, bir işlem yapman gerekmiyor.'
+				: 'Domain kaydedildi — kurulum ekibimiz tarafından tamamlanacak.'
 		};
 	},
 	detachDomain: async ({ request, locals }) => {
@@ -210,39 +315,53 @@ export const actions: Actions = {
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
 		const meta = requireManageableSite(locals.user, siteId);
-		requirePaidDomainAccess(locals.user);
+		requirePaidDomainAccess(locals.user, siteId);
 		if (!validateDomain(domain)) {
-			return fail(400, { domainMessage: 'That does not look like a valid domain.', siteId });
+			return fail(400, {
+				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				siteId
+			});
 		}
 		try {
 			const availability = await checkDomainAvailability(domain);
 			if (!availability.available) {
-				return fail(409, { domainMessage: `${domain} is not available.`, siteId });
+				return fail(409, {
+					domainMessage: 'Bu domain uygun değil. Başka bir ad dene.',
+					siteId
+				});
 			}
 			// Registration only ever happens after payment (constitution §5) —
 			// requirePaidDomainAccess above is that gate.
 			await registerDomain(domain);
 			await createARecord(domain);
 		} catch (err) {
-			return fail(502, { domainMessage: (err as Error).message, siteId });
+			console.error(`[domains] direct registration failed for ${domain}:`, err);
+			return fail(502, {
+				domainMessage:
+					'Domain kontrolü sırasında manuel inceleme gerektiren bir durum oluştu. Sizinle iletişime geçeceğiz.',
+				siteId
+			});
 		}
 		const attached = attachSiteDomain(siteId, domain, meta.ownerUserId);
 		if (!attached.ok && attached.reason === 'domain-taken') {
 			return fail(409, {
-				domainMessage: 'That domain is already attached to another site.',
+				domainMessage: 'Bu domain zaten başka bir siteye bağlı.',
 				siteId
 			});
 		}
-		if (!attached.ok) return fail(404, { domainMessage: 'Site not found.', siteId });
+		if (!attached.ok) return fail(404, { domainMessage: 'Site bulunamadı.', siteId });
 		const provision = await provisionDomain(domain);
+		if (provision.ran && !provision.ok) {
+			console.error(`[domains] provisioning failed for ${domain}: ${provision.output}`);
+		}
 		return {
 			domainAttached: domain,
 			siteId,
 			provision: provision.ran
 				? provision.ok
-					? 'Registered, DNS set, TLS provisioned.'
-					: `Registered; provisioning failed: ${provision.output?.slice(0, 300)}`
-				: 'Registered and saved. Auto-provisioning is off.'
+					? 'Domain tescil edildi ve siten bağlandı — birkaç dakika içinde bu adreste açılır.'
+					: 'Domain tescil edildi ancak kurulum tamamlanamadı — ekibimiz durumu inceliyor, bir işlem yapman gerekmiyor.'
+				: 'Domain tescil edildi — kurulum ekibimiz tarafından tamamlanacak.'
 		};
 	}
 };

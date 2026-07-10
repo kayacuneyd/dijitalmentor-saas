@@ -5,10 +5,15 @@ import { AIInvalidOutputError, AIUnavailableError, QuotaExceededError } from '$l
 import { assertWithinQuota, recordUsage, tenantIdForUser } from '$lib/server/ai/usage';
 import { saveDraft } from '$lib/server/db/repo';
 import { recordError } from '$lib/server/error-log';
+import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
+import { getPendingById, setGeneratedSiteId } from '$lib/server/onboarding/session';
+import { seedChatFromOnboarding } from '$lib/server/chatLog';
+import { manualReviewMessage, needsManualReview } from '$lib/onboarding/support';
 import type { RequestHandler } from './$types';
 
 const bodySchema = z.object({
-	description: z.string().trim().min(30, 'Describe yourself in at least a few sentences.')
+	description: z.string().trim().min(30, 'Describe yourself in at least a few sentences.'),
+	onboardingPendingId: z.string().trim().min(1).optional()
 });
 
 /** Self-description → generated draft → editor (the M3 first slice entry point). */
@@ -26,10 +31,24 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!body.success) {
 		return json({ ok: false, message: body.error.issues[0].message }, { status: 400 });
 	}
+	if (needsManualReview(body.data.description)) {
+		return json({ ok: false, message: manualReviewMessage }, { status: 409 });
+	}
 
 	const id = `site-${crypto.randomUUID().slice(0, 8)}`;
 	// Quota is per account, not per site — otherwise regenerating resets the budget.
 	const tenantId = tenantIdForUser(locals.user.id);
+	const startedAt = Date.now();
+	const onboardingPendingId = body.data.onboardingPendingId;
+	if (onboardingPendingId) {
+		recordOnboardingEvent({
+			event: 'generation_started',
+			pendingId: onboardingPendingId,
+			userId: locals.user.id,
+			siteId: id,
+			route: '/api/sites'
+		});
+	}
 
 	try {
 		// One generation = 1 generation credit (plan-tier limit; admins bypass credits).
@@ -45,9 +64,41 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 		recordUsage(tenantId, usage, 'generation');
 		saveDraft(site, { ownerUserId: locals.user.id });
+		if (onboardingPendingId) {
+			// Best-effort: fixes the generatedSiteId back-reference (unset at finish —
+			// the site doesn't exist yet there) and seeds the editor chat with the
+			// onboarding Q&A so the conversation visibly continues in the editor.
+			try {
+				const pending = getPendingById(onboardingPendingId);
+				if (pending) {
+					setGeneratedSiteId(onboardingPendingId, id);
+					seedChatFromOnboarding(id, pending.answers);
+				}
+			} catch (seedErr) {
+				console.error('[onboarding] chat seed failed:', seedErr);
+			}
+			recordOnboardingEvent({
+				event: 'generation_succeeded',
+				pendingId: onboardingPendingId,
+				userId: locals.user.id,
+				siteId: id,
+				route: '/api/sites',
+				durationMs: Date.now() - startedAt
+			});
+		}
 		return json({ ok: true, id, usage });
 	} catch (error) {
 		if (error instanceof QuotaExceededError) {
+			if (onboardingPendingId) {
+				recordOnboardingEvent({
+					event: 'generation_failed',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt
+				});
+			}
 			return json({ ok: false, message: error.message }, { status: 429 });
 		}
 		if (error instanceof AIUnavailableError) {
@@ -59,6 +110,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				userId: locals.user.id,
 				siteId: id
 			});
+			if (onboardingPendingId) {
+				recordOnboardingEvent({
+					event: 'generation_failed',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt,
+					errorId
+				});
+			}
 			return json(
 				{ ok: false, message: `${error.message} Reference: ${errorId}`, errorId },
 				{ status: 503 }
@@ -73,6 +135,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				userId: locals.user.id,
 				siteId: id
 			});
+			if (onboardingPendingId) {
+				recordOnboardingEvent({
+					event: 'generation_failed',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt,
+					errorId
+				});
+			}
 			return json(
 				{ ok: false, message: `${error.message} Reference: ${errorId}`, errorId },
 				{ status: 422 }

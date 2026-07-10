@@ -99,6 +99,12 @@ Mentor" badge.
 > Tüm M0–M6 + V2.0 + V2.2 Phase 1 + Beta launch (3 phases) done. Sonraki önceliklendirme ve risk
 > değerlendirmesi için `docs/ROADMAP_EVALUATION.md`'yi oku — orada Faz 0 (canlı smoke) → Faz 1
 > (GTM/pricing/yasal) → Faz 2 (V2.1 rich tenant engine) sırası ve açık kararlar listelendi.
+>
+> **2026-07-09 current roadmap:** `docs/specs/2026-07-09-hostinger-horizons-competitive-roadmap.md`
+> supersedes the older post-M6 ordering where it conflicts. Phase 0 is complete, Phase 1 is
+> materially complete with legal-counsel caveat, and the next active implementation milestone is
+> `docs/specs/2026-07-09-phase2-closure-sprint.md`: close Guided First-Run Experience before Phase 3
+> kit/quality work.
 
 ### Two-Layer AI Gatekeeper — conversational onboarding + cost control + monetization
 
@@ -118,7 +124,8 @@ unchanged for Layer 2; Layer 1 is provider-agnostic (amendment logged in `PROGRE
 - **Phase 1** — gatekeeper + approval flow + usage weighting + policy docs.
 - **Phase 2** — top-up payments + human help + dashboard budget indicator + plan-tier limits.
 
-**Status:** planned — not yet started. Implement after V2.0 SaaS UI Redesign lands.
+**Status:** implemented through Phase 1; monetization Phase 2 remains backlog. See `docs/PROGRESS.md`
+2026-07-08/09 rows for the live Groq + DeepSeek activation and current production evidence.
 
 ### Beta Launch & Hybrid Onboarding — closed beta + Hostinger email + bank transfer domains
 
@@ -136,4 +143,6 @@ operator-confirmed payment preserves constitution §5 (registration only after p
 - **Phase 2** — `domain_reservations` table + bank transfer flow + operator confirmation panel + dashboard reservation UI.
 - **Phase 3** — Stripe one-time domain payment + webhook auto-fulfillment.
 
-**Status:** planned — not yet started. Phase 1 is the launch blocker (email + access control).
+**Status:** implemented through Phase 3 for the closed-beta path. Stripe checkout, automated domain
+purchase, bank-transfer fulfillment configuration, and off-site disaster recovery remain deferred
+beyond closed beta; see `docs/PHASE0_VERIFICATION.md`.

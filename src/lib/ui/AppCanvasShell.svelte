@@ -2,7 +2,7 @@
 	let {
 		children,
 		label = 'saaskaya.app',
-		max = 'max-w-5xl',
+		max = 'max-w-6xl',
 		minHeight = 'min-h-[calc(100svh-2.5rem)]',
 		contentClass = 'px-5 py-8 sm:px-10 sm:py-12',
 		right,

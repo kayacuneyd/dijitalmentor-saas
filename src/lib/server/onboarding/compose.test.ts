@@ -8,6 +8,7 @@ const MINIMAL_REQUIRED = {
 	audience: 'Genç yetişkinler',
 	differentiator: 'Online ve yüz yüze seçenek',
 	tone: 'warm',
+	visualDirection: 'warm_trust',
 	languages: ['tr'],
 	contactMethod: 'email',
 	contactEmail: 'ada@example.com',
@@ -74,6 +75,30 @@ describe('composeDescription', () => {
 		const description = composeDescription({ ...MINIMAL_REQUIRED, languages: ['tr'] });
 		expect(description).not.toContain('öncelikli olarak');
 		expect(description).not.toContain('yayınlanmalı');
+	});
+
+	it('includes the selected visual direction as controlled steering text', () => {
+		const description = composeDescription({
+			...MINIMAL_REQUIRED,
+			visualDirection: 'modern_clinic'
+		});
+		expect(description).toContain('Görsel yön: Modern klinik');
+		expect(description).toContain('bölüm vurgusu');
+	});
+
+	it('adds the psych kit reference for the warm-trust launch direction', () => {
+		const description = composeDescription(MINIMAL_REQUIRED);
+		expect(description).toContain('Kit referansı: Sakin İlk Görüşme');
+		expect(description).toContain('calm-intake');
+		expect(description).toContain('Sabit blok setinin dışına çıkma');
+	});
+
+	it('lets an explicit catalog kit override the visual-direction kit reference', () => {
+		const description = composeDescription(MINIMAL_REQUIRED, { kitSlug: 'trauma-informed' });
+		expect(description).toContain('Görsel yön: Sıcak ve güven veren');
+		expect(description).toContain('Kit referansı: Travma Duyarlı');
+		expect(description).toContain('trauma-informed');
+		expect(description).not.toContain('calm-intake');
 	});
 
 	it('uses the raw escape-hatch description verbatim when present, ignoring structured answers', () => {

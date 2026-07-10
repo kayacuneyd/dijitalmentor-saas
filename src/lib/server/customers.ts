@@ -2,7 +2,12 @@ import { desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { db } from '$lib/server/db';
 import { adminActions, aiUsage, sites, users } from '$lib/server/db/schema';
-import { subscriptionState, type SubscriptionState } from '$lib/server/billing';
+import {
+	siteSubscriptionState,
+	subscriptionState,
+	type SiteSubscriptionState,
+	type SubscriptionState
+} from '$lib/server/billing';
 import {
 	creditLimits,
 	getMonthlyUsage,
@@ -13,6 +18,7 @@ import {
 import { listSitesByOwner, type SiteMeta } from '$lib/server/db/repo';
 import { getDomainForSite } from '$lib/server/domains';
 import { listSubmissionsForOwner } from '$lib/server/db/contact';
+import { listTicketsForUser, type SupportTicket } from '$lib/server/support';
 
 /**
  * Admin-only reads for /admin/customers — deliberately separate from anything
@@ -36,6 +42,7 @@ export type CustomerSummary = {
 	createdAt: Date;
 	subscription: SubscriptionState;
 	siteCount: number;
+	proSiteCount: number;
 	usage: MonthlyUsage;
 	limits: { edit: number; generation: number };
 	budgetUsd: number;
@@ -62,12 +69,16 @@ export function listCustomers(): CustomerSummary[] {
 
 	return rows.map((u) => {
 		const usageRow = usageByTenant.get(tenantIdForUser(u.id));
+		const ownedSites = listSitesByOwner(u.id);
 		return {
 			id: u.id,
 			email: u.email,
 			createdAt: u.createdAt,
 			subscription: subscriptionState(u.id),
 			siteCount: countByOwner.get(u.id) ?? 0,
+			proSiteCount: ownedSites.filter(
+				(site) => siteSubscriptionState(site.id, u.id).state !== 'free'
+			).length,
 			usage: clampUsage({
 				inputTokens: usageRow?.inputTokens ?? 0,
 				outputTokens: usageRow?.outputTokens ?? 0,
@@ -92,9 +103,10 @@ export type AdminActionRow = {
 export type CustomerDetail = CustomerSummary & {
 	/** True if a live Stripe subscription exists — overriding here won't cancel it. */
 	hasStripeCustomer: boolean;
-	sites: (SiteMeta & { siteName: string; domain: string | null })[];
+	sites: (SiteMeta & { siteName: string; domain: string | null; plan: SiteSubscriptionState })[];
 	submissions: ReturnType<typeof listSubmissionsForOwner>;
 	actions: AdminActionRow[];
+	tickets: SupportTicket[];
 };
 
 export function getCustomerDetail(userId: string): CustomerDetail | null {
@@ -102,6 +114,7 @@ export function getCustomerDetail(userId: string): CustomerDetail | null {
 	if (!user) return null;
 	const sitesList = listSitesByOwner(userId).map((site) => ({
 		...site,
+		plan: siteSubscriptionState(site.id, userId),
 		domain: getDomainForSite(site.id)
 	}));
 	return {
@@ -111,12 +124,14 @@ export function getCustomerDetail(userId: string): CustomerDetail | null {
 		hasStripeCustomer: Boolean(user.stripeCustomerId),
 		subscription: subscriptionState(userId),
 		siteCount: sitesList.length,
+		proSiteCount: sitesList.filter((site) => site.plan.state !== 'free').length,
 		usage: clampUsage(getMonthlyUsage(tenantIdForUser(userId))),
 		limits: creditLimits(userId),
 		budgetUsd: tenantMonthlyBudgetMicrousd(userId) / 1_000_000,
 		sites: sitesList,
 		submissions: listSubmissionsForOwner(userId),
-		actions: listAdminActions(userId)
+		actions: listAdminActions(userId),
+		tickets: listTicketsForUser(userId)
 	};
 }
 

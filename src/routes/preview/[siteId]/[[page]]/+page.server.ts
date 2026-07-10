@@ -2,6 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { canManageSite } from '$lib/server/auth';
 import { getOrSeedDraft, getSiteMeta } from '$lib/server/db/repo';
 import { localeSchema } from '$lib/schema/site';
+import { publicSitePath } from '$lib/siteUrls';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ params, url, locals }) => {
@@ -24,6 +25,11 @@ export const load: PageServerLoad = ({ params, url, locals }) => {
 		requested.success && site.locales.includes(requested.data)
 			? requested.data
 			: site.defaultLocale;
+	const source = url.searchParams.get('source') === 'live' ? 'live' : 'persisted';
+	const publishedVersion = meta?.publishedVersion ?? null;
+	const liveUrl = publishedVersion
+		? `${url.protocol}//${site.id}.${url.host}${publicSitePath(site, locale, page.slug)}`
+		: null;
 
-	return { site, page, locale };
+	return { site, page, locale, source, publishedVersion, liveUrl };
 };

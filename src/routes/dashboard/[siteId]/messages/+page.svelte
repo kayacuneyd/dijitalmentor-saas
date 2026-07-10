@@ -14,7 +14,7 @@
 	backLabel="dashboard"
 	title="Messages"
 	description={`Contact-form submissions for ${data.siteName}`}
-	max="max-w-3xl"
+	max="max-w-5xl"
 	canvasLabel="saaskaya.app / messages"
 >
 	{#if data.submissions.length === 0}

@@ -9,7 +9,7 @@
 		backHref,
 		backLabel = 'saaskaya',
 		max = 'max-w-3xl',
-		canvasMax = 'max-w-5xl',
+		canvasMax = 'max-w-6xl',
 		canvasLabel = 'saaskaya.app',
 		actions
 	} = $props<{

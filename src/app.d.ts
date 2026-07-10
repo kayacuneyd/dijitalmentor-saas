@@ -8,6 +8,8 @@ declare global {
 		}
 		interface Locals {
 			user: { id: string; email: string; isAdmin: boolean } | null;
+			locale: import('$lib/i18n').Locale;
+			unprefixedPath: string;
 		}
 		// interface PageData {}
 		// interface PageState {}

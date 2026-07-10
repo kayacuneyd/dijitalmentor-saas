@@ -34,7 +34,14 @@ function call(
 describe('/admin/customers/[userId] actions — auth guard', () => {
 	it('every action requires admin (redirect signed-out, 403 non-admin)', async () => {
 		const user = getOrCreateUser('actions-guard@example.com');
-		for (const action of ['overrideSubscription', 'topUp', 'detachDomain', 'unpublish'] as const) {
+		for (const action of [
+			'overrideSubscription',
+			'topUp',
+			'detachDomain',
+			'publish',
+			'unpublish',
+			'deleteSite'
+		] as const) {
 			await expect(call(action, {}, user.id, { user: null })).rejects.toBeTruthy();
 			await expect(call(action, {}, user.id, { user: nonAdmin })).rejects.toBeTruthy();
 		}
@@ -141,6 +148,73 @@ describe('?/detachDomain', () => {
 			status: number;
 		};
 		expect(res.status).toBe(404);
+	});
+});
+
+describe('?/publish', () => {
+	it('publishes a quality-passing draft and logs the action', async () => {
+		const user = getOrCreateUser('admin-publish-action@example.com');
+		const draft = structuredClone(getOrSeedDraft('seed-law')!);
+		draft.id = 'site-admin-publish-action';
+		draft.tenantId = 'tenant-site-admin-publish-action';
+		saveDraft(draft, { ownerUserId: user.id });
+
+		const res = await call('publish', { siteId: 'site-admin-publish-action' }, user.id);
+		expect((res as { published: string }).published).toBe('site-admin-publish-action');
+		expect(
+			db.select().from(sites).where(eq(sites.id, 'site-admin-publish-action')).get()
+				?.publishedVersion
+		).toBe(1);
+
+		const logged = db
+			.select()
+			.from(adminActions)
+			.where(eq(adminActions.targetUserId, user.id))
+			.all();
+		expect(logged[0].action).toBe('publish');
+	});
+
+	it('is blocked by the same quality gate the owner publish goes through', async () => {
+		const user = getOrCreateUser('admin-publish-blocked@example.com');
+		const draft = structuredClone(getOrSeedDraft('seed-psych')!);
+		draft.id = 'site-admin-publish-blocked';
+		draft.tenantId = 'tenant-site-admin-publish-blocked';
+		const hero = draft.pages[0].sections.find((section) => section.type === 'hero');
+		if (!hero || hero.type !== 'hero') throw new Error('psych seed hero missing');
+		hero.content.tr.headline = 'Kesin sonuç garantisiyle terapi';
+		saveDraft(draft, { ownerUserId: user.id });
+
+		const res = (await call('publish', { siteId: 'site-admin-publish-blocked' }, user.id)) as {
+			status: number;
+		};
+		expect(res.status).toBe(422);
+		expect(
+			db.select().from(sites).where(eq(sites.id, 'site-admin-publish-blocked')).get()
+				?.publishedVersion
+		).toBeNull();
+	});
+});
+
+describe('?/deleteSite', () => {
+	it('permanently deletes the site and logs the action', async () => {
+		const user = getOrCreateUser('admin-delete-action@example.com');
+		const draft = structuredClone(getOrSeedDraft('seed-dental')!);
+		draft.id = 'site-admin-delete-action';
+		draft.tenantId = 'tenant-site-admin-delete-action';
+		saveDraft(draft, { ownerUserId: user.id });
+
+		const res = await call('deleteSite', { siteId: 'site-admin-delete-action' }, user.id);
+		expect((res as { siteDeleted: string }).siteDeleted).toBeTruthy();
+		expect(
+			db.select().from(sites).where(eq(sites.id, 'site-admin-delete-action')).get()
+		).toBeUndefined();
+
+		const logged = db
+			.select()
+			.from(adminActions)
+			.where(eq(adminActions.targetUserId, user.id))
+			.all();
+		expect(logged[0].action).toBe('site_delete');
 	});
 });
 

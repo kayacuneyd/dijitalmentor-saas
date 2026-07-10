@@ -26,11 +26,17 @@ import {
 
 export type PaymentMethod = 'bank_transfer' | 'stripe';
 export type ReservationStatus =
-	'pending' | 'paid' | 'registering' | 'active' | 'failed' | 'cancelled';
+	'pending' | 'manual_review' | 'paid' | 'registering' | 'active' | 'failed' | 'cancelled';
 
 export type Reservation = typeof domainReservations.$inferSelect;
 
-const LIVE_STATUSES: ReservationStatus[] = ['pending', 'paid', 'registering', 'active'];
+const LIVE_STATUSES: ReservationStatus[] = [
+	'pending',
+	'manual_review',
+	'paid',
+	'registering',
+	'active'
+];
 
 export function domainPriceEur(): string {
 	return getSetting('DOMAIN_PRICE_EUR') || '15';
@@ -62,7 +68,15 @@ export function listPendingReservations(): Reservation[] {
 	return db
 		.select()
 		.from(domainReservations)
-		.where(inArray(domainReservations.status, ['pending', 'paid', 'registering', 'failed']))
+		.where(
+			inArray(domainReservations.status, [
+				'pending',
+				'manual_review',
+				'paid',
+				'registering',
+				'failed'
+			])
+		)
 		.orderBy(desc(domainReservations.createdAt))
 		.all();
 }
@@ -76,6 +90,8 @@ export function createReservation(input: {
 	siteId: string;
 	domain: string;
 	paymentMethod: PaymentMethod;
+	initialStatus?: 'pending' | 'manual_review';
+	operatorNotes?: string | null;
 }): CreateReservationResult {
 	const domain = normalizeDomain(input.domain);
 	if (!validateDomain(domain)) return { ok: false, reason: 'invalid-domain' };
@@ -98,11 +114,11 @@ export function createReservation(input: {
 		userId: input.userId,
 		siteId: input.siteId,
 		domain,
-		status: 'pending' as const,
+		status: input.initialStatus ?? ('pending' as const),
 		paymentMethod: input.paymentMethod,
 		priceEur: domainPriceEur(),
 		priceTry: domainPriceTry(),
-		operatorNotes: null,
+		operatorNotes: input.operatorNotes ?? null,
 		createdAt: now,
 		paidAt: null,
 		registeredAt: null,
@@ -114,6 +130,59 @@ export function createReservation(input: {
 		return { ok: false, reason: 'domain-taken' };
 	}
 	return { ok: true, reservation };
+}
+
+export type CustomerDomainGateResult =
+	| { status: 'available' }
+	| { status: 'unavailable'; note: string }
+	| { status: 'manual_review'; note: string };
+
+function domainTld(domain: string): string {
+	const labels = domain.split('.');
+	if (labels.length >= 3 && labels.at(-2) === 'com' && labels.at(-1) === 'tr') return 'com.tr';
+	return labels.at(-1) ?? '';
+}
+
+function configuredTlds(key: string, fallback: string[]): Set<string> {
+	return new Set(
+		(getSetting(key) ?? fallback.join(','))
+			.split(',')
+			.map((item) => item.trim().toLowerCase())
+			.filter(Boolean)
+	);
+}
+
+export async function customerDomainGate(domain: string): Promise<CustomerDomainGateResult> {
+	const normalized = normalizeDomain(domain);
+	if (!validateDomain(normalized)) return { status: 'unavailable', note: 'invalid syntax' };
+	const existing = db
+		.select({ status: domainReservations.status })
+		.from(domainReservations)
+		.where(eq(domainReservations.domain, normalized))
+		.all();
+	if (existing.some((r) => LIVE_STATUSES.includes(r.status as ReservationStatus))) {
+		return { status: 'unavailable', note: 'live reservation/domain conflict' };
+	}
+	const tld = domainTld(normalized);
+	const allowed = configuredTlds('DOMAIN_AUTO_TLDS', ['com', 'net', 'org', 'de', 'com.tr']);
+	const manual = configuredTlds('DOMAIN_MANUAL_REVIEW_TLDS', []);
+	if (manual.has(tld) || !allowed.has(tld)) {
+		return { status: 'manual_review', note: `tld ${tld || '(unknown)'} requires manual review` };
+	}
+	if (!porkbunConfigured()) {
+		return { status: 'manual_review', note: 'domain provider is not configured' };
+	}
+	try {
+		const availability = await checkDomainAvailability(normalized);
+		return availability.available
+			? { status: 'available' }
+			: { status: 'unavailable', note: 'provider reports unavailable' };
+	} catch (error) {
+		return {
+			status: 'manual_review',
+			note: `provider availability check failed: ${String(error)}`
+		};
+	}
 }
 
 function appendNote(id: string, note: string): void {

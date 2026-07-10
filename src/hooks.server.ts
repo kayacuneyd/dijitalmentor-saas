@@ -1,11 +1,67 @@
-import type { Handle, HandleServerError } from '@sveltejs/kit';
+import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
+import {
+	detectLocale,
+	LOCALE_COOKIE,
+	localeFromPath,
+	rememberLocale,
+	stripLocale,
+	withLocale
+} from '$lib/i18n';
 import { getSessionUser, isAdminEmail, SESSION_COOKIE } from '$lib/server/auth';
 import { recordError } from '$lib/server/error-log';
+
+const LOCALIZED_PUBLIC_PATHS = new Set([
+	'/',
+	'/pricing',
+	'/templates',
+	'/about',
+	'/contact',
+	'/blog',
+	'/new',
+	'/login',
+	'/login/verify',
+	'/beta',
+	'/profile/start'
+]);
+const LOCALIZED_PREFIXES = ['/legal', '/blog'];
+
+function isLocalizedPublicPath(pathname: string): boolean {
+	if (LOCALIZED_PUBLIC_PATHS.has(pathname)) return true;
+	return LOCALIZED_PREFIXES.some(
+		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+	);
+}
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const user = getSessionUser(event.cookies.get(SESSION_COOKIE));
 	event.locals.user = user ? { ...user, isAdmin: isAdminEmail(user.email) } : null;
-	return resolve(event);
+	const pathLocale = localeFromPath(event.url.pathname);
+	const locale =
+		pathLocale ??
+		detectLocale(
+			event.request.headers.get('accept-language'),
+			event.cookies.get(LOCALE_COOKIE),
+			event.request.headers.get('cf-ipcountry') ?? event.request.headers.get('x-vercel-ip-country')
+		);
+	event.locals.locale = locale;
+	event.locals.unprefixedPath = stripLocale(event.url.pathname);
+	if (pathLocale) rememberLocale(event.cookies, pathLocale);
+
+	if (!pathLocale && event.request.method === 'GET' && isLocalizedPublicPath(event.url.pathname)) {
+		redirect(307, withLocale(locale, `${event.url.pathname}${event.url.search}`));
+	}
+
+	const response = await resolve(event, {
+		transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+	});
+	response.headers.set('X-Content-Type-Options', 'nosniff');
+	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+	response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+	response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+	if (event.url.protocol === 'https:') {
+		response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+	}
+	return response;
 };
 
 export const handleError: HandleServerError = ({ error, event, status }) => {

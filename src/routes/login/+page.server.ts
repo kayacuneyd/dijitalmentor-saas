@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { betaModeOn, createLoginToken, isBetaAllowed, rateLimit } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
 import { PENDING_COOKIE } from '$lib/server/onboarding/session';
+import { withLocale } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 const BETA_DENIED = 'saaskaya şu anda kapalı betadadır. Davetiye için operatörle iletişime geçin.';
@@ -10,11 +11,11 @@ const BETA_DENIED = 'saaskaya şu anda kapalı betadadır. Davetiye için operat
 export const load: PageServerLoad = ({ locals, url }) => {
 	if (locals.user) redirect(303, '/dashboard');
 	const email = z.email().safeParse(url.searchParams.get('email'));
-	return { betaMode: betaModeOn(), email: email.success ? email.data : '' };
+	return { betaMode: betaModeOn(), email: email.success ? email.data : '', locale: locals.locale };
 };
 
 export const actions: Actions = {
-	default: async ({ request, url, cookies, getClientAddress }) => {
+	default: async ({ request, url, cookies, getClientAddress, locals }) => {
 		if (!rateLimit(`login:${getClientAddress()}`, 5, 60_000)) {
 			return fail(429, { message: 'Too many attempts — wait a minute and try again.' });
 		}
@@ -37,9 +38,10 @@ export const actions: Actions = {
 		// resumes even if the link is opened on a different device/browser than it
 		// was sent from — same trust model as the login token itself (also emailed).
 		const pendingToken = cookies.get(PENDING_COOKIE);
+		const verifyPath = withLocale(locals.locale, '/login/verify');
 		const link = pendingToken
-			? `${url.origin}/login/verify?token=${token}&p=${encodeURIComponent(pendingToken)}`
-			: `${url.origin}/login/verify?token=${token}`;
+			? `${url.origin}${verifyPath}?token=${token}&p=${encodeURIComponent(pendingToken)}`
+			: `${url.origin}${verifyPath}?token=${token}`;
 		const { devEchoLink } = await sendMagicLink(email.data, link);
 		return { sent: true, email: email.data, devEchoLink };
 	}

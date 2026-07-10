@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ONBOARDING_QUESTIONS, nextQuestion, questionById, visibleQuestions } from './questions';
 
 describe('onboarding question script', () => {
-	it('is a fixed, deterministic list — 14 top-level prompts plus 2 conditional contact steps', () => {
-		expect(ONBOARDING_QUESTIONS).toHaveLength(16);
+	it('is a fixed, deterministic list — 15 top-level prompts plus 2 conditional contact steps', () => {
+		expect(ONBOARDING_QUESTIONS).toHaveLength(17);
 		const conditional = ONBOARDING_QUESTIONS.filter((q) => q.showWhen);
 		expect(conditional.map((q) => q.id)).toEqual(['contactEmail', 'contactPhone']);
 	});
@@ -84,12 +84,18 @@ describe('onboarding question script', () => {
 			);
 			expect(nextQuestion(answered)).toBeUndefined();
 		});
+
+		it('stops the automated flow when the unsupported manual-review niche is selected', () => {
+			expect(visibleQuestions({ niche: 'unsupported' }).map((q) => q.id)).toEqual(['niche']);
+			expect(nextQuestion({ niche: 'unsupported' })).toBeUndefined();
+		});
 	});
 
 	describe('per-question schemas', () => {
-		it('niche accepts only the 3 fixed presets', () => {
+		it('niche accepts the 3 fixed presets plus the manual-review gate', () => {
 			const schema = questionById('niche')!.schema;
 			expect(schema.safeParse('psych').success).toBe(true);
+			expect(schema.safeParse('unsupported').success).toBe(true);
 			expect(schema.safeParse('other').success).toBe(false);
 		});
 
@@ -97,6 +103,12 @@ describe('onboarding question script', () => {
 			const schema = questionById('languages')!.schema;
 			expect(schema.safeParse([]).success).toBe(false);
 			expect(schema.safeParse(['tr']).success).toBe(true);
+		});
+
+		it('visualDirection accepts only the 3 curated direction ids', () => {
+			const schema = questionById('visualDirection')!.schema;
+			expect(schema.safeParse('warm_trust').success).toBe(true);
+			expect(schema.safeParse('anything_goes').success).toBe(false);
 		});
 
 		it('services caps at 8 items', () => {

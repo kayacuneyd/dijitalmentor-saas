@@ -1,5 +1,28 @@
 # Project Memory
 
+- 2026-07-10: Admin routes use shared `src/lib/ui/AdminShell.svelte` instead of `PageShell`.
+  Admin navigation is sidebar-first on desktop and horizontal on mobile. `/admin/settings` is
+  intentionally compact: system/payment summaries at the top, grouped collapsed settings panels
+  below. Keep admin changes inside this shell unless a route has a strong reason to opt out.
+- 2026-07-10: Production deploys now use an atomic release layout to avoid adapter-node chunk
+  races. `ecosystem.config.cjs` runs PM2 from `/var/www/saaskaya/current/build/index.js`;
+  `current` points to `/var/www/saaskaya/releases/<timestamp>`. Use
+  `npm run deploy:production` for normal deploys; it bootstraps/switches releases, keeps recent
+  releases, restarts/saves PM2, and runs `scripts/smoke-production.mjs`. Do not deploy by running
+  `npm run build && pm2 restart ...` directly, because mutating root `build/` while PM2 serves it
+  caused transient `ERR_MODULE_NOT_FOUND` chunk failures.
+- 2026-07-10: Self-serve beta entry is live at localized `/en|/tr|/de/beta`. The form accepts an
+  email, creates/reactivates a beta invite, creates the existing magic-link token, and sends the
+  magic-link email automatically. Optional `BETA_ENTRY_CODE` in `/admin/settings` Ops gates
+  `/beta?code=...`; leave it empty for an open form. First-run beta users complete `/profile/start`
+  (full name, profession, city; no password) before reaching localized `/new`. Migration v14 adds
+  `users.full_name`, `profession`, `city`, and `beta_profile_completed_at`.
+- 2026-07-09: Launch i18n routing is live for the public/customer funnel. English is default;
+  `/` redirects to `/en` unless `sk_locale` or `Accept-Language` selects `tr`/`de`. Locale-prefixed
+  routes `/en|/tr|/de` are implemented by universal `src/hooks.ts` `reroute`; server locale/cookie
+  handling lives in `src/hooks.server.ts`. Localized launch surfaces currently cover landing,
+  pricing, login, `/new` onboarding, and `/templates`; legal pages are still Turkish legal drafts
+  behind locale-prefixed URLs and need legal review before claiming full multilingual legal coverage.
 - 2026-07-08: Production canonical URL is `https://saaskaya.com`; `www.saaskaya.com` and
   `saaskaya.digitaltamam.com` redirect to the apex.
 - 2026-07-08: Cloudflare DNS has `@`, `www`, and `*` A records pointing to `72.62.52.55`.
@@ -65,3 +88,13 @@ pm2 save`; restarting by process name alone can preserve stale environment value
   before a paid public-launch resilience claim.
 - 2026-07-09: Phase 0 reproducible baseline is local commit `9fbf36d` on `master`; secrets,
   databases, dependencies, and build output were excluded. It has not been pushed.
+- 2026-07-09: Phase 3 kit/quality/onboarding changes were deployed with
+  `npm run build && pm2 restart ecosystem.config.cjs --only saaskaya --update-env && pm2 save`.
+  Controlled live smoke passed: `/new` `warm_trust` carried `calm-intake` into the real
+  `POST /api/sites` payload, Groq/DeepSeek generation returned 200, editor and quality panel opened,
+  publish returned 200 with only `seed_media_in_use` warning, tenant host returned 200, and all
+  temporary smoke rows were cleaned from `data/production.db`.
+- 2026-07-09: Creem is now implemented as an alternate subscription billing provider. Select it with
+  `PAYMENT_PROVIDER=creem` and configure `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET`,
+  `CREEM_PRO_PRODUCT_ID`, and optional `CREEM_TEST_MODE=1` in `/admin/settings`. Creem webhooks post
+  to `/api/billing/creem/webhook`; Stripe remains available through the existing provider path.

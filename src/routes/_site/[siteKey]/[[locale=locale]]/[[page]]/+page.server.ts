@@ -1,6 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import { z } from 'zod';
-import { resolvePublishedByKey } from '$lib/server/db/repo';
+import { getSiteMeta, resolvePublishedByKey } from '$lib/server/db/repo';
 import { addSubmission } from '$lib/server/db/contact';
 import { sendContactNotification } from '$lib/server/email';
 import { rateLimit } from '$lib/server/auth';
@@ -23,9 +23,10 @@ export const load: PageServerLoad = ({ params, setHeaders }) => {
 	const slug = params.page ?? site.pages[0].slug;
 	const page = site.pages.find((p) => p.slug === slug);
 	if (!page) error(404, `Unknown page "${slug}"`);
+	const meta = getSiteMeta(site.id);
 
 	setHeaders({ 'cache-control': 'public, max-age=60' });
-	return { site, page, locale };
+	return { site, page, locale, publishedVersion: meta?.publishedVersion ?? null };
 };
 
 const contactSchema = z.object({

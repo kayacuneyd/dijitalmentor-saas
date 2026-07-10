@@ -317,6 +317,175 @@ export const migrations: Migration[] = [
 				ON admin_actions (target_user_id, created_at)`
 			);
 		}
+	},
+	{
+		version: 12,
+		name: 'billing-events',
+		up(client) {
+			// Seed of a real MRR-over-time series, from this point forward only —
+			// subscriptionStatus/subscriptionEndsAt are point-in-time, not a history.
+			client.exec(`CREATE TABLE IF NOT EXISTS billing_events (
+				id text PRIMARY KEY,
+				user_id text NOT NULL,
+				kind text NOT NULL,
+				stripe_customer_id text,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS billing_events_created_idx
+				ON billing_events (created_at)`
+			);
+		}
+	},
+	{
+		version: 13,
+		name: 'support-tickets',
+		up(client) {
+			// First real implementation of the /pricing "1/ay insan incelemesi"
+			// promise — shipped as general support for everyone via the
+			// human_review category value; no per-plan quota/gating yet.
+			client.exec(`CREATE TABLE IF NOT EXISTS support_tickets (
+				id text PRIMARY KEY,
+				user_id text NOT NULL,
+				site_id text,
+				subject text NOT NULL,
+				category text NOT NULL DEFAULT 'general',
+				status text NOT NULL DEFAULT 'open',
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL,
+				last_message_at integer NOT NULL,
+				last_message_by text NOT NULL DEFAULT 'customer'
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS support_tickets_user_idx
+				ON support_tickets (user_id, created_at)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS support_tickets_status_idx
+				ON support_tickets (status, last_message_at)`
+			);
+			client.exec(`CREATE TABLE IF NOT EXISTS support_ticket_messages (
+				id text PRIMARY KEY,
+				ticket_id text NOT NULL,
+				author_kind text NOT NULL,
+				author_email text NOT NULL,
+				body text NOT NULL,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS support_ticket_messages_ticket_idx
+				ON support_ticket_messages (ticket_id, created_at)`
+			);
+		}
+	},
+	{
+		version: 14,
+		name: 'beta-profile',
+		up(client) {
+			ensureColumn(client, 'users', 'full_name', 'text');
+			ensureColumn(client, 'users', 'profession', 'text');
+			ensureColumn(client, 'users', 'city', 'text');
+			ensureColumn(client, 'users', 'beta_profile_completed_at', 'integer');
+		}
+	},
+	{
+		version: 15,
+		name: 'public-inquiries',
+		up(client) {
+			// Anonymous/acquisition messaging stays separate from authenticated
+			// customer support tickets so the admin UI can keep source semantics clear.
+			client.exec(`CREATE TABLE IF NOT EXISTS inquiries (
+				id text PRIMARY KEY,
+				source text NOT NULL,
+				email text NOT NULL,
+				name text NOT NULL,
+				category text NOT NULL DEFAULT 'other',
+				status text NOT NULL DEFAULT 'open',
+				user_id text,
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL,
+				last_message_at integer NOT NULL,
+				last_message_by text NOT NULL DEFAULT 'visitor'
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS inquiries_status_idx
+				ON inquiries (status, last_message_at)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS inquiries_source_idx
+				ON inquiries (source, last_message_at)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS inquiries_email_idx
+				ON inquiries (email, created_at)`
+			);
+			client.exec(`CREATE TABLE IF NOT EXISTS inquiry_messages (
+				id text PRIMARY KEY,
+				inquiry_id text NOT NULL,
+				author_kind text NOT NULL,
+				author_email text NOT NULL,
+				body text NOT NULL,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS inquiry_messages_inquiry_idx
+				ON inquiry_messages (inquiry_id, created_at)`
+			);
+		}
+	},
+	{
+		version: 16,
+		name: 'site-chat-messages',
+		up(client) {
+			// Editor AI chat transcript, per site — seeded from the /new onboarding
+			// Q&A and appended to on every subsequent chat turn.
+			client.exec(`CREATE TABLE IF NOT EXISTS site_chat_messages (
+				id text PRIMARY KEY,
+				site_id text NOT NULL,
+				role text NOT NULL,
+				kind text,
+				body text NOT NULL,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS site_chat_messages_site_idx
+				ON site_chat_messages (site_id, created_at)`
+			);
+		}
+	},
+	{
+		version: 17,
+		name: 'per-site-pro-public-handles',
+		up(client) {
+			ensureColumn(client, 'sites', 'public_handle', 'text');
+			client.exec(`UPDATE sites
+				SET public_handle = lower(replace(id, '_', '-'))
+				WHERE public_handle IS NULL OR trim(public_handle) = ''`);
+			client.exec(`CREATE UNIQUE INDEX IF NOT EXISTS sites_public_handle_unique
+				ON sites (public_handle)
+				WHERE public_handle IS NOT NULL`);
+			client.exec(`CREATE TABLE IF NOT EXISTS site_subscriptions (
+				id text PRIMARY KEY,
+				site_id text NOT NULL,
+				user_id text NOT NULL,
+				provider text NOT NULL,
+				provider_customer_id text,
+				provider_subscription_id text,
+				status text NOT NULL DEFAULT 'active',
+				price_eur_monthly integer NOT NULL DEFAULT 17,
+				current_period_end integer,
+				grace_until integer,
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS site_subscriptions_site_user_idx
+				ON site_subscriptions (site_id, user_id)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS site_subscriptions_user_idx
+				ON site_subscriptions (user_id)`);
+			client.exec(`CREATE UNIQUE INDEX IF NOT EXISTS site_subscriptions_provider_sub_unique
+				ON site_subscriptions (provider, provider_subscription_id)
+				WHERE provider_subscription_id IS NOT NULL`);
+		}
 	}
 ];
 

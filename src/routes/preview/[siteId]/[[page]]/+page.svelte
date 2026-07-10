@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { siteSchema, type Locale, type Site } from '$lib/schema/site';
 	import SiteRenderer from '$lib/render/SiteRenderer.svelte';
+	import { previewSitePath } from '$lib/siteUrls';
 
 	let { data } = $props();
 
@@ -8,6 +9,7 @@
 	let pushedDraft = $state<Site | null>(null);
 	const site = $derived(pushedDraft ?? data.site);
 	const page = $derived(site.pages.find((p) => p.slug === data.page.slug) ?? site.pages[0]);
+	const surfaceLabel = $derived(pushedDraft ? 'Live draft' : 'Saved preview');
 
 	$effect(() => {
 		const onMessage = (event: MessageEvent) => {
@@ -21,10 +23,8 @@
 		return () => window.removeEventListener('message', onMessage);
 	});
 
-	const hrefFor = (pageSlug: string) =>
-		`/preview/${data.site.id}/${pageSlug}?locale=${data.locale}`;
-	const localeHrefFor = (locale: Locale) =>
-		`/preview/${data.site.id}/${data.page.slug}?locale=${locale}`;
+	const hrefFor = (pageSlug: string) => previewSitePath(data.site.id, pageSlug, data.locale);
+	const localeHrefFor = (locale: Locale) => previewSitePath(data.site.id, data.page.slug, locale);
 </script>
 
 <svelte:head>
@@ -33,5 +33,16 @@
 		<meta name="description" content={site.settings.seo.description[data.locale]} />
 	{/if}
 </svelte:head>
+
+<div
+	class="fixed top-3 left-3 z-50 flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
+>
+	<span>{surfaceLabel}</span>
+	{#if data.liveUrl}
+		<a href={data.liveUrl} class="text-[#2f6f6a] underline-offset-2 hover:underline">
+			Published v{data.publishedVersion}
+		</a>
+	{/if}
+</div>
 
 <SiteRenderer {site} {page} locale={data.locale} {hrefFor} {localeHrefFor} />

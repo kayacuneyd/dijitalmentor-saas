@@ -16,6 +16,7 @@ import { canManageSite } from '$lib/server/auth';
 import { db } from '$lib/server/db';
 import { aiGateLog } from '$lib/server/db/schema';
 import { getOrSeedDraft, getSiteMeta, saveDraft } from '$lib/server/db/repo';
+import { appendChatMessage } from '$lib/server/chatLog';
 import type { RequestHandler } from './$types';
 
 /**
@@ -98,6 +99,13 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const quotaOpts = { ownerUserId: meta?.ownerUserId, isAdmin: locals.user.isAdmin };
 	const base = { siteId: site.id, tenantId };
 
+	// Persist the user's turn once per incoming message — a confirm/force resend
+	// carries the exact same `message` as its stage-1 send, so persisting those too
+	// would duplicate it in the transcript.
+	if (!body.data.approvedPrompt && !body.data.force) {
+		appendChatMessage({ siteId: site.id, role: 'user', kind: 'chat', body: body.data.message });
+	}
+
 	// One Layer-2 run = the only thing that mutates the draft or spends a credit.
 	const runAgent = async (opts: {
 		approvedPrompt?: string;
@@ -124,6 +132,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			agentTokens: totalTokens(result.usage),
 			model: model ?? heavyModel()
 		});
+		appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'applied', body: result.reply });
 		return json({ ok: true, kind: 'applied', reply: result.reply, site: result.site });
 	};
 
@@ -162,14 +171,17 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 
 		if (gate.intent === 'off_topic') {
 			logGate({ ...base, intent: gate.intent, decision: 'redirected', gateTokens });
+			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'redirect', body: gate.reply });
 			return json({ ok: true, kind: 'redirect', reply: gate.reply });
 		}
 		if (gate.intent === 'question') {
 			logGate({ ...base, intent: gate.intent, decision: 'answered', gateTokens });
+			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'reply', body: gate.reply });
 			return json({ ok: true, kind: 'reply', reply: gate.reply });
 		}
 		if (gate.intent === 'help_request') {
 			logGate({ ...base, intent: gate.intent, decision: 'help', gateTokens });
+			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'help', body: gate.reply });
 			return json({ ok: true, kind: 'help', reply: gate.reply });
 		}
 

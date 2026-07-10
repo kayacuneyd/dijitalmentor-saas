@@ -6,6 +6,25 @@
 	import { themeStyle } from './theme';
 	import SiteHeader from './SiteHeader.svelte';
 
+	// Self-hosted tenant preset fonts (src/lib/presets/index.ts): Playfair Display
+	// + Inter (law), Lora + Open Sans (psych), Poppins + Roboto (dental). Loaded
+	// here — not the root layout — so the SaaS shell never pays for tenant weights,
+	// and published tenant sites never call Google Fonts (no third-party request
+	// for a visitor of a customer's site). Only weights actually rendered by a
+	// given theme trigger a woff2 fetch (@font-face is lazily resolved per glyph).
+	import '@fontsource/playfair-display/latin.css';
+	import '@fontsource/playfair-display/latin-ext.css';
+	import '@fontsource/lora/latin.css';
+	import '@fontsource/lora/latin-ext.css';
+	import '@fontsource/poppins/latin.css';
+	import '@fontsource/poppins/latin-ext.css';
+	import '@fontsource/open-sans/latin.css';
+	import '@fontsource/open-sans/latin-ext.css';
+	import '@fontsource/roboto/latin.css';
+	import '@fontsource/roboto/latin-ext.css';
+	import '@fontsource/inter/latin.css';
+	import '@fontsource/inter/latin-ext.css';
+
 	let {
 		site,
 		page,

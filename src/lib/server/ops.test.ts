@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { db } from '$lib/server/db';
 import { users } from '$lib/server/db/schema';
 import { getOrCreateUser } from '$lib/server/auth';
-import { hasActiveSubscription, subscriptionState } from '$lib/server/billing';
+import {
+	activateSiteSubscription,
+	hasActiveSubscription,
+	subscriptionState
+} from '$lib/server/billing';
 import { healthCheck, sweepExpiredCustomDomains } from '$lib/server/ops';
 import { getDraft, getOrSeedDraft, saveDraft } from '$lib/server/db/repo';
 import { attachSiteDomain, getDomainForSite } from '$lib/server/domains';
@@ -71,7 +75,13 @@ describe('daily sweep: expired custom domains', () => {
 		graceSite.tenantId = 'tenant-grace';
 		saveDraft(graceSite, { ownerUserId: inGrace.id });
 		attachSiteDomain('site-grace', 'grace-praxis.example', inGrace.id);
-		setBilling(inGrace.id, 'canceled', new Date(Date.now() - 5 * DAY));
+		activateSiteSubscription({
+			siteId: 'site-grace',
+			userId: inGrace.id,
+			provider: 'manual',
+			status: 'canceled',
+			currentPeriodEnd: new Date(Date.now() - 5 * DAY)
+		});
 
 		// ownerless seed with a domain (should never be swept)
 		getOrSeedDraft('seed-dental');

@@ -5,6 +5,8 @@ import {
 	TONE_OPTIONS,
 	type OnboardingAnswers
 } from '$lib/onboarding/questions';
+import { visualDirectionById } from '$lib/onboarding/directions';
+import { psychKitBySlug, type PsychKitSlug } from '$lib/kits';
 
 /**
  * Composes the collected onboarding answers into a single flowing description
@@ -22,7 +24,10 @@ const asStringArray = (value: unknown): string[] =>
 
 const LANGUAGE_NAMES: Record<string, string> = { tr: 'Türkçe', en: 'İngilizce', de: 'Almanca' };
 
-export function composeDescription(answers: OnboardingAnswers): string {
+export function composeDescription(
+	answers: OnboardingAnswers,
+	options: { kitSlug?: PsychKitSlug } = {}
+): string {
 	// The free-text escape hatch bypasses the composer entirely.
 	const raw = asString(answers.rawDescription);
 	if (raw) return raw;
@@ -33,6 +38,8 @@ export function composeDescription(answers: OnboardingAnswers): string {
 	const audience = asString(answers.audience);
 	const differentiator = asString(answers.differentiator);
 	const tone = labelOf(TONE_OPTIONS, answers.tone);
+	const visualDirection = visualDirectionById(answers.visualDirection);
+	const selectedKit = psychKitBySlug(options.kitSlug);
 	const contactMethod = labelOf(CONTACT_METHOD_OPTIONS, answers.contactMethod);
 	const contactEmail = asString(answers.contactEmail);
 	const contactPhone = asString(answers.contactPhone);
@@ -53,6 +60,17 @@ export function composeDescription(answers: OnboardingAnswers): string {
 	if (services.length) sentences.push(`Sunduğu başlıca hizmetler: ${services.join(', ')}.`);
 	if (credentials) sentences.push(`Unvan/sertifika/üyelikler: ${credentials}.`);
 	if (tone) sentences.push(`Sitenin tonu ${tone.toLowerCase()} olmalı.`);
+	if (visualDirection) {
+		sentences.push(
+			`Görsel yön: ${visualDirection.label} — ${visualDirection.toneHint}; bölüm vurgusu: ${visualDirection.sectionEmphasis}.`
+		);
+		const kit = selectedKit ?? visualDirection.kit;
+		if (kit) {
+			sentences.push(
+				`Kit referansı: ${kit.label} (${kit.slug}) — ${kit.outcome} Sabit blok setinin dışına çıkma.`
+			);
+		}
+	}
 	if (booking) sentences.push(`Randevu süreci: ${booking.toLowerCase()}.`);
 
 	const contactBits: string[] = [];

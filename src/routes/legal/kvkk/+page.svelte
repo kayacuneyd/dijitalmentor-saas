@@ -25,7 +25,9 @@
 		<li><strong>Kimlik/eşleştirme:</strong> e-posta adresi</li>
 		<li><strong>İletişim:</strong> magic link, iletişim formu mesajları</li>
 		<li><strong>İşlem güvenliği:</strong> IP, oturum çerezi, tarayıcı bilgisi</li>
-		<li><strong>Finansal:</strong> Stripe müşteri kimliği, abonelik durumu (kart verisi yok)</li>
+		<li>
+			<strong>Finansal:</strong> ödeme sağlayıcısı müşteri kimliği, abonelik durumu (kart verisi yok)
+		</li>
 		<li><strong>Hizmet içeriği:</strong> AI'a verilen açıklama, üretilen site içeriği</li>
 	</ul>
 
@@ -53,7 +55,13 @@
 			<strong>AI sağlayıcılar (DeepSeek, Anthropic):</strong> site açıklama ve sohbet metni — yurt dışına
 			aktarım KVKK md. 9 kapsamında uygun güvence ile
 		</li>
-		<li><strong>Stripe:</strong> ödeme işleme (ABD merkezli, PCI-DSS uyumlu)</li>
+		<li>
+			<strong>Creem:</strong> abonelik/dijital ürün ödemelerinde Merchant of Record/ödeme satıcısı olarak
+			checkout, vergi/fatura ve ödeme işleme
+		</li>
+		<li>
+			<strong>Stripe:</strong> geçiş/fallback ödeme sağlayıcısı olarak kullanıldığı durumlarda ödeme işleme
+		</li>
 		<li><strong>Cloudflare R2:</strong> görsel depolama</li>
 		<li><strong>Resend/SMTP sağlayıcı:</strong> transactional e-posta</li>
 		<li><strong>Domain kayıtçı (Porkbun/NameSilo):</strong> WHOIS için domain sahibi bilgisi</li>

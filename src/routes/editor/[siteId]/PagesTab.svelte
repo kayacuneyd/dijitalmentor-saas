@@ -1,99 +1,151 @@
 <script lang="ts">
 	import type { DraftStore } from '$lib/stores/draft.svelte';
-	import { LOCALES, type Page } from '$lib/schema/site';
+	import { LOCALES, type Locale } from '$lib/schema/site';
+	import { addPage, removePage, MAX_PAGES } from '$lib/editor/pageOps';
 
 	let { store }: { store: DraftStore } = $props();
 
 	let slug = $state('');
-	let titles = $state<Record<string, string>>({ tr: '', en: '', de: '' });
+	let titles = $state<Record<Locale, string>>({ tr: '', en: '', de: '' });
 	let formError = $state('');
+	let addFormOpen = $state(false);
+	let confirmRemoveSlug = $state<string | null>(null);
 
-	const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-	function addPage() {
+	function submitAddPage() {
 		formError = '';
-		if (!SLUG_RE.test(slug)) {
-			formError = 'Slug must be kebab-case (a-z, 0-9, dashes).';
-			return;
-		}
-		if (store.site.pages.some((p) => p.slug === slug)) {
-			formError = `A page with slug "${slug}" already exists.`;
-			return;
-		}
-		if (store.site.pages.length >= 10) {
-			formError = 'Page limit reached (10).';
-			return;
-		}
-		if (LOCALES.some((l) => !titles[l].trim())) {
-			formError = 'A title is required for every locale.';
-			return;
-		}
-
-		const title = { tr: titles.tr.trim(), en: titles.en.trim(), de: titles.de.trim() };
-		const newPage: Page = {
-			slug,
-			title,
-			sections: [
-				{
-					id: `hero-${slug}`,
-					type: 'hero',
-					props: { variant: 'centered', background: 'plain' },
-					content: {
-						tr: { headline: title.tr },
-						en: { headline: title.en },
-						de: { headline: title.de }
-					}
-				}
-			]
-		};
-		const newSlug = slug;
+		let result: ReturnType<typeof addPage> | undefined;
 		store.update((site) => {
-			site.pages.push(newPage);
-			if (site.nav.items.length < 8) {
-				site.nav.items.push({ pageSlug: newSlug, label: { ...title } });
-			}
+			result = addPage(site, { slug, titles });
 		});
-		store.currentSlug = newSlug;
+		if (!result || !result.ok) {
+			formError = result?.error ?? 'Sayfa eklenemedi.';
+			return;
+		}
+		store.currentSlug = result.slug;
 		slug = '';
 		titles = { tr: '', en: '', de: '' };
+		addFormOpen = false;
+	}
+
+	function confirmRemove(pageSlug: string) {
+		let result: ReturnType<typeof removePage> | undefined;
+		store.update((site) => {
+			result = removePage(site, pageSlug);
+		});
+		if (result?.ok && store.currentSlug === pageSlug) {
+			store.currentSlug = result.nextSlug;
+		}
+		confirmRemoveSlug = null;
 	}
 </script>
 
-<div class="flex flex-col gap-4">
-	<ul class="menu bg-base-200 rounded-box w-full">
+<div class="flex flex-col gap-3">
+	<div class="flex items-center justify-between">
+		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">Sayfalar</span>
+		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">
+			{store.site.pages.length}/{MAX_PAGES}
+		</span>
+	</div>
+
+	<ul class="flex flex-col gap-1">
 		{#each store.site.pages as page (page.slug)}
-			<li>
+			<li class="flex items-center gap-1">
 				<button
-					class:menu-active={page.slug === store.currentSlug}
+					type="button"
+					class="min-w-0 flex-1 rounded-[10px] px-2.5 py-2 text-left text-sm transition {page.slug ===
+					store.currentSlug
+						? 'bg-[#171614] text-[#f3ecdd]'
+						: 'hover:bg-[var(--sk-shell)]'}"
 					onclick={() => (store.currentSlug = page.slug)}
 				>
 					<span class="truncate">{page.title[store.editLocale]}</span>
-					<span class="text-base-content/40 text-xs">/{page.slug}</span>
+					<span
+						class="ml-1.5 font-[var(--font-mono)] text-[10px] {page.slug === store.currentSlug
+							? 'text-[#f3ecdd]/60'
+							: 'text-[var(--sk-faint)]'}"
+					>
+						/{page.slug}
+					</span>
 				</button>
+				{#if store.site.pages.length > 1}
+					<button
+						type="button"
+						class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
+						onclick={() => (confirmRemoveSlug = page.slug)}
+						aria-label={`"${page.title[store.editLocale]}" sayfasını sil`}
+						title="Sayfayı sil"
+					>
+						✕
+					</button>
+				{/if}
 			</li>
+			{#if confirmRemoveSlug === page.slug}
+				<li
+					class="flex flex-col gap-2 rounded-[10px] border border-[#b8532f]/40 bg-[#b8532f]/5 p-3"
+				>
+					<p class="text-xs text-[#b8532f]">
+						"{page.title[store.editLocale]}" sayfasını sil?
+						{#if page.slug === store.site.pages[0].slug}
+							Bu ana sayfa — silersen listedeki bir sonraki sayfa ana sayfa olur.
+						{/if}
+					</p>
+					<div class="flex gap-2">
+						<button
+							type="button"
+							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
+							onclick={() => confirmRemove(page.slug)}
+						>
+							Evet, sil
+						</button>
+						<button
+							type="button"
+							class="sk-btn sk-btn-ghost sk-btn-sm"
+							onclick={() => (confirmRemoveSlug = null)}
+						>
+							Vazgeç
+						</button>
+					</div>
+				</li>
+			{/if}
 		{/each}
 	</ul>
 
-	<fieldset class="border-base-300 rounded-field border p-3">
-		<legend class="px-1 text-xs font-medium">Add page</legend>
-		<div class="flex flex-col gap-2">
-			<label class="form-control">
-				<span class="label-text mb-1 block text-xs">Slug</span>
-				<input type="text" class="input input-sm w-full" placeholder="about-us" bind:value={slug} />
+	<details bind:open={addFormOpen} class="rounded-[10px] border border-[var(--sk-line)]">
+		<summary
+			class="cursor-pointer list-none px-3 py-2 text-sm font-medium select-none [&::-webkit-details-marker]:hidden"
+		>
+			+ Yeni sayfa
+		</summary>
+		<div class="flex flex-col gap-2 border-t border-[var(--sk-line)] p-3">
+			<label class="flex flex-col gap-1">
+				<span class="text-xs text-[var(--sk-faint)]">Slug</span>
+				<input
+					type="text"
+					class="sk-input min-h-8 py-1.5 text-sm"
+					placeholder="about-us"
+					bind:value={slug}
+				/>
 			</label>
 			{#each LOCALES as locale (locale)}
-				<label class="form-control">
-					<span class="label-text mb-1 block text-xs">Title ({locale.toUpperCase()})</span>
-					<input type="text" class="input input-sm w-full" bind:value={titles[locale]} />
+				<label class="flex flex-col gap-1">
+					<span class="text-xs text-[var(--sk-faint)]">Başlık ({locale.toUpperCase()})</span>
+					<input type="text" class="sk-input min-h-8 py-1.5 text-sm" bind:value={titles[locale]} />
 				</label>
 			{/each}
 			{#if formError}
-				<p class="text-error text-xs">{formError}</p>
+				<p class="sk-alert sk-alert-error px-3 py-2 text-xs">{formError}</p>
 			{/if}
-			<button class="btn btn-primary btn-sm mt-1" onclick={addPage}>Add page</button>
-			<p class="text-base-content/50 text-xs">
-				New pages start with a hero section and are added to the navigation.
+			<button
+				type="button"
+				class="sk-btn sk-btn-primary sk-btn-sm mt-1 w-fit"
+				onclick={submitAddPage}
+				disabled={store.site.pages.length >= MAX_PAGES}
+			>
+				Sayfa ekle
+			</button>
+			<p class="text-xs text-[var(--sk-faint)]">
+				Yeni sayfalar bir hero bölümüyle başlar ve menüye eklenir.
 			</p>
 		</div>
-	</fieldset>
+	</details>
 </div>

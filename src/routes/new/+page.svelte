@@ -5,12 +5,247 @@
 	import {
 		ONBOARDING_QUESTIONS,
 		nextQuestion,
+		visibleQuestions,
 		type OnboardingAnswers,
 		type Question
 	} from '$lib/onboarding/questions';
+	import { VISUAL_DIRECTIONS } from '$lib/onboarding/directions';
+	import { localizeDirection, localizeQuestion } from '$lib/i18n/onboarding';
+	import { withLocale, type Locale } from '$lib/i18n';
+	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
+	import ChatBubble from '$lib/ui/ChatBubble.svelte';
+	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
+	const locale: Locale = $derived(data.locale);
+	const l = (path: string) => withLocale(locale, path);
+	const copy = $derived(
+		{
+			en: {
+				title: 'New site · saaskaya',
+				description:
+					'Answer a few questions and saaskaya will prepare a multilingual website through a validated structure.',
+				label: 'saaskaya.app / new site',
+				home: 'Home',
+				back: '← saaskaya',
+				h1: 'A few questions, one website.',
+				intro:
+					'You can start without an account. Answer the questions, then create your account at the final step. Your answers are saved.',
+				flow: 'Guided flow',
+				steps: [
+					'answer a few questions',
+					'create a free account',
+					'generate multilingual content',
+					'preview and publish with a validated structure'
+				],
+				selectedKit: 'Selected kit',
+				kitNote:
+					'This kit guides the first draft together with your answers; AI still cannot leave the fixed block set.',
+				done: 'Your answers are complete!',
+				doneSignedOut: 'Create your account and the site will be ready to generate.',
+				doneSignedIn: 'Now your site can be generated.',
+				credits: [
+					'This uses 1 site-generation credit.',
+					'Text, theme, and image edits are free.',
+					'Creative AI rewrites use extra credits.',
+					'If generation fails, your answers are preserved and you can retry.'
+				],
+				rawPlaceholder:
+					'Example: I am Dr. Ada Smith. I offer online therapy for adults in Berlin...',
+				rawCount: 'min. 30',
+				send: 'Send',
+				backToQuestions: '← Back to questions',
+				visualDirection: 'Visual direction',
+				kit: 'Kit',
+				continue: 'Continue',
+				addService: 'Write a service and add it...',
+				add: 'Add',
+				answerPlaceholder: 'Write your answer...',
+				skip: 'Skip',
+				createSite: 'Generate my site',
+				startFree: 'Start free',
+				generating: 'Generating your site...',
+				redirecting: 'Redirecting...',
+				rawToggle: 'I want to describe it in my own words →',
+				stepWord: 'Step',
+				stepsDone: 'All done',
+				nicheDescriptions: {
+					psych: 'A calm, reassuring site for your therapy practice',
+					law: 'A serious, professional presence for your firm',
+					dental: 'A fresh, modern site for your clinic',
+					unsupported: 'Manual beta review instead of forcing the wrong preset'
+				} as Record<string, string>,
+				unsupportedTitle: 'This field needs manual beta review.',
+				unsupportedBody:
+					'We do not map unsupported professions to the lawyer preset. Send us your field and we will review whether it can join the beta.',
+				unsupportedAction: 'Email support',
+				footer:
+					'AI turns your answers into a validated site structure. Questions are free; only site generation uses your monthly AI budget.',
+				stages: {
+					prepare: 'Preparing your answers...',
+					generate: 'AI is generating a validated site draft...',
+					editor: 'Opening the editor...'
+				},
+				errors: {
+					generic: 'Something went wrong.',
+					network: 'Network error — please try again.',
+					generation:
+						'The site draft could not be generated. Your answers are saved; you can try again shortly.',
+					generationNetwork:
+						'Network error — your answers are saved; check the connection and try again.'
+				}
+			},
+			tr: {
+				title: 'Yeni site · saaskaya',
+				description:
+					'Birkaç soruya yanıt ver, saaskaya senin için doğrulanmış bir yapı üzerinden çok dilli bir web sitesi hazırlasın.',
+				label: 'saaskaya.app / yeni site',
+				home: 'Anasayfa',
+				back: '← saaskaya',
+				h1: 'Birkaç soru, bir site.',
+				intro:
+					'Üye olmadan da başlayabilirsin — sorulara yanıt ver, en sonda "Ücretsiz Başla" ile hesabını oluştur. Cevapların kaybolmaz.',
+				flow: 'Rehberli akış',
+				steps: [
+					'birkaç soruya yanıt ver',
+					'ücretsiz hesabını oluştur',
+					'çok dilli içerik üretilsin',
+					'doğrulanmış yapı ile önizle ve yayınla'
+				],
+				selectedKit: 'Seçili kit',
+				kitNote:
+					'Bu kit, yanıtlarınla birlikte ilk taslağı yönlendirir; AI yine sabit blok setinin dışına çıkamaz.',
+				done: 'Cevapların tamam!',
+				doneSignedOut: 'Hesabını oluşturunca sitenin oluşturulmaya hazır olacak.',
+				doneSignedIn: 'Şimdi sitenin oluşturulabilir.',
+				credits: [
+					'Bu işlem 1 site üretim kredisi kullanır.',
+					'Metin, tema ve görsel düzenlemeleri ücretsizdir.',
+					'AI ile yaratıcı yeniden yazımlar ayrıca kredi kullanır.',
+					'Üretim başarısız olursa cevapların kaybolmaz; tekrar deneyebilirsin.'
+				],
+				rawPlaceholder:
+					"Örn: Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve boşanma davalarına bakıyorum. Ofisim Kadıköy'de…",
+				rawCount: 'min. 30',
+				send: 'Gönder',
+				backToQuestions: '← Sorulara dön',
+				visualDirection: 'Görsel yön',
+				kit: 'Kit',
+				continue: 'Devam et',
+				addService: 'Bir hizmet yaz ve ekle…',
+				add: 'Ekle',
+				answerPlaceholder: 'Yanıtını yaz…',
+				skip: 'Boş geç',
+				createSite: 'Siteni oluştur',
+				startFree: 'Ücretsiz Başla',
+				generating: 'Siten oluşturuluyor…',
+				redirecting: 'Yönlendiriliyor…',
+				rawToggle: 'Kendi cümlelerimle anlatmak istiyorum →',
+				stepWord: 'Adım',
+				stepsDone: 'Tamamlandı',
+				nicheDescriptions: {
+					psych: 'Danışanlarına güven veren, sakin bir terapi sitesi',
+					law: 'Büron için kurumsal ve ciddi bir vitrin',
+					dental: 'Kliniğin için ferah ve modern bir site',
+					unsupported: 'Yanlış preset’e düşürmek yerine manuel beta incelemesi'
+				} as Record<string, string>,
+				unsupportedTitle: 'Bu alan manuel beta incelemesi gerektiriyor.',
+				unsupportedBody:
+					'Desteklenmeyen meslekleri avukat preset’ine eşlemiyoruz. Mesleğini bize gönder; beta kapsamına alınıp alınamayacağını inceleyelim.',
+				unsupportedAction: 'Desteğe e-posta gönder',
+				footer:
+					'AI, sorulara verdiğin yanıtları doğrulanmış bir site yapısına dönüştürür — asla kod yazmaz. Sorular ücretsizdir; yalnızca site oluşturma aylık AI bütçeni kullanır.',
+				stages: {
+					prepare: 'Cevapların hazırlanıyor…',
+					generate: 'AI doğrulanmış site taslağını oluşturuyor…',
+					editor: 'Editör açılıyor…'
+				},
+				errors: {
+					generic: 'Bir şeyler ters gitti.',
+					network: 'Ağ hatası — lütfen tekrar dene.',
+					generation:
+						'Site taslağı oluşturulamadı. Cevapların duruyor; birazdan tekrar deneyebilirsin.',
+					generationNetwork:
+						'Ağ hatası — cevapların duruyor; bağlantıyı kontrol edip tekrar deneyebilirsin.'
+				}
+			},
+			de: {
+				title: 'Neue Website · saaskaya',
+				description:
+					'Beantworte einige Fragen und saaskaya erstellt eine mehrsprachige Website mit validierter Struktur.',
+				label: 'saaskaya.app / neue website',
+				home: 'Startseite',
+				back: '← saaskaya',
+				h1: 'Ein paar Fragen, eine Website.',
+				intro:
+					'Du kannst ohne Konto beginnen. Beantworte die Fragen und erstelle dein Konto im letzten Schritt. Deine Antworten bleiben erhalten.',
+				flow: 'Geführter Ablauf',
+				steps: [
+					'einige Fragen beantworten',
+					'kostenloses Konto erstellen',
+					'mehrsprachige Inhalte generieren',
+					'mit validierter Struktur prüfen und veröffentlichen'
+				],
+				selectedKit: 'Ausgewähltes Kit',
+				kitNote:
+					'Dieses Kit steuert den ersten Entwurf zusammen mit deinen Antworten; AI bleibt im festen Block-Set.',
+				done: 'Deine Antworten sind vollständig!',
+				doneSignedOut: 'Erstelle dein Konto, dann kann die Website generiert werden.',
+				doneSignedIn: 'Jetzt kann deine Website generiert werden.',
+				credits: [
+					'Dies nutzt 1 Website-Generierungs-Credit.',
+					'Text-, Theme- und Bildänderungen sind kostenlos.',
+					'Kreative AI-Umschreibungen nutzen zusätzliche Credits.',
+					'Wenn die Generierung fehlschlägt, bleiben deine Antworten erhalten.'
+				],
+				rawPlaceholder:
+					'Beispiel: Ich bin Dr. Ada Müller. Ich biete Online-Therapie für Erwachsene in Berlin...',
+				rawCount: 'min. 30',
+				send: 'Senden',
+				backToQuestions: '← Zurück zu Fragen',
+				visualDirection: 'Visuelle Richtung',
+				kit: 'Kit',
+				continue: 'Weiter',
+				addService: 'Leistung schreiben und hinzufügen...',
+				add: 'Hinzufügen',
+				answerPlaceholder: 'Antwort schreiben...',
+				skip: 'Überspringen',
+				createSite: 'Website generieren',
+				startFree: 'Kostenlos starten',
+				generating: 'Website wird generiert...',
+				redirecting: 'Weiterleitung...',
+				rawToggle: 'Ich möchte es in eigenen Worten beschreiben →',
+				stepWord: 'Schritt',
+				stepsDone: 'Abgeschlossen',
+				nicheDescriptions: {
+					psych: 'Eine ruhige, vertrauensvolle Website für deine Praxis',
+					law: 'Ein seriöser Auftritt für deine Kanzlei',
+					dental: 'Eine frische, moderne Website für deine Klinik',
+					unsupported: 'Manuelle Beta-Prüfung statt falschem Preset'
+				} as Record<string, string>,
+				unsupportedTitle: 'Dieses Feld benötigt eine manuelle Beta-Prüfung.',
+				unsupportedBody:
+					'Nicht unterstützte Berufe werden nicht auf das Anwalts-Preset abgebildet. Sende uns dein Feld, wir prüfen die Beta-Eignung.',
+				unsupportedAction: 'Support mailen',
+				footer:
+					'AI verwandelt deine Antworten in eine validierte Website-Struktur. Fragen sind kostenlos; nur die Website-Generierung nutzt dein monatliches AI-Budget.',
+				stages: {
+					prepare: 'Antworten werden vorbereitet...',
+					generate: 'AI generiert einen validierten Website-Entwurf...',
+					editor: 'Editor wird geöffnet...'
+				},
+				errors: {
+					generic: 'Etwas ist schiefgelaufen.',
+					network: 'Netzwerkfehler — bitte erneut versuchen.',
+					generation:
+						'Der Website-Entwurf konnte nicht generiert werden. Deine Antworten sind gespeichert; du kannst es erneut versuchen.',
+					generationNetwork:
+						'Netzwerkfehler — deine Antworten sind gespeichert; prüfe die Verbindung und versuche es erneut.'
+				}
+			}
+		}[locale]
+	);
 
 	let answers = $state<OnboardingAnswers>({});
 	$effect(() => {
@@ -21,6 +256,7 @@
 	let busy = $state(false);
 	let errorMessage = $state('');
 	let offTopicMessage = $state('');
+	let generationStage = $state('');
 	let useRaw = $state(false);
 	let rawText = $state('');
 
@@ -34,8 +270,35 @@
 		typeof answers.rawDescription === 'string' &&
 			(answers.rawDescription as string).trim().length >= 30
 	);
-	const current = $derived<Question | undefined>(hasRaw ? undefined : nextQuestion(answers));
+	const unsupportedNiche = $derived(answers.niche === 'unsupported');
+	const current = $derived<Question | undefined>(
+		hasRaw || unsupportedNiche ? undefined : nextQuestion(answers)
+	);
+	const currentDisplay = $derived(current ? localizeQuestion(current, locale) : undefined);
 	const answeredQuestions = $derived(ONBOARDING_QUESTIONS.filter((q) => q.id in answers));
+	const directions = $derived(
+		VISUAL_DIRECTIONS.map((direction) => localizeDirection(direction, locale))
+	);
+
+	// Progress: "Adım X / Y" + bar. Totals adapt as showWhen questions appear.
+	const visibleNow = $derived(visibleQuestions(answers));
+	const totalSteps = $derived(visibleNow.length);
+	const answeredCount = $derived(visibleNow.filter((q) => q.id in answers).length);
+	const flowComplete = $derived(!unsupportedNiche && (hasRaw || !current));
+	const stepNumber = $derived(Math.min(answeredCount + 1, totalSteps));
+	const progressPct = $derived(
+		flowComplete ? 100 : Math.round((answeredCount / Math.max(totalSteps, 1)) * 100)
+	);
+
+	// Inline stroke icons (leaf / scales / tooth) — no emoji-font dependency.
+	const nicheIconPaths: Record<string, string> = {
+		psych: 'M5 21c0-9.5 4.5-14.5 14-16-.8 9.5-5.5 14.2-14 16ZM5 21c3.5-5.5 7.5-9 12-11',
+		law: 'M12 3v18M4 7h16M6.5 7l-3.5 6.5a3.8 3.8 0 0 0 7 0L6.5 7ZM17.5 7 14 13.5a3.8 3.8 0 0 0 7 0L17.5 7ZM8 21h8',
+		dental:
+			'M12 5.5C10.5 4 8.8 3 7.2 3 4.7 3 3 5 3 7.5c0 4 2 6.6 3 10.1.4 1.4 1 2.4 2 2.4s1.4-1 1.6-2.4c.3-1.9.7-3.1 2.4-3.1s2.1 1.2 2.4 3.1c.2 1.4.6 2.4 1.6 2.4s1.6-1 2-2.4c1-3.5 3-6.1 3-10.1C21 5 19.3 3 16.8 3c-1.6 0-3.3 1-4.8 2.5Z',
+		unsupported:
+			'M12 3l7 4v5c0 4.2-2.8 7.8-7 9-4.2-1.2-7-4.8-7-9V7l7-4ZM9.5 9.5a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 17h.01'
+	};
 
 	$effect(() => {
 		current;
@@ -45,6 +308,26 @@
 		listInput = '';
 		offTopicMessage = '';
 	});
+
+	// Chat-style pacing: the next question (or a rejection) waits for at least a
+	// natural "typing" delay after the answer is known, so the AI doesn't feel
+	// instantaneous. Real network errors (caught below) skip this — a broken
+	// connection isn't "the AI thinking," delaying that message only frustrates.
+	let reducedMotion = $state(false);
+	$effect(() => {
+		reducedMotion =
+			typeof window !== 'undefined' &&
+			window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+	});
+
+	function pacedDelay(startedAt: number): Promise<void> {
+		if (reducedMotion) return Promise.resolve();
+		const minDelayMs = 600 + Math.random() * 600;
+		const remaining = minDelayMs - (Date.now() - startedAt);
+		return remaining > 0
+			? new Promise((resolve) => setTimeout(resolve, remaining))
+			: Promise.resolve();
+	}
 
 	function formatAnswer(q: Question, value: unknown): string {
 		if (q.kind === 'choice')
@@ -64,6 +347,8 @@
 		busy = true;
 		errorMessage = '';
 		offTopicMessage = '';
+		generationStage = '';
+		const startedAt = Date.now();
 		try {
 			const res = await fetch('/api/onboarding/answer', {
 				method: 'POST',
@@ -72,17 +357,22 @@
 			});
 			const resData = await res.json();
 			if (!res.ok || !resData.ok) {
+				await pacedDelay(startedAt);
 				if (resData.kind === 'off_topic') {
 					offTopicMessage = resData.message;
 				} else {
-					errorMessage = resData.message ?? 'Bir şeyler ters gitti.';
+					errorMessage = resData.message ?? copy.errors.generic;
 				}
 				return;
 			}
+			// The answer bubble commits immediately (it's the user's own already-known
+			// text); the next question stays hidden behind the typing indicator
+			// (`{#if ... && !busy}` below) until pacedDelay clears.
 			answers = { ...answers, [questionId]: value };
 			if (questionId === 'rawDescription') useRaw = false;
+			await pacedDelay(startedAt);
 		} catch {
-			errorMessage = 'Ağ hatası — lütfen tekrar dene.';
+			errorMessage = copy.errors.network;
 		} finally {
 			busy = false;
 		}
@@ -107,108 +397,160 @@
 
 	async function completeFlow() {
 		if (!data.user) {
-			await goto('/login');
+			await goto(l('/login'));
 			return;
 		}
 		busy = true;
 		errorMessage = '';
+		generationStage = copy.stages.prepare;
 		try {
-			const finishRes = await fetch('/api/onboarding/finish', { method: 'POST' });
+			const finishRes = await fetch('/api/onboarding/finish', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ kitSlug: data.selectedKit?.slug })
+			});
 			const finishData = await finishRes.json();
 			if (!finishRes.ok || !finishData.ok) {
-				errorMessage = finishData.message ?? 'Bir şeyler ters gitti.';
+				errorMessage = finishData.message ?? copy.errors.generic;
 				return;
 			}
+			generationStage = copy.stages.generate;
 			const genRes = await fetch('/api/sites', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ description: finishData.description })
+				body: JSON.stringify({
+					description: finishData.description,
+					onboardingPendingId: finishData.pendingId
+				})
 			});
 			const genData = await genRes.json();
 			if (!genRes.ok || !genData.ok) {
-				errorMessage = genData.message ?? 'Bir şeyler ters gitti.';
+				const message = genData.message ?? copy.errors.generation;
+				const reference =
+					genData.errorId && !message.includes(genData.errorId)
+						? ` Referans: ${genData.errorId}`
+						: '';
+				errorMessage = `${message}${reference}`;
 				return;
 			}
-			await goto(`/editor/${genData.id}`);
+			generationStage = copy.stages.editor;
+			await goto(`/editor/${genData.id}?onboarding=${finishData.pendingId}`);
 		} catch {
-			errorMessage = 'Ağ hatası — lütfen tekrar dene.';
+			errorMessage = copy.errors.generationNetwork;
 		} finally {
 			busy = false;
+			generationStage = '';
 		}
 	}
 </script>
 
 <svelte:head>
-	<title>Yeni site · saaskaya</title>
-	<meta
-		name="description"
-		content="Birkaç soruya yanıt ver, saaskaya senin için doğrulanmış bir yapı üzerinden çok dilli bir web sitesi hazırlasın."
-	/>
+	<title>{copy.title}</title>
+	<meta name="description" content={copy.description} />
 </svelte:head>
 
-<AppCanvasShell label="saaskaya.app / yeni site">
+<AppCanvasShell label={copy.label}>
 	{#snippet right()}
-		<a href="/" class="sk-btn sk-btn-secondary sk-btn-sm">Anasayfa</a>
+		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm">{copy.home}</a>
+		<LanguageSwitcher {locale} />
 	{/snippet}
 
-	<div class="mx-auto grid w-full max-w-4xl gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
 		<div class="pt-2">
-			<a href="/" class="sk-link text-sm text-[var(--sk-faint)]">← saaskaya</a>
-			<h1 class="sk-display mt-3 text-4xl leading-none sm:text-[42px]">Birkaç soru, bir site.</h1>
+			<a href={l('/')} class="sk-link text-sm text-[var(--sk-faint)]">{copy.back}</a>
+			<h1 class="sk-display mt-3 text-4xl leading-none sm:text-[42px]">{copy.h1}</h1>
 			<p class="mt-3 text-[15px] leading-6 text-[var(--sk-muted)]">
-				Üye olmadan da başlayabilirsin — sorulara yanıt ver, en sonda "Ücretsiz Başla" ile hesabını
-				oluştur. Cevapların kaybolmaz.
+				{copy.intro}
 			</p>
 			<div class="sk-soft mt-6 p-4">
-				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Rehberli akış</div>
+				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.flow}</div>
 				<div class="mt-3 flex flex-col gap-2 text-sm text-[var(--sk-muted)]">
-					<div>01 · birkaç soruya yanıt ver</div>
-					<div>02 · ücretsiz hesabını oluştur</div>
-					<div>03 · çok dilli içerik üretilsin</div>
-					<div>04 · doğrulanmış yapı ile önizle ve yayınla</div>
+					{#each copy.steps as step, i (step)}
+						<div>{String(i + 1).padStart(2, '0')} · {step}</div>
+					{/each}
 				</div>
 			</div>
+			{#if data.selectedKit}
+				<div class="sk-card mt-4 p-4">
+					<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.selectedKit}</div>
+					<div class="mt-1 text-sm font-semibold text-[var(--sk-ink)]">
+						{data.selectedKit.label}
+					</div>
+					<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+						{data.selectedKit.outcome}
+					</p>
+					<p class="mt-2 text-[11px] leading-4 text-[var(--sk-faint)]">
+						{copy.kitNote}
+					</p>
+				</div>
+			{/if}
 		</div>
 
 		<AppCard class="flex flex-col gap-3 p-6 sm:p-8">
+			<div class="flex flex-col gap-1.5">
+				<div class="flex items-center justify-between">
+					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
+						{flowComplete || unsupportedNiche
+							? copy.stepsDone
+							: `${copy.stepWord} ${stepNumber} / ${totalSteps}`}
+					</span>
+					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{progressPct}%</span>
+				</div>
+				<div class="h-1.5 w-full overflow-hidden rounded-full bg-[#171614]/10">
+					<div
+						class="h-full rounded-full bg-[var(--sk-ink)] transition-all duration-300"
+						style="width: {progressPct}%"
+					></div>
+				</div>
+			</div>
+
 			<div class="flex max-h-[28rem] min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 				{#each answeredQuestions as q (q.id)}
-					<div class="sk-card max-w-[92%] p-3 text-sm leading-6">{q.prompt}</div>
-					<div class="flex justify-end">
-						<div
-							class="max-w-[92%] rounded-[12px] bg-[#171614] px-3 py-2 text-sm leading-6 text-[#f3ecdd]"
-						>
-							{formatAnswer(q, answers[q.id])}
-						</div>
-					</div>
+					{@const displayedQuestion = localizeQuestion(q, locale)}
+					<ChatBubble role="assistant">{displayedQuestion.prompt}</ChatBubble>
+					<ChatBubble role="user">{formatAnswer(displayedQuestion, answers[q.id])}</ChatBubble>
 				{/each}
 
-				{#if current && !useRaw}
-					<div class="sk-card max-w-[92%] p-3 text-sm leading-6">
-						{current.prompt}
-						{#if current.helper}
-							<div class="mt-1 text-xs text-[var(--sk-faint)]">{current.helper}</div>
+				{#if currentDisplay && !useRaw && !busy}
+					<ChatBubble role="assistant">
+						{currentDisplay.prompt}
+						{#if currentDisplay.helper}
+							<div class="mt-1 text-xs text-[var(--sk-faint)]">{currentDisplay.helper}</div>
 						{/if}
-					</div>
-				{:else if !current}
-					<div class="sk-card max-w-[92%] p-3 text-sm leading-6">
-						Cevapların tamam! 🎉 {#if !data.user}Hesabını oluşturunca sitenin oluşturulmaya hazır
-							olacak.{:else}Şimdi sitenin oluşturulabilir.{/if}
-					</div>
+					</ChatBubble>
+				{:else if unsupportedNiche && !busy}
+					<ChatBubble role="assistant">
+						{copy.unsupportedTitle}
+						<div
+							class="mt-3 border-t border-[rgba(23,22,20,.08)] pt-3 text-xs leading-5 text-[var(--sk-muted)]"
+						>
+							{copy.unsupportedBody}
+						</div>
+					</ChatBubble>
+				{:else if !current && !busy}
+					<ChatBubble role="assistant">
+						{copy.done}
+						{#if !data.user}{copy.doneSignedOut}{:else}{copy.doneSignedIn}{/if}
+						<div
+							class="mt-3 border-t border-[rgba(23,22,20,.08)] pt-3 text-xs leading-5 text-[var(--sk-muted)]"
+						>
+							{#each copy.credits as credit (credit)}
+								<div>• {credit}</div>
+							{/each}
+						</div>
+					</ChatBubble>
 				{/if}
 
 				{#if offTopicMessage}
-					<div class="sk-card max-w-[92%] p-3 text-sm leading-6">{offTopicMessage}</div>
+					<ChatBubble role="assistant">{offTopicMessage}</ChatBubble>
 				{/if}
 
 				{#if errorMessage}
-					<div class="sk-alert sk-alert-error px-3 py-2 text-xs">{errorMessage}</div>
+					<ChatBubble role="error">{errorMessage}</ChatBubble>
 				{/if}
 
 				{#if busy}
-					<div class="sk-card w-fit p-3 text-sm">
-						<span class="loading loading-dots loading-sm"></span>
-					</div>
+					<TypingIndicator label={generationStage} />
 				{/if}
 			</div>
 
@@ -218,13 +560,13 @@
 						<textarea
 							class="sk-textarea min-h-40 text-[14.5px]"
 							rows="7"
-							placeholder="Örn: Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve boşanma davalarına bakıyorum. Ofisim Kadıköy'de…"
+							placeholder={copy.rawPlaceholder}
 							bind:value={rawText}
 							disabled={busy}></textarea>
 						<div
 							class="absolute right-4 bottom-3 font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]"
 						>
-							{rawText.trim().length} / min. 30
+							{rawText.trim().length} / {copy.rawCount}
 						</div>
 					</div>
 					<div class="flex flex-wrap gap-2">
@@ -234,7 +576,7 @@
 							disabled={busy || rawText.trim().length < 30}
 							onclick={() => submitAnswer('rawDescription', rawText)}
 						>
-							Gönder
+							{copy.send}
 						</button>
 						<button
 							type="button"
@@ -242,13 +584,72 @@
 							disabled={busy}
 							onclick={() => (useRaw = false)}
 						>
-							← Sorulara dön
+							{copy.backToQuestions}
 						</button>
 					</div>
 				</div>
+			{:else if current?.id === 'visualDirection'}
+				<div class="grid gap-2 sm:grid-cols-3">
+					{#each directions as direction (direction.id)}
+						<button
+							type="button"
+							class="sk-card flex h-full flex-col items-start gap-2 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+							disabled={busy}
+							onclick={() => submitAnswer(current!.id, direction.id)}
+						>
+							<span class="sk-mono text-[10px] text-[var(--sk-faint)]">{copy.visualDirection}</span>
+							<span class="text-sm font-semibold text-[var(--sk-ink)]">{direction.label}</span>
+							<span class="text-xs leading-5 text-[var(--sk-muted)]">{direction.preview}</span>
+							{#if direction.kit}
+								<span
+									class="rounded-full bg-[rgba(47,111,106,.1)] px-2 py-1 text-[10.5px] text-[#2f6f6a]"
+								>
+									{copy.kit} · {direction.kit.label}
+								</span>
+								<span class="text-[11px] leading-4 text-[var(--sk-muted)]">
+									{direction.kit.outcome}
+								</span>
+							{/if}
+							<span class="mt-auto text-[11px] leading-4 text-[var(--sk-faint)]">
+								{direction.promise}
+							</span>
+						</button>
+					{/each}
+				</div>
+			{:else if current?.id === 'niche'}
+				<div class="grid gap-2 sm:grid-cols-3">
+					{#each currentDisplay?.options ?? [] as option (option.value)}
+						<button
+							type="button"
+							class="sk-card flex h-full flex-col items-start gap-1.5 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+							disabled={busy}
+							onclick={() => submitAnswer(current!.id, option.value)}
+						>
+							<svg
+								class="size-6 text-[var(--sk-ink)]"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path
+									d={nicheIconPaths[option.value] ??
+										'M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z'}
+								/>
+							</svg>
+							<span class="text-sm font-semibold text-[var(--sk-ink)]">{option.label}</span>
+							<span class="text-xs leading-5 text-[var(--sk-muted)]">
+								{copy.nicheDescriptions[option.value] ?? ''}
+							</span>
+						</button>
+					{/each}
+				</div>
 			{:else if current?.kind === 'choice'}
 				<div class="flex flex-wrap gap-2">
-					{#each current.options ?? [] as option (option.value)}
+					{#each currentDisplay?.options ?? [] as option (option.value)}
 						<button
 							type="button"
 							class="sk-btn sk-btn-secondary sk-btn-sm"
@@ -262,7 +663,7 @@
 			{:else if current?.kind === 'multi_choice'}
 				<div class="flex flex-col gap-2">
 					<div class="flex flex-wrap gap-2">
-						{#each current.options ?? [] as option (option.value)}
+						{#each currentDisplay?.options ?? [] as option (option.value)}
 							<button
 								type="button"
 								class="sk-btn sk-btn-sm {multiValue.includes(option.value)
@@ -281,7 +682,7 @@
 						disabled={busy || multiValue.length === 0}
 						onclick={() => submitAnswer(current!.id, multiValue)}
 					>
-						Devam et
+						{copy.continue}
 					</button>
 				</div>
 			{:else if current?.kind === 'list_text'}
@@ -310,7 +711,7 @@
 						<input
 							type="text"
 							class="sk-input min-h-9 flex-1 py-1.5 text-sm"
-							placeholder="Bir hizmet yaz ve ekle…"
+							placeholder={copy.addService}
 							bind:value={listInput}
 							disabled={busy || listItems.length >= 8}
 						/>
@@ -319,7 +720,7 @@
 							class="sk-btn sk-btn-secondary sk-btn-sm"
 							disabled={busy || !listInput.trim() || listItems.length >= 8}
 						>
-							Ekle
+							{copy.add}
 						</button>
 					</form>
 					<button
@@ -328,7 +729,7 @@
 						disabled={busy || listItems.length === 0}
 						onclick={() => submitAnswer(current!.id, listItems)}
 					>
-						Devam et
+						{copy.continue}
 					</button>
 				</div>
 			{:else if current?.kind === 'short_text' || current?.kind === 'open_text'}
@@ -342,14 +743,14 @@
 					{#if current.kind === 'open_text'}
 						<textarea
 							class="sk-textarea min-h-20 flex-1 py-1.5 text-sm"
-							placeholder="Yanıtını yaz…"
+							placeholder={copy.answerPlaceholder}
 							bind:value={textValue}
 							disabled={busy}></textarea>
 					{:else}
 						<input
 							type="text"
 							class="sk-input min-h-9 flex-1 py-1.5 text-sm"
-							placeholder="Yanıtını yaz…"
+							placeholder={copy.answerPlaceholder}
 							bind:value={textValue}
 							disabled={busy}
 						/>
@@ -359,7 +760,7 @@
 						class="sk-btn sk-btn-primary sk-btn-sm"
 						disabled={busy || (current.required && !textValue.trim())}
 					>
-						Gönder
+						{copy.send}
 					</button>
 				</form>
 				{#if !current.required}
@@ -369,9 +770,13 @@
 						disabled={busy}
 						onclick={() => submitAnswer(current!.id, '')}
 					>
-						Boş geç
+						{copy.skip}
 					</button>
 				{/if}
+			{:else if unsupportedNiche}
+				<a href="mailto:support@saaskaya.com" class="sk-btn sk-btn-secondary sk-btn-lg w-full">
+					{copy.unsupportedAction}
+				</a>
 			{:else if !current}
 				<button
 					type="button"
@@ -381,11 +786,11 @@
 				>
 					{#if busy}
 						<span class="loading loading-spinner loading-sm"></span>
-						{data.user ? 'Siten oluşturuluyor…' : 'Yönlendiriliyor…'}
+						{generationStage || (data.user ? copy.generating : copy.redirecting)}
 					{:else if data.user}
-						Siteni oluştur
+						{copy.createSite}
 					{:else}
-						Ücretsiz Başla
+						{copy.startFree}
 					{/if}
 				</button>
 			{/if}
@@ -397,13 +802,12 @@
 					disabled={busy}
 					onclick={() => (useRaw = true)}
 				>
-					Kendi cümlelerimle anlatmak istiyorum →
+					{copy.rawToggle}
 				</button>
 			{/if}
 
 			<p class="text-xs leading-5 text-[var(--sk-faint)]">
-				AI, sorulara verdiğin yanıtları doğrulanmış bir site yapısına dönüştürür — asla kod yazmaz.
-				Sorular ücretsizdir; yalnızca site oluşturma aylık AI bütçeni kullanır.
+				{copy.footer}
 			</p>
 		</AppCard>
 	</div>

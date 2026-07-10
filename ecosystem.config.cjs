@@ -25,7 +25,7 @@ module.exports = {
 	apps: [
 		{
 			name: 'saaskaya',
-			script: 'build/index.js',
+			script: path.join(__dirname, 'current', 'build', 'index.js'),
 			cwd: __dirname,
 			env: {
 				NODE_ENV: 'production',

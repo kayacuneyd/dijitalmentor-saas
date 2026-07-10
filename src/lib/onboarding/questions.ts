@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { VISUAL_DIRECTION_OPTIONS, visualDirectionSchema } from './directions';
+import { SUPPORTED_NICHES, UNSUPPORTED_NICHE, isUnsupportedNicheAnswer } from './support';
 
 /**
  * Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a fixed, deterministic
@@ -30,11 +32,13 @@ export type Question = {
 
 const shortText = (max: number) => z.string().trim().min(1).max(max);
 const optionalText = (max: number) => z.string().trim().max(max).optional();
+const NICHE_VALUES = [...SUPPORTED_NICHES, UNSUPPORTED_NICHE] as const;
 
 export const NICHE_OPTIONS: ChoiceOption[] = [
 	{ value: 'psych', label: 'Psikolog / Terapist' },
 	{ value: 'law', label: 'Avukat / Hukuk Bürosu' },
-	{ value: 'dental', label: 'Diş Hekimi / Klinik' }
+	{ value: 'dental', label: 'Diş Hekimi / Klinik' },
+	{ value: UNSUPPORTED_NICHE, label: 'Başka bir alan' }
 ];
 
 export const TONE_OPTIONS: ChoiceOption[] = [
@@ -76,7 +80,7 @@ export const ONBOARDING_QUESTIONS: Question[] = [
 		required: true,
 		guarded: false,
 		options: NICHE_OPTIONS,
-		schema: z.enum(['psych', 'law', 'dental'])
+		schema: z.enum(NICHE_VALUES)
 	},
 	{
 		id: 'businessName',
@@ -118,6 +122,17 @@ export const ONBOARDING_QUESTIONS: Question[] = [
 		guarded: false,
 		options: TONE_OPTIONS,
 		schema: z.enum(['warm', 'professional', 'modern', 'minimal'])
+	},
+	{
+		id: 'visualDirection',
+		kind: 'choice',
+		prompt: 'Kredi harcamadan önce bir görsel yön seç.',
+		helper:
+			'Bu seçim serbest tasarım üretmez; mevcut güvenli bloklar ve tema ipuçları içinde ilk taslağı yönlendirir.',
+		required: true,
+		guarded: false,
+		options: VISUAL_DIRECTION_OPTIONS,
+		schema: visualDirectionSchema
 	},
 	{
 		id: 'languages',
@@ -221,6 +236,7 @@ export function questionById(id: string): Question | undefined {
 
 /** Questions visible given the answers collected so far, in order. */
 export function visibleQuestions(answers: OnboardingAnswers): Question[] {
+	if (isUnsupportedNicheAnswer(answers)) return ONBOARDING_QUESTIONS.slice(0, 1);
 	return ONBOARDING_QUESTIONS.filter((q) => !q.showWhen || q.showWhen(answers));
 }
 

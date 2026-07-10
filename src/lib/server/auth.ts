@@ -22,6 +22,14 @@ const hash = (value: string) => createHash('sha256').update(value).digest('hex')
 const newToken = () => randomBytes(32).toString('base64url');
 
 export type SessionUser = { id: string; email: string };
+export type UserProfile = {
+	id: string;
+	email: string;
+	fullName: string | null;
+	profession: string | null;
+	city: string | null;
+	betaProfileCompletedAt: Date | null;
+};
 
 export function normalizeEmail(email: string): string {
 	return email.trim().toLowerCase();
@@ -131,6 +139,10 @@ export function addInvite(email: string, profession?: string, notes?: string): v
 		.run();
 }
 
+export function selfServeBetaInvite(email: string): void {
+	addInvite(email, 'self-serve beta', 'created from /beta');
+}
+
 export function setInviteStatus(email: string, status: 'invited' | 'revoked'): void {
 	db.update(betaInvites)
 		.set({ status })
@@ -167,6 +179,45 @@ export function getOrCreateUser(email: string): SessionUser {
 		.values({ ...user, createdAt: new Date() })
 		.run();
 	return user;
+}
+
+export function getUserProfile(userId: string): UserProfile | null {
+	const row = db.select().from(users).where(eq(users.id, userId)).get();
+	if (!row) return null;
+	return {
+		id: row.id,
+		email: row.email,
+		fullName: row.fullName,
+		profession: row.profession,
+		city: row.city,
+		betaProfileCompletedAt: row.betaProfileCompletedAt
+	};
+}
+
+export function betaProfileComplete(userId: string): boolean {
+	const row = db
+		.select({ completedAt: users.betaProfileCompletedAt })
+		.from(users)
+		.where(eq(users.id, userId))
+		.get();
+	return Boolean(row?.completedAt);
+}
+
+export function updateBetaProfile(input: {
+	userId: string;
+	fullName: string;
+	profession: string;
+	city: string;
+}): void {
+	db.update(users)
+		.set({
+			fullName: input.fullName.trim(),
+			profession: input.profession.trim(),
+			city: input.city.trim(),
+			betaProfileCompletedAt: new Date()
+		})
+		.where(eq(users.id, input.userId))
+		.run();
 }
 
 // --- sessions ----------------------------------------------------------------

@@ -79,6 +79,25 @@ export function siteMediaUsage(siteId: string): number {
 	return Number(result?.total ?? 0);
 }
 
+/** Best-effort R2 cleanup (e.g. after a site is deleted). Never throws — DB rows are
+ *  the source of truth and are always gone by the time this runs; a stray orphaned
+ *  object in R2 is an acceptable outcome, a thrown error here is not. */
+export async function deleteMediaObjects(objectKeys: string[]): Promise<void> {
+	if (objectKeys.length === 0) return;
+	let config: ReturnType<typeof r2Config>;
+	try {
+		config = r2Config();
+	} catch {
+		return; // R2 unconfigured — nothing to clean up remotely
+	}
+	const s3 = client(config);
+	await Promise.all(
+		objectKeys.map((key) =>
+			s3.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key })).catch(() => undefined)
+		)
+	);
+}
+
 export function listMedia(siteId: string) {
 	return db
 		.select()

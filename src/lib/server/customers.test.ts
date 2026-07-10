@@ -5,6 +5,7 @@ import { users } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { recordUsage, tenantIdForUser } from '$lib/server/ai/usage';
 import { getOrSeedDraft, saveDraft } from '$lib/server/db/repo';
+import { createTicket } from './support';
 import { getCustomerDetail, listAdminActions, listCustomers, logAdminAction } from './customers';
 
 function makeOwnedSite(seedId: string, siteId: string, ownerUserId: string) {
@@ -65,6 +66,19 @@ describe('getCustomerDetail (admin customer detail)', () => {
 		expect(detail.submissions).toEqual([]);
 		expect(detail.actions).toHaveLength(1);
 		expect(detail.actions[0].action).toBe('ai_topup');
+	});
+
+	it("includes the customer's support tickets", () => {
+		const user = getOrCreateUser('customer-detail-tickets@example.com');
+		createTicket({
+			userId: user.id,
+			subject: 'Question about my plan',
+			body: 'Can I upgrade?',
+			authorEmail: user.email
+		});
+		const detail = getCustomerDetail(user.id)!;
+		expect(detail.tickets).toHaveLength(1);
+		expect(detail.tickets[0].subject).toBe('Question about my plan');
 	});
 
 	it('flags hasStripeCustomer when a Stripe customer id is on file', () => {

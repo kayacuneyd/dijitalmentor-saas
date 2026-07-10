@@ -13,6 +13,8 @@ export const sites = sqliteTable('sites', {
 	id: text('id').primaryKey(),
 	tenantId: text('tenant_id').notNull(),
 	draft: text('draft', { mode: 'json' }).notNull(),
+	// Customer-facing saaskaya subdomain handle. Internal `id` remains immutable.
+	publicHandle: text('public_handle'),
 	// NULL = ownerless demo site (the seeds); set on generation once auth exists (M4).
 	ownerUserId: text('owner_user_id'),
 	// Points at the site_versions row currently served publicly; NULL = not published.
@@ -60,6 +62,10 @@ export const users = sqliteTable(
 	{
 		id: text('id').primaryKey(),
 		email: text('email').notNull(),
+		fullName: text('full_name'),
+		profession: text('profession'),
+		city: text('city'),
+		betaProfileCompletedAt: integer('beta_profile_completed_at', { mode: 'timestamp' }),
 		// Billing (M5/M6): filled by the Stripe webhook.
 		stripeCustomerId: text('stripe_customer_id'),
 		subscriptionStatus: text('subscription_status'),
@@ -277,15 +283,15 @@ export const mediaAssets = sqliteTable(
 );
 
 // Audit trail shared by every /admin/customers action (subscription override, AI
-// credit top-up, domain detach, unpublish). A flat "who did what to whom, when"
-// record, not a quota ledger — quota adjustments themselves live in ai_usage.
+// credit top-up, domain detach, publish, unpublish, site delete). A flat "who did
+// what to whom, when" record, not a quota ledger — quota adjustments live in ai_usage.
 export const adminActions = sqliteTable(
 	'admin_actions',
 	{
 		id: text('id').primaryKey(),
 		adminEmail: text('admin_email').notNull(),
 		targetUserId: text('target_user_id').notNull(),
-		// subscription_override | ai_topup | domain_detach | unpublish
+		// subscription_override | ai_topup | domain_detach | publish | unpublish | site_delete
 		action: text('action').notNull(),
 		detail: text('detail').notNull(),
 		createdAt: integer('created_at', { mode: 'timestamp' })
@@ -293,4 +299,166 @@ export const adminActions = sqliteTable(
 			.$defaultFn(() => new Date())
 	},
 	(table) => [index('admin_actions_target_idx').on(table.targetUserId, table.createdAt)]
+);
+
+export const billingEvents = sqliteTable(
+	'billing_events',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id').notNull(),
+		// subscription_activated | more kinds added as billing.ts grows
+		kind: text('kind').notNull(),
+		stripeCustomerId: text('stripe_customer_id'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('billing_events_created_idx').on(table.createdAt)]
+);
+
+// Site-scoped paid entitlement. User-level subscription columns stay temporarily
+// for legacy/admin views; new checkout flows write here.
+export const siteSubscriptions = sqliteTable(
+	'site_subscriptions',
+	{
+		id: text('id').primaryKey(),
+		siteId: text('site_id').notNull(),
+		userId: text('user_id').notNull(),
+		provider: text('provider').notNull(),
+		providerCustomerId: text('provider_customer_id'),
+		providerSubscriptionId: text('provider_subscription_id'),
+		status: text('status').notNull().default('active'),
+		priceEurMonthly: integer('price_eur_monthly').notNull().default(17),
+		currentPeriodEnd: integer('current_period_end', { mode: 'timestamp' }),
+		graceUntil: integer('grace_until', { mode: 'timestamp' }),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [
+		index('site_subscriptions_site_user_idx').on(table.siteId, table.userId),
+		index('site_subscriptions_user_idx').on(table.userId),
+		uniqueIndex('site_subscriptions_provider_sub_unique').on(
+			table.provider,
+			table.providerSubscriptionId
+		)
+	]
+);
+
+export const supportTickets = sqliteTable(
+	'support_tickets',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id').notNull(),
+		siteId: text('site_id'),
+		subject: text('subject').notNull(),
+		// general | billing | technical | human_review
+		category: text('category').notNull().default('general'),
+		// open | pending | resolved | closed
+		status: text('status').notNull().default('open'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastMessageAt: integer('last_message_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		// customer | admin — who sent the most recent message
+		lastMessageBy: text('last_message_by').notNull().default('customer')
+	},
+	(table) => [
+		index('support_tickets_user_idx').on(table.userId, table.createdAt),
+		index('support_tickets_status_idx').on(table.status, table.lastMessageAt)
+	]
+);
+
+export const supportTicketMessages = sqliteTable(
+	'support_ticket_messages',
+	{
+		id: text('id').primaryKey(),
+		ticketId: text('ticket_id').notNull(),
+		// customer | admin
+		authorKind: text('author_kind').notNull(),
+		authorEmail: text('author_email').notNull(),
+		body: text('body').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('support_ticket_messages_ticket_idx').on(table.ticketId, table.createdAt)]
+);
+
+export const inquiries = sqliteTable(
+	'inquiries',
+	{
+		id: text('id').primaryKey(),
+		// contact | chat
+		source: text('source').notNull(),
+		email: text('email').notNull(),
+		name: text('name').notNull(),
+		// beta_access | support | partnership | billing | other
+		category: text('category').notNull().default('other'),
+		// open | pending | resolved | closed
+		status: text('status').notNull().default('open'),
+		userId: text('user_id'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastMessageAt: integer('last_message_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		// visitor | admin
+		lastMessageBy: text('last_message_by').notNull().default('visitor')
+	},
+	(table) => [
+		index('inquiries_status_idx').on(table.status, table.lastMessageAt),
+		index('inquiries_source_idx').on(table.source, table.lastMessageAt),
+		index('inquiries_email_idx').on(table.email, table.createdAt)
+	]
+);
+
+export const inquiryMessages = sqliteTable(
+	'inquiry_messages',
+	{
+		id: text('id').primaryKey(),
+		inquiryId: text('inquiry_id').notNull(),
+		// visitor | admin
+		authorKind: text('author_kind').notNull(),
+		authorEmail: text('author_email').notNull(),
+		body: text('body').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('inquiry_messages_inquiry_idx').on(table.inquiryId, table.createdAt)]
+);
+
+// Editor AI chat transcript, per site. Seeded from the /new onboarding Q&A
+// (kind='onboarding_seed') so the conversation visibly continues once the site
+// lands in the editor; later turns are the live gatekeeper chat (kind matches the
+// /api/sites/[siteId]/chat response kind: reply | applied | redirect | help).
+// This is the first place raw chat text is persisted — ai_gate_log deliberately
+// stores none.
+export const siteChatMessages = sqliteTable(
+	'site_chat_messages',
+	{
+		id: text('id').primaryKey(),
+		siteId: text('site_id').notNull(),
+		// user | assistant
+		role: text('role').notNull(),
+		kind: text('kind'),
+		body: text('body').notNull(),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('site_chat_messages_site_idx').on(table.siteId, table.createdAt)]
 );

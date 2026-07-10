@@ -1,19 +1,12 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
-	import PageShell from '$lib/ui/PageShell.svelte';
+	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
 	let { data } = $props();
 
-	function planLabel(subscription: (typeof data.customers)[number]['subscription']): string {
-		if (subscription.state === 'active') return 'Pro';
-		if (subscription.state === 'grace') return 'Pro · grace';
-		return 'Free';
-	}
-
-	function planTone(subscription: (typeof data.customers)[number]['subscription']) {
-		if (subscription.state === 'active') return 'success' as const;
-		if (subscription.state === 'grace') return 'warning' as const;
+	function planTone(customer: (typeof data.customers)[number]) {
+		if (customer.proSiteCount > 0) return 'success' as const;
 		return 'neutral' as const;
 	}
 
@@ -33,15 +26,12 @@
 	<title>Customers · saaskaya admin</title>
 </svelte:head>
 
-<PageShell
-	backHref="/admin/settings"
-	backLabel="settings"
+<AdminShell
 	title="Customers"
 	description="Every account, their plan, and this month's AI usage."
-	max="max-w-4xl"
-	canvasLabel="saaskaya.app / admin"
+	active="/admin/customers"
 >
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<h2 class="sk-display text-2xl leading-none">{data.customers.length} customer(s)</h2>
 			{#if data.customers.length === 0}
@@ -53,8 +43,8 @@
 							<div class="min-w-0">
 								<div class="flex items-center gap-2">
 									<span class="truncate font-medium">{customer.email}</span>
-									<StatusPill tone={planTone(customer.subscription)}>
-										{planLabel(customer.subscription)}
+									<StatusPill tone={planTone(customer)}>
+										{customer.proSiteCount} Pro site
 									</StatusPill>
 								</div>
 								<p class="font-[var(--font-mono)] text-[11px] text-[var(--sk-faint)]">
@@ -70,4 +60,4 @@
 			{/if}
 		</div>
 	</AppCard>
-</PageShell>
+</AdminShell>

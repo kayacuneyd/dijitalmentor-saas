@@ -92,6 +92,62 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 			.prepare(`SELECT 1 FROM sqlite_master WHERE type='index' AND name='admin_actions_target_idx'`)
 			.get();
 		expect(adminActionsIdx).toBeTruthy();
+		// v12: billing events (MRR-over-time seed)
+		expect(tables(client)).toContain('billing_events');
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('billing_events') WHERE name='kind'`).get()
+		).toBeTruthy();
+		const billingEventsIdx = client
+			.prepare(
+				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='billing_events_created_idx'`
+			)
+			.get();
+		expect(billingEventsIdx).toBeTruthy();
+		// v13: support ticket tables
+		expect(tables(client)).toEqual(
+			expect.arrayContaining(['support_tickets', 'support_ticket_messages'])
+		);
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('support_tickets') WHERE name='status'`).get()
+		).toBeTruthy();
+		expect(
+			client
+				.prepare(
+					`SELECT 1 FROM pragma_table_info('support_ticket_messages') WHERE name='author_kind'`
+				)
+				.get()
+		).toBeTruthy();
+		const supportStatusIdx = client
+			.prepare(
+				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='support_tickets_status_idx'`
+			)
+			.get();
+		expect(supportStatusIdx).toBeTruthy();
+		// v15: public inquiry inbox
+		expect(tables(client)).toEqual(expect.arrayContaining(['inquiries', 'inquiry_messages']));
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('inquiries') WHERE name='source'`).get()
+		).toBeTruthy();
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('inquiry_messages') WHERE name='body'`).get()
+		).toBeTruthy();
+		const inquiriesStatusIdx = client
+			.prepare(`SELECT 1 FROM sqlite_master WHERE type='index' AND name='inquiries_status_idx'`)
+			.get();
+		expect(inquiriesStatusIdx).toBeTruthy();
+		// v16: persistent editor chat transcript
+		expect(tables(client)).toContain('site_chat_messages');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('site_chat_messages') WHERE name='kind'`)
+				.get()
+		).toBeTruthy();
+		const chatSiteIdx = client
+			.prepare(
+				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='site_chat_messages_site_idx'`
+			)
+			.get();
+		expect(chatSiteIdx).toBeTruthy();
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

@@ -12,9 +12,9 @@
 
 - ✅ **M0–M6 tüm planlanan milestones bitti** — Zod `Site` schema, 9 block + registry, editor (iframe +
   postMessage + autosave), AI loop (generate + translate + chat patch + token counter), auth (magic link
-  + DB session), dashboard + publish snapshots, Host routing + locale routes, Stripe + domains + Caddy→nginx
-  on-demand TLS, migration runner (versioned/idempotent/resumable), nightly backups + health watchdog,
-  cancellation policy (grace window + daily sweep + data export).
+  - DB session), dashboard + publish snapshots, Host routing + locale routes, Stripe + domains + Caddy→nginx
+    on-demand TLS, migration runner (versioned/idempotent/resumable), nightly backups + health watchdog,
+    cancellation policy (grace window + daily sweep + data export).
 - ✅ **V2.0 SaaS UI redesign live** — canvas normalization, warm editorial sistem, paylaşımlı
   `AppCanvasShell`/`PageShell`, tüm route'lar tek görsel çerçevede.
 - ✅ **V2.2 Phase 1 — two-layer AI gatekeeper done** — Haiku triage → approval card → risk-routed
@@ -134,18 +134,18 @@ smoke test'tir.** Bundan önce yeni feature eklemek, var olmayan bir ürünü da
 
 ## 4. Riskler & teknik boşluklar
 
-| Risk | Durum | Öneri |
-| --- | --- | --- |
-| Live AI smoke hiç yapılmadı | ⚠️ Açık | Faz 0 |
-| Tek VPS = SPOF | Backup var, DR tam değil | `idea.md` 6.2 — off-site backup (`BACKUP_REMOTE` config'i hazır ama set edilmemiş) |
-| Dev+prod shared `local.db` | ⚠️ Beta büyüyünce problem | V2.6 öne çekilebilir |
-| 2FA yok | Magic link tek faktör | `idea.md` 6.1 — opsiyonel 2FA sonradan |
-| Content moderation/disclaimer yok | Legal/health nişinde ciddi | Faz 1 (yasal) + Faz 2 (`siteQualityCheck`) |
-| KVKK/GDPR + ToS + Privacy yok | Beta launch için lazım | Faz 1 |
-| CI/CD + staging + rollback yok | `idea.md` 6.2 | Ölçeklendikçe |
-| Analytics yok | `idea.md` 6.8 | Faz 6 (GA4/Plausible) |
-| Porkbun endpoint paths verify edilmemiş | Spec'te not edilmiş | Faz 0'da ilk canlı kullanımda |
-| Wildcard-subdomain TLS backlog | Caddy→nginx geçişinden kaldı | Beta cohort büyüyünce |
+| Risk                                    | Durum                        | Öneri                                                                              |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| Live AI smoke hiç yapılmadı             | ⚠️ Açık                      | Faz 0                                                                              |
+| Tek VPS = SPOF                          | Backup var, DR tam değil     | `idea.md` 6.2 — off-site backup (`BACKUP_REMOTE` config'i hazır ama set edilmemiş) |
+| Dev+prod shared `local.db`              | ⚠️ Beta büyüyünce problem    | V2.6 öne çekilebilir                                                               |
+| 2FA yok                                 | Magic link tek faktör        | `idea.md` 6.1 — opsiyonel 2FA sonradan                                             |
+| Content moderation/disclaimer yok       | Legal/health nişinde ciddi   | Faz 1 (yasal) + Faz 2 (`siteQualityCheck`)                                         |
+| KVKK/GDPR + ToS + Privacy yok           | Beta launch için lazım       | Faz 1                                                                              |
+| CI/CD + staging + rollback yok          | `idea.md` 6.2                | Ölçeklendikçe                                                                      |
+| Analytics yok                           | `idea.md` 6.8                | Faz 6 (GA4/Plausible)                                                              |
+| Porkbun endpoint paths verify edilmemiş | Spec'te not edilmiş          | Faz 0'da ilk canlı kullanımda                                                      |
+| Wildcard-subdomain TLS backlog          | Caddy→nginx geçişinden kaldı | Beta cohort büyüyünce                                                              |
 
 ## 5. İlk 3 somut adım
 

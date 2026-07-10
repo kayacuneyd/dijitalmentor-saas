@@ -121,6 +121,7 @@ describe('POST /api/onboarding/answer', () => {
 			['audience', 'Genç yetişkinler'],
 			['differentiator', 'Online seçenek'],
 			['tone', 'warm'],
+			['visualDirection', 'warm_trust'],
 			['languages', ['tr']]
 		];
 		let last;
@@ -145,6 +146,7 @@ describe('POST /api/onboarding/answer', () => {
 			['audience', 'Genç yetişkinler'],
 			['differentiator', 'Online seçenek'],
 			['tone', 'warm'],
+			['visualDirection', 'warm_trust'],
 			['languages', ['tr']],
 			['contactMethod', 'email'],
 			['contactEmail', 'ada@example.com'],

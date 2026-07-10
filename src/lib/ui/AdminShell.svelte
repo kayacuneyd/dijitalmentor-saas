@@ -1,0 +1,113 @@
+<script lang="ts">
+	import AppCanvasShell from './AppCanvasShell.svelte';
+
+	type AdminNavItem = {
+		href: string;
+		label: string;
+		eyebrow?: string;
+		match?: string;
+	};
+
+	let {
+		children,
+		title,
+		description,
+		active = '/admin',
+		actions,
+		max = 'max-w-7xl'
+	} = $props<{
+		children: import('svelte').Snippet;
+		title: string;
+		description?: string;
+		active?: string;
+		actions?: import('svelte').Snippet;
+		max?: string;
+	}>();
+
+	const nav: AdminNavItem[] = [
+		{ href: '/admin', label: 'Overview', eyebrow: 'Ops', match: '/admin' },
+		{ href: '/admin/customers', label: 'Customers', eyebrow: 'CRM', match: '/admin/customers' },
+		{ href: '/admin/inbox', label: 'Inbox', eyebrow: 'Public', match: '/admin/inbox' },
+		{ href: '/admin/support', label: 'Support', eyebrow: 'Help', match: '/admin/support' },
+		{ href: '/admin/invites', label: 'Beta Invites', eyebrow: 'Access', match: '/admin/invites' },
+		{ href: '/admin/settings', label: 'Settings', eyebrow: 'System', match: '/admin/settings' }
+	];
+
+	function isActive(item: AdminNavItem): boolean {
+		if (item.href === '/admin') return active === '/admin';
+		return active === item.href || active.startsWith(`${item.match}/`);
+	}
+</script>
+
+<AppCanvasShell label="saaskaya.app / admin" max="max-w-[92rem]">
+	<div
+		class="grid min-h-[calc(100svh-7rem)] gap-0 overflow-hidden rounded-[var(--sk-radius)] border border-[var(--sk-line)] bg-[var(--sk-card)] lg:grid-cols-[232px_1fr]"
+	>
+		<aside class="border-b border-[var(--sk-line)] bg-[var(--sk-shell)] lg:border-r lg:border-b-0">
+			<div class="flex h-full flex-col">
+				<div class="border-b border-[var(--sk-line)] p-4">
+					<a href="/dashboard" class="sk-link inline-flex items-center gap-2">
+						<span
+							class="flex size-8 items-center justify-center rounded-[8px] bg-[#171614] pb-0.5 font-[var(--font-display)] text-xl text-[#f3ecdd]"
+							>s</span
+						>
+						<span>
+							<span class="block text-sm font-semibold leading-none">saaskaya</span>
+							<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]">Admin Console</span
+							>
+						</span>
+					</a>
+				</div>
+				<nav
+					class="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible"
+					aria-label="Admin"
+				>
+					{#each nav as item (item.href)}
+						<a
+							href={item.href}
+							class="flex min-w-36 items-center justify-between gap-3 rounded-[8px] px-3 py-2 text-sm transition lg:min-w-0 {isActive(
+								item
+							)
+								? 'bg-[var(--sk-ink)] text-[var(--sk-card)]'
+								: 'text-[var(--sk-muted)] hover:bg-[rgb(23_22_20_/_0.05)] hover:text-[var(--sk-ink)]'}"
+							aria-current={isActive(item) ? 'page' : undefined}
+						>
+							<span class="font-medium">{item.label}</span>
+							{#if item.eyebrow}
+								<span class="sk-mono text-[8.5px] opacity-60">{item.eyebrow}</span>
+							{/if}
+						</a>
+					{/each}
+				</nav>
+				<div class="mt-auto hidden border-t border-[var(--sk-line)] p-3 lg:block">
+					<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm w-full">Back to app</a>
+				</div>
+			</div>
+		</aside>
+
+		<section class="min-w-0 bg-[#fbfaf7]">
+			<div class="mx-auto flex w-full {max} flex-col gap-5 p-4 sm:p-5 lg:p-6">
+				<header
+					class="flex flex-col gap-3 border-b border-[var(--sk-line)] pb-4 md:flex-row md:items-start md:justify-between"
+				>
+					<div class="min-w-0">
+						<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Admin</div>
+						<h1 class="mt-1 text-2xl font-semibold text-[var(--sk-ink)] sm:text-3xl">
+							{title}
+						</h1>
+						{#if description}
+							<p class="mt-1 max-w-2xl text-sm leading-6 text-[var(--sk-muted)] md:text-[15px]">
+								{description}
+							</p>
+						{/if}
+					</div>
+					{#if actions}
+						<div class="flex flex-wrap gap-2 md:justify-end">{@render actions()}</div>
+					{/if}
+				</header>
+
+				{@render children()}
+			</div>
+		</section>
+	</div>
+</AppCanvasShell>

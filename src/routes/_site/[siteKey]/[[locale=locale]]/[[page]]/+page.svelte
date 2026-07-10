@@ -1,19 +1,12 @@
 <script lang="ts">
 	import type { Locale } from '$lib/schema/site';
 	import SiteRenderer from '$lib/render/SiteRenderer.svelte';
+	import { publicSitePath } from '$lib/siteUrls';
 
 	let { data, form } = $props();
 
-	const homeSlug = $derived(data.site.pages[0].slug);
-
-	function pathFor(locale: Locale, pageSlug: string): string {
-		const prefix = locale === data.site.defaultLocale ? '' : `/${locale}`;
-		const path = pageSlug === homeSlug ? '' : `/${pageSlug}`;
-		return prefix + path || '/';
-	}
-
-	const hrefFor = (pageSlug: string) => pathFor(data.locale, pageSlug);
-	const localeHrefFor = (locale: Locale) => pathFor(locale, data.page.slug);
+	const hrefFor = (pageSlug: string) => publicSitePath(data.site, data.locale, pageSlug);
+	const localeHrefFor = (locale: Locale) => publicSitePath(data.site, locale, data.page.slug);
 </script>
 
 <svelte:head>
@@ -22,6 +15,14 @@
 		<meta name="description" content={data.site.settings.seo.description[data.locale]} />
 	{/if}
 </svelte:head>
+
+{#if data.publishedVersion}
+	<div
+		class="fixed top-3 left-3 z-50 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
+	>
+		Published v{data.publishedVersion}
+	</div>
+{/if}
 
 <SiteRenderer
 	site={data.site}

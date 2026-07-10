@@ -4,6 +4,7 @@ import type { Cookies } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import { pendingOnboarding } from '$lib/server/db/schema';
 import type { OnboardingAnswers } from '$lib/onboarding/questions';
+import { recordOnboardingEvent } from './telemetry';
 
 /**
  * Anonymous session for the guided onboarding Q&A (Hostinger Horizons roadmap
@@ -65,6 +66,25 @@ export function getPendingByToken(token: string | undefined | null): PendingReco
 	return rowToRecord(row);
 }
 
+/** Server-internal lookup by id (no token needed) — used once generation is done and
+ *  only the pending id (already handed to the client in the finish response) is on
+ *  hand. Unlike `getPendingByToken`, this doesn't gate on expiry: the record is
+ *  already `consumed` by this point, we're only reading its answers back. */
+export function getPendingById(id: string): PendingRecord | null {
+	const row = db.select().from(pendingOnboarding).where(eq(pendingOnboarding.id, id)).get();
+	return row ? rowToRecord(row) : null;
+}
+
+/** Fills in the `generatedSiteId` back-reference once the site actually exists —
+ *  `consumePending` runs at /api/onboarding/finish, before the site is created, so
+ *  it can never set this itself. */
+export function setGeneratedSiteId(id: string, siteId: string): void {
+	db.update(pendingOnboarding)
+		.set({ generatedSiteId: siteId, updatedAt: new Date() })
+		.where(eq(pendingOnboarding.id, id))
+		.run();
+}
+
 /** Lazily creates a pending row + `sk_pending` cookie if none exists yet. */
 export function createOrGetPending(cookies: Cookies): PendingRecord {
 	const existing = getPendingByToken(cookies.get(PENDING_COOKIE));
@@ -85,6 +105,7 @@ export function createOrGetPending(cookies: Cookies): PendingRecord {
 			expiresAt: new Date(now.getTime() + PENDING_TTL_MS)
 		})
 		.run();
+	recordOnboardingEvent({ event: 'started', pendingId: id, route: '/new', source: 'pending' });
 	// Opportunistic cleanup, same idiom as createLoginToken/createSession.
 	db.delete(pendingOnboarding).where(lt(pendingOnboarding.expiresAt, now)).run();
 	setCookie(cookies, token);
@@ -111,6 +132,13 @@ export function savePendingAnswer(
 		.set({ answers, updatedAt: now, expiresAt: new Date(now.getTime() + PENDING_TTL_MS) })
 		.where(eq(pendingOnboarding.id, pending.id))
 		.run();
+	recordOnboardingEvent({
+		event: 'answer_saved',
+		pendingId: pending.id,
+		userId: pending.linkedUserId,
+		route: '/api/onboarding/answer',
+		source: questionId
+	});
 	return { ...pending, answers };
 }
 

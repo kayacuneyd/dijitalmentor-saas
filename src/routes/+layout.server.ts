@@ -1,4 +1,8 @@
 import type { LayoutServerLoad } from './$types';
 
-/** Expose the signed-in user to every page (nav state). */
-export const load: LayoutServerLoad = ({ locals }) => ({ user: locals.user });
+/** Expose session and locale context to every page. */
+export const load: LayoutServerLoad = ({ locals }) => ({
+	user: locals.user,
+	locale: locals.locale,
+	unprefixedPath: locals.unprefixedPath
+});

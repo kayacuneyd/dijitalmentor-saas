@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import AppCard from '$lib/ui/AppCard.svelte';
-	import PageShell from '$lib/ui/PageShell.svelte';
+	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
 	let { data, form } = $props();
 	const c = $derived(data.customer);
+
+	function liveUrl(site: (typeof c.sites)[number]): string {
+		const host = site.domain ?? `${site.publicHandle ?? site.id}.${page.url.host}`;
+		return `https://${host}${site.publishedVersion ? `?v=${site.publishedVersion}` : ''}`;
+	}
 
 	function planLabel(subscription: typeof c.subscription): string {
 		if (subscription.state === 'active') return 'Pro';
@@ -18,20 +24,40 @@
 		if (subscription.state === 'grace') return 'warning' as const;
 		return 'neutral' as const;
 	}
+
+	function sitePlanLabel(plan: (typeof c.sites)[number]['plan']): string {
+		if (plan.state === 'active') return 'Pro site';
+		if (plan.state === 'grace') return 'Pro grace';
+		return 'Free site';
+	}
+
+	function sitePlanTone(plan: (typeof c.sites)[number]['plan']) {
+		if (plan.state === 'active') return 'success' as const;
+		if (plan.state === 'grace') return 'warning' as const;
+		return 'neutral' as const;
+	}
+
+	function ticketTone(status: string) {
+		if (status === 'resolved') return 'success' as const;
+		if (status === 'closed') return 'neutral' as const;
+		return 'warning' as const;
+	}
+
+	let deleteConfirmSiteId = $state<string | null>(null);
 </script>
 
 <svelte:head>
 	<title>{c.email} · Customers · saaskaya admin</title>
 </svelte:head>
 
-<PageShell
-	backHref="/admin/customers"
-	backLabel="customers"
+<AdminShell
 	title={c.email}
 	description="Joined {new Date(c.createdAt).toLocaleDateString()}"
-	max="max-w-4xl"
-	canvasLabel="saaskaya.app / admin"
+	active="/admin/customers"
 >
+	{#snippet actions()}
+		<a href="/admin/customers" class="sk-btn sk-btn-secondary sk-btn-sm">Back to customers</a>
+	{/snippet}
 	{#if form?.overridden}
 		<div class="sk-alert sk-alert-success">
 			Plan manually set to <strong>{form.overridden === 'active' ? 'Pro' : 'Free'}</strong>.
@@ -42,13 +68,19 @@
 		<div class="sk-alert sk-alert-success">
 			Domain detached from <strong>{form.domainDetached}</strong>.
 		</div>
+	{:else if form?.published}
+		<div class="sk-alert sk-alert-success"><strong>{form.published}</strong> published.</div>
 	{:else if form?.unpublished}
 		<div class="sk-alert sk-alert-success"><strong>{form.unpublished}</strong> unpublished.</div>
+	{:else if form?.siteDeleted}
+		<div class="sk-alert sk-alert-success">
+			<strong>{form.siteDeleted}</strong> permanently deleted.
+		</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
 
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div>
@@ -78,7 +110,7 @@
 		</div>
 	</AppCard>
 
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-4">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<h2 class="font-semibold">AI usage this month</h2>
@@ -139,7 +171,7 @@
 		</div>
 	</AppCard>
 
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<h2 class="font-semibold">Sites ({c.sites.length})</h2>
 			{#if c.sites.length === 0}
@@ -147,36 +179,95 @@
 			{:else}
 				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
 					{#each c.sites as site (site.id)}
-						<li class="flex flex-wrap items-center justify-between gap-2 py-3">
-							<div class="min-w-0">
-								<p class="truncate text-sm font-medium">{site.siteName}</p>
-								<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
-									{site.id}
+						<li class="flex flex-col gap-2 py-3">
+							<div class="flex flex-wrap items-center justify-between gap-2">
+								<div class="min-w-0">
+									<p class="truncate text-sm font-medium">{site.siteName}</p>
+									<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
+										{site.id}
+										{#if site.domain}
+											· {site.domain}{/if}
+									</p>
+								</div>
+								<div class="flex flex-wrap items-center gap-2">
+									<StatusPill tone={site.publishedVersion ? 'success' : 'neutral'}>
+										{site.publishedVersion ? 'Published' : 'Draft'}
+									</StatusPill>
+									<StatusPill tone={sitePlanTone(site.plan)}>
+										{sitePlanLabel(site.plan)}
+									</StatusPill>
+									<a
+										href="/preview/{site.id}"
+										target="_blank"
+										class="sk-btn sk-btn-ghost sk-btn-sm"
+									>
+										Preview
+									</a>
 									{#if site.domain}
-										· {site.domain}{/if}
-								</p>
+										<form method="POST" action="?/detachDomain" use:enhance>
+											<input type="hidden" name="siteId" value={site.id} />
+											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
+												Detach domain
+											</button>
+										</form>
+									{/if}
+									{#if site.publishedVersion}
+										<a href={liveUrl(site)} target="_blank" class="sk-btn sk-btn-ghost sk-btn-sm">
+											Live ↗
+										</a>
+										<form method="POST" action="?/unpublish" use:enhance>
+											<input type="hidden" name="siteId" value={site.id} />
+											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+												Unpublish
+											</button>
+										</form>
+									{:else}
+										<form method="POST" action="?/publish" use:enhance>
+											<input type="hidden" name="siteId" value={site.id} />
+											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Publish</button>
+										</form>
+									{/if}
+									<button
+										type="button"
+										onclick={() => (deleteConfirmSiteId = site.id)}
+										class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
+									>
+										Delete
+									</button>
+								</div>
 							</div>
-							<div class="flex flex-wrap items-center gap-2">
-								<StatusPill tone={site.publishedVersion ? 'success' : 'neutral'}>
-									{site.publishedVersion ? 'Published' : 'Draft'}
-								</StatusPill>
-								{#if site.domain}
-									<form method="POST" action="?/detachDomain" use:enhance>
-										<input type="hidden" name="siteId" value={site.id} />
-										<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
-											Detach domain
-										</button>
-									</form>
-								{/if}
-								{#if site.publishedVersion}
-									<form method="POST" action="?/unpublish" use:enhance>
+							{#if deleteConfirmSiteId === site.id}
+								<div
+									class="flex flex-wrap items-center gap-2 rounded-[10px] border border-[#b8532f]/40 bg-[#b8532f]/5 p-3"
+								>
+									<p class="text-xs text-[#b8532f]">
+										Permanently delete <strong>{site.siteName}</strong>? This unpublishes it,
+										detaches its domain, and removes all versions/media. Cannot be undone.
+									</p>
+									<form
+										method="POST"
+										action="?/deleteSite"
+										use:enhance={() => {
+											return async ({ update }) => {
+												await update();
+												deleteConfirmSiteId = null;
+											};
+										}}
+									>
 										<input type="hidden" name="siteId" value={site.id} />
 										<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
-											Unpublish
+											Confirm delete
 										</button>
 									</form>
-								{/if}
-							</div>
+									<button
+										type="button"
+										onclick={() => (deleteConfirmSiteId = null)}
+										class="sk-btn sk-btn-ghost sk-btn-sm"
+									>
+										Cancel
+									</button>
+								</div>
+							{/if}
 						</li>
 					{/each}
 				</ul>
@@ -184,7 +275,7 @@
 		</div>
 	</AppCard>
 
-	<AppCard>
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<h2 class="font-semibold">Contact submissions ({c.submissions.length})</h2>
 			{#if c.submissions.length === 0}
@@ -207,7 +298,32 @@
 		</div>
 	</AppCard>
 
-	<AppCard>
+	<AppCard class="p-4">
+		<div class="flex flex-col gap-3">
+			<h2 class="font-semibold">Support tickets ({c.tickets.length})</h2>
+			{#if c.tickets.length === 0}
+				<p class="text-sm text-[var(--sk-muted)]">No tickets from this customer.</p>
+			{:else}
+				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
+					{#each c.tickets as ticket (ticket.id)}
+						<li class="flex flex-wrap items-center justify-between gap-2 py-3">
+							<div class="min-w-0">
+								<a href="/admin/support/{ticket.id}" class="sk-link truncate font-medium">
+									{ticket.subject}
+								</a>
+								<p class="text-xs text-[var(--sk-faint)]">
+									{ticket.category} · updated {new Date(ticket.lastMessageAt).toLocaleDateString()}
+								</p>
+							</div>
+							<StatusPill tone={ticketTone(ticket.status)}>{ticket.status}</StatusPill>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	</AppCard>
+
+	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<h2 class="font-semibold">Admin action log ({c.actions.length})</h2>
 			{#if c.actions.length === 0}
@@ -227,4 +343,4 @@
 			{/if}
 		</div>
 	</AppCard>
-</PageShell>
+</AdminShell>

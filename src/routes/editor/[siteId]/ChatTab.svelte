@@ -1,8 +1,11 @@
 <script lang="ts">
 	import type { Site } from '$lib/schema/site';
 	import type { DraftStore } from '$lib/stores/draft.svelte';
+	import type { ChatMessageRow } from '$lib/server/chatLog';
+	import ChatBubble from '$lib/ui/ChatBubble.svelte';
+	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 
-	let { store }: { store: DraftStore } = $props();
+	let { store, history = [] }: { store: DraftStore; history?: ChatMessageRow[] } = $props();
 
 	type ChatMessage = { role: 'user' | 'assistant' | 'error'; text: string };
 	type Proposal = {
@@ -12,7 +15,8 @@
 		reply: string;
 	};
 
-	let messages = $state<ChatMessage[]>([]);
+	// svelte-ignore state_referenced_locally
+	let messages = $state<ChatMessage[]>(history.map((row) => ({ role: row.role, text: row.body })));
 	let input = $state('');
 	let busy = $state(false);
 	let proposal = $state<Proposal | null>(null);
@@ -131,21 +135,7 @@
 			</div>
 		{/if}
 		{#each messages as msg, i (i)}
-			{#if msg.role === 'user'}
-				<div class="flex justify-end">
-					<div
-						class="max-w-[92%] rounded-[12px] bg-[#171614] px-3 py-2 text-sm leading-6 text-[#f3ecdd]"
-					>
-						{msg.text}
-					</div>
-				</div>
-			{:else if msg.role === 'assistant'}
-				<div class="sk-card max-w-[92%] p-3 text-sm leading-6">
-					{msg.text}
-				</div>
-			{:else}
-				<div class="sk-alert sk-alert-error px-3 py-2 text-xs">{msg.text}</div>
-			{/if}
+			<ChatBubble role={msg.role} animate={i >= history.length}>{msg.text}</ChatBubble>
 		{/each}
 
 		{#if redirected && !busy}
@@ -192,9 +182,7 @@
 		{/if}
 
 		{#if busy}
-			<div class="sk-card w-fit p-3 text-sm">
-				<span class="loading loading-dots loading-sm"></span>
-			</div>
+			<TypingIndicator />
 		{/if}
 	</div>
 

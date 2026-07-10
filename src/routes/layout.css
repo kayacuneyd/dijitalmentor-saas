@@ -8,6 +8,7 @@
 	--sk-stone: #ece7dd;
 	--sk-shell: #f3efe6;
 	--sk-card: #fbfaf7;
+	--sk-paper: #f3ecdd;
 	--sk-line: rgb(23 22 20 / 0.1);
 	--sk-line-strong: rgb(23 22 20 / 0.16);
 	--sk-success-bg: #e8f0e2;
@@ -20,8 +21,8 @@
 	--sk-error-line: rgb(184 83 47 / 0.32);
 	--sk-error-ink: #7a2f1a;
 	--sk-radius: 14px;
-	--font-display: 'Instrument Serif', Georgia, serif;
-	--font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+	--font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+	--font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 	color: var(--sk-ink);
 	font-family: var(--font-sans);
@@ -50,7 +51,7 @@ select {
 
 .sk-display {
 	font-family: var(--font-display);
-	font-weight: 400;
+	font-weight: 800;
 	letter-spacing: 0;
 }
 
@@ -77,9 +78,10 @@ select {
 }
 
 .sk-card {
-	border: 1px solid var(--sk-line);
+	border: 1px solid var(--sk-line-strong);
 	border-radius: 12px;
 	background: var(--sk-card);
+	box-shadow: 0 1px 2px rgb(23 22 20 / 0.04);
 }
 
 .sk-soft {

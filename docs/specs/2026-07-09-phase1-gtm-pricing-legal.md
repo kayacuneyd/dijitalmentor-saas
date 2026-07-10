@@ -29,7 +29,7 @@ Psikologlar en dengeli başlangıç nişidir:
 2. **İçerik riski yönetilebilir:** Sağlık Hizmetleri Reklam Yönetmeliği psikologları da kapsar ama hekim olmadıkları için tıbbi iddia kısıtları diş hekimlerinden esnek; disclaimer + owner-review gate ile kontrol altında.
 3. **Lead değeri:** Tekrarlayan seans modeli (haftalık/iki haftalık) bir müşterinin yıllık değeri yüksek; randevu/booking modülü (Phase 3) doğrudan iş değeri yaratır.
 4. **Dijital ihtiyaç:** Pandemi sonrası online terapi normalleşti; genç psikologlar kendi muayenehanesini açarken web sitesi + randevu + çok dilli (TR/EN/DE — yabancı danışan) ihtiyacı net.
-5. **Ödeme isteği:** Muayenehane psikologları için aylık 299₺ birkaç seansın karşılığı — ROI bariz.
+5. **Ödeme isteği:** Muayenehane psikologları için aylık 17€ birkaç seansın küçük bir bölümü — ROI bariz.
 
 ### Diğer nişlerin durumu
 
@@ -38,9 +38,9 @@ Psikologlar en dengeli başlangıç nişidir:
 
 ## 2. Fiyatlandırma Tablosu
 
-### Karar: Free / Pro / Premium (TRY, aylık, KDV hariç)
+### Karar: Free / Pro / Premium (aylık, KDV hariç)
 
-| Özellik                           | Free                          | Pro (299₺/ay)              | Premium (599₺/ay)                             |
+| Özellik                           | Free                          | Pro (17€/ay)               | Premium (sonra netleşecek)                    |
 | --------------------------------- | ----------------------------- | -------------------------- | --------------------------------------------- |
 | **Site**                          | 1 taslak site                 | 1 yayınlanmış site         | 1 yayınlanmış site                            |
 | **Yayın**                         | `*.saaskaya.com` alt alan adı | Özel domain + alt alan adı | Özel domain + alt alan adı                    |
@@ -81,18 +81,18 @@ Psikologlar en dengeli başlangıç nişidir:
 
 | Kale                     | Tutar (₺/ay) |
 | ------------------------ | ------------ |
-| Pro abonelik (KDV hariç) | 299,00       |
-| **Toplam gelir**         | **299,00**   |
+| Pro abonelik (KDV hariç) | 15,00€       |
+| **Toplam gelir**         | **15,00€**   |
 
 ### Değişken maliyetler (site başına)
 
-| Kale                                    | Hesap                                | Tutar (₺/ay) |
-| --------------------------------------- | ------------------------------------ | ------------ |
-| AI (DeepSeek Flash, 50 edit + 5 üretim) | 50×$0.001 + 5×$0.005 ≈ $0.075 ≈ 2,5₺ | 3,00         |
-| Stripe komisyonu                        | 299×%2,9 + 2₺                        | 10,70        |
-| R2 depolama (500 MB)                    | ~$0.015/GB×0,5 ≈ 0,25₺               | 1,00         |
-| E-posta (Resend/SMTP)                   | ~50 mail/ay ≈ 2₺                     | 2,00         |
-| **Toplam değişken**                     |                                      | **16,70**    |
+| Kale                                    | Hesap                                | Tutar (₺/ay)     |
+| --------------------------------------- | ------------------------------------ | ---------------- |
+| AI (DeepSeek Flash, 50 edit + 5 üretim) | 50×$0.001 + 5×$0.005 ≈ $0.075 ≈ 2,5₺ | 3,00             |
+| Creem/ödeme komisyonu                   | 17€×sağlayıcı komisyonu              | sağlayıcıya göre |
+| R2 depolama (500 MB)                    | ~$0.015/GB×0,5 ≈ 0,25₺               | 1,00             |
+| E-posta (Resend/SMTP)                   | ~50 mail/ay ≈ 2₺                     | 2,00             |
+| **Toplam değişken**                     |                                      | **16,70**        |
 
 ### Sabit maliyet payı (10 aktif ödemeli site varsayımı)
 
@@ -112,12 +112,8 @@ Psikologlar en dengeli başlangıç nişidir:
 
 ### Brüt marj
 
-|                     | Tutar (₺/ay) |
-| ------------------- | ------------ |
-| Gelir               | 299,00       |
-| Toplam maliyet      | 161,70       |
-| **Brüt marj**       | **137,30**   |
-| **Brüt marj oranı** | **~46%**     |
+> 2026-07-10 fiyat kararı 17€/ay olarak değişti. Aşağıdaki eski TRY ölçek hesabı yeni fiyat ve
+> ödeme sağlayıcı komisyonlarıyla yeniden hesaplanmalı; launch kararı için kaynak kabul edilmez.
 
 ### Ölçek etkisi
 
@@ -181,7 +177,7 @@ Psikologlar en dengeli başlangıç nişidir:
 ## 6. Exit Gate Kontrol
 
 - [x] Bir adlandırılmış ICP: **muayenehane psikoloğu** (TR, online/offline terapi, 1–3 yıllık deneyim, web sitesi yok veya eski)
-- [x] Onaylanmış fiyatlandırma tablosu: Free/Pro/Premium (299₺/599₺)
+- [x] Onaylanmış fiyatlandırma tablosu: Free/Pro (17€/ay); Premium ve ek servisler sonra netleşecek
 - [x] Pozitif hedef brüt marj: ~%46 (10 müşteri), ~%66 (20 müşteri)
 - [x] Yasal inceleme tamam: 6 sayfa yayınlandı (operatör hukuki gözden geçirme bekliyor — beta öncesi)
 - [x] Çözülmemiş launch-policy kararı yok: niş, fiyat, iade, domain, disclaimer belgelendi

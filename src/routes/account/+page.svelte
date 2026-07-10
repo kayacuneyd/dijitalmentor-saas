@@ -19,10 +19,11 @@
 	backLabel="dashboard"
 	title="Account"
 	description={data.user.email}
-	max="max-w-4xl"
+	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
 	{#snippet actions()}
+		<a href="/account/support" class="sk-btn sk-btn-secondary sk-btn-sm">Support</a>
 		<form method="POST" action="/logout">
 			<button type="submit" class="sk-btn sk-btn-ghost">Sign out</button>
 		</form>
@@ -138,9 +139,9 @@
 	<AppCard>
 		<div class="flex flex-col gap-4">
 			<div>
-				<h2 class="font-semibold">Data exports</h2>
+				<h2 class="font-semibold">Site exports</h2>
 				<p class="text-sm text-[var(--sk-muted)]">
-					Each export contains the full site JSON and contact-form submissions for that site.
+					Full site export is available for Pro sites and operator support cases.
 				</p>
 			</div>
 			{#if data.sites.length === 0}
@@ -159,13 +160,17 @@
 										· {site.domain}{/if}
 								</p>
 							</div>
-							<a
-								href="/api/sites/{site.id}/export"
-								class="sk-btn sk-btn-secondary sk-btn-sm"
-								download
-							>
-								Export
-							</a>
+							{#if site.canExport}
+								<a
+									href="/api/sites/{site.id}/export"
+									class="sk-btn sk-btn-secondary sk-btn-sm"
+									download
+								>
+									Export
+								</a>
+							{:else}
+								<span class="text-xs text-[var(--sk-faint)]">Pro site required</span>
+							{/if}
 						</li>
 					{/each}
 				</ul>

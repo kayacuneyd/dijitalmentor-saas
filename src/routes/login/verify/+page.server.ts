@@ -2,14 +2,17 @@ import { redirect } from '@sveltejs/kit';
 import {
 	consumeLoginToken,
 	createSession,
+	betaProfileComplete,
 	getOrCreateUser,
+	isAdminEmail,
 	isBetaAllowed,
 	setSessionCookie
 } from '$lib/server/auth';
+import { withLocale } from '$lib/i18n';
 import { linkPendingToUser } from '$lib/server/onboarding/session';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = ({ url, cookies }) => {
+export const load: PageServerLoad = ({ url, cookies, locals }) => {
 	const token = url.searchParams.get('token');
 	const email = token ? consumeLoginToken(token) : null;
 	if (!email) return { failed: true };
@@ -28,5 +31,9 @@ export const load: PageServerLoad = ({ url, cookies }) => {
 		urlToken: url.searchParams.get('p'),
 		userId: user.id
 	});
-	redirect(303, pending ? '/new' : '/dashboard');
+	if (pending) redirect(303, withLocale(locals.locale, '/new'));
+	if (!isAdminEmail(email) && !betaProfileComplete(user.id)) {
+		redirect(303, withLocale(locals.locale, '/profile/start'));
+	}
+	redirect(303, '/dashboard');
 };

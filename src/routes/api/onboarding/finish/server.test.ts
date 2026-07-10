@@ -42,10 +42,15 @@ async function answer(
 
 function finish(
 	cookies: ReturnType<typeof makeCookieJar>,
-	locals: { user: { id: string; email: string } | null }
+	locals: { user: { id: string; email: string } | null },
+	body?: unknown
 ) {
 	return POST({
-		request: new Request('http://localhost/api/onboarding/finish', { method: 'POST' }),
+		request: new Request('http://localhost/api/onboarding/finish', {
+			method: 'POST',
+			headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+			body: body === undefined ? undefined : JSON.stringify(body)
+		}),
 		cookies,
 		locals
 	} as unknown as Parameters<typeof POST>[0]);
@@ -60,6 +65,7 @@ const FULL_ANSWERS: [string, unknown][] = [
 	['audience', 'Genç yetişkinler'],
 	['differentiator', 'Online seçenek'],
 	['tone', 'warm'],
+	['visualDirection', 'warm_trust'],
 	['languages', ['tr']],
 	['contactMethod', 'email'],
 	['contactEmail', 'ada@example.com'],
@@ -109,6 +115,33 @@ describe('POST /api/onboarding/finish', () => {
 		expect(pending?.linkedUserId).toBe(user.id);
 	});
 
+	it('includes a valid selected catalog kit in the composed description', async () => {
+		const ip = nextIp();
+		const cookies = makeCookieJar();
+		for (const [questionId, value] of FULL_ANSWERS) {
+			await answer(questionId, value, cookies, ip);
+		}
+		const res = await finish(cookies, { user }, { kitSlug: 'online-therapy' });
+		const data = await res.json();
+		expect(res.status).toBe(200);
+		expect(data.description).toContain('Kit referansı: Online Terapi');
+		expect(data.description).toContain('online-therapy');
+		expect(data.description).not.toContain('calm-intake');
+	});
+
+	it('rejects an unknown selected kit before consuming the pending record', async () => {
+		const ip = nextIp();
+		const cookies = makeCookieJar();
+		for (const [questionId, value] of FULL_ANSWERS) {
+			await answer(questionId, value, cookies, ip);
+		}
+		const res = await finish(cookies, { user }, { kitSlug: 'unknown-kit' });
+		const data = await res.json();
+		expect(res.status).toBe(400);
+		expect(data.message).toBe('Unknown kit.');
+		expect(getPendingByToken(cookies.store[PENDING_COOKIE])?.status).toBe('completed');
+	});
+
 	it('accepts the raw escape-hatch description verbatim, bypassing the structured gate', async () => {
 		const ip = nextIp();
 		const cookies = makeCookieJar();
@@ -124,6 +157,35 @@ describe('POST /api/onboarding/finish', () => {
 		expect(data.description).toBe(
 			'Ben Av. Zeynep Demir. İstanbul’da 12 yıldır aile hukuku ve boşanma davalarına bakıyorum.'
 		);
+	});
+
+	it('sends unsupported niche selections to manual beta review instead of generation', async () => {
+		const ip = nextIp();
+		const cookies = makeCookieJar();
+		await answer('niche', 'unsupported', cookies, ip);
+
+		const res = await finish(cookies, { user });
+		const data = await res.json();
+
+		expect(res.status).toBe(409);
+		expect(data.message).toContain('manuel beta incelemesine');
+	});
+
+	it('rejects raw unsupported professions before generation can map them to a preset', async () => {
+		const ip = nextIp();
+		const cookies = makeCookieJar();
+		await answer(
+			'rawDescription',
+			'Ayakkabı tamiri yapan küçük bir işletmeyim. İstanbul’da taban yenileme, boya ve bakım hizmeti veriyorum.',
+			cookies,
+			ip
+		);
+
+		const res = await finish(cookies, { user });
+		const data = await res.json();
+
+		expect(res.status).toBe(409);
+		expect(data.message).toContain('Law preset');
 	});
 
 	it('rejects finishing a pending record already claimed by a different account', async () => {

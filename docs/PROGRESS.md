@@ -3,6 +3,212 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-10
+
+**Current workspace state redeployed on request.** User asked to deploy everything not yet deployed.
+Ran the atomic `npm run deploy:production` flow against the current dirty workspace state. Verification:
+deploy `npm run check` passed with 0 errors/warnings, full `npm test` passed (61 files / 383 tests),
+production build succeeded, PM2 restarted/saved, production smoke passed on mobile + desktop public
+routes, and the active release is `20260710T133539Z`.
+
+## 2026-07-10
+
+**Creem production billing alignment.** User corrected the Creem dashboard webhook URL to the app's
+real endpoint, `https://saaskaya.com/api/billing/creem/webhook`, and changed the Pro product to
+17€/month recurring. Verified via Creem's read-only product API that the configured
+`CREEM_PRO_PRODUCT_ID` now returns `billing_type=recurring`, `billing_period=every-month`,
+`currency=EUR`, `price=1700`, `status=active`, and `mode=prod`. Set production app settings
+`PAYMENT_PROVIDER=creem` and `PRO_PRICE_EUR=17` so provider choice and admin MRR no longer depend on
+fallback behavior.
+
+Updated customer-visible Pro subscription copy from 15€ to 17€ on the landing pricing teaser,
+`/pricing` EN/TR/DE copy, SEO `SoftwareApplication` offer metadata, and the admin revenue default.
+Domain price copy intentionally remains about 15€/year because that is a separate pass-through domain
+reservation cost.
+
+Hardened Creem checkout/webhook mapping: checkout creation now sends `userId`, `referenceId`, and
+`internal_customer_id` metadata; webhook handling reads metadata from object, nested subscription, or
+nested checkout payloads; `checkout.completed`, `subscription.scheduled_cancel`, and
+`subscription.update` are handled explicitly. Verification before deploy: targeted billing/revenue
+tests passed (2 files / 22 tests), `npm run check` passed with 0 errors/warnings, full `npm test`
+passed (61 files / 383 tests), and `npm run build` succeeded.
+
+Deployed with `npm run deploy:production`: release `20260710T130357Z`, deploy check/test/build passed,
+PM2 restarted, and production smoke passed. Post-deploy live smoke confirmed `/en/pricing` shows
+17€/month, landing shows 17€, a signed Creem webhook returns 200, and authenticated
+`/api/billing/checkout` returns a 303 redirect to `creem.io`; the temporary smoke user/session were
+removed from production DB afterward.
+
+## 2026-07-10
+
+**Live-product feedback batch shipped: publish-staleness fix, site deletion, persistent editor
+chat, editor/dashboard/admin polish, landing hero media.** Implemented the full plan in
+`docs/PLAN.md`-adjacent scratch (11-item user feedback round; plan lived at
+`/root/.claude/plans/docs-specs-2026-07-09-hostinger-horizon-effervescent-iverson.md`).
+
+- **Publish staleness (root cause, critical fix).** `DraftStore.save()`
+  (`src/lib/stores/draft.svelte.ts`) unconditionally reported `status='saved'` on a successful PUT
+  even if a newer edit landed while that PUT was in flight — `publish()` then skipped the flush and
+  snapshotted a stale draft. Fixed with a monotonic edit-generation tracker
+  (`src/lib/stores/saveTracker.ts`, new): `save()` only reports `'saved'` when no edit raced past it,
+  otherwise stays `'dirty'`; new `flush()` loops `save()` until the server is confirmed current.
+  `publish()` now calls `flush()` and aborts with a visible error if it fails, and belt-and-braces
+  sends the current draft snapshot in the publish request body — `POST /api/sites/[siteId]/publish`
+  now accepts an optional `{draft}`, validates it with `siteSchema` (constitution §2), persists it,
+  then snapshots. Owner-facing live links get a `?v={version}` cache-buster. Verified live: edited a
+  headline and clicked Republish within the 800ms autosave window — the published tenant page served
+  the edit immediately (previously would have published the pre-edit version).
+- **Site deletion (new).** Permanent delete with typed site-name confirmation.
+  `src/lib/server/siteDeletion.ts` (new): transactional cascade (site_versions, contact_submissions,
+  media_assets, site_chat_messages, custom_domains, sites), blocks on a paid/registering/active domain
+  reservation, auto-cancels a pending one, best-effort R2 cleanup via new `deleteMediaObjects()` in
+  `media.ts`. Dashboard: "Siteyi sil" in the site's `⋯` menu with an inline type-to-confirm panel.
+  Admin: matching `deleteSite` action + confirm UI on `/admin/customers/[userId]`, logged to
+  `admin_actions` (`site_delete`).
+- **Persistent editor chat (new, migration v16).** New `site_chat_messages` table
+  (`src/lib/server/db/migrations.ts` v16, `schema.ts`) + `src/lib/server/chatLog.ts`
+  (append/list/delete/seed). The /new onboarding Q&A is replayed into the editor's Chat tab
+  (`seedChatFromOnboarding`, wired at `POST /api/sites` success — also fixes the `generatedSiteId`
+  back-reference on `pending_onboarding`, which was never set before) so the conversation visibly
+  continues once the site lands in the editor. `/api/sites/[siteId]/chat` now persists user turns
+  (stage-1 sends only) and assistant replies (applied/reply/help/redirect; proposals/errors stay
+  ephemeral). New shared `src/lib/ui/ChatBubble.svelte` + `TypingIndicator.svelte` replace the
+  hand-duplicated bubble markup in both `/new` and the editor's `ChatTab`.
+- **Editor polish.** New `src/lib/editor/icons.ts` (inline SVG, matches the landing page's stroke
+  convention) — sidebar tabs are now icon+label instead of plain text, checklist ✓/○ are proper
+  circle icons, the viewport switcher is icon-only, and the editor locale picker is a segmented
+  flag-button control (reusing `src/lib/ui/flags.ts`). `PagesTab.svelte` rewritten off DaisyUI onto
+  the `sk-*` system with a page counter, collapsed add-page form, and new remove-page support (new
+  pure `src/lib/editor/pageOps.ts`: `addPage`/`removePage`, backfills `nav.items` when removal would
+  empty it — nav requires ≥1 entry or the next autosave 400s).
+- **Dashboard live preview thumbnails (new).** `src/lib/ui/SitePreviewThumb.svelte`: a lazy,
+  non-interactive, scaled iframe of `/preview/{siteId}` (owner-authed draft, works pre-publish) on
+  each dashboard site card.
+- **Width harmonization + admin go-live tools.** One rule: PageShell pages get `max="max-w-5xl"`,
+  AdminShell pages inherit the default `max-w-7xl` (no override) — normalized 6 previously-uneven
+  files. Admin customer detail gained `publish`/preview/live-link tools (same quality gate as owner
+  publish, logged to `admin_actions`), so admins can manage a beta user's site without an approval
+  gate (per product decision — self-serve publish stays, admin now has visibility + a lever).
+- **Landing hero right column.** Hero is now a two-column grid at `lg:` (`FlowAnimation` moved into
+  the right column, was a standalone block below the hero); single column on mobile, no overflow at
+  375–1536px.
+
+Verification: `npm run check` (0 errors/warnings, 1699 files), `npm test` (61 files / 381 tests,
+including new `saveTracker.test.ts`, `siteDeletion.test.ts`, `chatLog.test.ts`, `pageOps.test.ts`,
+extended `publish/server.test.ts` and `admin/customers/[userId]/actions.test.ts`), `npm run build`
+clean. Live-driven Playwright verification against a local dev server (system Chromium via
+`playwright-core`, `AUTH_DEV_ECHO_LINK=1` for a scripted login): landing hero at 1440px/390px (no
+horizontal overflow, TR-locale headline glyph-consistent, flag switcher intact from the prior
+round), dashboard preview thumbnails rendering, editor sidebar icons/checklist/viewport/locale
+switcher all correct, Pages tab restyle + remove buttons, Chat tab wired to the shared bubble
+components, and the publish-staleness fix confirmed against a real published page (200, edited
+headline present). Test data cleaned from the local dev DB afterward; `local.db` is gitignored so
+none of it reached version control. Deploy is a separate explicit step, not run as part of this
+task.
+
+## 2026-07-10
+
+**Public acquisition/support roadmap spec saved.** Added
+`docs/specs/2026-07-10-public-site-acquisition-support-roadmap.md` as a two-deliverable roadmap for
+the requested public-site improvements. Deliverable A covers public shell/header/footer, pricing
+navigation, landing CTA order, language switcher readability, About/Contact/Blog pages, SEO/GEO,
+sitemap/hreflang/JSON-LD, and scroll-to-top. Deliverable B covers public contact/chat messaging,
+schema/backend, rate limits, operator email notifications, and admin inbox/reply workflow. No
+implementation changes were made in this task; the spec is waiting for explicit approval before work
+starts.
+
+## 2026-07-10
+
+**Admin console redesigned with a classic sidebar layout.** Replaced the old top-button admin
+navigation with a shared `src/lib/ui/AdminShell.svelte`: fixed desktop left sidebar, horizontal
+mobile admin nav, compact page headers, and consistent active states across Overview, Customers,
+Customer detail, Support, Support detail, Beta Invites, and Settings. `AppCard` now accepts an `id`
+prop so settings sections can be linked by anchor. The Overview page now filters dashboard activity
+noise: scanner 404s, favicon/ads/sellers probes, and old transient chunk-import errors no longer
+fill the main activity card; the full recent error list remains available in Settings.
+
+**Settings UX compacted.** Rebuilt `/admin/settings` around a settings group navigator and collapsed
+group panels for AI, AI Providers, Email, Billing, Domains, Media, Ops, and Errors. System status and
+pending domain payments stay at the top as compact operational cards; settings no longer stretch
+open down the whole page by default. Existing save/clear/payment/error-resolution actions are
+unchanged, so the redesign is layout-only for behavior. Verification: `npm run check` passed with
+0 errors/warnings, full unit suite passed (53 files / 340 tests), `npm run build` passed, production
+was deployed with the atomic `npm run deploy:production` flow, and production smoke passed. Additional
+authenticated Playwright checks on `/admin`, `/admin/settings`, `/admin/customers`, `/admin/support`,
+and `/admin/invites` passed on mobile 390px and desktop 1440px: all returned 200, rendered 5 admin
+nav links, and had horizontal overflow 0. The temporary admin test session was removed afterward.
+
+**Atomic production release deploy implemented.** Root-caused `err-c249d645` and follow-up
+`ERR_MODULE_NOT_FOUND` incidents to PM2 serving mutable root `build/` while `npm run build` replaced
+adapter-node chunk files underneath the live process. Added `scripts/deploy-production.sh` and
+`npm run deploy:production`: the script bootstraps `current` from the existing build if needed,
+builds into root `build/`, copies the completed bundle into `releases/<timestamp>/build`, atomically
+switches `current`, restarts/saves PM2, runs production smoke, and keeps recent releases. Updated
+`ecosystem.config.cjs` so PM2 runs `/var/www/saaskaya/current/build/index.js`; the script detects
+old PM2 script paths and recreates the app when necessary because `pm2 startOrRestart` does not
+change an existing app's script path. Added `/current` and `/releases` to `.gitignore`.
+
+Verification: first full deploy ran `npm run check` (0 errors/warnings), full unit suite (53 files /
+340 tests), build, PM2 restart/save, and production smoke. A second deploy validated the path-migration
+guard: PM2 was recreated from old `/build/index.js` to `/current/build/index.js`, then build/switch/
+restart/smoke succeeded. Final PM2 describe reports script path
+`/var/www/saaskaya/current/build/index.js`, `current` points to
+`releases/20260710T074449Z`, `/en` returns 200, `/dashboard` returns the expected signed-out 303 to
+`/login`, and the only post-switch error event is the smoke script's expected `/does-not-exist` 404.
+
+**Self-serve beta entry flow deployed.** Added localized `/beta` entry pages for EN/TR/DE where a
+tester enters only an email address; the server automatically creates/reactivates a beta invite,
+creates the existing magic-link token, and sends the magic-link email without exposing a manual
+"choose invite" step. Added optional `BETA_ENTRY_CODE` under Ops settings: when configured, only
+`/beta?code=...` matching the setting can submit; when empty, the form is open self-serve. Added
+localized `/profile/start` as the post-magic-link first-run profile step with full name, profession,
+and city, no password. Login verification now sends non-admin users without a completed beta profile
+to `/profile/start`; pending anonymous onboarding still continues directly to `/new`.
+
+Migration v14 (`beta-profile`) adds `users.full_name`, `profession`, `city`, and
+`beta_profile_completed_at`. Production DB shows v14 applied and all four columns present. Verification:
+`npm run check` passed with 0 errors/warnings, full unit suite passed (53 files / 340 tests),
+`npm run build` passed before deployment, PM2 restarted/saved, direct HTTPS checks returned 200 for
+`/en/beta`, 307 for `/beta` to `/en/beta`, and 303 for signed-out `/en/profile/start` to `/en/beta`.
+Updated `scripts/smoke-production.mjs` to cover beta/profile localized routes; production smoke passed
+on mobile and desktop.
+
+**Beta locale/security follow-up.** Investigated a Chrome "Dangerous site" report for
+`https://saaskaya.com/beta` and a report that beta locale pages always showed English. Live HTML and
+hydrated Playwright checks showed `/tr/beta` renders Turkish and `/de/beta` renders German, but the
+base app shell still emitted `<html lang="en">` and defaulted to Svelte's inline favicon. Fixed
+`src/app.html` to use dynamic `%lang%`, added a saaskaya `/favicon.svg`, and added baseline response
+security headers from `src/hooks.server.ts`: HSTS, `X-Content-Type-Options`, `Referrer-Policy`,
+`Permissions-Policy`, and `X-Frame-Options: SAMEORIGIN`. Locale detection now also understands
+Cloudflare/Vercel country headers for TR and German-speaking countries when no explicit path locale is
+present. Verification: `npm run check`, `npm run build`, PM2 restart/save, live headers show the new
+security headers, `/tr/beta` returns `html lang="tr"` with Turkish copy, `/de/beta` returns
+`html lang="de"` with German copy, `/favicon.svg` returns 200, and production smoke passed after
+updating the smoke image check to wait for lazy-loaded landing images.
+
+## 2026-07-09
+
+**Launch i18n foundation deployed.** Added locale-aware public/customer launch routing with
+`/en`, `/tr`, and `/de` prefixes, browser/cookie locale resolution, `sk_locale`, and a language
+switcher. Localized the launch funnel surfaces: landing, pricing, login, guided `/new` onboarding
+chrome/questions/options, and `/templates` chrome/CTA/meta. English is the default; `/` now 307
+redirects to `/en` unless a supported browser/cookie locale is present. Legacy public URLs such as
+`/pricing`, `/new`, and legal routes redirect to the selected locale prefix. Moved SvelteKit
+`reroute` into `src/hooks.ts` after production smoke caught `/en/...` 404s from the first server-hook
+implementation. Verification: targeted onboarding/templates tests passed (4 files / 26 tests), full
+unit suite passed (53 files / 340 tests), `npm run check` passed with 0 errors/warnings,
+`npm run build` passed, PM2 restarted/saved, direct HTTPS checks returned 200 for `/en|/tr|/de`
+landing/pricing/new/templates/login, root returned 307 to `/en`, and
+`node scripts/smoke-production.mjs` passed after updating it for locale redirects. Caveat: legal
+documents remain Turkish legal drafts with locale-prefixed access; full legal translation still needs
+legal/accounting review before a multilingual paid public launch claim.
+
+**Pro pricing decision updated to 15€/month.** Changed the customer-facing Pro price on the landing
+pricing teaser and `/pricing`, updated the pricing spec decision from 299₺ to 15€, and switched the
+admin MRR estimate setting/display from `PRO_PRICE_TRY` to `PRO_PRICE_EUR` with a default of 15. Domain
+pricing remains separate at 15€/year; Premium/top-up/extra services were intentionally left unchanged
+until the product decision is finalized.
+
 ## How to use this file
 
 - Add a **Task log** row when you finish a task (newest at top).
@@ -78,7 +284,7 @@ backups. Porkbun/Stripe/payment settings are not required for preview-only beta 
 
 | Date       | Milestone | Task                                                                            | Status   | Key decisions / notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------- | --------- | ------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-07-09 | Admin     | Admin customer-management panel (`/admin/customers`)                            | ✅ done  | Second of two features planned together after evaluating (and passing on) a paid AI gateway for cost control. Previously only `/admin/invites` and `/admin/settings` existed — no way to see/manage individual customers. Extracted the `requireAdmin(locals)` guard (duplicated identically in both existing admin routes) into `src/lib/server/auth.ts` as a rule-of-three refactor before adding the third route. New `src/lib/server/customers.ts`: `listCustomers()` (3 queries total — users, grouped site-count, this-month `ai_usage` matched by computed tenant id, **not** joined through `sites` since one user's multiple sites share one `ai_usage` row and a join would fan it out) and `getCustomerDetail(userId)` (sites via existing `listSitesByOwner`, aggregated contact submissions via new `listSubmissionsForOwner` in `db/contact.ts`, admin action history) — deliberately separate from anything `canManageSite`-gated, so admin status never grants blanket site-edit access; admin reads go through this module's own queries, not the customer-facing editor/dashboard routes. Migration **v11** (`admin_actions` — flat audit table: adminEmail/targetUserId/action/detail/createdAt, shared by all four actions, not a quota ledger). Four `requireAdmin`-gated form actions on `/admin/customers/[userId]`: `overrideSubscription` (manual Stripe bypass; UI warns if the customer has a live `stripeCustomerId` since the next webhook can silently overwrite the override — no Stripe API call attempted, out of scope for this pass); `topUp` (new `grantAiTopUp()` in `usage.ts` — signed-delta `UPDATE` on `ai_usage`, counters may go negative and read as banked headroom by every existing `used >= limit` check; **requires** a reason, rejects all-zero amounts); `detachDomain`/`unpublish` (reuse existing `detachSiteDomain`/`unpublishSite`, previously owner-only, now also admin-callable) — both send a best-effort courtesy email matching the existing `sweepExpiredCustomDomains` precedent, reworded for a support action instead of policy expiry. 28 new tests across `usage.test.ts` (`grantAiTopUp`), `billing.test.ts` (`overrideSubscription`), `contact.test.ts` (`listSubmissionsForOwner` cross-site aggregation), `customers.test.ts`, and two new `page.server.test.ts`/`actions.test.ts` files under `admin/customers/` (a first for this codebase — no prior precedent for testing `+page.server.ts` `load`/`actions` directly; used `isRedirect`/`isHttpError` from `@sveltejs/kit` to assert guard behavior). 247/247 tests, 0 type errors, clean build. Live-verified end-to-end: signed-out 303 / non-admin 403 / admin 200 on all three admin routes; all four actions exercised live via curl (discovered/documented that SvelteKit form actions return HTTP 200 at the transport layer even on `fail()`, with the real status inside the JSON envelope — same nuance already known for `/login`); a full Playwright pass (list → detail → top-up form → success banner, required-field guard, 375px zero overflow). Nav link added from `/admin/settings`. Explicitly excluded from this work (confirmed with the user before starting): site analytics/performance metrics and a customer support/ticket system — both are separate, larger features for a future session. **Not yet committed or deployed** — see Current milestone note above. |
+| 2026-07-09 | Admin     | Admin customer-management panel (`/admin/customers`)                            | ✅ done  | Second of two features planned together after evaluating (and passing on) a paid AI gateway for cost control. Previously only `/admin/invites` and `/admin/settings` existed — no way to see/manage individual customers. Extracted the `requireAdmin(locals)` guard (duplicated identically in both existing admin routes) into `src/lib/server/auth.ts` as a rule-of-three refactor before adding the third route. New `src/lib/server/customers.ts`: `listCustomers()` (3 queries total — users, grouped site-count, this-month `ai_usage` matched by computed tenant id, **not** joined through `sites` since one user's multiple sites share one `ai_usage` row and a join would fan it out) and `getCustomerDetail(userId)` (sites via existing `listSitesByOwner`, aggregated contact submissions via new `listSubmissionsForOwner` in `db/contact.ts`, admin action history) — deliberately separate from anything `canManageSite`-gated, so admin status never grants blanket site-edit access; admin reads go through this module's own queries, not the customer-facing editor/dashboard routes. Migration **v11** (`admin_actions` — flat audit table: adminEmail/targetUserId/action/detail/createdAt, shared by all four actions, not a quota ledger). Four `requireAdmin`-gated form actions on `/admin/customers/[userId]`: `overrideSubscription` (manual Stripe bypass; UI warns if the customer has a live `stripeCustomerId` since the next webhook can silently overwrite the override — no Stripe API call attempted, out of scope for this pass); `topUp` (new `grantAiTopUp()` in `usage.ts` — signed-delta `UPDATE` on `ai_usage`, counters may go negative and read as banked headroom by every existing `used >= limit` check; **requires** a reason, rejects all-zero amounts); `detachDomain`/`unpublish` (reuse existing `detachSiteDomain`/`unpublishSite`, previously owner-only, now also admin-callable) — both send a best-effort courtesy email matching the existing `sweepExpiredCustomDomains` precedent, reworded for a support action instead of policy expiry. 28 new tests across `usage.test.ts` (`grantAiTopUp`), `billing.test.ts` (`overrideSubscription`), `contact.test.ts` (`listSubmissionsForOwner` cross-site aggregation), `customers.test.ts`, and two new `page.server.test.ts`/`actions.test.ts` files under `admin/customers/` (a first for this codebase — no prior precedent for testing `+page.server.ts` `load`/`actions` directly; used `isRedirect`/`isHttpError` from `@sveltejs/kit` to assert guard behavior). 247/247 tests, 0 type errors, clean build. Live-verified end-to-end: signed-out 303 / non-admin 403 / admin 200 on all three admin routes; all four actions exercised live via curl (discovered/documented that SvelteKit form actions return HTTP 200 at the transport layer even on `fail()`, with the real status inside the JSON envelope — same nuance already known for `/login`); a full Playwright pass (list → detail → top-up form → success banner, required-field guard, 375px zero overflow). Nav link added from `/admin/settings`. Explicitly excluded from this work (confirmed with the user before starting): site analytics/performance metrics and a customer support/ticket system — both are separate, larger features for a future session. **Not yet committed or deployed** — see Current milestone note above.                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | 2026-07-09 | Cost      | Per-tenant monthly $ AI budget cap (real-dollar safety net)                     | ✅ done  | While evaluating whether a paid AI gateway (nexos.ai) could cut costs, found the existing cost control was entirely count-based (N edits/generations/month) and assumption-based (~3₺/customer in the Phase 1 unit-economics doc) — never an enforced $ ceiling, even though the real per-call cost (`estimatedCostMicrousd`) was already tracked per tenant per month in `ai_usage`, just never compared against a per-tenant limit (only a beta-wide $5/month sum across _all_ tenants). Added `AI_BUDGET_FREE_USD`(default 1)/`AI_BUDGET_PRO_USD`(default 4) to `config.ts`'s `SETTING_DEFS`; new `tenantMonthlyBudgetMicrousd(ownerUserId)` + a third backstop check in `assertWithinQuota` (`src/lib/server/ai/usage.ts`), inserted after the token backstop and, like it, **not bypassed by `isAdmin`** (admin smoke tests still spend real provider $, unlike the credit-count bypass). Deliberately additive, not a replacement — the credit-count limits customers see on `/pricing` are unchanged; this is a silent net under them for when real cost drifts from the assumption (provider price change, unusually large site/edit). Zero new call-site code: both `QuotaExceededError` catch sites (`/api/sites`, chat) already map it to 429 generically. Added `tenantIdForUser()` as the single place the `tenant-<userId>` format is built, refactored the one existing inline literal in `/api/sites/+server.ts` to use it. New customer-facing surface: an "AI usage this month" card on `/account` (edits X/Y, generations X/Y, `$spent/$cap` with a `StatusPill` tone by ratio) — previously no per-tenant usage was shown anywhere, not even reactively beyond a 429 toast. 8 new tests in `usage.test.ts` (defaults, settings-override, trips independent of token/global backstops, Free vs Pro tier, admin NOT exempt). 219/219 tests, 0 type errors, clean build. Live-verified: fresh Free user's `/account` correctly shows `$0.00 / $1.00`, `0 / 10`edits,`0 / 1` generations. Premium tier explicitly out of scope (doesn't exist in code today, only Free/Pro — flagged elsewhere as separate, larger work). First of two features from the same planning session; the admin customer-management panel (`/admin/customers`) is next.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-07-09 | Phase 2   | Guided onboarding Q&A (anonymous-reachable `/new`, Groq topic-guard)            | ✅ done  | Implemented per the approved plan (chat-driven, non-plan-mode session): `/new`'s page-load auth redirect (`idea.md §6.1`) moved to `POST /api/onboarding/finish`, the moment generation is actually spent. `src/lib/onboarding/questions.ts` — pure, isomorphic 14-question script (+2 conditional `contactEmail`/`contactPhone` steps) with per-question Zod validation, zero AI cost to render/sequence. `src/lib/server/onboarding/session.ts` — `sk_pending` cookie (structurally separate from `sk_session`, grants no site/AI capability), `pending_onboarding` table (migration **v9**), sha256 hash-at-rest tokens matching `auth.ts`'s convention, 48h sliding expiry, opportunistic + daily-cron sweep (`sweepExpiredOnboarding`, wired into `/api/admin/tasks/daily`). **Cross-device handoff:** `login/+page.server.ts`'s action now appends the pending token as `&p=` on the magic-link URL when a `sk_pending` cookie is present at send time; `login/verify/+page.server.ts` resolves that URL param (preferred) or the cookie, links the record to the new user, and redirects to `/new` instead of `/dashboard` when one exists — proven live by opening the dev-echo link in a **second** browser context with no prior cookie. **Groq on-topic guard** (`src/lib/server/ai/onboardingGuard.ts` + additive `onboardingGuardSchema` in `schemas.ts`): same forced-tool-call + cheap-model + one-repair mechanism as `gatekeeper.ts`, but binary-only (no question/help_request branches) and **no force/override field anywhere in the schema or endpoint** — the deliberate difference from the editor chat gatekeeper's "yine de gönder" escape, per the user's explicit requirement that onboarding never becomes a general chatbot. Runs on the ~8 free-text questions (confirmed scope with the user); fails OPEN on `AIUnavailableError`/`AIInvalidOutputError` (logged via `recordError`, `source:'onboarding-guard'`) so the fixed backbone never depends on Groq uptime; three dedicated `rateLimit()` buckets (`onboarding-start/answer/guard`) reuse `auth.ts`'s existing in-memory limiter. `src/lib/server/onboarding/compose.ts` — pure `composeDescription()` turns collected answers into a `description` string fed to the **unchanged** `POST /api/sites`/`generate.ts` (verified via `git diff` — byte-identical). Free-text escape hatch ("kendi cümlelerimle anlatmak istiyorum") kept, now routed through the same pending/cookie/handoff plumbing, deliberately left unguarded (no regression vs. today's shipped behavior). Full `/new/+page.svelte` rewrite: chat-bubble transcript of answered questions, per-kind input controls (choice/multi_choice/short_text/open_text/list_text), off-topic rejections shown inline with zero override affordance, review screen with an explicit "Siteni oluştur"/"Ücretsiz Başla" action (never auto-fires generation on redirect). 200/200 tests (`npm test`), 0 `svelte-check` errors, clean `npm run build`. Live verification: curl smoke of the full anonymous → answer → magic-link → cross-device-verify → resume chain; two full Playwright runs (main flow incl. escape-hatch toggle + cross-device resume + generation handoff, and a route-intercepted off-topic-guard UI check confirming rejection message shows, answer isn't saved, and no force control exists anywhere in the DOM); 375px viewport zero horizontal overflow; daily-sweep endpoint confirmed live (`sweptOnboarding` in the JSON response). Deferred like other AI live smokes in this project: a real (non-mocked) Groq call, since no `GROQ_API_KEY` is configured in this dev environment — the guard's fail-open path was exercised live instead (logged to `error_events`, answers still saved). Committed `193c8d8`; deployed and its own post-deploy fix logged in the row above. |
 | 2026-07-09 | Phase 2   | Deploy + nginx `proxy_read_timeout` fix (AI generation was timing out silently) | ✅ done  | Committed `193c8d8`, `npm run build`, `pm2 restart saaskaya` — migration v9 applied cleanly to the real `data/production.db` (`[db] migrations applied: 9-pending-onboarding`), full route sweep 200s, `/api/health` ok. User's own live test surfaced two things: (1) `err-0b10286e` — a one-off (first-ever, count=1 historically) `AIInvalidOutputError` 422 from the **pre-existing, unchanged** `/api/sites`/`generate.ts` one-repair-attempt policy; not a regression, no site row was created, user advised to retry. (2) A retry then showed the user "Ağ hatası" (network error), but `sites` table showed a real row (`site-2d837a73`, "Donbass LLM", owned by the user's own account) had actually been created — root cause: `saaskaya.com`'s nginx vhost had no `proxy_read_timeout` override, so it used nginx's compiled-in 60s default; the AI generation call took longer than that, nginx logged `upstream timed out ... POST /api/sites` and dropped the connection to the browser ~33s before the backend actually finished and saved successfully. **Fix:** added `proxy_read_timeout 120s;` to the `location /` block in `/etc/nginx/sites-available/saaskaya.com`, validated with `nginx -t`, reloaded with `systemctl reload nginx` (confirmed live via `nginx -T`, other vhosts on the shared box unaffected — spot-checked flikoston.com and tombala.digitaltamam.com still 200). Also cleaned up two `pending_onboarding` rows created during live testing (one the assistant's own smoke-test answer, one the user's own manual test — initially assumed both were disposable test data and deleted without pausing to check; flagged to the user afterward, no real impact since neither had reached a completed/converted state).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -594,3 +800,802 @@ http://127.0.0.1:3021/de` returned the app's 404 — the reroute hook never fire
   to `local.db`; production diagnostics must read the PM2 environment first.
 - **Verification:** `svelte-check` clean, 26 test files / 132 tests, production build, migration v8
   present in production, live `/`, `/login`, and `/api/health` all 200, no smoke residue.
+
+### 2026-07-09 — Phase 1/2 health audit and production smoke refresh
+
+- Audited `docs/specs/2026-07-09-hostinger-horizons-competitive-roadmap.md` against the current
+  repo and live site. Phase 1 is materially complete: ICP/pricing/unit economics are documented in
+  `docs/specs/2026-07-09-phase1-gtm-pricing-legal.md`, and the live pricing + six legal routes all
+  return 200. Remaining Phase 1 caveat: legal copy is still operator/legal-counsel review material,
+  not a paid-public-launch legal approval.
+- Phase 2 is partially implemented, not exit-gate complete. Implemented: anonymous guided Q&A on
+  `/new`, pending onboarding session/cookie, login handoff, `/api/onboarding/finish`, answer
+  validation, guarded free-text answers, rate limits, answer preservation before generation, and
+  tests. Missing against the roadmap: 3 curated visual directions before spending a generation
+  credit, editor completion checklist / next-best action, and beta funnel metrics for median
+  time-to-preview + 70% preview reach.
+- Updated `scripts/smoke-production.mjs` because its old `/new` expectation was obsolete. `/new`
+  now intentionally returns 200 while the auth/abuse gate lives at `/api/onboarding/finish`. The
+  smoke also covers `/pricing` and all current legal pages.
+- Verification: `npm test` passed (32 files / 200 tests), `npm run check` passed with 0
+  errors/warnings, `npm run build` passed, and refreshed production smoke passed on mobile + desktop.
+  Live checks: HTTP→HTTPS 301, apex 200, `www`→apex 301, `/api/health` 200, `/sitemap.xml` 200,
+  `/new` 200, `/pricing` 200, all legal pages 200, and tenant routes
+  `site-6e8106ca.saaskaya.com/` + `seed-law.saaskaya.com/de` 200. TLS certificate covers
+  `saaskaya.com` and `*.saaskaya.com`, expiring 2026-10-06.
+
+### 2026-07-09 — Build during live audit triggered stale PM2 manifest
+
+- **Incident:** During the health audit, running `npm run build` on the live checkout rewrote the
+  adapter-node build assets while the running PM2 process still held the previous manifest. The
+  first refreshed production smoke then saw 502 asset loads and tenant public routes returned 500
+  with missing hashed chunk imports.
+- **Root cause:** The production process serves the same checkout/build directory used by local
+  verification. A build without an immediate PM2 restart creates a manifest/assets mismatch for the
+  running Node process.
+- **Fix:** Restarted with `pm2 restart ecosystem.config.cjs --only saaskaya --update-env`, saved the
+  PM2 process list, and re-ran production smoke. PM2 env confirmed `NODE_ENV=production`,
+  `DATABASE_URL=data/production.db`, and `PUBLIC_APP_HOST=saaskaya.com`.
+- **Prevention:** Treat `npm run build` on this live checkout as a deploy step: either build in an
+  isolated release directory, or immediately restart PM2 before browser smoke. The smoke script now
+  probes page routes and legal routes, not just `/api/health`, so this class of failure is caught.
+
+### 2026-07-09 — Phase 2 closure sprint opened
+
+- Added `docs/specs/2026-07-09-phase2-closure-sprint.md` as the active implementation spec for
+  closing the Hostinger Horizons roadmap Phase 2 exit gate. The sprint is deliberately narrow:
+  curated onboarding directions, clearer generation credit/progress/retry states, editor completion
+  checklist, onboarding funnel telemetry, and end-to-end verification.
+- Explicitly kept Phase 3+ work out of scope: new blocks, 6–9 full kits, `siteQualityCheck`,
+  persistent revisions, media-library UX, and commercial self-service.
+- Updated `docs/PLAN.md` so the current roadmap points to the 2026-07-09 Hostinger Horizons roadmap
+  and the new Phase 2 closure sprint, while correcting stale backlog statuses for the already
+  implemented gatekeeper and closed-beta/hybrid onboarding work.
+- Verification: documentation-only change; no runtime checks required. The previous health audit's
+  latest code/build/live-smoke evidence remains current for the sprint baseline.
+
+### 2026-07-09 — Phase 2 closure Task 1: curated onboarding directions
+
+- Added `src/lib/onboarding/directions.ts` with exactly three controlled launch-niche visual
+  directions: `warm_trust`, `modern_clinic`, and `calm_minimal`. Each direction carries a Turkish
+  label, promise, tone hint, section-emphasis hint, and preview copy. These are deterministic prompt
+  steering hints only; no free-form layout, tenant HTML/CSS, or new block types were introduced.
+- Added the required `visualDirection` onboarding question after `tone` in
+  `src/lib/onboarding/questions.ts`. It uses the direction module's Zod enum schema, persists through
+  the existing pending onboarding session, and remains unguarded because it is a fixed choice.
+- Updated `/new` to render the visual-direction question as three cards while keeping all other
+  choice questions on the existing button UI. The selected card is saved through the existing
+  `/api/onboarding/answer` path, so no separate server action or schema bypass was added.
+- Updated `composeDescription()` to include the selected direction as a deterministic Turkish
+  steering sentence for the existing `/api/sites` generation contract. The raw-description escape
+  hatch still bypasses the composer exactly as before.
+- Updated onboarding API fixtures for the new required question and added tests for direction
+  ordering/schema/options plus composer output.
+- Verification: targeted onboarding tests passed (5 files / 56 tests), `npm run check` passed with
+  0 errors/warnings, and full `npm test` passed (33 files / 206 tests). `npm run build` was not run
+  because this checkout is the live build directory and build would require an immediate PM2 restart;
+  deploy/build verification is deferred until the sprint's deploy step.
+
+### 2026-07-09 — Phase 2 closure Task 2: generation credit/progress/retry clarity
+
+- Updated `/new` final review state to explain before generation that one site-generation credit is
+  spent, direct text/theme/media edits are free, creative AI rewrites use credits, and failed
+  generation does not discard answers.
+- Added staged generation copy in `src/routes/new/+page.svelte`: answers prepared → validated site
+  draft being generated → editor opening. The button and inline busy bubble now show the current
+  stage instead of a generic spinner-only state.
+- Improved retryable failure copy for `/api/sites` errors and network failures. Existing `errorId`
+  references from the generation endpoint are preserved without duplicate reference text, and the
+  user is told that answers remain available for retry.
+- Verification: `npm run check` passed before and after formatting, full `npm test` passed (33 files
+  / 206 tests), and targeted Prettier checks passed. `npm run build` remains deferred until deploy
+  because this checkout serves production build assets.
+
+### 2026-07-09 — Phase 2 closure Task 3: editor first-run completion checklist
+
+- Added `src/lib/editor/completionChecklist.ts`, a deterministic guidance helper that derives six
+  first-run checklist items from the current draft: homepage headline, contact path, services,
+  languages, media, and publish. It takes `publishedVersion` as an option so publish state is
+  guidance-only and never blocks the schema or publish API.
+- Added tests covering fixed item order, tab targets, published-version behavior, and first
+  incomplete next-action selection.
+- Updated `src/routes/editor/[siteId]/+page.svelte` to show a compact "İlk yayın checklist" panel
+  above the existing editor tabs. The panel surfaces the next best action and lets the user jump to
+  the relevant existing tab (`Content`, `Settings`, or `Languages`). No new schema fields, block
+  types, publish blockers, or arbitrary tenant HTML/CSS were added.
+- Verification: targeted checklist test passed (1 file / 4 tests), `npm run check` passed, full
+  `npm test` passed (34 files / 210 tests), and targeted Prettier checks passed. Build/deploy smoke
+  remains deferred until the sprint deploy step for the live-build-directory reason already logged.
+
+### 2026-07-09 — Phase 2 closure Task 4: onboarding funnel telemetry
+
+- Added migration v10 (`onboarding-events`) and the `onboarding_events` Drizzle table for
+  privacy-safe funnel telemetry. The table stores only ids, event names, route/source, optional
+  duration, and optional error id — no raw answers, generated descriptions, credentials, or user
+  copy.
+- Added `src/lib/server/onboarding/telemetry.ts` with append-only event recording, recent-event
+  listing, funnel summary (`started` → `generation_succeeded` preview reach), and duplicate-reducing
+  editor-open detection by site id.
+- Wired events into the Phase 2 flow:
+  - `started` when a new pending onboarding session is created;
+  - `answer_saved` after each accepted answer;
+  - `completed` when `/api/onboarding/finish` composes the generation description;
+  - `generation_started` / `generation_succeeded` / `generation_failed` in `/api/sites` when an
+    optional `onboardingPendingId` is present;
+  - `editor_opened` when the editor is opened from the onboarding handoff query.
+- Updated `/new` to pass the pending id from finish → generation and then to editor as a query
+  marker. Existing non-onboarding `/api/sites` callers remain compatible because the new field is
+  optional.
+- Added tests for telemetry event writes, privacy expectations, summary calculation, editor-open
+  detection, and migration v10. Verification: targeted backend tests passed (5 files / 41 tests),
+  full `npm test` passed (35 files / 213 tests), `npm run check` passed after formatting, and
+  telemetry/migration targeted tests passed again after formatting. Build/deploy smoke remains
+  deferred until the sprint deploy step.
+
+### 2026-07-09 — Phase 2 closure deploy and smoke verification
+
+- Built and deployed the Phase 2 closure work with `npm run build` followed immediately by
+  `pm2 restart ecosystem.config.cjs --only saaskaya --update-env` and `pm2 save`, avoiding the
+  stale-manifest gap documented earlier. Migration v10 (`onboarding-events`) applied during the
+  build/start cycle and is present in `schema_migrations`.
+- Production smoke passed with `node scripts/smoke-production.mjs`: mobile + desktop public surface,
+  landing/login, protected route expectations, `/new`, `/pricing`, all legal pages, sitemap, health,
+  404 behavior, no horizontal overflow, no broken images, and no browser console/page errors.
+- Additional live probes passed: `/api/health` returned db/disk ok, `/new` returned 200,
+  `/editor/site-6e8106ca` redirected signed-out users to login, and
+  `https://site-6e8106ca.saaskaya.com/` returned 200.
+- Ran a public `/new` browser smoke through the first questions until the new visual-direction step:
+  exactly 3 direction cards rendered, 390px mobile overflow was 0, and no console errors appeared.
+  That smoke created one pending onboarding/event residue (`pending-7aead4f9`); it was deleted from
+  `pending_onboarding` and `onboarding_events`, verified back to zero rows for that id.
+- Full authenticated AI-generation E2E was not run in this pass because it spends live model
+  credits and requires controlled test-account/site cleanup. The implementation now has deployed
+  instrumentation to measure that path with the next real or explicitly approved controlled beta
+  smoke.
+
+### 2026-07-09 — Phase 2 closure controlled authenticated E2E smoke
+
+- After operator approval, ran a controlled live authenticated E2E smoke with a temporary DB-backed
+  session rather than enabling magic-link dev echo. The successful run covered:
+  `/new` → guided answers → visual direction selection → generation credit review → live
+  Groq/DeepSeek generation → editor → "İlk yayın checklist" visible → publish → public tenant
+  subdomain returned 200.
+- Successful smoke evidence: generated `site-43d38e9f` from `pending-c5ed8e10`, published public
+  route returned 200, desktop overflow was 0, browser console errors were empty, and onboarding
+  telemetry contained `started`, 17× `answer_saved`, `completed`, `generation_started`,
+  `generation_succeeded`, and `editor_opened`.
+- Cleanup completed and was verified: temporary users, sessions, generated sites, site versions,
+  tenant AI usage, pending onboarding records, and onboarding events all returned 0 rows for the
+  smoke ids. `/api/health` remained db/disk ok after cleanup.
+- One earlier mobile attempt had already reached the editor after generation but failed the test
+  harness because the mobile iframe was attached but considered hidden by Playwright; that generated
+  `site-cb40847d` was also fully cleaned up. The rerun used desktop viewport and an attached-iframe
+  assertion, then completed publish successfully.
+- Follow-up asset check: current HTML references `start.Dvy7Qfvq.js`; both normal and Brotli asset
+  requests return 200, and a fresh `/new` browser load produced no console errors or failed
+  requests. Older PM2 log ENOENT lines referred to previous hashed assets during earlier build
+  transitions and are not current.
+
+### 2026-07-09 — Phase 3: quality gate wired into publish
+
+- Wired `siteQualityCheck()` into `POST /api/sites/[siteId]/publish`. The repository snapshot function remains pure; the route now blocks publish with HTTP 422 when quality blockers exist and returns the quality report on both blocked and successful publish responses.
+- Updated the editor to compute quality from the current draft and show a compact "Kalite kontrol" panel with blocker/warning counts and the first issues. Publish is disabled client-side when blockers exist, while the server-side route remains the real enforcement point.
+- Added publish API tests covering a quality-passing draft and a blocked draft with an unsafe professional outcome claim.
+- Verification: targeted quality/publish tests passed (2 files / 11 tests), full `npm test` passed (41 files / 258 tests), `npm run check` passed with 0 errors/warnings, and Prettier checks passed for touched quality/publish/editor files.
+
+### 2026-07-09 — Phase 3: psych-specific quality rules
+
+- Extended `siteQualityCheck()` with launch-niche (`psych`) rules without adding blocks or changing the tenant schema.
+- Added psych warnings for missing FAQ, too-thin services, missing confidentiality/professional-ethics copy, and missing appointment/session path copy. These are warnings, not blockers, so they guide cleanup without stopping a structurally safe publish.
+- Added a psych blocker for prescription/diagnosis authority claims such as "ilaç yazar", "reçete yazar", or "tanı koyar", because that crosses the psychologist-site scope and needs operator review.
+- Added tests for the psych warnings and prescription/diagnosis blocker. Verification: targeted quality tests passed (1 file / 11 tests), full `npm test` passed (41 files / 260 tests), `npm run check` passed with 0 errors/warnings, and Prettier checks passed for the quality files.
+- Deployment intentionally skipped per operator choice; these changes remain local until a later controlled deploy.
+
+### 2026-07-09 — Phase 3: first psych professional kit recipe
+
+- Added the first controlled psych professional kit recipe without adding schema fields or block types: `src/lib/kits/psych.ts` exports `calm-intake` / "Sakin İlk Görüşme".
+- The kit produces a validated `Site` using the existing fixed blocks in this order: hero, about, services, FAQ, CTA, contact, footer. Copy is Turkish-first with EN/DE localized content, emphasizes confidentiality/ethics, clear service areas, appointment path, and safe informational footer language.
+- The recipe deliberately avoids `/seed/` media references so it does not carry placeholder-media warnings; authentic media remains a later Phase 5 concern.
+- Added `src/lib/kits/index.ts` and tests proving the kit is registered, schema-valid, uses only fixed blocks, passes the Phase 3 quality gate without blockers or psych-specific warnings, and contains no seed media references.
+- Verification: targeted kit/quality tests passed (2 files / 15 tests), full `npm test` passed (42 files / 264 tests), `npm run check` passed with 0 errors/warnings, and Prettier checks passed after formatting. Deployment intentionally skipped per operator choice.
+
+### 2026-07-09 — Phase 3: psych kit connected to onboarding direction
+
+- Connected the `calm-intake` / "Sakin İlk Görüşme" psych kit to the `warm_trust` visual direction. The `/new` visual-direction card now surfaces the kit label and outcome before generation, while the other curated directions remain non-kit directions.
+- Updated the onboarding composer to include a deterministic kit reference when `warm_trust` is selected. The steering text stays inside the existing schema-constrained generation contract and explicitly keeps generation within the fixed block set.
+- Exported the kit slug type through `src/lib/kits/index.ts` and added tests proving the kit binding and composer steering text.
+- Verification: targeted onboarding/kit tests passed (3 files / 21 tests), `npm run check` passed with 0 errors/warnings, full unit suite passed (42 files / 266 tests), and Prettier checks passed for the touched files after formatting. Deployment intentionally skipped per operator choice.
+
+### 2026-07-09 — Phase 3: local onboarding kit smoke
+
+- Ran a local real-browser smoke on `http://127.0.0.1:5173/new` with a temporary DB-backed user/session and the launch psych path: psych niche → warm tone → `warm_trust` visual direction → multi-language/contact/booking/services answers → final generation click.
+- Verified the `/new` visual-direction card renders the kit label `Kit · Sakin İlk Görüşme` and kit outcome before generation.
+- Verified the actual `POST /api/sites` browser request payload contains the deterministic kit steering text: `Kit referansı: Sakin İlk Görüşme`, `calm-intake`, and `Sabit blok setinin dışına çıkma`.
+- Full AI generation/editor handoff could not be verified locally because this environment has no Groq/DeepSeek API keys configured. The generation endpoint returned the expected 503 provider-configuration failure (`DeepSeek is not configured`), so no local site was created.
+- Cleanup completed: the temporary smoke user, session, generated-site rows (none), pending/onboarding telemetry rows, AI usage row, and 7 expected local missing-API-key error-log rows were removed. Deployment remains intentionally skipped.
+
+### 2026-07-09 — Phase 3 deploy and controlled live smoke
+
+- Deployed the Phase 3 kit/quality/onboarding changes to production with `npm run build`,
+  `pm2 restart ecosystem.config.cjs --only saaskaya --update-env`, and `pm2 save`.
+- Pre-deploy verification passed: full unit suite (42 files / 266 tests), `npm run check` with
+  0 errors/warnings, and production build.
+- Post-deploy read-only production smoke passed: `/api/health` db/disk ok, `/new` returned 200 with
+  the new asset manifest, and `node scripts/smoke-production.mjs` passed for the mobile + desktop
+  public surface.
+- Ran a controlled live authenticated E2E smoke with a temporary DB-backed user/session:
+  `/new` psych onboarding → `warm_trust` visual direction → real `POST /api/sites` with the
+  `calm-intake` kit reference → Groq/DeepSeek generation → editor → quality panel → publish → public
+  tenant host.
+- Successful smoke evidence: generated `site-2a4436d5` from `pending-e8d444ae`; `POST /api/sites`
+  returned 200 with 4,112 input tokens, 5,581 output tokens, and 2,140 micro-USD estimated cost;
+  editor opened; quality panel showed 1 warning and 0 blockers; publish returned 200 version 1; the
+  public tenant host returned 200.
+- Generated draft evidence: psych theme, `tr/en/de` locales, sections
+  `hero → about → services → faq → contact → footer`, and confidentiality/gizlilik copy present.
+- Cleanup completed and was verified: temporary user, session, generated site, site version, tenant
+  AI usage, pending onboarding row, onboarding telemetry, and smoke-linked error rows all returned
+  0 rows in `data/production.db`.
+- Recent production error check after the smoke showed only the expected `/does-not-exist` 404 from
+  the read-only smoke script; no smoke user/site error rows remained.
+
+### 2026-07-09 — Super-admin command center, Stage 1: revenue/MRR overview
+
+- New `/admin` command-center landing page (`src/routes/admin/+page.server.ts`/`.svelte`), the first
+  of a 4-stage plan (revenue → activity/alerts → support tickets → site analytics) scoped explicitly
+  separate from Phase 3 per operator decision. Full plan:
+  `/root/.claude/plans/docs-specs-2026-07-09-hostinger-horizon-effervescent-iverson.md`.
+- New `PRO_PRICE_TRY` setting (`config.ts`, group `Billing`, default 299) — the only price data the
+  server has today; MRR intentionally has no per-tier breakdown since Premium isn't an enforced tier.
+- New `src/lib/server/revenue.ts`: `proPriceTry()`, `subscriberCounts()`, `mrrTry()`,
+  `signupTrend(months)`, `aiSpendTrend(months)`, `recentSignups(limit)`. Trend queries group
+  `users.createdAt` (epoch seconds, `strftime(..., 'unixepoch')`) and `aiUsage.month`, zero-filling
+  missing months in JS.
+- New `src/lib/ui/Sparkline.svelte` — dependency-free inline bar chart using existing `--sk-*` vars
+  (no chart library added, matches the minimal `AppCard` kit).
+- Re-pointed the admin IA: `/admin` is now the front door. `admin/settings`, `admin/customers`,
+  `admin/invites` cross-link back to `/admin` instead of each other; `/dashboard`'s admin link now
+  points at `/admin` instead of `/admin/settings`.
+- Verification: `revenue.test.ts` (6 tests, direct-assert against seeded users/usage rows) +
+  `admin/page.server.test.ts` (3 tests: signed-out redirect, non-admin 403, admin data shape) — full
+  suite 44 files / 275 tests passing, `npm run check` 0 errors/warnings, Prettier clean. Live
+  verification via an isolated `vite dev` on a separate port against the gitignored dev DB
+  (production untouched): real magic-link sign-in as the admin account, screenshot-confirmed the
+  MRR/subscriber/AI-spend tiles, signup and AI-spend sparklines, and recent-signups list all render
+  correctly against real seeded data with zero console/page errors. Skipped one manual "seed an
+  active subscription and hand-verify MRR" mutation step after the safety classifier flagged direct
+  writes to a user row even in the dev DB — the MRR arithmetic itself is already covered by
+  `revenue.test.ts`'s seeded-user assertions, so this was a redundant extra check, not a gap.
+- Deployment intentionally deferred — Stages 2-4 of the plan are still pending.
+
+### 2026-07-09 — Super-admin command center, Stage 2: activity feed + proactive alerts
+
+- New `billing_events` table (migration v12, `src/lib/server/db/schema.ts`/`migrations.ts`) — one
+  row per real Stripe subscription activation, written from `billing.ts`'s
+  `checkout.session.completed` handler (domain one-time payments are explicitly excluded, routed
+  before the write). This is the seed of a real MRR-over-time series from this point forward only;
+  `subscriptionStatus`/`subscriptionEndsAt` stay point-in-time and aren't backfillable.
+- New `src/lib/server/activity.ts`: `listActivityFeed(limit)` merges six sources in JS (admin
+  actions, error events, onboarding `generation_succeeded` events, signups, paid domain
+  reservations, billing events), newest-first. Reused the parallel session's already-landed
+  `listRecentOnboardingEvents()` (`onboarding/telemetry.ts`) rather than querying that table
+  directly — the feed needed zero extra code to pick up real onboarding events once telemetry
+  writes landed.
+- New `src/lib/server/alerts.ts`: `computeAlerts()` — global AI budget ≥80%/100% of the monthly
+  backstop, unresolved application errors, per-customer edit/generation/budget ratio ≥80% (top 10),
+  system health check failing, and grace-window customers exiting within 3 days. Reuses the same
+  80%/100% threshold split already established in `account/+page.svelte`'s `spendTone`.
+- Wired both into `/admin`: an alerts banner (only rendered when non-empty) above the stat tiles,
+  and an activity feed card at the bottom of the page.
+- Verification: `migrations.test.ts` extended for v12 (table + index) + `billing.test.ts` extended
+  (activation writes a row, domain payment does not) + new `activity.test.ts` (6-source merge,
+  ordering, limit, onboarding-event filtering) + new `alerts.test.ts` (budget threshold crossing,
+  unresolved-error surfacing, per-customer near-cap, grace-window-soon vs not-soon) — full suite 46
+  files / 282 tests passing, `npm run check` 0 errors/warnings, Prettier clean. Live verification on
+  the same isolated dev-DB `vite dev` setup as Stage 1: confirmed the migration auto-applies on
+  boot, confirmed the activity feed shows the real seeded signup, then triggered one real 404
+  through the app's own error-logging path (not a raw DB write) and confirmed both the alert banner
+  ("1 unresolved application error(s)") and the new activity-feed entry appeared correctly on
+  reload, screenshot-verified.
+- Deployment intentionally deferred — Stages 3-4 of the plan are still pending.
+
+### 2026-07-09 — Phase 3: psych kit set expanded to 3 launch kits
+
+- Expanded `src/lib/kits/psych.ts` from 1 to 3 controlled launch psych kits:
+  `calm-intake`, `modern-clinic`, and `online-therapy`. The two new kits use only existing fixed
+  blocks, no schema changes, no raw HTML/CSS, and no `/seed/` media references.
+- Added `psychKitBySlug()` and exported the new kit creators through `src/lib/kits/index.ts`.
+- Rebound the 3 onboarding visual directions to concrete kit references:
+  `warm_trust → calm-intake`, `modern_clinic → modern-clinic`,
+  `calm_minimal → online-therapy`.
+- Updated kit and direction tests. Every registered kit is schema-valid, uses the fixed block set,
+  has no quality blockers/warnings, and contains no seed media references.
+- Verification: targeted kit/onboarding/composer tests passed (3 files / 27 tests), full unit suite
+  passed (46 files / 288 tests), `npm run check` passed with 0 errors/warnings, and Prettier passed
+  for touched files.
+- Browser verification: inserted the two new kit sites as temporary ownerless local preview rows,
+  then checked `/preview/kit-psych-modern-clinic` and `/preview/kit-psych-online-therapy` at
+  375/768/1280 widths. All 6 browser checks returned 200, rendered the expected headline, had
+  horizontal overflow 0, and had no console errors or failed requests. Temporary preview rows were
+  deleted from `local.db` afterward.
+- `npm run build` was intentionally not run in this step because the checkout is the production
+  build directory; build without immediate PM2 restart can create a stale-asset window. Deployment
+  is left as a separate controlled step.
+
+### 2026-07-09 — Phase 3: psych kit set expanded to 6 launch kits
+
+- Added the remaining three controlled psych launch kits:
+  `child-family`, `couples-therapy`, and `trauma-informed`. The full launch kit set is now
+  `calm-intake`, `modern-clinic`, `online-therapy`, `child-family`, `couples-therapy`, and
+  `trauma-informed`.
+- Added exports for `createChildFamilyPsychSite()`, `createCouplesTherapyPsychSite()`, and
+  `createTraumaInformedPsychSite()`. The new kit recipes use only existing fixed blocks and the
+  existing `Site` schema; no raw HTML/CSS, schema fields, block types, or seed media references were
+  added.
+- Added a shared internal builder for the three new structured psych kits to keep section order,
+  localization, contact path, FAQ, CTA, and footer safety language consistent.
+- Updated kit tests to cover all 6 recipes. Verification: targeted kit tests passed (1 file /
+  19 tests), full unit suite passed (47 files / 303 tests), and Prettier passed for the touched kit
+  files.
+- Browser verification: inserted the three new kit sites as temporary ownerless local preview rows,
+  then checked `/preview/kit-psych-child-family`, `/preview/kit-psych-couples-therapy`, and
+  `/preview/kit-psych-trauma-informed` at 375/768/1280 widths. All 9 browser checks returned 200,
+  rendered the expected headline, had horizontal overflow 0, and had no console errors or failed
+  requests. Temporary preview rows were deleted from `local.db` afterward.
+- `npm run check` is currently blocked by an unrelated dirty admin/support change outside this kit
+  sprint: `src/routes/admin/+page.svelte` is missing an `activityLabel` entry for
+  `ticket_created`. The kit files themselves passed unit/schema/quality/browser verification.
+- `npm run build` was intentionally not run in this step because the checkout is the production
+  build directory; build/deploy should be a separate controlled step after the unrelated admin
+  type-check blocker is resolved.
+
+### 2026-07-09 — Phase 3: templates catalog page
+
+- Confirmed the previous `npm run check` blocker is resolved: `src/routes/admin/+page.svelte` now
+  covers the support activity kinds (`ticket_created`, `ticket_reply`) in `activityLabel`, and
+  `npm run check` passes with 0 errors/warnings.
+- Added the public `/templates` catalog route for the six psych launch kits. The page renders
+  Turkish-first kit cards with slug, label, audience, outcome, hero headline, section chips,
+  locale list, and quality summary.
+- Added `src/routes/templates/+page.server.ts` to derive catalog data directly from
+  `psychProfessionalKits`, each kit's `createSite()` recipe, and `siteQualityCheck()`. This keeps
+  the catalog tied to real kit fixtures rather than duplicated marketing copy.
+- Added `src/routes/templates/page.server.test.ts` proving the page returns all six kit slugs,
+  TR/EN/DE locale metadata, section data, and quality summaries with 0 blockers / 0 warnings.
+- Verification: targeted templates+kit tests passed (2 files / 20 tests), `npm run check` passed
+  with 0 errors/warnings, and full unit suite passed (52 files / 329 tests).
+- Browser verification: local `/templates` passed in mobile 375px and desktop 1280px. Both loads
+  returned 200, rendered the expected headline and all 6 kit cards, had horizontal overflow 0, and
+  had no console errors or failed requests.
+- The CTA currently links to `/new` without a kit parameter. Direct `/new?kit=...` binding and
+  `/templates/[slug]` detail/preview pages remain the next Phase 3 steps.
+
+### 2026-07-09 — Phase 3: catalog kit selection wired into onboarding
+
+- Wired `/templates` kit CTAs to `/new?kit=<slug>` for all six psych launch kits.
+- Updated `/new` load to validate the optional `kit` query parameter via `psychKitBySlug()` and
+  expose only safe kit metadata (`slug`, `label`, `audience`, `outcome`) to the page.
+- Updated `/new` UI to show a "Seçili kit" card when a valid kit query is present, explaining that
+  the kit steers the first draft while AI remains inside the fixed block set.
+- Updated `/api/onboarding/finish` to accept an optional JSON body `{ kitSlug }`, validate the slug
+  server-side, and pass it into `composeDescription()`.
+- Updated `composeDescription()` so an explicit catalog kit overrides the visual-direction kit
+  reference. This prevents `/new?kit=trauma-informed` from falling back to the default visual
+  direction kit while still preserving the selected visual-direction tone/section steering text.
+- Added tests for composer override behavior, finish endpoint valid/invalid kit body handling,
+  `/new` load selected-kit metadata, and the existing templates catalog load.
+- Verification: targeted tests passed (4 files / 24 tests), `npm run check` passed with
+  0 errors/warnings, and full unit suite passed (53 files / 334 tests).
+- Browser verification: local `/templates` → `/new?kit=trauma-informed` passed in mobile 375px and
+  desktop 1280px. Both runs saw 6 catalog CTAs, landed on the expected `/new?kit=trauma-informed`
+  URL, rendered the selected kit card, had horizontal overflow 0, and had no console errors or
+  failed requests.
+- Build/deploy remains deferred as a separate controlled step.
+
+### 2026-07-09 — General production deploy after Phase 3/user updates
+
+- Deployed the current working tree as the requested general production deploy. The checkout was
+  already dirty with Phase 3 catalog/kit changes plus admin, billing, support, and documentation
+  updates, so the deployment scope was treated as all current local changes.
+- Verification before restart: `npm run test:unit -- --run` passed (53 files / 334 tests),
+  `npm run check` passed with 0 errors/warnings, and `npm run build` completed successfully.
+- Production restart: `pm2 restart ecosystem.config.cjs --only saaskaya --update-env` completed,
+  `pm2 save` completed, and `saaskaya` reported `online`.
+- Production smoke: `https://saaskaya.com/api/health` returned `ok: true` with DB and disk checks
+  OK; `node scripts/smoke-production.mjs` passed for the public read-only surface on mobile and
+  desktop.
+- Route checks: `https://saaskaya.com/templates` and
+  `https://saaskaya.com/new?kit=trauma-informed` both returned HTTP 200.
+- Browser verification on production with `playwright-core`: `/templates` and
+  `/new?kit=trauma-informed` passed at mobile 375px and desktop 1280px. `/templates` rendered all
+  6 kit cards and the trauma-informed CTA; `/new?kit=trauma-informed` rendered the selected-kit
+  card. All four browser checks had horizontal overflow 0, 0 console errors, and 0 failed requests.
+- Production DB residue check: `schema_migrations` includes versions 12 and 13; the only
+  `error_events` row in the last 15 minutes was the expected `/does-not-exist` 404 generated by the
+  smoke script. PM2 historical logs still include older scanner 404s and stale-asset entries, but
+  the post-deploy smoke did not reproduce them.
+
+### 2026-07-09 — Creem payment provider seam
+
+- Added Creem as a first-class billing provider while keeping Stripe intact as the backwards-compatible
+  default. `PAYMENT_PROVIDER=creem|stripe` now selects the active subscription checkout provider;
+  if unset, Stripe stays active unless only Creem is configured.
+- Added admin settings for `CREEM_API_KEY`, `CREEM_WEBHOOK_SECRET`, `CREEM_PRO_PRODUCT_ID`, and
+  `CREEM_TEST_MODE`. These follow the existing DB-over-env settings model and remain server-only.
+- Added Creem subscription checkout creation through the REST API (`POST /v1/checkouts` with
+  `x-api-key`, `product_id`, `success_url`, `customer.email`, `request_id`, and `metadata.userId`).
+  Test mode uses `https://test-api.creem.io/v1`; production uses `https://api.creem.io/v1`.
+- Added `/api/billing/creem/webhook` with raw-body HMAC verification via the `creem-signature`
+  header. Creem `subscription.paid` / `subscription.active` grant Pro access; cancellation-like
+  events (`subscription.canceled`, `past_due`, `expired`, `paused`) update the existing
+  `subscriptionState()`/grace-window model.
+- Deliberately avoided a production DB migration in this slice: the existing
+  `users.stripeCustomerId` / `billing_events.stripeCustomerId` columns are treated as legacy
+  provider-customer-id slots for Creem too. A later cleanup migration can rename/split these fields
+  once the payment provider choice is stable.
+- Verification: targeted billing tests passed (1 file / 14 tests), full unit suite passed
+  (53 files / 340 tests), `npm run check` passed with 0 errors/warnings, and `npm run build`
+  completed successfully.
+- Production was restarted immediately after the build because this checkout serves the live build
+  directory: `pm2 restart ecosystem.config.cjs --only saaskaya --update-env && pm2 save`.
+  Live smoke passed: `/api/health` returned OK, `/account` redirected unauthenticated users to
+  `/login`, `/api/billing/creem/webhook` returned POST-only 405 to HEAD, and
+  `node scripts/smoke-production.mjs` passed on the public read-only surface.
+
+### 2026-07-09 — Legal pages updated for Creem Merchant of Record
+
+- Updated the customer-facing legal copy now that Creem is the intended primary payment provider and
+  Merchant of Record candidate for paid subscriptions.
+- `/legal/privacy`: replaced Stripe-only financial-data language with provider-neutral payment
+  customer IDs; added Creem as MoR/checkout/tax/invoice/payment processor while keeping Stripe as a
+  fallback/legacy payment processor; clarified that card data is not stored on saaskaya servers.
+- `/legal/terms`: updated the payment section to name Creem as primary provider/MoR and Stripe as
+  fallback/legacy; clarified that Creem checkout terms may govern payment, chargeback, tax/invoice,
+  and consumer-payment topics; removed the premature Turkey-only venue claim pending legal review.
+- `/legal/refund`: updated cancellation/refund/dunning language from Stripe-specific to active
+  provider/Creem MoR wording, while keeping bank-transfer and non-refundable domain registration
+  rules.
+- `/legal/kvkk`: updated financial-data and third-party transfer text to include Creem and
+  provider-neutral payment identifiers.
+- Verification: legal grep confirmed old Stripe-only phrases were removed from legal routes,
+  `npm run check` passed with 0 errors/warnings, and `npm run build` completed successfully.
+- Production deploy: restarted and saved PM2 after the build. Live checks returned 200 for
+  `/legal/privacy`, `/legal/terms`, `/legal/refund`, `/legal/kvkk`, and `/sitemap.xml`;
+  `/api/health` returned OK; live `/legal/terms` and `/legal/privacy` include the Creem/MoR copy.
+- Caveat remains explicit in-page: these are operational launch drafts, not substitute legal advice;
+  paid public launch still needs Germany/Turkey legal/accounting review.
+
+### 2026-07-10 — UX revizyonu Faz 1–4 (docs/specs/SAASKAYA_UX_REVIZYON_PROMPT.md)
+
+- All four phases of the UX revision spec implemented as a pure UI/UX layer — no backend logic,
+  payment flow, or generation pipeline changes (the only server-file edits were user-facing display
+  strings in `dashboard/+page.server.ts`, with failed-provisioning raw output moved to
+  `console.error` instead of the customer UI).
+- **Faz 1 (dashboard jargon/dil temizliği)**: `dashboard/+page.svelte` rewritten fully in Turkish.
+  Hash site IDs removed (replaced by "Son güncelleme: [tarih]"); "live · v1"/"draft only" →
+  "Yayında"/"Taslak" (version numbers no longer shown anywhere); "Billing not configured yet." →
+  "Pro'ya geçiş çok yakında…"; "yourdomain.com" → "kendisiteniz.com". Action hierarchy per card:
+  primary **Düzenle**, secondary Önizle + Yayınla/Yayından kaldır (+ Canlı siteyi aç when live),
+  and a dependency-free `<details>` "⋯" overflow menu holding Gelen mesajlar, Son değişiklikleri
+  yayına al (republish), and Yedeğini indir (export). English `domainMessage` fail strings and the
+  raw provision strings in `dashboard/+page.server.ts` translated to friendly Turkish.
+- **Faz 2 (onboarding)**: `/new` gained a persistent progress header — "Adım X / Y" + yüzde +
+  dolan bar (`visibleQuestions()`-driven, adapts as conditional questions appear) — and the first
+  (niche) question now renders as three large tappable cards with stroke-SVG icons
+  (leaf/scales/tooth) and per-locale supporting copy; the free-text "Kendi cümlelerimle…" toggle
+  stays as the secondary path below. New copy keys added to all three locales.
+- **Faz 3 (landing görsel kanıt + güven)**: real screenshots of the three seed demo sites captured
+  via Playwright into `static/examples/{law,psych,dental}.jpg` (~38 KB each) and the examples
+  section rebuilt as a 3-up thumbnail card grid (image links to the full `/preview/...`). The two
+  decisive trust answers ("AI kod yazmaz", "Site senin") now sit directly under the hero CTA as
+  shield-icon cards in all three locales (full Güven section unchanged below). The four
+  "Nasıl çalışır" steps each got an inline stroke icon.
+- **Faz 4 (görsel ton)**: landing price cards now separate the number (display 3xl) from "/ay"
+  (small, faint, baseline-aligned — `/pricing` already did this); FAQ converted to
+  `<details>`-based accordions with a rotating "+" affordance; `.sk-card` border strengthened one
+  step (`--sk-line` → `--sk-line-strong`) plus a 1px soft shadow for a slightly more concrete,
+  less thin-line feel (palette untouched).
+- Verification: `npm run check` 0 errors/warnings (1649 files), full suite 53 files / 340 tests
+  passing, Prettier clean. Live dev-server browser verification with screenshots: landing (tr) with
+  thumbnails/trust strip/step icons/accordion/price cards; `/new` in both TR and EN showing
+  "Adım 1 / 15" + bar + niche cards (emoji icons were replaced with inline SVGs after the headless
+  screenshot exposed the emoji-font dependency); dashboard signed in as the admin account with a
+  temporary dev-DB site row proving the Turkish card, date line, hierarchy, and open "⋯" menu
+  (row deleted afterward; dev `local.db` only). Zero console/page errors on all screens.
+- Deploy intentionally not run — build/deploy remains a separate controlled step.
+- Backlog note: super-admin command center Stage 4 (privacy-safe site visit analytics per the
+  approved plan) remains pending; Stages 1–3 (revenue overview, activity feed + alerts, support
+  tickets) are implemented and fully verified.
+
+### 2026-07-10 — UI polish: self-hosted fonts, real imagery, flow animation
+
+- **Self-hosted typography (KVKK + performance)**: replaced the single Google Fonts CDN `<link>` in
+  `+layout.svelte` (which loaded 8 families for every SaaS page, including 5 tenant-only ones, and
+  sent visitor IPs to Google — a real concern for the DE market) with `@fontsource/*` packages.
+  SaaS chrome fonts (Instrument Serif, IBM Plex Sans, IBM Plex Mono; latin + latin-ext, so Turkish
+  ğ/ş/İ/ı render) now load from `+layout.svelte`; tenant preset fonts (Playfair Display, Lora,
+  Poppins, Open Sans, Roboto) load from `SiteRenderer.svelte` instead, so the SaaS shell stops
+  paying for weights only tenant sites use, and published tenant sites no longer call Google at
+  all. Found and fixed a real bug in the process: the `law` preset's body font is `Inter`
+  (`src/lib/presets/index.ts`), but `Inter` was never in the old Google Fonts URL — every
+  law-preset tenant site had been silently falling back to a system font for body text. Added
+  `@fontsource/inter` alongside the other tenant fonts to fix it.
+- **`/templates` kit thumbnails**: captured real screenshots of all 6 psych kits into
+  `static/templates/<slug>.jpg` (~45 KB each) using the same temporary-ownerless-preview-row +
+  Playwright pattern proven earlier for `static/examples/` — this time via a short-lived internal
+  `/api/_dev-seed-kits` route (tsx alone can't resolve SvelteKit's `$env` virtual module outside
+  the Vite pipeline, so the seeding had to run inside the actual dev server process). Route deleted
+  and all 6 temporary rows removed from dev `local.db` after the screenshots were captured
+  (verified 0 remaining). `/templates` cards now show the real thumbnail instead of a flat color
+  gradient block.
+- **Social sharing (`og:image`)**: generated `static/og.jpg` (1200×630, self-hosted brand fonts via
+  a throwaway local HTML file screenshotted with Playwright) and added
+  `og:title/og:description/og:image/og:url` + `twitter:card=summary_large_image` meta to the three
+  public entry pages (landing, `/pricing`, `/templates`), localized from each page's existing
+  `copy` object.
+- **Flow animation**: ported `docs/animation/Saaskaya Flow Animation.dc.html` (a design comp built
+  on a proprietary `x-dc`/`support.js` runtime) into a real, dependency-free
+  `src/lib/ui/FlowAnimation.svelte` using Svelte 5 runes — same palette, keyframes, and demo
+  content (a Turkish lawyer's onboarding: describe → AI generates → live 3-viewport preview → edit
+  → publish), no runtime dependency. Added an `IntersectionObserver` + `document.visibilitychange`
+  guard so the three `setInterval` timers only run while the stage is actually on-screen and the
+  tab is active (the original comp ran unconditionally). `prefers-reduced-motion: reduce` shows a
+  static Scene 1 with the full text and no timers, verified via Playwright's `reducedMotion`
+  emulation. Embedded on the landing page directly below the hero trust strip, localized scene
+  labels passed as a prop (`copy.flowScenes`) so the chrome text matches the page's locale while
+  the demo content itself stays fixed (same rationale as the existing example-sites section).
+- **Positioning broadened** (user-requested, since the target market includes avukat, akademisyen,
+  psikolog, fizyoterapist, ergoterapist, danışman — not psychologists only): landing pill
+  "Psikologlar için" → "Uzman meslekler için" (EN "For professionals", DE "Für Expertenberufe");
+  title/meta broadened while keeping "psikolog" for SEO continuity; FAQ "Sadece psikologlar mı?"
+  now names the full target set with psych as the launch focus, in all three locales.
+  `/templates` was left untouched — it genuinely is the psych-only kit catalog, not a
+  misleading claim.
+- Verification: `npm run check` 0 errors/warnings (1650 files), full suite 53 files / 340 tests
+  passing, `npm run build` succeeded, Prettier clean. Confirmed via `curl` + grep on the built
+  output: zero `fonts.googleapis`/`fonts.gstatic` references anywhere, 116 woff2 files bundled
+  locally. Live dev-server verification: screenshotted the landing page at two moments 4.2s apart
+  to prove the animation's scene actually cycles ("01/05 · Kendini anlat" → "02/05 · AI üretiyor"),
+  screenshotted the `prefers-reduced-motion: reduce` fallback (static, fully-typed text, no cursor
+  blink), screenshotted `/templates` with all 6 real thumbnails, and curled the og-meta tags on all
+  three public pages. Zero console/page errors on every screen checked.
+- Deploy intentionally not run — stays a separate controlled step, same as every prior stage.
+
+### 2026-07-10 — Per-site Pro domain roadmap Deliverables D/E/F
+
+- **D — preview/publish parity controls**: added shared URL helpers for public/preview locale paths,
+  labeled editor iframe as `Live draft`, open-preview link as `Saved preview`, preview route as
+  `Saved preview`/`Live draft` depending on postMessage state, and public tenant pages as
+  `Published vN`. Preview-to-live links preserve the selected locale/page. Dashboard preview links
+  now open the persisted saved draft with the site's default locale.
+- **D — stale publish guard**: dashboard first-publish is no longer a direct form POST. Unpublished
+  sites send the operator back to the editor, where publish already flushes and submits the exact
+  draft body. Dashboard republish remains available only for already-published sites and now runs
+  the same quality gate before snapshotting.
+- **D — parity helper**: added `src/lib/server/previewParity.ts`, normalizing title, site name,
+  theme preset, primary color, section ids/types/order, hero headline, and nav labels so saved
+  preview and published snapshots can be compared deterministically in smoke tests.
+- **E — unsupported niche gate**: onboarding now includes a manual-review `Başka bir alan` option.
+  Selecting it stops the automated flow and shows support escalation instead of letting generation
+  fall into the lawyer preset. Raw descriptions that clearly ask for unsupported sectors such as
+  shoe repair are rejected at both `/api/onboarding/finish` and `/api/sites`.
+- **F — landing hero redesign**: removed the duplicate hero BrandMark, shortened EN/TR/DE H1 copy,
+  tightened the left column, and aligned the flow animation as product evidence in a controlled
+  two-column desktop grid with a single-column mobile fallback.
+- **Related build blockers fixed**: Creem webhook typing was extended for per-site metadata under
+  subscription objects, pricing highlight typing was narrowed, and publish API tests were updated
+  to create publishable public-handle fixtures under the current identity gate.
+- Verification: `npm run check` 0 errors/warnings, `npm test` 62 files / 389 tests passing,
+  `npm run lint` clean, `npm run build` succeeded. Local dev-server Playwright smoke:
+  `/tr` at 1440/1280/375 had no horizontal overflow, CTA above fold, and the shortened Turkish H1;
+  `/tr/new` unsupported niche flow showed the manual beta-review message and zero generate buttons.
+  Screenshots saved under `/tmp/saaskaya-hero-{desktop,laptop,mobile}.png` and
+  `/tmp/saaskaya-new-unsupported-mobile.png`.
+
+### 2026-07-10 — Per-site Pro, private domain gate, and public handle identity (Deliverables A-C)
+
+- Implemented `docs/specs/2026-07-10-per-site-pro-domain-preview-parity-roadmap.md` Deliverables
+  A-C. Added append-only migration **v17** (`per-site-pro-public-handles`) with
+  `sites.public_handle` and `site_subscriptions`; existing sites backfill their handle from the
+  internal id, while new customer-facing edits happen through a separate identity form.
+- Changed paid entitlement from account-level checks to site-level checks where it matters for this
+  roadmap: checkout requires a manageable `siteId`; Stripe/Creem metadata uses
+  `kind=site_subscription`, `siteId`, `userId`, `plan=pro`, `price=17 EUR/month`; webhooks create or
+  update `site_subscriptions`; export, custom-domain attach/register, daily domain sweep, dashboard
+  site cards, account export list, admin customer summaries, and MRR now evaluate the specific site.
+  Legacy `users.subscription_*` columns remain for backward compatibility/admin override flow.
+- Updated customer-facing pricing/product copy to **17€/month per published site** and removed Free
+  full-export promises from public pricing, landing trust copy, account export UI, dashboard menus,
+  and legal terms. Full export is now Pro-site gated, with admin/operator exception preserved.
+- Added public subdomain identity controls on dashboard site cards (`siteName`, `publicHandle`,
+  `contactEmail`), handle normalization/validation/reserved-word/uniqueness checks, and routing
+  resolution by public handle as well as internal site id/custom domain. First publish is blocked in
+  the editor API if the site still uses the internal random id as its public handle; dashboard first
+  publish remains routed through editor review.
+- Reworked customer-visible domain reservation copy so provider/wholesale cost and registrar errors
+  are not shown. Domain gate returns customer-safe states (`available`, `unavailable`,
+  `manual_review`); unsupported TLDs/provider errors go to manual review with operator notes. Free
+  sites that pass domain gate are prompted to activate Pro for that specific site before domain setup.
+- Verification: `npm run check` passed with 0 errors/warnings; `npm test` passed (62 files / 389
+  tests); `npm run build` succeeded. Deploy intentionally not run.
+
+### 2026-07-10 — Public Site Acquisition + Support Roadmap Deliverable B: Messaging System
+
+- **Public inquiry data model**: added separate `inquiries` and `inquiry_messages` tables instead
+  of forcing anonymous visitors into authenticated `support_tickets`. Migration v15
+  (`public-inquiries`) creates source/status/email indexes for admin inbox filtering and keeps
+  support tickets untouched. `src/lib/server/inquiries.ts` owns validation, creation, thread reads,
+  admin replies, status updates, and best-effort email notification/reply delivery.
+- **Contact form backend + chat bubble**: `/contact` now stores real public inquiries through the
+  shared helper, with email validation, body length limits, category allowlist, IP/email rate
+  limits, and a honeypot field. `/api/inquiries` provides the same backend for
+  `MessageBubble.svelte`, which is visible on public marketing pages and sets the expectation that
+  this is async email reply, not live chat. Existing A-deliverable `PublicShell`/`SeoHead` contact
+  page was preserved; stale "next delivery" copy was updated to describe the now-live inbox flow.
+- **Admin inbox**: added `/admin/inbox` and `/admin/inbox/[inquiryId]` plus an AdminShell nav item.
+  Admins can filter public inquiries by status/source, see contact-form and chat-bubble submissions,
+  read the full message history, reply, and set `open | pending | resolved | closed`. Admin reply
+  content is rendered as text (`whitespace-pre-wrap`), never HTML. Existing `/admin/support` and
+  customer support ticket routes remain unchanged.
+- **Email behavior**: new inquiry alerts use existing `ALERT_EMAIL`; admin replies use the existing
+  `sendEmail()` provider seam. Delivery failures are logged without throwing, so stored inquiries
+  and replies are never lost when email is unconfigured. Local browser verification intentionally
+  observed `no email provider configured` on reply delivery while confirming the reply persisted.
+- Verification: targeted inquiry/API/admin/migration tests passed (5 files / 16 tests), full suite
+  passed (57 files / 350 tests), `npm run check` passed with 0 errors/warnings, `npm run build`
+  passed, and targeted Prettier checks passed after formatting touched files. Local Playwright
+  verification submitted `/tr/contact`, submitted the `/en` message bubble, verified both appeared
+  in `/admin/inbox`, opened one inquiry, stored an admin reply, set it to `resolved`, and confirmed
+  mobile public page overflow stayed `0` with the bubble panel fitting inside a 390px viewport.
+  Test inquiry rows and the temporary admin session were removed from `local.db` afterward.
+- Deployed on user request with `npm run deploy:production`: release `20260710T114429Z`, full deploy
+  checks/tests/build passed, PM2 restarted against `current/build/index.js`, and the deploy script's
+  production smoke passed on mobile + desktop public routes. Post-deploy Deliverable B smoke on
+  `https://saaskaya.com` submitted `/tr/contact`, submitted the `/en` message bubble, confirmed
+  production DB rows for `contact` and `chat`, verified both appeared in `/admin/inbox`, stored an
+  admin reply, set the contact inquiry to `resolved`, and confirmed the mobile bubble has horizontal
+  overflow `0`; live smoke inquiry rows and the temporary admin session were removed afterward.
+
+### 2026-07-10 — Deliverable A public site foundation shipped
+
+- Implemented the public-site foundation from `docs/specs/2026-07-10-public-site-acquisition-support-roadmap.md`:
+  shared `PublicShell`, `PublicHeader`, `PublicFooter`, `ScrollToTop`, and `SeoHead` components now give the marketing pages a consistent SaaS navigation/footer surface without touching the tenant Zod `Site` contract or AI output rules.
+- Public navigation is now present across landing, pricing, templates, about, contact, and blog pages.
+  Links are locale-aware through `withLocale(...)`; `/pricing` is no longer a dead end.
+- Improved the language switcher active state: it keeps the flag + `EN/TR/DE` label, preserves
+  `aria-current`, and uses a lighter selected state instead of the previous black pill.
+- Added new localized public pages:
+  `/about`, `/contact`, `/blog`, and `/blog/[slug]` under `/en`, `/tr`, and `/de`.
+  Blog content is static/file-driven via `src/lib/public/blog.ts` with three concise starter posts.
+- Contact page is connected to the existing public inquiries action, so valid messages enter the
+  admin inbox flow; invalid form submissions render inline validation. The existing message bubble is now present on the new public pages too.
+- SEO/GEO basics added for public pages: localized titles/descriptions, canonical links,
+  `hreflang` alternates including `x-default`, OG/Twitter tags, valid JSON-LD
+  (`Organization`, `WebSite`, `SoftwareApplication`, `ContactPage`, and `BlogPosting`), and
+  Kornwestheim/Germany trust signals. `/sitemap.xml` now includes localized marketing, legal, and blog routes; `robots.txt` already points to the sitemap.
+- Landing conversion flow now has an earlier mid-page CTA after the process proof, while the final
+  CTA remains distinct. Landing/pricing/templates content widths were widened in a controlled way;
+  article/blog detail pages stay narrower for readability.
+- Error log: initial production browser verification found JSON-LD scripts rendering the literal
+  `{@html stringifyJsonLd(item)}` because Svelte does not process `{@html}` inside an
+  `application/ld+json` script body. Fixed by serializing complete JSON-LD script tags into the
+  head with escaped `</script>` splitting.
+- Verification: `npm run check` passed, `npm test` passed (57 files / 350 tests), `npm run build`
+  passed, and `npm run deploy:production` completed via the atomic release flow. Latest production
+  release: `20260710T104907Z`; PM2 `saaskaya` online and deploy smoke passed. Additional live
+  Playwright verification on `https://saaskaya.com` covered `/en`, `/en/pricing`, `/en/templates`,
+  `/en/about`, `/en/contact`, `/en/blog`, and `/en/blog/ai-assisted-website-building` at mobile and
+  desktop widths: status 200, no horizontal overflow, footer present, language labels readable,
+  canonical/hreflang present, and JSON-LD parses. Live checks also confirmed sitemap/robots entries
+  and contact-form validation rendering.
+
+### 2026-07-10 — Per-site Pro, domain margin, identity, preview parity roadmap
+
+- Captured the user's product-model corrections in
+  `docs/specs/2026-07-10-per-site-pro-domain-preview-parity-roadmap.md`: public Pro price moves to
+  17€/month, Pro must be scoped to a specific published site rather than the whole user account, Free
+  should not advertise full data export, and customer-facing domain flows must not reveal wholesale
+  provider cost estimates.
+- Investigated the reported preview/live mismatch for `site-ca7a4be4` with read-only production DB
+  queries. The stored draft and published v1 snapshot match on core fields (`siteName`, preset,
+  primary color, first page title, first hero headline), so the immediate evidence does not show the
+  wrong draft being snapshotted. The roadmap records the likely risk areas: TR preview vs DE public
+  comparison, editor iframe's unsaved postMessage live draft vs persisted preview URL, dashboard's
+  bodyless publish path, and unsupported profession content being mapped onto the `law` preset.
+- No application code changed in this step; this was a planning/spec task.
+
+### 2026-07-10 — Nunito Turkish glyph fix, instant locale switching, flag language pills
+
+- **Fredoka replaced with Nunito across the SaaS UI**: the previous polish pass assumed Fredoka
+  covered Turkish; a direct `fontTools` cmap check proved the actual shipped Fredoka files were
+  missing `ğ`, `Ğ`, `ş`, `Ş`, and `İ`. Replaced the SaaS layout imports with self-hosted
+  `@fontsource/nunito` (`latin`, `latin-ext`, plus explicit 800 subsets), set both
+  `--font-display` and `--font-sans` to Nunito, and bumped `.sk-display` to weight 800 so headings
+  remain distinct now that display/body share one family. `--font-mono` stays IBM Plex Mono for
+  small technical labels. Removed unused Fredoka and IBM Plex Sans dependencies from
+  `package.json` / `package-lock.json`; tenant renderer fonts remain a separate system.
+- **Verified glyph coverage from the actual files now shipped**: `fontTools` confirmed the combined
+  Nunito latin+latin-ext subsets for both 400 and 800 contain the full checked set
+  `ğĞşŞıİçöü` with no missing characters. Individual subsets split coverage as expected
+  (`latin` carries `ı/ç/ö/ü`, `latin-ext` carries `ğ/Ğ/ş/Ş/İ`), and the browser loads both via
+  unicode-range. Playwright close-up of the Turkish landing headline
+  `"Pratiğini anlat..."` showed one consistent Nunito rendering with no fallback glyph seam;
+  `document.fonts.check('800 44px Nunito', ...)` returned true.
+- **Locale switcher now refreshes layout data without a document reload**:
+  `LanguageSwitcher.svelte` keeps normal `<a href>` links for no-JS/right-click behavior but
+  intercepts plain left-clicks and calls `goto(withLocale(...), { invalidateAll: true })`. This
+  forces SvelteKit to rerun the root layout data load even though `/tr/new` and `/en/new` map to
+  the same internal rerouted route id. Modified clicks are left native; DOM event verification
+  showed plain click is canceled, while ctrl-click and middle-click are not canceled.
+- **Flagged language pills**: added `src/lib/ui/flags.ts` with inline SVGs for GB/EN, TR, and DE,
+  rendered alongside the existing `EN/TR/DE` text labels. Also defined the missing `--sk-paper`
+  token used by the active pill state so the selected language remains readable.
+- Verification: `npm run check` 0 errors/warnings, full suite 53 files / 340 tests passing,
+  `npm run build` succeeded. `npm run lint` still fails on 24 pre-existing unrelated dirty files
+  outside this task; the touched files were formatted with Prettier directly. Live dev-server
+  Playwright verification: TR → EN → DE on landing updated copy with only SvelteKit
+  `__data.json` fetches and zero document requests; `/tr/new` → `/en/new` preserved the in-progress
+  onboarding step (`Step 2 / 15`) while also using only a data fetch; desktop and mobile switcher
+  screenshots showed flags + text with no overflow (mobile switcher width 163px inside 390px).
+- Deployed on user request with `npm run deploy:production`: release `20260710T102815Z`, PM2
+  `saaskaya` restarted and online, deploy script production smoke passed on mobile + desktop public
+  surfaces. Post-deploy Playwright smoke on `https://saaskaya.com/tr` confirmed the Turkish headline
+  loads as Nunito (`document.fonts.check(...) === true`), the language switcher renders `EN TR DE`
+  with flags, and TR → EN uses only SvelteKit `__data.json` fetches with zero document requests.
+
+### 2026-07-10 — UI polish round 2: wider canvas, Fredoka headings, stacked layouts, chat pacing
+
+- **Wider app canvas**: the browser-chrome canvas (`src/lib/ui/AppCanvasShell.svelte`) felt cramped
+  on every page. Found two independent width layers — `AppCanvasShell`'s own default (`max-w-5xl`,
+  never overridden by any route) and each page's separately-nested inner content div. Bumped
+  `AppCanvasShell`'s default to `max-w-6xl` and `PageShell.svelte`'s `canvasMax` default to match
+  (it was silently overriding `AppCanvasShell`'s own default for every admin/dashboard/account
+  page). Then bumped each page's inner content width one Tailwind step to actually use the
+  reclaimed space (`max-w-3xl`→`max-w-4xl`, `max-w-4xl`→`max-w-5xl` across ~19 routes;
+  `/templates`→`max-w-6xl`), with deliberate exceptions: `/login`, `/login/verify`, and
+  `/profile/start` stay narrow (single-purpose forms read worse wider, not better).
+- **Heading font → self-hosted Fredoka**: user linked Secular One as a style reference but it ships
+  a single weight (400) — the design system needs 500/600 for buttons/badges, so applying it
+  everywhere would flatten the hierarchy. Landed on **Fredoka** (rounded/geometric, same spirit,
+  weights 300–700, full Latin + Latin-Extended for Turkish ğ/ş/ı/İ and German umlauts) applied only
+  to `--font-display` (headings, `.sk-display`) — body/button text stays on IBM Plex Sans,
+  untouched. Swapped the `@fontsource/instrument-serif` import in `+layout.svelte` for
+  `@fontsource/fredoka`; tenant-site fonts (`SiteRenderer.svelte`) are a separate system,
+  unaffected.
+- **Two-column → stacked sections**: `/beta` (`md:grid-cols-[0.9fr_1fr]`) and `/new`
+  (`lg:grid-cols-[0.9fr_1.1fr]`) both read awkwardly as side-by-side splits. Both now stack:
+  intro/context section first, the card/chat section directly below, top-to-bottom reading order.
+  `/beta` moved to a centered `max-w-2xl` column (no longer splitting space between two columns);
+  `/new` moved to the same `max-w-2xl` so both the prose intro and the chat bubble column share a
+  single readable width — matching how real chat UIs never let a message column run edge-to-edge
+  even in a wide window.
+- **WhatsApp/ChatGPT-style paced Q&A in `/new`**: previously the next question appeared the instant
+  an answer validated — no sense of "the AI is thinking." `submitAnswer()` now commits the answer
+  (and its bubble) immediately once the real `/api/onboarding/answer` validation resolves, then
+  holds the next question behind the existing typing-dots indicator for a randomized minimum delay
+  (`600–1200ms`, `Date.now()`-anchored so a slow real response is never rushed and a fast one is
+  never instant/robotic) before revealing it. Off-topic rejections get the same pacing (feels like
+  a genuine "the AI evaluated it" response); real network errors in the `catch` block skip pacing
+  entirely — a broken connection isn't "the AI thinking," delaying that message only frustrates.
+  Added Svelte's built-in `svelte/transition` (`fly`, ~200ms, small y-offset) as a mount-in
+  animation on every newly-appended bubble — first use of `svelte/transition` in the codebase, no
+  new dependency. `prefers-reduced-motion: reduce` skips both the artificial delay and the
+  transition (same pattern as `FlowAnimation.svelte` from the previous polish pass).
+- **Explicitly deferred**: expanding beyond the 3 launch professions (avukat/psikolog/diş hekimi).
+  User initially believed 6 professions already existed; investigation confirmed the 6 "kits" are
+  actually 6 style variants within the single psychologist niche (calm-intake, modern-clinic,
+  online-therapy, child-family, couples-therapy, trauma-informed) —
+  `docs/CONSTITUTION.md` explicitly caps niche presets at 3 and mandates single-niche GTM. User
+  confirmed they want real new professions, not wider psych-style exposure, and agreed (when asked)
+  to sequence this as its own dedicated future plan rather than bundling a constitution-level scope
+  change into a UI-polish pass.
+- Verification: `npm run check` 0 errors/warnings (1650 files), full suite 53 files / 340 tests
+  passing, `npm run build` succeeded, Prettier clean. Live dev-server Playwright verification:
+  landing/templates/mobile screenshots confirming the wider canvas and Fredoka headline (close-up
+  crop confirmed correct Turkish glyph rendering — ğ/ı/ş/ü all correct); `/beta` and `/new`
+  screenshotted showing the stacked single-column layout; `/new` driven through a real click
+  (selecting the "Psikolog / Terapist" niche card) with screenshots at 150ms (answer bubble +
+  typing dots visible, next question still hidden) and ~1.65s later (next question fully revealed
+  with "Adım 2/15") — confirmed the pacing behaves exactly as designed; `prefers-reduced-motion`
+  emulation confirmed the instant fallback. Zero console/page errors on every screen checked.
+- Deploy intentionally not run — stays a separate controlled step, same as every prior stage.

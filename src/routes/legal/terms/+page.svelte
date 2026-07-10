@@ -23,7 +23,7 @@
 		<li>Doğrudan metin/tema/medya düzenleme</li>
 		<li>Alt alan adında veya özel domainde yayınlama</li>
 		<li>İletişim formu ve mesaj yönetimi</li>
-		<li>Veri dışa aktarma</li>
+		<li>Pro sitelerde tam veri dışa aktarma</li>
 	</ul>
 	<p>
 		saaskaya <strong>genel amaçlı web sitesi kurucu veya uygulama geliştiricisi değildir.</strong>
@@ -36,7 +36,7 @@
 		<li>Gerçek ve güncel e-posta adresi vermek zorunludur</li>
 		<li>Hesap güvenliğinden siz sorumlusunuz; yetkisiz erişimi derhal bildirin</li>
 		<li>Kapalı beta döneminde yalnızca davet edilen e-postalar hesap açabilir</li>
-		<li>Hesap başına 1 site (Free/Pro) veya plan limitleri içinde</li>
+		<li>Hesap birden fazla site barındırabilir; Pro abonelik site başına uygulanır</li>
 	</ul>
 
 	<h2>4. Planlar ve Limitler</h2>
@@ -49,8 +49,16 @@
 
 	<h2>5. Ödeme</h2>
 	<ul>
-		<li>Pro/Premium abonelikler Stripe üzerinden aylık faturalandırılır</li>
-		<li>Domain satın alımı Stripe veya banka havalesi ile yapılır</li>
+		<li>
+			Pro/Premium aboneliklerde birincil ödeme sağlayıcısı Creem'dir. Creem, uygun olduğu ölçüde
+			Merchant of Record/ödeme satıcısı olarak checkout, vergi/fatura ve ödeme işleme süreçlerini
+			yürütür.
+		</li>
+		<li>
+			Stripe, geçiş/fallback sağlayıcısı olarak veya eski ödeme kayıtları için kullanılabilir. Aktif
+			checkout ekranında hangi ödeme sağlayıcısının kullanıldığı görünür.
+		</li>
+		<li>Domain satın alımı ödeme sağlayıcısı veya banka havalesi ile yapılabilir</li>
 		<li>Domain tescili yalnızca ödeme onayından sonra yapılır (geri alınamaz)</li>
 		<li>Ödeme dönemi sonuna kadar ücretli özellikler aktif kalır</li>
 		<li>İade ve cayma koşulları <a href="/legal/refund">İptal ve İade sayfasında</a></li>
@@ -83,7 +91,7 @@
 	<h2>9. Domain</h2>
 	<ul>
 		<li>Domain, tescil sonrası size aittir (ICANN kuralları)</li>
-		<li>Domain yenileme aboneliğe dahil değildir; yıllık ayrı faturalanır</li>
+		<li>Domain yenileme aboneliğe dahil değildir; yıllık ayrı ücretlendirilebilir</li>
 		<li>Abonelik iptalinde domain 30 gün grace dönemi boyunca aktif kalır, sonra ayrılır</li>
 		<li>Domain transfer-out her zaman mümkündür (kayıtçı üzerinden)</li>
 	</ul>
@@ -128,8 +136,11 @@
 
 	<h2>15. Uyuşmazlık Çözümü</h2>
 	<p>
-		Önce müzakere, ardından Türkiye Cumhuriyeti kanunları uygulanır. Yetkili mahkeme İstanbul
-		(Çağlayan) Mahkemeleri'dir.
+		Önce iyi niyetli müzakere ve destek kanalları kullanılır. Ücretli checkout'ta Creem Merchant of
+		Record olarak görünüyorsa, ödeme, chargeback, vergi/fatura ve tüketici mevzuatı konularında
+		Creem'in checkout sırasında sunduğu ek şartlar da uygulanabilir. saaskaya platform kullanımı ve
+		yayınlanan içerik sorumlulukları bu Şartlara tabidir. Nihai uygulanacak hukuk ve yetkili merci,
+		ücretli genel lansman öncesi hukuki danışmanla kesinleştirilecektir.
 	</p>
 
 	<h2>16. Değişiklikler</h2>
@@ -141,5 +152,11 @@
 	<h2>17. İletişim</h2>
 	<p>
 		<a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>
+	</p>
+
+	<p class="sk-callout">
+		<strong>Hukuki gözden geçirme:</strong> Bu şartlar Creem Merchant of Record kararına göre güncellenmiş
+		operasyonel taslaktır. Almanya'da işletme/gelir vergisi, Türkiye'ye satış, tüketici hakları ve mesafeli
+		satış kuralları için profesyonel onay alınmadan "paid public launch approved" kabul edilmemelidir.
 	</p>
 </LegalShell>

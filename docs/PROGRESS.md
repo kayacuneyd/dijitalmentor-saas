@@ -1951,3 +1951,46 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   position at `left:360`, `width:720`, `centerDelta:0`, `bottom:24` on a 1440px viewport; mobile
   had `scrollWidth:390` on a 390px viewport with no horizontal overflow. Submitting a profession
   brief from `/tr` navigated to `/tr/new` and prefilled the textarea.
+
+### 2026-07-11 — Assistant widget UX: KB answers, typing indicator, footer clearance, inquiry-source fix
+
+- **Fixed a silent support-form bug:** the assistant dock posts `source: 'assistant'` to
+  `/api/inquiries`, but `INQUIRY_SOURCES` only allowed `contact|chat`, so every assistant support
+  submission failed with a 400 and never reached `/admin/inbox`. Added `'assistant'` to the enum
+  (`src/lib/server/inquiries.ts` — plain text column, no migration needed) and to the admin inbox
+  source filter chips; covered by regression tests in `inquiries.test.ts`,
+  `api/inquiries/server.test.ts`, and `admin/inbox/page.server.test.ts`.
+- **Extracted + expanded the rule-based knowledge base** into `src/lib/server/assistant/kb.ts`
+  (typed `KbEntry[]`, ordered first-match-wins, TR/EN/DE keywords + replies). New informational
+  intents (`action: 'answer'`): `what_is_saaskaya`, `how_it_works`, `supported_languages`,
+  `beta_status` (→ `/beta`), `editing_media`, `publishing`, `account_login` (→ `/login`), so
+  anonymous visitors get real answers to general product questions. The endpoint
+  (`api/assistant/route/+server.ts`) is now a thin shell (rate limit + zod + `classify()`); the
+  response contract is unchanged. Removed the over-broad `mail`/`email` keywords from the domain
+  intent. Decision: **no AI in this iteration** — keyword rules only; the typed KB is deliberately
+  shaped so a future Groq fallback phase can reuse it as system-prompt content. Matching lowercases
+  with both `tr-TR` and default locales so uppercase Turkish and English both hit. New
+  `kb.test.ts` (14 tests) encodes the ordering traps (info questions of 28+ chars must not fall
+  into `start_onboarding`).
+- **Widget UX (`SiteAssistantDock.svelte` + `layout.css`):** greeting shortened per locale,
+  rendered only while the conversation is empty, and restyled as a subtle hint
+  (`.sk-assistant-greeting`); added a WhatsApp-style three-dot typing bubble
+  (`.sk-assistant-typing`, first `@keyframes` in `layout.css`, static under
+  `prefers-reduced-motion`) with a length-scaled reveal delay (450 + 4×reply-length ms, clamped
+  ≤900ms; real network latency counts toward it, `typing` cleared in `finally`); panel got
+  `aria-live="polite"`.
+- **Footer clearance + transparency:** the centered minimized pill used to cover the centered
+  copyright line in `PublicFooter`. Fixed by reserving document-flow space — the copyright bar's
+  bottom padding is now `calc(4.5rem + env(safe-area-inset-bottom))` — rather than nudging the
+  fixed dock. Pill/shell background alpha lowered 0.94 → 0.78 with `blur(16px)` (+`-webkit-`
+  prefix) and a `@supports` solid fallback for browsers without backdrop-filter.
+- Verification: `npm run check` 0 errors; `npm run test` 69 files / 430 tests green;
+  `npm run build` succeeded. Live smoke on the dev server: 8 intents route correctly via curl
+  (incl. `answer` + `fallback` + onboarding-prefill regression); `POST /api/inquiries` with
+  `source:'assistant'` → 200 + DB row; admin magic-link login → `/admin/inbox?source=assistant`
+  lists exactly the smoke inquiries. Playwright (1440px + 390px): pill no longer intersects the
+  copyright text (28–32px clearance; note `scroll-behavior: smooth` races naive scroll
+  measurements — use `behavior: 'instant'`), shell computed background `rgba(251,250,247,0.78)` +
+  `blur(16px)`, typing dots appear <100ms and reply reveals ~0.9s, greeting disappears after the
+  first message, support form submits end-to-end, `reducedMotion: 'reduce'` → `animation: none`,
+  zero horizontal overflow, zero console errors.

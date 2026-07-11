@@ -1,6 +1,6 @@
 import { isHttpError, isRedirect } from '@sveltejs/kit';
 import { describe, expect, it } from 'vitest';
-import { createInquiry, validateInquiry } from '$lib/server/inquiries';
+import { createInquiry, validateInquiry, type InquirySource } from '$lib/server/inquiries';
 import { load } from './+page.server';
 
 const admin = { id: 'admin-1', email: 'admin@saaskaya.com', isAdmin: true };
@@ -10,7 +10,7 @@ function url(query = '') {
 	return new URL(`http://localhost/admin/inbox${query}`);
 }
 
-function seedInquiry(source: 'contact' | 'chat' = 'contact') {
+function seedInquiry(source: InquirySource = 'contact') {
 	const parsed = validateInquiry({
 		source,
 		name: 'Inbox Visitor',
@@ -43,6 +43,7 @@ describe('GET /admin/inbox (load)', () => {
 	it('returns public inquiries and filters by source/status', () => {
 		const contact = seedInquiry('contact');
 		const chat = seedInquiry('chat');
+		const assistant = seedInquiry('assistant');
 		const all = load({ locals: { user: admin }, url: url() } as never) as {
 			inquiries: { id: string }[];
 			status: string;
@@ -59,5 +60,13 @@ describe('GET /admin/inbox (load)', () => {
 		expect(chatOnly.status).toBe('open');
 		expect(chatOnly.inquiries.some((row) => row.id === chat.id)).toBe(true);
 		expect(chatOnly.inquiries.some((row) => row.id === contact.id)).toBe(false);
+
+		const assistantOnly = load({
+			locals: { user: admin },
+			url: url('?source=assistant')
+		} as never) as { inquiries: { id: string }[]; source: string };
+		expect(assistantOnly.source).toBe('assistant');
+		expect(assistantOnly.inquiries.some((row) => row.id === assistant.id)).toBe(true);
+		expect(assistantOnly.inquiries.some((row) => row.id === chat.id)).toBe(false);
 	});
 });

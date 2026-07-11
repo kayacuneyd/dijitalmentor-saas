@@ -7,7 +7,7 @@ import { db } from '$lib/server/db';
 import { inquiries, inquiryMessages } from '$lib/server/db/schema';
 import { sendEmail } from '$lib/server/email';
 
-export const INQUIRY_SOURCES = ['contact', 'chat'] as const;
+export const INQUIRY_SOURCES = ['contact', 'chat', 'assistant'] as const;
 export const INQUIRY_CATEGORIES = [
 	'beta_access',
 	'support',

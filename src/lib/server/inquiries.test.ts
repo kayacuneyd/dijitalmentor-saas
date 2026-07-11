@@ -55,6 +55,23 @@ describe('public inquiries', () => {
 		expect(detail?.messages[0].body).toContain('join the beta');
 	});
 
+	it('accepts assistant-widget inquiries and filters them by source', () => {
+		const parsed = validateInquiry({
+			source: 'assistant',
+			name: 'Widget Visitor',
+			email: 'widget@example.com',
+			category: 'support',
+			message: 'I asked the assistant for help and it opened this support form.',
+			website: ''
+		});
+		expect(parsed.ok).toBe(true);
+		if (!parsed.ok) throw new Error('expected valid assistant inquiry');
+		const inquiry = createInquiry(parsed.data);
+		expect(inquiry.source).toBe('assistant');
+		expect(listInquiries({ source: 'assistant' }).some((row) => row.id === inquiry.id)).toBe(true);
+		expect(listInquiries({ source: 'contact' }).some((row) => row.id === inquiry.id)).toBe(false);
+	});
+
 	it('lists by source/status and tracks admin replies', () => {
 		const parsed = validateInquiry({
 			source: 'chat',

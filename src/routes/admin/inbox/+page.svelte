@@ -6,7 +6,7 @@
 	let { data } = $props();
 
 	const statuses = ['all', 'open', 'pending', 'resolved', 'closed'] as const;
-	const sources = ['all', 'contact', 'chat'] as const;
+	const sources = ['all', 'contact', 'chat', 'assistant'] as const;
 
 	const statusTone = (status: string) =>
 		status === 'resolved' ? 'success' : status === 'closed' ? 'neutral' : 'warning';

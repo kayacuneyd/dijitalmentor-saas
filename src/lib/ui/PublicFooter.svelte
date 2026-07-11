@@ -145,7 +145,7 @@
 		</div>
 	</div>
 	<div
-		class="border-t border-[var(--sk-line)] px-4 py-4 text-center text-xs text-[var(--sk-muted)]"
+		class="border-t border-[var(--sk-line)] px-4 pt-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] text-center text-xs text-[var(--sk-muted)]"
 	>
 		Built & developed in Kornwestheim by
 		<a class="sk-link text-[var(--sk-ink)]" href="https://kayacuneyt.com" rel="noopener noreferrer"

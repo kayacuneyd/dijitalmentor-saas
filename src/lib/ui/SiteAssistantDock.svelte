@@ -13,6 +13,7 @@
 		| 'login_required'
 		| 'open_dashboard'
 		| 'open_legal'
+		| 'answer'
 		| 'fallback';
 
 	type AssistantResponse = {
@@ -35,8 +36,7 @@
 			open: 'Asistanı aç',
 			minimize: 'Küçült',
 			close: 'Kapat',
-			greeting:
-				'Mesleğini veya aradığın siteyi yaz. Uygunsa seni doğru başlangıç ekranına götüreyim.',
+			greeting: 'Merhaba! Site kurma, fiyat veya saaskaya hakkında sorabilirsin.',
 			placeholder: 'Örn. Kadıköy’de diyetisyenim, randevulu site istiyorum',
 			send: 'Gönder',
 			thinking: 'Bakıyorum...',
@@ -62,8 +62,7 @@
 			open: 'Open assistant',
 			minimize: 'Minimize',
 			close: 'Close',
-			greeting:
-				'Tell me your profession or the site you need. I will route you to the right next step.',
+			greeting: 'Hi! Ask about creating a site, pricing, or saaskaya in general.',
 			placeholder: 'E.g. I am a dietitian and need a booking website',
 			send: 'Send',
 			thinking: 'Checking...',
@@ -89,7 +88,7 @@
 			open: 'Assistent öffnen',
 			minimize: 'Minimieren',
 			close: 'Schliessen',
-			greeting: 'Beschreibe deinen Beruf oder die Website. Ich leite dich zum passenden Schritt.',
+			greeting: 'Hallo! Frag zu Website, Preisen oder saaskaya allgemein.',
 			placeholder: 'Z. B. Ich bin Ernährungsberaterin und brauche Buchungen',
 			send: 'Senden',
 			thinking: 'Prüfe...',
@@ -123,6 +122,7 @@
 	let messages = $state<Message[]>([]);
 	let input = $state('');
 	let busy = $state(false);
+	let typing = $state(false);
 	let error = $state('');
 	let contactMode = $state(false);
 	let contactBusy = $state(false);
@@ -164,6 +164,10 @@
 		if (panelEl) panelEl.scrollTop = panelEl.scrollHeight;
 	}
 
+	function sleep(ms: number) {
+		return new Promise((resolve) => setTimeout(resolve, ms));
+	}
+
 	async function submit() {
 		const message = input.trim();
 		if (!message || busy) return;
@@ -173,6 +177,8 @@
 		contactMode = false;
 		contactSent = false;
 		messages = [...messages, { role: 'user', text: message }];
+		typing = true;
+		const startedAt = performance.now();
 		await scrollPanel();
 		try {
 			const response = await fetch('/api/assistant/route', {
@@ -182,6 +188,12 @@
 			});
 			const data = (await response.json()) as AssistantResponse;
 			if (!response.ok || !data.ok || !data.reply) throw new Error(data.message ?? 'assistant');
+			// Hold the typing bubble briefly so canned replies land at a natural pace;
+			// real network latency counts toward the same target.
+			const target = Math.min(900, 450 + data.reply.length * 4);
+			const elapsed = performance.now() - startedAt;
+			if (elapsed < target) await sleep(target - elapsed);
+			typing = false;
 			messages = [...messages, { role: 'assistant', text: data.reply }];
 			await scrollPanel();
 			if (data.action === 'contact_support') {
@@ -202,6 +214,7 @@
 		} catch {
 			error = String(t.error);
 		} finally {
+			typing = false;
 			busy = false;
 		}
 	}
@@ -266,11 +279,23 @@
 				</div>
 			</div>
 
-			<div class="sk-assistant-panel" bind:this={panelEl}>
-				<div class="sk-assistant-msg sk-assistant-msg-assistant">{String(t.greeting)}</div>
+			<div class="sk-assistant-panel" bind:this={panelEl} aria-live="polite">
+				{#if messages.length === 0}
+					<div class="sk-assistant-msg sk-assistant-msg-assistant sk-assistant-greeting">
+						{String(t.greeting)}
+					</div>
+				{/if}
 				{#each messages as message}
 					<div class={`sk-assistant-msg sk-assistant-msg-${message.role}`}>{message.text}</div>
 				{/each}
+				{#if typing}
+					<div
+						class="sk-assistant-msg sk-assistant-msg-assistant sk-assistant-typing"
+						aria-hidden="true"
+					>
+						<span></span><span></span><span></span>
+					</div>
+				{/if}
 				{#if error}<div class="sk-assistant-error">{error}</div>{/if}
 			</div>
 

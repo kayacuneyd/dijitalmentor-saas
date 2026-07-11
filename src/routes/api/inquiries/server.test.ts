@@ -39,6 +39,22 @@ describe('POST /api/inquiries', () => {
 		expect(detail?.userId).toBeNull();
 	});
 
+	it('stores an assistant-widget inquiry (regression: source was rejected)', async () => {
+		const res = await call({
+			source: 'assistant',
+			name: 'Assistant Visitor',
+			email: 'assistant-visitor@example.com',
+			category: 'support',
+			message: 'The assistant routed me here with a support question about my site.',
+			website: ''
+		});
+		expect(res.status).toBe(200);
+		const data = await res.json();
+		expect(data.ok).toBe(true);
+		const detail = getInquiryDetail(data.id);
+		expect(detail?.source).toBe('assistant');
+	});
+
 	it('rejects invalid bodies and rate limits repeated submissions', async () => {
 		const invalid = await call({
 			source: 'chat',

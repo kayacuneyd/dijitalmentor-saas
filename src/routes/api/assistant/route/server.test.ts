@@ -34,6 +34,18 @@ describe('assistant route endpoint', () => {
 		expect(domain.href).toBe('/pricing');
 	});
 
+	it('answers general product questions with the answer action', async () => {
+		const res = await request('saaskaya nedir?');
+		const data = await res.json();
+
+		expect(res.status).toBe(200);
+		expect(data.action).toBe('answer');
+		expect(typeof data.reply).toBe('string');
+		expect(data.reply.length).toBeGreaterThan(20);
+		expect(data.href).toBeUndefined();
+		expect(data.prefill).toBeUndefined();
+	});
+
 	it('requires login for edit intent when signed out, dashboard when signed in', async () => {
 		const signedOut = await (await request('Sitemdeki hakkımda yazısını düzenle')).json();
 		const signedIn = await (

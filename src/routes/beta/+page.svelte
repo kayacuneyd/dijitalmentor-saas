@@ -4,7 +4,8 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
-	import MessageBubble from '$lib/ui/MessageBubble.svelte';
+	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
@@ -31,7 +32,7 @@
 				codeMissing:
 					'This beta link needs a valid code. Please use the full invitation link you received.',
 				dev: 'Dev mode',
-				open: 'Open your sign-in link →',
+				open: 'Open your sign-in link',
 				after:
 					'After sign-in: quick profile → guided website chat → preview → publish on subdomain.'
 			},
@@ -52,7 +53,7 @@
 				codeMissing:
 					'Bu beta linki geçerli bir kod gerektiriyor. Lütfen sana gönderilen tam davet linkini kullan.',
 				dev: 'Dev modu',
-				open: 'Giriş linkini aç →',
+				open: 'Giriş linkini aç',
 				after: 'Girişten sonra: hızlı profil → rehberli website chat → preview → subdomain yayın.'
 			},
 			de: {
@@ -72,7 +73,7 @@
 				codeMissing:
 					'Dieser Beta-Link benötigt einen gültigen Code. Bitte nutze den vollständigen Einladungslink.',
 				dev: 'Dev-Modus',
-				open: 'Anmeldelink öffnen →',
+				open: 'Anmeldelink öffnen',
 				after:
 					'Nach dem Login: Kurzprofil → geführter Website-Chat → Vorschau → Subdomain veröffentlichen.'
 			}
@@ -87,13 +88,19 @@
 
 <AppCanvasShell label="saaskaya.app / beta">
 	{#snippet right()}
-		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm">{copy.home}</a>
+		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm"
+			>{@html uiIcons.home(14)}{copy.home}</a
+		>
 		<LanguageSwitcher {locale} />
 	{/snippet}
 
 	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
 		<div>
-			<a href={l('/')} class="sk-link text-sm text-[var(--sk-faint)]">← saaskaya</a>
+			<a
+				href={l('/')}
+				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
+				>{@html uiIcons.arrowLeft(14)}saaskaya</a
+			>
 			<div class="mt-5"><BrandMark /></div>
 			<div
 				class="mt-5 inline-flex rounded-full bg-[rgba(47,111,106,.1)] px-3 py-1 text-xs font-medium text-[#2f6f6a]"
@@ -118,7 +125,10 @@
 					{#if form.devEchoLink}
 						<div class="sk-alert sk-alert-warning text-xs">
 							<span class="sk-mono block text-[10.5px] text-[var(--sk-faint)]">{copy.dev}</span>
-							<a class="sk-link break-all font-medium" href={form.devEchoLink}>{copy.open}</a>
+							<a
+								class="sk-link inline-flex items-center gap-1.5 break-all font-medium"
+								href={form.devEchoLink}>{copy.open}{@html uiIcons.arrowRight(14)}</a
+							>
 						</div>
 					{/if}
 				</div>
@@ -152,10 +162,11 @@
 					<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
 						{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
 						{copy.submit}
+						{#if !busy}{@html uiIcons.arrowRight(16)}{/if}
 					</button>
 				</form>
 			{/if}
 		</AppCard>
 	</div>
-	<MessageBubble {locale} userEmail={data.user?.email ?? ''} />
 </AppCanvasShell>
+<SiteAssistantDock {locale} currentPath="/beta" userEmail={data.user?.email ?? ''} />

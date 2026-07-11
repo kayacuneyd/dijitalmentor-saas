@@ -1,4 +1,4 @@
-import { psychProfessionalKits } from '$lib/kits';
+import { controlledKits } from '$lib/kits';
 import { siteQualityCheck } from '$lib/quality/siteQuality';
 import type { SectionType } from '$lib/schema/site';
 import type { PageServerLoad } from './$types';
@@ -14,9 +14,17 @@ const sectionLabels: Record<SectionType, string> = {
 	team: 'Ekip',
 	footer: 'Footer'
 };
+const templateImages = new Set([
+	'calm-intake',
+	'modern-clinic',
+	'online-therapy',
+	'child-family',
+	'couples-therapy',
+	'trauma-informed'
+]);
 
 export const load: PageServerLoad = () => {
-	const kits = psychProfessionalKits.map((kit) => {
+	const kits = controlledKits.map((kit) => {
 		const site = kit.createSite();
 		const sections = site.pages[0].sections.map((section) => section.type);
 		const quality = siteQualityCheck(site);
@@ -26,8 +34,13 @@ export const load: PageServerLoad = () => {
 		return {
 			slug: kit.slug,
 			label: kit.label,
+			profession: kit.profession,
+			category: kit.category,
+			hasImage: templateImages.has(kit.slug),
 			audience: kit.audience,
 			outcome: kit.outcome,
+			featureKits: kit.featureKits,
+			promptRecipes: kit.promptRecipes,
 			siteName: site.settings.siteName,
 			headline,
 			sections: sections.map((type) => ({ type, label: sectionLabels[type] })),

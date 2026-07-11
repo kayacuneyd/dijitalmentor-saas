@@ -1,0 +1,338 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
+	import type { Locale } from '$lib/i18n';
+	import { withLocale } from '$lib/i18n';
+	import { uiIcons } from '$lib/ui/icons';
+
+	type AssistantAction =
+		| 'start_onboarding'
+		| 'show_pricing'
+		| 'show_domain_info'
+		| 'contact_support'
+		| 'login_required'
+		| 'open_dashboard'
+		| 'open_legal'
+		| 'fallback';
+
+	type AssistantResponse = {
+		ok: boolean;
+		action?: AssistantAction;
+		reply?: string;
+		href?: string;
+		prefill?: string;
+		message?: string;
+	};
+
+	type Message = {
+		role: 'assistant' | 'user';
+		text: string;
+	};
+
+	const copy = {
+		tr: {
+			title: 'saaskaya asistan',
+			open: 'Asistanı aç',
+			minimize: 'Küçült',
+			close: 'Kapat',
+			greeting:
+				'Mesleğini veya aradığın siteyi yaz. Uygunsa seni doğru başlangıç ekranına götüreyim.',
+			placeholder: 'Örn. Kadıköy’de diyetisyenim, randevulu site istiyorum',
+			send: 'Gönder',
+			thinking: 'Bakıyorum...',
+			contactTitle: 'Destek talebi',
+			contactIntro: 'Bunu ekibe iletmek için kısa formu doldurabilirsin.',
+			name: 'Ad soyad',
+			email: 'E-posta',
+			category: 'Konu',
+			message: 'Mesaj',
+			contactSend: 'Talebi gönder',
+			sent: 'Talebin ulaştı. E-posta üzerinden dönüş yapacağız.',
+			error: 'Şu an yanıt alınamadı. Birazdan tekrar dene.',
+			categories: {
+				beta_access: 'Beta erişimi',
+				support: 'Destek',
+				partnership: 'Partnerlik',
+				billing: 'Faturalama',
+				other: 'Diğer'
+			}
+		},
+		en: {
+			title: 'saaskaya assistant',
+			open: 'Open assistant',
+			minimize: 'Minimize',
+			close: 'Close',
+			greeting:
+				'Tell me your profession or the site you need. I will route you to the right next step.',
+			placeholder: 'E.g. I am a dietitian and need a booking website',
+			send: 'Send',
+			thinking: 'Checking...',
+			contactTitle: 'Support request',
+			contactIntro: 'Fill this short form to send it to the team.',
+			name: 'Full name',
+			email: 'Email',
+			category: 'Topic',
+			message: 'Message',
+			contactSend: 'Send request',
+			sent: 'Your request arrived. We will reply by email.',
+			error: 'No response right now. Please try again shortly.',
+			categories: {
+				beta_access: 'Beta access',
+				support: 'Support',
+				partnership: 'Partnership',
+				billing: 'Billing',
+				other: 'Other'
+			}
+		},
+		de: {
+			title: 'saaskaya assistent',
+			open: 'Assistent öffnen',
+			minimize: 'Minimieren',
+			close: 'Schliessen',
+			greeting: 'Beschreibe deinen Beruf oder die Website. Ich leite dich zum passenden Schritt.',
+			placeholder: 'Z. B. Ich bin Ernährungsberaterin und brauche Buchungen',
+			send: 'Senden',
+			thinking: 'Prüfe...',
+			contactTitle: 'Support-Anfrage',
+			contactIntro: 'Mit diesem kurzen Formular sendest du es an das Team.',
+			name: 'Name',
+			email: 'E-Mail',
+			category: 'Thema',
+			message: 'Nachricht',
+			contactSend: 'Anfrage senden',
+			sent: 'Deine Anfrage ist angekommen. Wir antworten per E-Mail.',
+			error: 'Aktuell keine Antwort. Bitte versuche es gleich erneut.',
+			categories: {
+				beta_access: 'Beta-Zugang',
+				support: 'Support',
+				partnership: 'Partnerschaft',
+				billing: 'Abrechnung',
+				other: 'Sonstiges'
+			}
+		}
+	} satisfies Record<Locale, Record<string, unknown>>;
+
+	let {
+		locale,
+		userEmail = '',
+		currentPath = '/'
+	}: { locale: Locale; userEmail?: string | null; currentPath?: string } = $props();
+
+	const t = $derived(copy[locale]);
+	let minimized = $state(false);
+	let messages = $state<Message[]>([]);
+	let input = $state('');
+	let busy = $state(false);
+	let error = $state('');
+	let contactMode = $state(false);
+	let contactBusy = $state(false);
+	let contactSent = $state(false);
+	let contactName = $state('');
+	let contactEmail = $state('');
+	let contactCategory = $state('support');
+	let contactMessage = $state('');
+	let panelEl: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		contactEmail = contactEmail || userEmail || '';
+	});
+
+	$effect(() => {
+		try {
+			minimized = localStorage.getItem('saaskaya.assistantMinimized') === '1';
+		} catch {
+			minimized = false;
+		}
+	});
+
+	function persistMinimized(value: boolean) {
+		minimized = value;
+		try {
+			localStorage.setItem('saaskaya.assistantMinimized', value ? '1' : '0');
+		} catch {
+			// localStorage may be unavailable in strict privacy contexts.
+		}
+	}
+
+	function routeHref(href: string): string {
+		if (href === '/dashboard') return href;
+		return withLocale(locale, href);
+	}
+
+	async function scrollPanel() {
+		await tick();
+		if (panelEl) panelEl.scrollTop = panelEl.scrollHeight;
+	}
+
+	async function submit() {
+		const message = input.trim();
+		if (!message || busy) return;
+		input = '';
+		error = '';
+		busy = true;
+		contactMode = false;
+		contactSent = false;
+		messages = [...messages, { role: 'user', text: message }];
+		await scrollPanel();
+		try {
+			const response = await fetch('/api/assistant/route', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ message, currentPath, locale })
+			});
+			const data = (await response.json()) as AssistantResponse;
+			if (!response.ok || !data.ok || !data.reply) throw new Error(data.message ?? 'assistant');
+			messages = [...messages, { role: 'assistant', text: data.reply }];
+			await scrollPanel();
+			if (data.action === 'contact_support') {
+				contactMode = true;
+				contactMessage = message;
+				return;
+			}
+			if (data.action === 'start_onboarding') {
+				try {
+					localStorage.setItem('saaskaya.promptSeed', data.prefill || message);
+				} catch {
+					// Non-critical convenience handoff.
+				}
+			}
+			if (data.href) {
+				setTimeout(() => void goto(routeHref(data.href as string)), 450);
+			}
+		} catch {
+			error = String(t.error);
+		} finally {
+			busy = false;
+		}
+	}
+
+	async function submitContact() {
+		if (contactBusy) return;
+		error = '';
+		contactBusy = true;
+		try {
+			const response = await fetch('/api/inquiries', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					source: 'assistant',
+					name: contactName,
+					email: contactEmail,
+					category: contactCategory,
+					message: contactMessage,
+					website: ''
+				})
+			});
+			const data = (await response.json()) as { ok: boolean; message?: string };
+			if (!response.ok || !data.ok) throw new Error(data.message ?? 'inquiry');
+			contactSent = true;
+			contactMode = false;
+			messages = [...messages, { role: 'assistant', text: String(t.sent) }];
+			await scrollPanel();
+		} catch {
+			error = String(t.error);
+		} finally {
+			contactBusy = false;
+		}
+	}
+</script>
+
+<div class="sk-assistant-dock" data-testid="site-assistant-dock">
+	{#if minimized}
+		<button
+			type="button"
+			class="sk-assistant-pill"
+			aria-label={String(t.open)}
+			onclick={() => persistMinimized(false)}
+		>
+			{@html uiIcons.message(16)}
+			<span>{String(t.title)}</span>
+		</button>
+	{:else}
+		<div class="sk-assistant-shell">
+			<div class="sk-assistant-head">
+				<span class="sk-assistant-title">{String(t.title)}</span>
+				<div class="sk-assistant-controls">
+					<button
+						type="button"
+						aria-label={String(t.minimize)}
+						onclick={() => persistMinimized(true)}
+					>
+						{@html uiIcons.minus(14)}
+					</button>
+					<button type="button" aria-label={String(t.close)} onclick={() => persistMinimized(true)}>
+						{@html uiIcons.x(14)}
+					</button>
+				</div>
+			</div>
+
+			<div class="sk-assistant-panel" bind:this={panelEl}>
+				<div class="sk-assistant-msg sk-assistant-msg-assistant">{String(t.greeting)}</div>
+				{#each messages as message}
+					<div class={`sk-assistant-msg sk-assistant-msg-${message.role}`}>{message.text}</div>
+				{/each}
+				{#if error}<div class="sk-assistant-error">{error}</div>{/if}
+			</div>
+
+			{#if contactMode}
+				<form
+					class="sk-assistant-contact"
+					onsubmit={(event) => (event.preventDefault(), submitContact())}
+				>
+					<div>
+						<strong>{String(t.contactTitle)}</strong>
+						<p>{String(t.contactIntro)}</p>
+					</div>
+					<div class="sk-assistant-contact-grid">
+						<input
+							class="sk-input"
+							bind:value={contactName}
+							placeholder={String(t.name)}
+							required
+						/>
+						<input
+							class="sk-input"
+							type="email"
+							bind:value={contactEmail}
+							placeholder={String(t.email)}
+							required
+						/>
+					</div>
+					<select class="sk-select" bind:value={contactCategory}>
+						<option value="beta_access">{String(t.categories.beta_access)}</option>
+						<option value="support">{String(t.categories.support)}</option>
+						<option value="partnership">{String(t.categories.partnership)}</option>
+						<option value="billing">{String(t.categories.billing)}</option>
+						<option value="other">{String(t.categories.other)}</option>
+					</select>
+					<textarea
+						class="sk-textarea"
+						bind:value={contactMessage}
+						placeholder={String(t.message)}
+						rows="3"
+						required></textarea>
+					<button class="sk-btn sk-btn-primary" type="submit" disabled={contactBusy}>
+						{contactBusy ? String(t.thinking) : String(t.contactSend)}
+					</button>
+				</form>
+			{/if}
+
+			<form class="sk-assistant-bar" onsubmit={(event) => (event.preventDefault(), submit())}>
+				<input
+					bind:value={input}
+					placeholder={String(t.placeholder)}
+					aria-label={String(t.placeholder)}
+					disabled={busy}
+				/>
+				<button
+					class="sk-assistant-send"
+					type="submit"
+					aria-label={String(t.send)}
+					disabled={busy || !input.trim()}
+				>
+					{@html uiIcons.arrowRight(16)}
+				</button>
+			</form>
+		</div>
+	{/if}
+</div>

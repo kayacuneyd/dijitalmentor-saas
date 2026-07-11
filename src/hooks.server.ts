@@ -8,7 +8,8 @@ import {
 	withLocale
 } from '$lib/i18n';
 import { getSessionUser, isAdminEmail, SESSION_COOKIE } from '$lib/server/auth';
-import { recordError } from '$lib/server/error-log';
+import { recordError, shouldRecordError } from '$lib/server/error-log';
+import { recordRequestProbe } from '$lib/server/requestProbes';
 
 const LOCALIZED_PUBLIC_PATHS = new Set([
 	'/',
@@ -65,6 +66,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = ({ error, event, status }) => {
+	if (!shouldRecordError({ status })) {
+		recordRequestProbe({
+			pathname: event.url.pathname,
+			status,
+			userAgent: event.request.headers.get('user-agent'),
+			clientAddress:
+				event.request.headers.get('cf-connecting-ip') ??
+				event.request.headers.get('x-forwarded-for') ??
+				null
+		});
+		return {
+			message: status === 404 ? 'Not found' : 'Something went wrong.'
+		};
+	}
 	const errorId = recordError(error, {
 		source: 'sveltekit',
 		route: event.route.id ?? event.url.pathname,

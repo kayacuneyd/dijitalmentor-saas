@@ -6,7 +6,7 @@ import {
 	type OnboardingAnswers
 } from '$lib/onboarding/questions';
 import { visualDirectionById } from '$lib/onboarding/directions';
-import { psychKitBySlug, type PsychKitSlug } from '$lib/kits';
+import { kitBySlug } from '$lib/kits';
 
 /**
  * Composes the collected onboarding answers into a single flowing description
@@ -26,7 +26,7 @@ const LANGUAGE_NAMES: Record<string, string> = { tr: 'Türkçe', en: 'İngilizce
 
 export function composeDescription(
 	answers: OnboardingAnswers,
-	options: { kitSlug?: PsychKitSlug } = {}
+	options: { kitSlug?: string } = {}
 ): string {
 	// The free-text escape hatch bypasses the composer entirely.
 	const raw = asString(answers.rawDescription);
@@ -39,7 +39,7 @@ export function composeDescription(
 	const differentiator = asString(answers.differentiator);
 	const tone = labelOf(TONE_OPTIONS, answers.tone);
 	const visualDirection = visualDirectionById(answers.visualDirection);
-	const selectedKit = psychKitBySlug(options.kitSlug);
+	const selectedKit = kitBySlug(options.kitSlug);
 	const contactMethod = labelOf(CONTACT_METHOD_OPTIONS, answers.contactMethod);
 	const contactEmail = asString(answers.contactEmail);
 	const contactPhone = asString(answers.contactPhone);
@@ -67,8 +67,11 @@ export function composeDescription(
 		const kit = selectedKit ?? visualDirection.kit;
 		if (kit) {
 			sentences.push(
-				`Kit referansı: ${kit.label} (${kit.slug}) — ${kit.outcome} Sabit blok setinin dışına çıkma.`
+				`Kit referansı: ${kit.label} (${kit.slug}) — ${kit.outcome} Meslek: ${'profession' in kit ? kit.profession : 'Psikolog / Terapist'}. Sabit blok setinin dışına çıkma.`
 			);
+			if ('featureKits' in kit && kit.featureKits.length) {
+				sentences.push(`Önerilen feature kitleri: ${kit.featureKits.join(', ')}.`);
+			}
 		}
 	}
 	if (booking) sentences.push(`Randevu süreci: ${booking.toLowerCase()}.`);

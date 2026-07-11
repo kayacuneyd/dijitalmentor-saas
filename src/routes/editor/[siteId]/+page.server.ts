@@ -3,6 +3,7 @@ import { canManageSite } from '$lib/server/auth';
 import { getOrSeedDraft, getSiteMeta } from '$lib/server/db/repo';
 import { hasEditorOpenedEvent, recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
 import { listChatMessages } from '$lib/server/chatLog';
+import { publicSitePath } from '$lib/siteUrls';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ params, locals, url }) => {
@@ -28,6 +29,11 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
 	return {
 		site,
 		publishedVersion: meta?.publishedVersion ?? null,
+		liveUrl: `${url.protocol}//${meta?.publicHandle ?? site.id}.${url.host}${publicSitePath(
+			site,
+			site.defaultLocale,
+			site.pages[0].slug
+		)}`,
 		user: locals.user,
 		chatHistory: listChatMessages(params.siteId)
 	};

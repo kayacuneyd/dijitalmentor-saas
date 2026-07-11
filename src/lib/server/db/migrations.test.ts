@@ -24,6 +24,7 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'custom_domains',
 				'ai_usage',
 				'error_events',
+				'request_probe_stats',
 				'onboarding_events',
 				'media_assets',
 				'schema_migrations'
@@ -41,6 +42,13 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 		).toBeTruthy();
 		// v8: privacy-safe operational error records
 		expect(tables(client)).toContain('error_events');
+		// v18: aggregate scanner/404 telemetry, separate from operational errors
+		expect(tables(client)).toContain('request_probe_stats');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('request_probe_stats') WHERE name='pattern'`)
+				.get()
+		).toBeTruthy();
 		expect(
 			client
 				.prepare(`SELECT 1 FROM pragma_table_info('ai_usage') WHERE name='generation_count'`)
@@ -203,6 +211,49 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 			owner_user_id: 'user-1',
 			status: 'active'
 		});
+	});
+
+	it('backfills historical 404 scanner errors into aggregate request probes', () => {
+		const client = new Database(':memory:');
+		runMigrations(client, migrations.slice(0, 17));
+		client
+			.prepare(
+				`INSERT INTO error_events (
+					id, level, source, route, method, status, error_name, message, created_at
+				) VALUES (?, 'error', 'sveltekit', ?, 'GET', 404, 'Error', ?, ?)`
+			)
+			.run('err-wp', '/wp-admin/install.php', 'Not found: /wp-admin/install.php', 1000);
+		client
+			.prepare(
+				`INSERT INTO error_events (
+					id, level, source, route, method, status, error_name, message, created_at
+				) VALUES (?, 'error', 'sveltekit', ?, 'GET', 404, 'Error', ?, ?)`
+			)
+			.run('err-lander', '/lander/fake', 'Not found: /lander/fake', 2000);
+		client
+			.prepare(
+				`INSERT INTO error_events (
+					id, level, source, route, method, status, error_name, message, created_at
+				) VALUES (?, 'error', 'sveltekit', ?, 'GET', 404, 'Error', ?, ?)`
+			)
+			.run('err-wp-env', '/wp/.env', 'Not found: /wp/.env', 2500);
+		client
+			.prepare(
+				`INSERT INTO error_events (
+					id, level, source, route, method, status, error_name, message, created_at
+				) VALUES (?, 'error', 'sveltekit', ?, 'GET', 500, 'Error', ?, ?)`
+			)
+			.run('err-real', '/dashboard', 'Database unavailable', 3000);
+
+		runMigrations(client);
+
+		expect(
+			client.prepare(`SELECT pattern, count FROM request_probe_stats ORDER BY pattern`).all()
+		).toEqual([
+			{ pattern: 'landing-probe', count: 1 },
+			{ pattern: 'secret-scan', count: 1 },
+			{ pattern: 'wordpress', count: 1 }
+		]);
 	});
 
 	it('a failing migration rolls back atomically and can be retried', () => {

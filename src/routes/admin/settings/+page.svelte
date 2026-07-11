@@ -38,6 +38,10 @@
 		const env = settings.filter((s) => s.source === 'env').length;
 		return `${settings.length} settings · ${db} db · ${env} env`;
 	}
+
+	const requestProbeTotal = $derived(
+		data.requestProbes.reduce((total, probe) => total + probe.count, 0)
+	);
 </script>
 
 <svelte:head>
@@ -205,6 +209,13 @@
 						<span class="font-medium">Errors</span>
 						<span class="sk-mono text-[8.5px] opacity-60">{data.unresolvedErrors}</span>
 					</a>
+					<a
+						href="#request-probes"
+						class="flex min-w-36 justify-between rounded-[8px] px-3 py-2 text-sm text-[var(--sk-muted)] hover:bg-[rgb(23_22_20_/_0.05)] hover:text-[var(--sk-ink)] xl:min-w-0"
+					>
+						<span class="font-medium">Probes</span>
+						<span class="sk-mono text-[8.5px] opacity-60">{data.requestProbes.length}</span>
+					</a>
 				</nav>
 			</AppCard>
 		</aside>
@@ -332,6 +343,58 @@
 												</button>
 											</form>
 										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				</details>
+			</AppCard>
+
+			<AppCard class="p-0" id="request-probes">
+				<details open>
+					<summary
+						class="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden"
+					>
+						<span>
+							<span class="block text-sm font-semibold">Request probes</span>
+							<span class="mt-0.5 block text-xs text-[var(--sk-faint)]">
+								404 scanner and missing-route telemetry · aggregate only
+							</span>
+						</span>
+						<StatusPill tone={requestProbeTotal > 0 ? 'warning' : 'success'}>
+							{requestProbeTotal} requests
+						</StatusPill>
+					</summary>
+					<div class="border-t border-[var(--sk-line)] px-4 py-3">
+						{#if data.requestProbes.length === 0}
+							<p class="text-sm text-[var(--sk-muted)]">No request probes recorded.</p>
+						{:else}
+							<ul
+								class="flex max-h-[28rem] flex-col divide-y divide-[var(--sk-line)] overflow-auto"
+							>
+								{#each data.requestProbes as probe (probe.pattern)}
+									<li class="grid gap-2 py-3 text-sm lg:grid-cols-[1fr_auto]">
+										<div class="min-w-0">
+											<div class="flex flex-wrap items-center gap-2">
+												<code class="text-xs font-semibold">{probe.pattern}</code>
+												<StatusPill tone="warning">{probe.status}</StatusPill>
+												<span class="text-xs text-[var(--sk-faint)]">
+													last {new Date(probe.lastSeenAt).toLocaleString()}
+												</span>
+											</div>
+											<p class="sk-mono mt-1 truncate text-[10px] text-[var(--sk-faint)]">
+												{probe.samplePath}
+											</p>
+											<p class="sk-mono mt-1 truncate text-[10px] text-[var(--sk-faint)]">
+												first {new Date(probe.firstSeenAt).toLocaleString()}
+												{probe.lastUserAgentHash ? ` · ua ${probe.lastUserAgentHash}` : ''}
+												{probe.lastIpPrefixHash ? ` · ip ${probe.lastIpPrefixHash}` : ''}
+											</p>
+										</div>
+										<div class="sk-mono text-right text-xs font-semibold">
+											{probe.count} hits
+										</div>
 									</li>
 								{/each}
 							</ul>

@@ -25,7 +25,7 @@ export const load: PageServerLoad = ({ params, setHeaders }) => {
 	if (!page) error(404, `Unknown page "${slug}"`);
 	const meta = getSiteMeta(site.id);
 
-	setHeaders({ 'cache-control': 'public, max-age=60' });
+	setHeaders({ 'cache-control': 'no-cache, must-revalidate' });
 	return { site, page, locale, publishedVersion: meta?.publishedVersion ?? null };
 };
 

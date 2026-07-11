@@ -18,6 +18,7 @@
 	import { checkCircleIcon, emptyCircleIcon, tabIcons, viewportIcons } from '$lib/editor/icons';
 	import { flagSvgs } from '$lib/ui/flags';
 	import { previewSitePath } from '$lib/siteUrls';
+	import { uiIcons } from '$lib/ui/icons';
 
 	let { data } = $props();
 
@@ -58,9 +59,16 @@
 	// svelte-ignore state_referenced_locally
 	let publishedVersion = $state(data.publishedVersion);
 	let publishing = $state(false);
+	let publishNotice = $state<{
+		tone: 'success' | 'error';
+		title: string;
+		message: string;
+		version?: number;
+	} | null>(null);
 	const checklist = $derived(buildCompletionChecklist(store.site, { publishedVersion }));
 	const nextAction = $derived(nextChecklistItem(checklist));
 	const quality = $derived(siteQualityCheck(store.site));
+	const hasUnpublishedChanges = $derived(store.status !== 'saved');
 
 	/** Draft → immutable published snapshot. Flushes every pending edit first — a plain
 	 *  `save()` can resolve while a newer edit is still unsent, which is exactly how
@@ -68,10 +76,15 @@
 	 *  publish request body as a belt-and-braces guarantee against that race. */
 	async function publish() {
 		publishing = true;
+		publishNotice = null;
 		try {
 			const flushed = await store.flush();
 			if (!flushed) {
-				alert('Kaydetme başarısız oldu — yayın iptal edildi. Lütfen tekrar dene.');
+				publishNotice = {
+					tone: 'error',
+					title: 'Yayın iptal edildi',
+					message: 'Son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+				};
 				return;
 			}
 			const res = await fetch(`/api/sites/${store.site.id}/publish`, {
@@ -80,10 +93,34 @@
 				body: JSON.stringify({ draft: $state.snapshot(store.site) })
 			});
 			const body = await res.json();
-			if (res.ok && body.ok) publishedVersion = body.version;
-			else if (body.quality?.blockers?.length) {
-				alert(`Publish blocked: ${body.quality.blockers[0].message}`);
-			} else alert(body.message ?? 'Publish failed — please try again.');
+			if (res.ok && body.ok) {
+				publishedVersion = body.version;
+				publishNotice = {
+					tone: 'success',
+					title: `Published v${body.version}`,
+					message:
+						'Canlı subdomain yeni snapshot ile güncellendi. Canlı link aynı locale ve sayfayı açar.',
+					version: body.version
+				};
+			} else if (body.quality?.blockers?.length) {
+				publishNotice = {
+					tone: 'error',
+					title: 'Yayın kalite kontrolünde durdu',
+					message: body.quality.blockers[0].message
+				};
+			} else {
+				publishNotice = {
+					tone: 'error',
+					title: 'Yayın başarısız',
+					message: body.message ?? 'Publish failed — please try again.'
+				};
+			}
+		} catch {
+			publishNotice = {
+				tone: 'error',
+				title: 'Yayın isteği gönderilemedi',
+				message: 'Ağ bağlantısı veya sunucu yanıtı kesildi. Taslağı kaydedip tekrar dene.'
+			};
 		} finally {
 			publishing = false;
 		}
@@ -110,6 +147,7 @@
 
 <AppCanvasShell
 	label={`saaskaya.app / editor / ${store.site.id}`}
+	max="max-w-[96rem]"
 	minHeight="h-[calc(100svh-2.5rem)]"
 	contentClass=""
 	flush
@@ -121,7 +159,7 @@
 	<div class="flex h-full min-h-0 overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]">
 		<!-- Left sidebar -->
 		<aside
-			class="flex w-[22rem] max-w-[88vw] shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)]"
+			class="flex w-[19.5rem] max-w-[88vw] shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)]"
 		>
 			<header
 				class="flex items-start justify-between gap-3 border-b border-[var(--sk-line)] px-4 py-4"
@@ -154,8 +192,10 @@
 			</div>
 
 			<div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
-				<div class="sk-card mb-4 p-4">
-					<div class="flex items-start justify-between gap-3">
+				<details class="sk-card mb-3 p-3" open>
+					<summary
+						class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+					>
 						<div>
 							<div class="sk-mono text-[10px] text-[var(--sk-faint)]">İlk yayın checklist</div>
 							<h2 class="mt-1 text-sm font-semibold">Sıradaki adım: {nextAction.label}</h2>
@@ -168,7 +208,7 @@
 						>
 							Aç
 						</button>
-					</div>
+					</summary>
 					<div class="mt-3 flex flex-col gap-2">
 						{#each checklist as item (item.id)}
 							<button
@@ -185,10 +225,12 @@
 							</button>
 						{/each}
 					</div>
-				</div>
+				</details>
 
-				<div class="sk-card mb-4 p-4">
-					<div class="flex items-start justify-between gap-3">
+				<details class="sk-card mb-3 p-3">
+					<summary
+						class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+					>
 						<div>
 							<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Kalite kontrol</div>
 							<h2 class="mt-1 text-sm font-semibold">
@@ -209,7 +251,7 @@
 						>
 							{quality.canPublish ? 'Publish OK' : 'Blocked'}
 						</span>
-					</div>
+					</summary>
 					{#if quality.issues.length}
 						<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
 							{#each quality.issues.slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
@@ -226,7 +268,7 @@
 							{/each}
 						</div>
 					{/if}
-				</div>
+				</details>
 
 				{#if activeTab === 'Chat'}
 					<ChatTab {store} history={data.chatHistory} />
@@ -263,6 +305,13 @@
 					{/each}
 				</div>
 				<div class="flex items-center gap-2">
+					<div
+						class="hidden items-center gap-2 rounded-full border border-[var(--sk-line)] px-3 py-1 text-[11px] text-[var(--sk-muted)] xl:flex"
+					>
+						<span>{publishedVersion ? `Published v${publishedVersion}` : 'Not published'}</span>
+						<span class="text-[var(--sk-faint)]">·</span>
+						<span>{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}</span>
+					</div>
 					<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
 						{#each store.site.locales as locale (locale)}
 							<button
@@ -284,7 +333,7 @@
 						>Save now</button
 					>
 					<a href={savedPreviewSrc} target="_blank" class="sk-btn sk-btn-ghost sk-btn-sm"
-						>Saved preview ↗</a
+						>Saved preview {@html uiIcons.external(13)}</a
 					>
 					<button
 						class="sk-btn sk-btn-primary sk-btn-sm"
@@ -297,6 +346,30 @@
 					</button>
 				</div>
 			</div>
+
+			{#if publishNotice}
+				<div
+					class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'
+						? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+						: 'border-red-200 bg-red-50 text-red-900'}"
+				>
+					<div class="flex flex-wrap items-center justify-between gap-3">
+						<div>
+							<div class="font-semibold">{publishNotice.title}</div>
+							<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
+						</div>
+						{#if publishNotice.tone === 'success'}
+							<a
+								href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
+								target="_blank"
+								class="sk-btn sk-btn-secondary sk-btn-sm"
+							>
+								Canlı siteyi aç {@html uiIcons.external(13)}
+							</a>
+						{/if}
+					</div>
+				</div>
+			{/if}
 
 			<div class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] p-4 sm:p-6">
 				<div

@@ -1,10 +1,11 @@
 <script lang="ts">
 	import BrandMark from '$lib/ui/BrandMark.svelte';
-	import MessageBubble from '$lib/ui/MessageBubble.svelte';
+	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
@@ -30,16 +31,16 @@
 					'Custom domain registration is handled after payment and internal approval. Provider costs are never exposed in the checkout flow.',
 				faqLabel: 'Frequently asked questions',
 				ctaText: 'Not sure yet? Generate your first draft, then decide.',
-				cta: 'Describe your practice → see your site',
+				cta: 'Describe your practice',
 				plans: [
 					[
 						'Free',
 						'0€',
 						'Try and see',
 						[
-							'1 draft site',
+							'3 preview sites',
+							'1 published website',
 							'*.saaskaya.com subdomain',
-							'1 AI site generation / month',
 							'10 AI chat edits / month',
 							'3 pages',
 							'20 MB media',
@@ -55,7 +56,6 @@
 						[
 							'1 published site',
 							'Custom domain + subdomain',
-							'5 AI site generations / month',
 							'50 AI chat edits / month',
 							'8 pages',
 							'500 MB media',
@@ -117,16 +117,16 @@
 					'Özel domain tescili ödeme ve iç uygunluk onayından sonra yürütülür. Sağlayıcı maliyetleri ödeme akışında gösterilmez.',
 				faqLabel: 'Sıkça sorulan sorular',
 				ctaText: 'Henüz emin değil misiniz? Önce siteni üret, sonra karar ver.',
-				cta: 'Pratiğini anlat → siteni gör',
+				cta: 'Pratiğini anlat',
 				plans: [
 					[
 						'Free',
 						'0€',
 						'Dene ve gör',
 						[
-							'1 taslak site',
+							'3 preview site',
+							'1 yayınlanan website',
 							'*.saaskaya.com alt alan adı',
-							'1 AI site üretimi / ay',
 							'10 AI sohbet düzenleme / ay',
 							'3 sayfa',
 							'20 MB medya',
@@ -142,7 +142,6 @@
 						[
 							'1 yayınlanmış site',
 							'Özel domain + alt alan adı',
-							'5 AI site üretimi / ay',
 							'50 AI sohbet düzenleme / ay',
 							'8 sayfa',
 							'500 MB medya',
@@ -204,16 +203,16 @@
 					'Eigene Domains werden nach Zahlung und interner Freigabe registriert. Providerkosten werden im Checkout nicht angezeigt.',
 				faqLabel: 'Häufige Fragen',
 				ctaText: 'Noch unsicher? Erstelle zuerst deinen Entwurf und entscheide dann.',
-				cta: 'Praxis beschreiben → Website sehen',
+				cta: 'Praxis beschreiben',
 				plans: [
 					[
 						'Free',
 						'0€',
 						'Ausprobieren',
 						[
-							'1 Entwurfsseite',
+							'3 Vorschau-Websites',
+							'1 veröffentlichte Website',
 							'*.saaskaya.com Subdomain',
-							'1 AI-Website-Generierung / Monat',
 							'10 AI-Chat-Bearbeitungen / Monat',
 							'3 Seiten',
 							'20 MB Medien',
@@ -229,7 +228,6 @@
 						[
 							'1 veröffentlichte Website',
 							'Eigene Domain + Subdomain',
-							'5 AI-Website-Generierungen / Monat',
 							'50 AI-Chat-Bearbeitungen / Monat',
 							'8 Seiten',
 							'500 MB Medien',
@@ -303,9 +301,7 @@
 	userEmail={data.user?.email ?? null}
 	label="saaskaya.com / pricing"
 >
-	<div
-		class="mx-auto flex w-full max-w-6xl flex-col items-start gap-5 px-5 pt-10 sm:px-10 sm:pt-12"
-	>
+	<MarketingSection class="flex flex-col items-start gap-5 pt-10 sm:pt-12">
 		<BrandMark href={l('/')} />
 		<div class="flex flex-wrap gap-2">
 			{#each copy.pills as pill (pill)}
@@ -314,9 +310,9 @@
 		</div>
 		<h1 class="sk-display text-4xl leading-none sm:text-[42px]">{copy.h1}</h1>
 		<p class="max-w-xl text-[17px] leading-8 text-[var(--sk-muted)]">{copy.lead}</p>
-	</div>
+	</MarketingSection>
 
-	<div class="mx-auto mt-10 w-full max-w-6xl px-5 sm:px-10">
+	<MarketingSection class="mt-10">
 		<div class="grid gap-4 sm:grid-cols-3">
 			{#each plans as plan (plan.name)}
 				<div
@@ -361,13 +357,13 @@
 				</div>
 			{/each}
 		</div>
-	</div>
+	</MarketingSection>
 
-	<div class="mx-auto mt-6 w-full max-w-6xl px-5 sm:px-10">
+	<MarketingSection class="mt-6">
 		<div class="sk-soft p-4 text-xs text-[var(--sk-muted)]">{copy.domainNote}</div>
-	</div>
+	</MarketingSection>
 
-	<div class="mx-auto mt-10 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-10 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.faqLabel}</div>
 		<dl class="mt-4 flex flex-col gap-4">
 			{#each faqs as faq (faq.q)}
@@ -377,13 +373,14 @@
 				</div>
 			{/each}
 		</dl>
-	</div>
+	</MarketingSection>
 
-	<div class="mx-auto mt-10 w-full max-w-6xl px-5 pb-12 sm:px-10">
+	<MarketingSection class="mt-10 pb-12">
 		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
 			<p class="text-sm text-[var(--sk-muted)]">{copy.ctaText}</p>
-			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg">{copy.cta}</a>
+			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
+				>{copy.cta}{@html uiIcons.arrowRight(16)}</a
+			>
 		</div>
-	</div>
-	<MessageBubble {locale} userEmail={data.user?.email ?? ''} />
+	</MarketingSection>
 </PublicShell>

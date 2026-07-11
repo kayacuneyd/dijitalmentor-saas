@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { withLocale, type Locale } from '$lib/i18n';
 	import { absoluteUrl, organizationJsonLd } from '$lib/seo';
-	import MessageBubble from '$lib/ui/MessageBubble.svelte';
+	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
@@ -118,9 +118,7 @@
 	userEmail={data.user?.email ?? null}
 	label="saaskaya.com / contact"
 >
-	<section
-		class="mx-auto grid w-full max-w-6xl gap-8 px-5 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1.05fr_.95fr]"
-	>
+	<MarketingSection as="section" class="grid gap-8 py-10 sm:py-14 lg:grid-cols-[1.05fr_.95fr]">
 		<div>
 			<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.kicker}</div>
 			<h1 class="sk-display mt-4 text-4xl leading-tight sm:text-[46px]">{copy.h1}</h1>
@@ -196,6 +194,5 @@
 				</form>
 			{/if}
 		</aside>
-	</section>
-	<MessageBubble {locale} userEmail={data.user?.email ?? ''} />
+	</MarketingSection>
 </PublicShell>

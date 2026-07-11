@@ -22,9 +22,8 @@ import { listTicketsForUser, type SupportTicket } from '$lib/server/support';
 
 /**
  * Admin-only reads for /admin/customers — deliberately separate from anything
- * `canManageSite`-gated. Admin status here never grants blanket site-edit
- * access; it only unlocks these summary/detail queries and the four actions
- * in this same module's sibling routes.
+ * `canManageSite`-gated. Super admins can also manage customer drafts through
+ * the shared site guard for support and quality-control work.
  */
 
 const currentMonth = () => new Date().toISOString().slice(0, 7); // 'YYYY-MM'

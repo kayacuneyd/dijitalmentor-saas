@@ -486,6 +486,121 @@ export const migrations: Migration[] = [
 				ON site_subscriptions (provider, provider_subscription_id)
 				WHERE provider_subscription_id IS NOT NULL`);
 		}
+	},
+	{
+		version: 18,
+		name: 'request-probe-stats',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS request_probe_stats (
+				pattern text PRIMARY KEY,
+				sample_path text NOT NULL,
+				status integer NOT NULL DEFAULT 404,
+				count integer NOT NULL DEFAULT 0,
+				first_seen_at integer NOT NULL,
+				last_seen_at integer NOT NULL,
+				last_user_agent_hash text,
+				last_ip_prefix_hash text
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS request_probe_stats_last_seen_idx
+				ON request_probe_stats (last_seen_at)`);
+			client.exec(`INSERT OR IGNORE INTO request_probe_stats (
+				pattern,
+				sample_path,
+				status,
+				count,
+				first_seen_at,
+				last_seen_at
+			)
+			SELECT
+				CASE
+					WHEN lower(coalesce(route, '')) LIKE '%wp-admin%'
+						OR lower(coalesce(route, '')) LIKE '%wp-login.php%'
+						OR lower(coalesce(route, '')) LIKE '%xmlrpc.php%'
+						OR lower(coalesce(route, '')) LIKE '%wlwmanifest.xml%'
+						OR lower(coalesce(route, '')) LIKE '%wp-includes%'
+						OR lower(coalesce(route, '')) LIKE '%/wordpress/%'
+						OR lower(coalesce(route, '')) LIKE '%/wp/%'
+					THEN 'wordpress'
+					WHEN lower(coalesce(route, '')) LIKE '%/.env%'
+						OR lower(coalesce(route, '')) LIKE '%/.git%'
+						OR lower(coalesce(route, '')) LIKE '%phpinfo.php%'
+						OR lower(coalesce(route, '')) LIKE '%config.php%'
+						OR lower(coalesce(route, '')) LIKE '%/backup%'
+					THEN 'secret-scan'
+					WHEN lower(coalesce(route, '')) = '/favicon.ico'
+						OR lower(coalesce(route, '')) = '/favicon.png'
+						OR lower(coalesce(route, '')) LIKE '%apple-touch-icon%'
+					THEN 'asset-miss'
+					WHEN lower(coalesce(route, '')) = '/lander'
+						OR lower(coalesce(route, '')) LIKE '/lander/%'
+					THEN 'landing-probe'
+					WHEN coalesce(route, '') GLOB '/[A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9]*'
+						AND length(trim(coalesce(route, ''), '/')) BETWEEN 6 AND 12
+					THEN 'random-short-path'
+					ELSE 'unknown-404'
+				END AS pattern,
+				max(coalesce(route, '/')) AS sample_path,
+				404 AS status,
+				count(*) AS count,
+				min(created_at) AS first_seen_at,
+				max(created_at) AS last_seen_at
+			FROM error_events
+			WHERE status = 404
+			GROUP BY pattern`);
+		}
+	},
+	{
+		version: 19,
+		name: 'request-probe-secret-scan-priority',
+		up(client) {
+			// Rebuild the historical 404 aggregate with secret scans taking precedence
+			// over WordPress buckets, so /wp/.env is treated as credential probing.
+			client.exec(`DELETE FROM request_probe_stats`);
+			client.exec(`INSERT OR IGNORE INTO request_probe_stats (
+				pattern,
+				sample_path,
+				status,
+				count,
+				first_seen_at,
+				last_seen_at
+			)
+			SELECT
+				CASE
+					WHEN lower(coalesce(route, '')) LIKE '%/.env%'
+						OR lower(coalesce(route, '')) LIKE '%/.git%'
+						OR lower(coalesce(route, '')) LIKE '%phpinfo.php%'
+						OR lower(coalesce(route, '')) LIKE '%config.php%'
+						OR lower(coalesce(route, '')) LIKE '%/backup%'
+					THEN 'secret-scan'
+					WHEN lower(coalesce(route, '')) LIKE '%wp-admin%'
+						OR lower(coalesce(route, '')) LIKE '%wp-login.php%'
+						OR lower(coalesce(route, '')) LIKE '%xmlrpc.php%'
+						OR lower(coalesce(route, '')) LIKE '%wlwmanifest.xml%'
+						OR lower(coalesce(route, '')) LIKE '%wp-includes%'
+						OR lower(coalesce(route, '')) LIKE '%/wordpress/%'
+						OR lower(coalesce(route, '')) LIKE '%/wp/%'
+					THEN 'wordpress'
+					WHEN lower(coalesce(route, '')) = '/favicon.ico'
+						OR lower(coalesce(route, '')) = '/favicon.png'
+						OR lower(coalesce(route, '')) LIKE '%apple-touch-icon%'
+					THEN 'asset-miss'
+					WHEN lower(coalesce(route, '')) = '/lander'
+						OR lower(coalesce(route, '')) LIKE '/lander/%'
+					THEN 'landing-probe'
+					WHEN coalesce(route, '') GLOB '/[A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9][A-Za-z0-9]*'
+						AND length(trim(coalesce(route, ''), '/')) BETWEEN 6 AND 12
+					THEN 'random-short-path'
+					ELSE 'unknown-404'
+				END AS pattern,
+				max(coalesce(route, '/')) AS sample_path,
+				404 AS status,
+				count(*) AS count,
+				min(created_at) AS first_seen_at,
+				max(created_at) AS last_seen_at
+			FROM error_events
+			WHERE status = 404
+			GROUP BY pattern`);
+		}
 	}
 ];
 

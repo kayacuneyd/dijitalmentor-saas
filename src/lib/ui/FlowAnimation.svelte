@@ -201,7 +201,23 @@
 				</div>
 				<div class="describe-card-foot">
 					<div class="mono-label">TR · EN · DE</div>
-					<button type="button" class="generate-btn sk-anim">Generate my site →</button>
+					<button type="button" class="generate-btn sk-anim">
+						Generate my site
+						<svg
+							viewBox="0 0 24 24"
+							width="14"
+							height="14"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.9"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							aria-hidden="true"
+						>
+							<path d="M5 12h14" />
+							<path d="m12 5 7 7-7 7" />
+						</svg>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -401,10 +417,12 @@
 	{/if}
 </div>
 
-<div class="flow-footer">
-	<span>{loopCaption}</span>
-	<span>{reducedMotionCaption}</span>
-</div>
+{#if loopCaption || reducedMotionCaption}
+	<div class="flow-footer">
+		<span>{loopCaption}</span>
+		<span>{reducedMotionCaption}</span>
+	</div>
+{/if}
 
 <style>
 	@keyframes sk-blink {

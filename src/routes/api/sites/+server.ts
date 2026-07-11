@@ -8,6 +8,7 @@ import { recordError } from '$lib/server/error-log';
 import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
 import { getPendingById, setGeneratedSiteId } from '$lib/server/onboarding/session';
 import { seedChatFromOnboarding } from '$lib/server/chatLog';
+import { assertCanCreateFreePreviewSite, SiteQuotaError } from '$lib/server/siteQuota';
 import { manualReviewMessage, needsManualReview } from '$lib/onboarding/support';
 import type { RequestHandler } from './$types';
 
@@ -51,9 +52,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
-		// One generation = 1 generation credit (plan-tier limit; admins bypass credits).
+		assertCanCreateFreePreviewSite(locals.user);
+		// Free-tier site creation is slot-based, so deleting a draft frees the slot.
+		// The AI token/$ backstops still apply, but historical generation_count no
+		// longer blocks a user who removed an unused preview site.
 		assertWithinQuota(tenantId, {
-			kind: 'generation',
 			ownerUserId: locals.user.id,
 			isAdmin: locals.user.isAdmin
 		});
@@ -62,7 +65,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			id,
 			tenantId
 		});
-		recordUsage(tenantId, usage, 'generation');
+		recordUsage(tenantId, usage);
 		saveDraft(site, { ownerUserId: locals.user.id });
 		if (onboardingPendingId) {
 			// Best-effort: fixes the generatedSiteId back-reference (unset at finish —
@@ -151,6 +154,49 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				{ status: 422 }
 			);
 		}
-		throw error;
+		if (error instanceof SiteQuotaError) {
+			if (onboardingPendingId) {
+				recordOnboardingEvent({
+					event: 'generation_failed',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt
+				});
+			}
+			return json(
+				{ ok: false, code: error.code, message: error.message },
+				{ status: error.status }
+			);
+		}
+		const errorId = recordError(error, {
+			source: 'site-generation',
+			route: '/api/sites',
+			method: 'POST',
+			status: 500,
+			userId: locals.user.id,
+			siteId: id
+		});
+		if (onboardingPendingId) {
+			recordOnboardingEvent({
+				event: 'generation_failed',
+				pendingId: onboardingPendingId,
+				userId: locals.user.id,
+				siteId: id,
+				route: '/api/sites',
+				durationMs: Date.now() - startedAt,
+				errorId
+			});
+		}
+		return json(
+			{
+				ok: false,
+				message:
+					'Site generation failed before the editor could open. Your answers are saved; please try again shortly.',
+				errorId
+			},
+			{ status: 500 }
+		);
 	}
 };

@@ -211,6 +211,19 @@ export const errorEvents = sqliteTable(
 	(table) => [index('error_events_created_idx').on(table.createdAt)]
 );
 
+// Aggregate 404/scanner telemetry. This deliberately stores no request body,
+// raw IP, raw user-agent, stack trace, credentials, or customer content.
+export const requestProbeStats = sqliteTable('request_probe_stats', {
+	pattern: text('pattern').primaryKey(),
+	samplePath: text('sample_path').notNull(),
+	status: integer('status').notNull().default(404),
+	count: integer('count').notNull().default(0),
+	firstSeenAt: integer('first_seen_at', { mode: 'timestamp' }).notNull(),
+	lastSeenAt: integer('last_seen_at', { mode: 'timestamp' }).notNull(),
+	lastUserAgentHash: text('last_user_agent_hash'),
+	lastIpPrefixHash: text('last_ip_prefix_hash')
+});
+
 // Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a short-lived, anonymous
 // pending record of in-progress answers. `tokenHash` identifies it via either the
 // `sk_pending` cookie or the magic-link URL fallback param — never the raw token.

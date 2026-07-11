@@ -6,6 +6,7 @@
 import { chromium } from 'playwright-core';
 
 const baseUrl = process.env.SMOKE_BASE_URL || 'https://saaskaya.com';
+const tenantSmokeUrl = process.env.SMOKE_TENANT_URL || 'https://seed-law.saaskaya.com/en';
 const executablePath =
 	process.env.CHROMIUM_PATH || '/root/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome';
 
@@ -145,6 +146,32 @@ try {
 		}
 	}
 	await request.close();
+
+	const tenantContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
+	const tenantPage = await tenantContext.newPage();
+	const tenantResponse = await tenantPage.goto(tenantSmokeUrl, { waitUntil: 'networkidle' });
+	if (tenantResponse?.status() !== 200) {
+		failures.push(`${tenantSmokeUrl}: expected 200, got ${tenantResponse?.status()}`);
+	} else {
+		const title = await tenantPage.title();
+		const bodyText = await tenantPage.locator('body').innerText();
+		const cacheControl = tenantResponse.headers()['cache-control'] ?? '';
+		if (/saaskaya — AI website platform|Launch a multilingual|Pratiğin için/i.test(title)) {
+			failures.push(
+				`${tenantSmokeUrl}: rendered app landing title instead of tenant site (${title})`
+			);
+		}
+		if (!/Published v\d+/i.test(bodyText)) {
+			failures.push(`${tenantSmokeUrl}: missing published-version marker`);
+		}
+		if (!/Aksoy|Hukuk|law/i.test(bodyText)) {
+			failures.push(`${tenantSmokeUrl}: missing expected tenant content marker`);
+		}
+		if (!/no-cache/i.test(cacheControl)) {
+			failures.push(`${tenantSmokeUrl}: expected no-cache tenant response, got "${cacheControl}"`);
+		}
+	}
+	await tenantContext.close();
 } finally {
 	await browser.close();
 }

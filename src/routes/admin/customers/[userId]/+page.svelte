@@ -4,6 +4,7 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 
 	let { data, form } = $props();
 	const c = $derived(data.customer);
@@ -203,6 +204,7 @@
 									>
 										Preview
 									</a>
+									<a href="/editor/{site.id}" class="sk-btn sk-btn-secondary sk-btn-sm">Edit</a>
 									{#if site.domain}
 										<form method="POST" action="?/detachDomain" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
@@ -213,7 +215,7 @@
 									{/if}
 									{#if site.publishedVersion}
 										<a href={liveUrl(site)} target="_blank" class="sk-btn sk-btn-ghost sk-btn-sm">
-											Live ↗
+											Live {@html uiIcons.external(13)}
 										</a>
 										<form method="POST" action="?/unpublish" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />

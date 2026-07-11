@@ -1,5 +1,5 @@
 import { PENDING_COOKIE, getPendingByToken } from '$lib/server/onboarding/session';
-import { psychKitBySlug } from '$lib/kits';
+import { kitBySlug } from '$lib/kits';
 import type { PageServerLoad } from './$types';
 
 /**
@@ -10,7 +10,7 @@ import type { PageServerLoad } from './$types';
  */
 export const load: PageServerLoad = ({ locals, cookies, url }) => {
 	const pending = getPendingByToken(cookies.get(PENDING_COOKIE));
-	const selectedKit = psychKitBySlug(url.searchParams.get('kit'));
+	const selectedKit = kitBySlug(url.searchParams.get('kit'));
 	return {
 		user: locals.user,
 		pending,
@@ -18,8 +18,12 @@ export const load: PageServerLoad = ({ locals, cookies, url }) => {
 			? {
 					slug: selectedKit.slug,
 					label: selectedKit.label,
+					profession: selectedKit.profession,
+					category: selectedKit.category,
 					audience: selectedKit.audience,
-					outcome: selectedKit.outcome
+					outcome: selectedKit.outcome,
+					featureKits: selectedKit.featureKits,
+					promptRecipes: selectedKit.promptRecipes
 				}
 			: null
 	};

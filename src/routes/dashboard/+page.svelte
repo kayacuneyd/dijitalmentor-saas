@@ -4,6 +4,7 @@
 	import PageShell from '$lib/ui/PageShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import SitePreviewThumb from '$lib/ui/SitePreviewThumb.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 
 	let { data, form } = $props();
 
@@ -35,12 +36,13 @@
 	backHref="/"
 	title="Sitelerin"
 	description={data.user.email}
-	max="max-w-5xl"
+	max="max-w-7xl"
+	canvasMax="max-w-[92rem]"
 	canvasLabel="saaskaya.app / panel"
 >
 	{#snippet actions()}
 		<div class="flex flex-wrap gap-2">
-			<a href="/new" class="sk-btn sk-btn-primary">+ Yeni site</a>
+			<a href="/new" class="sk-btn sk-btn-primary">{@html uiIcons.plus(16)}Yeni site</a>
 			<a href="/account" class="sk-btn sk-btn-secondary">Hesap</a>
 			{#if data.user.isAdmin}
 				<a href="/admin" class="sk-btn sk-btn-secondary">Admin</a>
@@ -246,7 +248,7 @@
 										target="_blank"
 										class="sk-btn sk-btn-secondary sk-btn-sm"
 									>
-										Canlı siteyi aç ↗
+										Canlı siteyi aç {@html uiIcons.external(13)}
 									</a>
 									<form method="POST" action="?/unpublish" use:enhance>
 										<input type="hidden" name="siteId" value={site.id} />

@@ -129,6 +129,20 @@ describe('POST /api/onboarding/finish', () => {
 		expect(data.description).not.toContain('calm-intake');
 	});
 
+	it('includes a new profession kit and its feature kits in the composed description', async () => {
+		const ip = nextIp();
+		const cookies = makeCookieJar();
+		for (const [questionId, value] of FULL_ANSWERS) {
+			await answer(questionId, questionId === 'niche' ? 'dietitian' : value, cookies, ip);
+		}
+		const res = await finish(cookies, { user }, { kitSlug: 'dietitian-modern' });
+		const data = await res.json();
+		expect(res.status).toBe(200);
+		expect(data.description).toContain('Kit referansı: Modern Diyetisyen');
+		expect(data.description).toContain('Meslek: Diyetisyen');
+		expect(data.description).toContain('Önerilen feature kitleri: booking-request');
+	});
+
 	it('rejects an unknown selected kit before consuming the pending record', async () => {
 		const ip = nextIp();
 		const cookies = makeCookieJar();

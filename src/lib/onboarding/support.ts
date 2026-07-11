@@ -1,6 +1,13 @@
 import type { OnboardingAnswers } from './questions';
 
-export const SUPPORTED_NICHES = ['psych', 'law', 'dental'] as const;
+export const SUPPORTED_NICHES = [
+	'psych',
+	'law',
+	'dental',
+	'dietitian',
+	'real_estate',
+	'beauty'
+] as const;
 export const UNSUPPORTED_NICHE = 'unsupported';
 
 export const manualReviewMessage =
@@ -15,10 +22,6 @@ const unsupportedProfessionPatterns = [
 	/\bshoemaker\b/i,
 	/\bterzi\b/i,
 	/\btailor\b/i,
-	/\bkuaf[oö]r\b/i,
-	/\bhairdresser\b/i,
-	/\bberber\b/i,
-	/\bbarber\b/i,
 	/\boto\s+tamir\b/i,
 	/\bauto\s+repair\b/i
 ];
@@ -38,7 +41,21 @@ const supportedProfessionPatterns = [
 	/\bdi[sş]\b/i,
 	/\bdi[sş]\s+hekimi\b/i,
 	/\bdent/i,
-	/\bzahnarzt\b/i
+	/\bzahnarzt\b/i,
+	/\bdiyetisyen\b/i,
+	/\bbeslenme\b/i,
+	/\bdietitian\b/i,
+	/\bnutrition\b/i,
+	/\bemlak\b/i,
+	/\bgayrimenkul\b/i,
+	/\breal\s+estate\b/i,
+	/\bimmobilien\b/i,
+	/\bg[uü]zellik\b/i,
+	/\bkuaf[oö]r\b/i,
+	/\bhairdresser\b/i,
+	/\bberber\b/i,
+	/\bbarber\b/i,
+	/\bbeauty\b/i
 ];
 
 export function isUnsupportedNicheAnswer(answers: OnboardingAnswers): boolean {

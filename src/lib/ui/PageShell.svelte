@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AppCanvasShell from './AppCanvasShell.svelte';
+	import { uiIcons } from './icons';
 
 	let {
 		children,
@@ -31,7 +32,11 @@
 		<header class="flex flex-wrap items-start justify-between gap-4">
 			<div class="min-w-0">
 				{#if backHref}
-					<a href={backHref} class="sk-link text-sm text-[var(--sk-faint)]">← {backLabel}</a>
+					<a
+						href={backHref}
+						class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
+						>{@html uiIcons.arrowLeft(14)}{backLabel}</a
+					>
 				{/if}
 				{#if kicker}
 					<div class="sk-mono mt-5 text-[10.5px] text-[var(--sk-faint)]">{kicker}</div>

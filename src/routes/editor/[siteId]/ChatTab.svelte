@@ -4,6 +4,7 @@
 	import type { ChatMessageRow } from '$lib/server/chatLog';
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 
 	let { store, history = [] }: { store: DraftStore; history?: ChatMessageRow[] } = $props();
 
@@ -140,7 +141,7 @@
 
 		{#if redirected && !busy}
 			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={forceSend}>
-				Sitenle ilgili olduğunu düşünüyorsan yine de gönder →
+				Sitenle ilgili olduğunu düşünüyorsan yine de gönder {@html uiIcons.arrowRight(14)}
 			</button>
 		{/if}
 

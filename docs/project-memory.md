@@ -61,7 +61,10 @@ pm2 save`; restarting by process name alone can preserve stale environment value
 - 2026-07-09: Operational errors persist in migration v8 `error_events` and appear under
   `/admin/settings` → Recent errors. Customers receive an `err-xxxxxxxx` reference; use that code to
   find route, status, user/site identifiers, sanitized message, and stack. Never request customer
-  content or credentials for first-line diagnosis.
+  content or credentials for first-line diagnosis. As of 2026-07-11, `src/hooks.server.ts` keeps 404
+  route misses out of `error_events`; public scanner traffic is aggregated in
+  `request_probe_stats` and shown separately as Request probes so Recent errors stays focused on
+  real 500/422 application incidents.
 - 2026-07-09: Production data is isolated at `/var/www/saaskaya/data/production.db`; local
   development remains on `.env` `DATABASE_URL=local.db`. PM2 reads
   `DATABASE_URL_PRODUCTION=data/production.db` from `.env`. `scripts/backup.sh` and

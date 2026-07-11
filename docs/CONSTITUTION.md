@@ -38,7 +38,8 @@ If a request conflicts with a principle here, **stop and flag it** before procee
 - A general-purpose website builder / WordPress clone.
 - Arbitrary layouts or a drag-and-drop designer beyond the fixed blocks.
 - A plugin / extension marketplace.
-- More than **3 niche presets** at launch: lawyers · psychologists · dentists.
+- More than **3 raw theme presets** at launch: lawyers · psychologists · dentists. Profession kits may
+  expand as controlled recipes that map back to those presets and the fixed block set.
 - Multi-niche go-to-market — GTM focuses **one** niche even though three presets exist.
 
 ## The first slice (MVP heart) — what "done" means for the first deliverable

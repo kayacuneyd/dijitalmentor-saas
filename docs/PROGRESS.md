@@ -3,6 +3,122 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-11
+
+**Self-serve `deploy.sh` added.** User wants to trigger deploys themselves without going through an
+AI session each time. Added root-level `deploy.sh`, a thin wrapper the user runs directly: stages +
+commits the working tree, pushes to `origin/master`, then runs the existing
+`npm run deploy:production` pipeline (check/test/build/atomic release swap/PM2 restart/smoke).
+Supports `-y`/`--yes` (skip confirmation), `--no-git` (build/deploy only, no commit/push), a leading
+positional arg as the commit message, and `-- <flags>` to forward options
+(`--skip-check`/`--skip-tests`/`--skip-smoke`/`--no-restart`) through to
+`scripts/deploy-production.sh`. Prints the staged file list before committing so the user can catch
+anything sensitive before it hits GitHub.
+
+While building it, found `data/app.sqlite` was an **untracked, non-gitignored SQLite file**
+(`*.db` was covered, `*.sqlite` was not) — a real risk once a script starts doing `git add -A`.
+Fixed `.gitignore` to add `*.sqlite`, `*.sqlite3`, and `/data` (matches the existing `/build`,
+`/current`, `/releases` runtime-directory pattern). Scanned the full pending diff and all untracked
+files for credential-shaped strings before touching git; no real secrets found (only the
+`secret-scan` probe-classifier feature name and env var *names* like `PORKBUN_API_KEY` in prose,
+never values). Verified the script's git logic (stage/commit/push, `--no-git`, `--` passthrough)
+against an isolated scratch repo with a stubbed `deploy:production` script — not against this real
+repo — before handing it to the user.
+
+**Request probe telemetry separated from operational errors.** User challenged the first bot-noise
+fix: dropping 404 scanner traffic entirely would keep Recent errors clean, but would lose useful
+security posture signal. Implemented the better split: `error_events` remains for real application
+incidents, while 404 route misses are aggregated into a new privacy-safe `request_probe_stats`
+table.
+
+Migration v18 creates `request_probe_stats` with `pattern`, `sample_path`, `status`, `count`,
+`first_seen_at`, `last_seen_at`, and hashed last user-agent/IP-prefix fingerprints. It deliberately
+stores no raw IP, raw user-agent, request body, stack trace, credentials, or customer content. The
+migration also backfills historical status-404 rows from `error_events` into aggregate buckets so
+the admin panel does not start empty after deploy.
+
+Added `src/lib/server/requestProbes.ts` with classifier buckets for WordPress probes, secret scans,
+fake landing probes, random short-path probes, benign asset misses, and unknown 404s. `handleError`
+now sends 404s to `recordRequestProbe()` and only records non-404 errors through `recordError()`.
+`/admin/settings` now loads `requestProbes` and renders a separate Request probes card next to
+Recent errors, showing pattern, sample path, count, first/last seen, and hashed fingerprints.
+
+Verification: targeted request-probe/error-log/migration tests passed (`3 files / 11 tests`),
+`npm run check` passed with 0 errors/warnings, full `npm test` passed (`66 files / 407 tests`),
+`npm run build` succeeded, and touched files passed Prettier. Not deployed yet because the current
+working tree contains many unrelated dirty changes and the production deploy script packages the
+entire workspace state.
+
+Deployed all current workspace changes on user request with `npm run deploy:production`. First
+release `20260711T161538Z` passed deploy check/test/build/PM2 restart/smoke; post-deploy inspection
+showed v18 applied and the Request probes aggregate populated. Tightened probe classification before
+finalizing so secret scans take precedence over WordPress buckets (`/wp/.env` is `secret-scan`, not
+`wordpress`), added append-only migration v19 to rebuild the historical aggregate with that priority,
+and redeployed final release `20260711T162322Z`. Deploy check/test/build/smoke passed again, PM2
+`saaskaya` is online, and production smoke passed. Live verification: `http://saaskaya.com/tr`
+redirects 301 to `https://saaskaya.com/tr`, `https://saaskaya.com/tr` returns 200, TLS certificate
+subject is `CN = saaskaya.com`, `https://seed-law.saaskaya.com/en` returns tenant HTML with
+`Published v4` and `cache-control: no-cache, must-revalidate`. Production DB now has migrations
+v18/v19 applied; a live request to `/wp-admin/install.php` returned 404, incremented
+`request_probe_stats.wordpress` from 180 to 181, and left unresolved status-404 application errors
+at 0.
+
+## 2026-07-11
+
+**Recent errors bot-noise cleanup.** User noticed `/wp-admin/install.php` in the admin Recent errors
+list and asked why WordPress installation paths were appearing. Investigation found no WordPress
+route, dependency, or installation in the app. Production `error_events` showed the issue was public
+scanner traffic: 764 total rows, 747/748 of the unresolved rows were 404s, with repeated probes for
+`/wp-admin/install.php`, `/wp-login.php`, `xmlrpc.php`, `wlwmanifest.xml`, `.env`, and random
+`/lander/...` paths. Nginx access logs confirmed automated probes from external IPs and fake/old
+browser user agents. Root cause in the app: SvelteKit routes ordinary route misses through
+`handleError`, and `src/hooks.server.ts` recorded those 404s as application errors.
+
+Added `shouldRecordError()` in `src/lib/server/error-log.ts` and wired `handleError` to skip 404
+recording, so future scanner misses no longer pollute operational errors. Also filtered
+`listRecentErrors()` and `unresolvedErrorCount()` to exclude historical 404 rows from the admin
+surface, keeping Recent errors focused on real 500/422 incidents. Production DB cleanup marked the
+748 unresolved 404 rows resolved; remaining unresolved production rows are now 16 status-500 and 1
+status-422 records. Added regression coverage proving a `/wp-admin/install.php` 404 is not counted
+or listed while a real 500 remains actionable.
+
+Verification: targeted error-log/alerts tests passed (`2 files / 6 tests`), `npm run check` passed
+with 0 errors/warnings, full `npm test` passed (`65 files / 404 tests`), and `npm run build`
+succeeded. Full `npm run lint` still fails on pre-existing/generated `.agents/skills/hallmark/**`
+and `skills-lock.json` formatting; touched files were verified with Prettier directly.
+
+## 2026-07-11
+
+**Tenant subdomain preview/publish parity root-cause fix deployed.** User reported the core unresolved
+issue: the website shown in editor preview did not match the website served from the assigned
+subdomain, and repeated save/publish attempts made it unclear whether publishing actually worked.
+Live repro showed `https://seed-law.saaskaya.com/` redirecting to `/en` and serving the main
+saaskaya acquisition site instead of the tenant site. Root cause: `src/hooks.ts` had regressed to
+locale-only rerouting and no longer called `resolveHostReroute`, so tenant subdomains were treated
+as app-host public routes.
+
+Added `src/lib/reroute.ts` to compose routing in the correct order: tenant/custom-domain host
+reroute first, app-host locale stripping second. Added regression coverage in
+`src/lib/reroute.test.ts` for tenant subdomains with and without locale prefixes, plus app-host
+localized public routes. Changed public tenant route caching from `public, max-age=60` to
+`no-cache, must-revalidate` so republish no longer appears stale. Expanded
+`scripts/smoke-production.mjs` to verify a real tenant subdomain after deploy: 200 response,
+tenant content marker, `Published vN`, no main-app landing title, and no-cache response header.
+
+Improved editor publish clarity: editor load now returns a canonical `liveUrl`; publish success and
+failure use persistent inline notices instead of transient alerts; successful publish shows
+`Published vN` plus a cache-busted live-site link; toolbar status distinguishes published version
+from unsaved draft changes.
+
+Verification before deploy: targeted reroute/host-routing/preview-parity/publish tests passed
+(`4 files / 17 tests`), `npm run check` passed with 0 errors/warnings, full `npm test` passed
+(`64 files / 394 tests`), `npm run lint` passed after formatting touched and pre-existing dirty UI
+files, and `npm run build` succeeded. Deployed with `npm run deploy:production`: release
+`20260711T001533Z`, PM2 `saaskaya` restarted and online, and production smoke passed including the
+new tenant-subdomain check. Post-deploy live curl confirmed
+`https://seed-law.saaskaya.com/en` returns 200 tenant HTML containing `Published v4` and Aksoy law
+content with `cache-control: no-cache, must-revalidate`, not the saaskaya landing page.
+
 ## 2026-07-10
 
 **Phase 2 closure sprint + public site + support + i18n + admin inbox deployed.** User asked to deploy
@@ -1381,6 +1497,102 @@ http://127.0.0.1:3021/de` returned the app's 404 — the reroute hook never fire
   three public pages. Zero console/page errors on every screen checked.
 - Deploy intentionally not run — stays a separate controlled step, same as every prior stage.
 
+### 2026-07-10 — Homepage hero desktop text width fix
+
+- Widened the landing hero desktop layout after the Turkish H1 was still constrained to a narrow
+  `10ch` column and breaking into too many stacked lines. The hero now uses a wider `max-w-7xl`
+  canvas, a more balanced desktop grid, `max-w-3xl` on the left column, `max-w-[24ch]` on the H1,
+  and `max-w-2xl` on the lead paragraph while keeping the requested `lg:text-[2.5rem]`.
+- Verification: `npm run check` passed locally. `npm run deploy:production` passed check, tests
+  (63 files / 391 tests), build, PM2 restart/save, and production smoke for mobile + desktop public
+  surfaces. Deployed release `20260710T235302Z`; `current` points to that release. Live
+  `https://saaskaya.com/tr` returns HTTP 200 and contains the new `max-w-[24ch]` hero class.
+
+### 2026-07-10 — Login/editor/dashboard polish, Free site slots, generation error hardening
+
+- **UI polish applied in the approved order**: `/login` is now a tighter magic-link task screen with
+  shorter copy, beta status as a pill, and icon-led home/back/mail actions. Shared `PageShell`
+  back links and remaining public flow links now use inline SVG icons from `src/lib/ui/icons.ts`
+  instead of literal arrow glyphs; landing/pricing/templates CTAs use text + icon. The only
+  remaining arrow glyphs are in comments, tests, or explanatory legal copy.
+- **Landing page density reduced**: hero lead copy was shortened, the left column headline/lead
+  scale was nudged down, and the two trust cards became slimmer inline trust rows. This keeps the
+  first viewport focused on the single promise while deeper trust detail remains in the lower
+  sections.
+- **Editor/dashboard width**: dashboard now uses a `max-w-7xl` inner shell and wider canvas. Editor
+  canvas is `max-w-[96rem]`, the left sidebar is narrower, and checklist/quality panels are
+  collapsible so desktop preview receives more real horizontal space without removing guidance.
+- **Free tier semantics changed from historical generation credits to active site slots**:
+  `src/lib/server/siteQuota.ts` enforces 3 active Free preview sites and 1 first-time Free published
+  website. `/api/sites` uses this slot check plus token/$ backstops, but no longer spends/enforces
+  historical `generation_count` for site creation; deleting a draft now naturally frees preview
+  capacity. Publish quota is enforced both in the editor API and the dashboard republish action.
+  Pricing/onboarding copy was updated to describe 3 preview sites + 1 published website.
+- **Beta "network error" hardening**: recent `error_events` only showed unrelated 404s, so the
+  reported beta network error was not being captured as a structured app error. `/api/sites` now
+  catches unexpected generation failures, records a `site-generation` error with `errorId`, records
+  onboarding failure telemetry when applicable, and returns JSON instead of falling through to a
+  generic HTML/500 response. `/new` now safely reads non-JSON API responses and shows the server
+  status/reference instead of collapsing everything into a client-side network message.
+- Verification: `npm run check` passed, `npm test` passed (63 files / 391 tests), `npm run build`
+  passed. Because this checkout serves the live PM2 process, ran
+  `pm2 restart ecosystem.config.cjs --only saaskaya --update-env` and `pm2 save`. Production smoke
+  passed (`node scripts/smoke-production.mjs`), and `/tr/login`, `/tr/new`, `/tr/pricing` all
+  returned HTTP 200 over `https://saaskaya.com`.
+
+### 2026-07-10 — Correct production release deploy for latest UI/quota changes
+
+- The previous PM2 restart was still serving `/var/www/saaskaya/current/build/index.js` from the
+  older release, so the live homepage kept showing the old hero copy/CTA despite the root checkout
+  build being updated. Ran the canonical release deploy path: `npm run deploy:production`.
+- Deploy created release `20260710T232334Z`, switched `current` to
+  `/var/www/saaskaya/releases/20260710T232334Z`, restarted PM2, saved the process list, and removed
+  one old release.
+- Verification: deploy script passed `npm run check`, `npm test` (63 files / 391 tests),
+  `npm run build`, and production smoke on mobile + desktop. Confirmed PM2 script path is
+  `/var/www/saaskaya/current/build/index.js`; `readlink -f current` points to the new release.
+  Live HTML at `https://saaskaya.com/tr` now contains the new hero lead (`Pratiğini anlat, çok
+dilli site taslağını gör...`) and no longer contains the old `AI destekli web sitesi platformu`
+  hero text. `http://saaskaya.com/tr` redirects 301 to HTTPS; `/tr/login`, `/tr/new`, `/tr/pricing`
+  return HTTP 200; TLS certificate subject is `CN = saaskaya.com`.
+
+### 2026-07-10 — Homepage hero H1 size trial deployed
+
+- Updated the landing hero H1 class to the requested sizing experiment:
+  `sk-display max-w-[10ch] text-3xl leading-[1.08] sm:text-[2rem] lg:text-[2.5rem]`.
+- Deployed with the canonical release pipeline (`npm run deploy:production`), creating release
+  `20260710T234505Z`, switching `current` to that release, restarting PM2, and saving the process
+  list.
+- Verification: deploy script passed `npm run check`, `npm test` (63 files / 391 tests),
+  `npm run build`, and production smoke. Confirmed live HTML at `https://saaskaya.com/tr` contains
+  the exact requested H1 class and no longer contains the previous `max-w-[12ch]` /
+  `lg:text-[43px]` hero sizing. PM2 remains online via `/var/www/saaskaya/current/build/index.js`.
+
+### 2026-07-11 — Tenant subdomain preview/publish parity root-cause fix
+
+- Root cause confirmed from live evidence: `https://seed-law.saaskaya.com/` redirected to `/en` and
+  rendered the main saaskaya landing page, not the tenant public site. `src/lib/hostRouting.ts`
+  still had the correct pure host-routing helper, but `src/hooks.ts` had been replaced with a
+  locale-only reroute hook, so tenant hosts never reached `/_site/[siteKey]`.
+- Added `src/lib/reroute.ts` as the single pure reroute decision point: host/custom-domain routing
+  runs first, app-host locale stripping second. `src/hooks.ts` now delegates to that combined helper
+  with `PUBLIC_APP_HOST`.
+- Added `src/lib/reroute.test.ts` covering the exact escaped regression:
+  `seed-law.saaskaya.com/` -> `/_site/seed-law`, `seed-law.saaskaya.com/en` ->
+  `/_site/seed-law/en`, while `saaskaya.com/tr/new` still strips to `/new`.
+- Changed public tenant cache from `public, max-age=60` to `no-cache, must-revalidate`, removing the
+  60-second stale-snapshot window that made republish look unreliable.
+- Expanded `scripts/smoke-production.mjs` with a real tenant subdomain check
+  (`SMOKE_TENANT_URL`, default `https://seed-law.saaskaya.com/en`) that fails if the tenant host
+  renders the app landing title, lacks a `Published vN` marker, lacks tenant content markers, or
+  misses the no-cache header.
+- Editor publish UX now uses a persistent publish notice instead of transient `alert()` messages:
+  save failure, quality blocker, network failure, and successful `Published vN` states are visible;
+  success includes the cache-busted live URL.
+- Verification before deploy: targeted tests passed (4 files / 17 tests), `npm run check` clean,
+  full `npm test` passed (64 files / 394 tests), `npm run lint` clean after Prettier formatting,
+  and `npm run build` succeeded.
+
 ### 2026-07-10 — Per-site Pro domain roadmap Deliverables D/E/F
 
 - **D — preview/publish parity controls**: added shared URL helpers for public/preview locale paths,
@@ -1411,6 +1623,10 @@ http://127.0.0.1:3021/de` returned the app's 404 — the reroute hook never fire
   `/tr/new` unsupported niche flow showed the manual beta-review message and zero generate buttons.
   Screenshots saved under `/tmp/saaskaya-hero-{desktop,laptop,mobile}.png` and
   `/tmp/saaskaya-new-unsupported-mobile.png`.
+- Deployed on user request with `npm run deploy:production`: release `20260710T221712Z`, PM2
+  `saaskaya` restarted and online, deploy script production smoke passed on
+  `https://saaskaya.com` mobile + desktop public read-only surfaces. `current` now points at
+  `/var/www/saaskaya/releases/20260710T221712Z`.
 
 ### 2026-07-10 — Per-site Pro, private domain gate, and public handle identity (Deliverables A-C)
 
@@ -1619,3 +1835,119 @@ http://127.0.0.1:3021/de` returned the app's 404 — the reroute hook never fire
   with "Adım 2/15") — confirmed the pacing behaves exactly as designed; `prefers-reduced-motion`
   emulation confirmed the instant fallback. Zero console/page errors on every screen checked.
 - Deploy intentionally not run — stays a separate controlled step, same as every prior stage.
+
+### 2026-07-11 — Super admin customer draft access
+
+- Fixed the customer-support permission gap: `canManageSite` now treats `locals.user.isAdmin` as a
+  platform-level manage permission for owned sites, while preserving ownerless seed-demo access and
+  blocking signed-out/non-owner users. Because editor, draft preview, autosave, chat edit, media,
+  export, publish, and dashboard guards already call this shared helper, the super-admin bypass is
+  centralized instead of duplicated per route.
+- Added a direct `Edit` button beside `Preview` on `/admin/customers/[userId]`, so operators can
+  open a customer's editor from the customer detail page without manually constructing `/editor/:id`.
+- Verification: targeted Vitest coverage passed for auth + site publish/chat guards (`3 files / 22
+tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnings.
+- Deployed on user request with `npm run deploy:production`: release `20260711T001636Z`, `current`
+  points to `/var/www/saaskaya/releases/20260711T001636Z`, PM2 `saaskaya` restarted and is online,
+  deploy smoke passed on `https://saaskaya.com` mobile + desktop. Post-deploy checks confirmed
+  `http://saaskaya.com/tr` redirects 301 to HTTPS, `https://saaskaya.com/tr` returns 200,
+  `https://seed-law.saaskaya.com/en` returns 200 with `cache-control: no-cache, must-revalidate`,
+  and the TLS certificate subject is `CN = saaskaya.com`.
+
+### 2026-07-11 — Controlled profession kit expansion + prompt recipes
+
+- Amended the constitution language from "3 niche presets" to "3 raw theme presets": law, psych, and
+  dental remain the only raw theme/schema presets, but profession kits may now expand as controlled
+  recipes that map back to those presets and the fixed block set. This preserves the no-freeform
+  builder/no-plugin-marketplace rule while unlocking the product loop the user wants: more
+  profession-specific starts with lower AI token spend.
+- Installed the Hallmark skill with `npx skills add nutlope/hallmark` for future design audit/study
+  work. It landed under `.agents/skills/hallmark`; current-session usage still depends on Codex
+  skill discovery/restart, so this implementation did not rely on Hallmark output.
+- Added a generic controlled-kit registry on top of the existing psych kits and introduced three new
+  profession kits: `dietitian-modern`, `real-estate-agent`, and `beauty-salon`. Each kit has
+  profession/category metadata, feature-kit tags, prompt recipes, a schema-valid `Site` factory, and
+  maps back to the existing raw theme presets instead of adding raw layout/code freedom.
+- Expanded `/templates` from a psych-only catalog into a profession-kit catalog showing profession,
+  feature kits, prompt recipe, quality metadata, and a safe non-image card treatment for kits that do
+  not yet have bespoke visual assets. Existing psych kit images are preserved.
+- Expanded `/new` onboarding and `/api/onboarding/finish` to accept the new controlled kit registry.
+  The first niche question now includes Dietitian, Real Estate Agent, and Beauty Salon; selected kits
+  flow into the composed generation brief with profession and feature-kit steering while keeping the
+  AI inside the fixed block set.
+- Verification: `npm run check` passed with 0 errors/warnings, targeted kit/onboarding tests passed
+  (`5 files / 59 tests`), full `npm test` passed (`65 files / 403 tests`), and `npm run build`
+  succeeded. Local dev-server SSR checks returned 200 for `/tr/templates`,
+  `/tr/new?kit=dietitian-modern`, and `/tr/new?kit=beauty-salon`, and the rendered HTML contained
+  the new profession kit, feature-kit, and prompt recipe content.
+- Deployed on user request with `npm run deploy:production`: the first sandboxed attempt passed
+  check/test/build and switched `current` but failed at PM2 restart due `/root/.pm2` sandbox access,
+  then the escalated rerun completed fully. Release `20260711T164313Z` is live, `current` points to
+  `/var/www/saaskaya/releases/20260711T164313Z`, PM2 `saaskaya` restarted and is online, and
+  production smoke passed. Post-deploy checks confirmed `https://saaskaya.com/tr/templates`,
+  `https://saaskaya.com/tr/new?kit=dietitian-modern`, and
+  `https://saaskaya.com/tr/new?kit=beauty-salon` return 200; `http://saaskaya.com/tr/templates`
+  redirects 301 to HTTPS; live HTML contains Modern Diyetisyen, Emlak Danışmanı, Güzellik Salonu,
+  Feature kitler, and Prompt tarifi; TLS certificate subject is `CN = saaskaya.com`.
+
+### 2026-07-11 — Public UI cleanup: hero, login, legal, and container rhythm
+
+- Cleaned up the public marketing surface based on the user's CrewAI reference and screenshot
+  notes. The home hero no longer shows the redundant profession/language/beta pills, and the
+  animation's visible technical captions (`Canlı akışta gör`, loop/autoplay, reduced-motion copy)
+  are suppressed while keeping the reduced-motion behavior itself.
+- Added a real prompt-composer CTA on the home hero. It stores the user's one-sentence brief locally
+  and opens `/new`; the onboarding screen then opens the raw-description path with that text
+  prefilled. This adapts the CrewAI-style middle prompt button into the actual saaskaya generation
+  loop instead of adding a decorative chatbot.
+- Reworked the hero trust notes into two equal columns and removed the existing floating
+  `MessageBubble` from the home page so mobile does not show two competing chat affordances or cover
+  the trust content.
+- Introduced shared public layout primitives (`MarketingSection`, `PublicBreadcrumb`,
+  `PromptComposer`) and made `AppCanvasShell` support a no-chrome mode. `PublicShell` now uses the
+  no-chrome mode, so public pages no longer render the fake browser bar; application/admin/editor
+  screens keep the old chrome by default.
+- Moved pricing, templates, contact, blog, blog detail, and about pages onto the same `max-w-7xl`
+  outer rhythm as the hero/header/footer. Readable inner text columns stay narrower where useful,
+  but the page edges now align consistently.
+- Redesigned `/login` as a centered, single-column auth panel with a minimal top bar and small legal
+  links instead of the previous disconnected two-column empty layout.
+- Rebuilt `LegalShell` inside the public header/footer system. The old "Ana sayfa" back button is
+  now a breadcrumb (`Ana sayfa / Yasal / current document`), and every legal page gets a compact
+  legal-document navigation block.
+- Verification: `npm run check` passed with 0 errors/warnings, full `npm test` passed (`66 files /
+407 tests`), and `npm run build` succeeded after the final changes. Local smoke checks returned
+  200 for `/tr`, `/tr/login`, `/tr/legal/acceptable-use`, `/tr/pricing`, and `/tr/templates`.
+  Chromium screenshot smoke covered desktop home/login/legal/templates and mobile home: no console
+  errors, no horizontal overflow at 375px or 1440px, the home prompt composer is present, the
+  redundant hero technical captions are absent, and the fake public shell labels are absent.
+
+### 2026-07-11 — Porkbun credential readiness check
+
+- Checked `data/production.db` `app_settings` without exposing secret values. `PORKBUN_API_KEY` and
+  `PORKBUN_SECRET_KEY` are both set, so `porkbunConfigured()` resolves true from the application
+  settings path.
+- Domain purchase is still not customer-live because `PAYMENT_MODE` remains `disabled`. `SERVER_IP`
+  and `DOMAIN_PROVISION` are not set in `app_settings`; `SERVER_IP` is required for Porkbun A-record
+  creation, while `DOMAIN_PROVISION=1` is required for automatic nginx+TLS provisioning.
+- Current production state has no `domain_reservations` rows and `custom_domains` count is 0.
+
+### 2026-07-11 — Public floating assistant dock
+
+- Replaced the scattered public `MessageBubble` usages with a shared `SiteAssistantDock` mounted
+  from `PublicShell`, plus the beta page. The dock is fixed at desktop center-bottom, uses existing
+  saaskaya tokens, has minimize/close controls, and degrades to a full-width mobile bottom bar with
+  safe-area spacing.
+- Added `/api/assistant/route`, a rate-limited rule-based assistant router. It classifies short
+  visitor messages into onboarding, pricing/domain, support, legal, login, or dashboard actions. The
+  onboarding action stores the user's brief for `/new`; support opens the existing inquiry workflow
+  instead of creating a second inbox path.
+- Removed the embedded home hero `PromptComposer` so the CrewAI-style interaction lives in one
+  persistent bottom surface rather than inside the hero content.
+- Verification: `npm run check` passed with 0 errors/warnings, full `npm test` passed (`67 files /
+410 tests`), and `npm run build` succeeded. Local preview on `127.0.0.1:4175` returned 200 for
+  `/tr`. Assistant API smoke returned `start_onboarding` for a dietitian website brief and
+  `show_pricing` for a domain/hosting price question. Chromium checks confirmed desktop dock
+  position at `left:360`, `width:720`, `centerDelta:0`, `bottom:24` on a 1440px viewport; mobile
+  had `scrollWidth:390` on a 390px viewport with no horizontal overflow. Submitting a profession
+  brief from `/tr` navigated to `/tr/new` and prefilled the textarea.

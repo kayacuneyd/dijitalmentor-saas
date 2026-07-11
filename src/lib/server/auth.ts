@@ -268,13 +268,14 @@ export function clearSessionCookie(cookies: Cookies): void {
 
 /**
  * Ownerless sites (the hand-authored seeds) stay open as public demos;
- * owned sites are manageable by their owner only.
+ * owned sites are manageable by their owner or a super admin.
  */
 export function canManageSite(
-	user: SessionUser | null,
+	user: (SessionUser & { isAdmin?: boolean }) | null,
 	ownerUserId: string | null | undefined
 ): boolean {
 	if (!ownerUserId) return true;
+	if (user?.isAdmin) return true;
 	return user?.id === ownerUserId;
 }
 

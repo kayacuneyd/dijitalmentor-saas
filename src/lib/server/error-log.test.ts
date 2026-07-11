@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { db } from '$lib/server/db';
 import { errorEvents } from '$lib/server/db/schema';
-import { listRecentErrors, recordError, resolveError, unresolvedErrorCount } from './error-log';
+import {
+	listRecentErrors,
+	recordError,
+	resolveError,
+	shouldRecordError,
+	unresolvedErrorCount
+} from './error-log';
 
 afterEach(() => {
 	db.delete(errorEvents).run();
@@ -32,5 +38,29 @@ describe('operational error log', () => {
 		});
 		expect(resolveError(id)).toBe(true);
 		expect(unresolvedErrorCount()).toBe(0);
+	});
+
+	it('does not treat 404 misses as actionable application errors', () => {
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		expect(shouldRecordError({ status: 404 })).toBe(false);
+		expect(shouldRecordError({ status: 500 })).toBe(true);
+
+		const scannerId = recordError(new Error('Not found: /wp-admin/install.php'), {
+			source: 'sveltekit',
+			route: '/wp-admin/install.php',
+			method: 'GET',
+			status: 404
+		});
+		const appErrorId = recordError(new Error('Database unavailable'), {
+			source: 'sveltekit',
+			route: '/dashboard',
+			method: 'GET',
+			status: 500
+		});
+
+		expect(listRecentErrors(10).map((event) => event.id)).toEqual([appErrorId]);
+		expect(unresolvedErrorCount()).toBe(1);
+		expect(resolveError(scannerId)).toBe(true);
+		expect(unresolvedErrorCount()).toBe(1);
 	});
 });

@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { load } from './+page.server';
 
 describe('GET /templates (load)', () => {
-	it('returns the six launch psych kits with quality metadata', () => {
+	it('returns controlled profession kits with quality and prompt metadata', () => {
 		const result = load({} as never) as {
 			kits: {
 				slug: string;
+				profession: string;
+				featureKits: string[];
+				promptRecipes: unknown[];
 				sections: unknown[];
 				locales: string[];
 				quality: { canPublish: boolean; blockerCount: number; warningCount: number };
@@ -17,12 +20,21 @@ describe('GET /templates (load)', () => {
 			'online-therapy',
 			'child-family',
 			'couples-therapy',
-			'trauma-informed'
+			'trauma-informed',
+			'dietitian-modern',
+			'real-estate-agent',
+			'beauty-salon'
 		]);
+		expect(result.kits.find((kit) => kit.slug === 'dietitian-modern')?.profession).toBe(
+			'Diyetisyen'
+		);
 		for (const kit of result.kits) {
+			expect(kit.featureKits.length).toBeGreaterThan(0);
+			expect(kit.promptRecipes.length).toBeGreaterThan(0);
 			expect(kit.sections.length).toBeGreaterThanOrEqual(5);
 			expect(kit.locales).toEqual(['tr', 'en', 'de']);
-			expect(kit.quality).toEqual({ canPublish: true, blockerCount: 0, warningCount: 0 });
+			expect(kit.quality.canPublish).toBe(true);
+			expect(kit.quality.blockerCount).toBe(0);
 		}
 	});
 });

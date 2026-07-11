@@ -1,4 +1,4 @@
-import { desc, eq, isNull } from 'drizzle-orm';
+import { desc, eq, isNull, ne } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { errorEvents } from '$lib/server/db/schema';
 
@@ -16,6 +16,12 @@ export type ErrorContext = {
 	userId?: string | null;
 	siteId?: string | null;
 };
+
+export function shouldRecordError(context: Pick<ErrorContext, 'status'>): boolean {
+	// SvelteKit routes ordinary 404 misses through handleError. Public internet scanners
+	// probe WordPress/.env/landing-page paths constantly, so storing 404s hides real incidents.
+	return context.status !== 404;
+}
 
 export function recordError(error: unknown, context: ErrorContext): string {
 	const id = `err-${crypto.randomUUID().slice(0, 8)}`;
@@ -55,13 +61,19 @@ export function listRecentErrors(limit = 30) {
 	return db
 		.select()
 		.from(errorEvents)
+		.where(ne(errorEvents.status, 404))
 		.orderBy(desc(errorEvents.createdAt))
 		.limit(Math.min(Math.max(limit, 1), 100))
 		.all();
 }
 
 export function unresolvedErrorCount(): number {
-	return db.select().from(errorEvents).where(isNull(errorEvents.resolvedAt)).all().length;
+	return db
+		.select()
+		.from(errorEvents)
+		.where(isNull(errorEvents.resolvedAt))
+		.all()
+		.filter((event) => event.status !== 404).length;
 }
 
 export function resolveError(id: string): boolean {

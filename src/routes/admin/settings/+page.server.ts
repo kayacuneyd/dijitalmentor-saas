@@ -18,6 +18,7 @@ import {
 	rejectPayment
 } from '$lib/server/reservations';
 import { listRecentErrors, resolveError, unresolvedErrorCount } from '$lib/server/error-log';
+import { listRequestProbes } from '$lib/server/requestProbes';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -37,6 +38,7 @@ export const load: PageServerLoad = ({ locals }) => {
 		},
 		errors: listRecentErrors(),
 		unresolvedErrors: unresolvedErrorCount(),
+		requestProbes: listRequestProbes(),
 		pending: listPendingReservations()
 	};
 };

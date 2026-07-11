@@ -92,9 +92,12 @@ describe('onboarding question script', () => {
 	});
 
 	describe('per-question schemas', () => {
-		it('niche accepts the 3 fixed presets plus the manual-review gate', () => {
+		it('niche accepts controlled profession kits plus the manual-review gate', () => {
 			const schema = questionById('niche')!.schema;
 			expect(schema.safeParse('psych').success).toBe(true);
+			expect(schema.safeParse('dietitian').success).toBe(true);
+			expect(schema.safeParse('real_estate').success).toBe(true);
+			expect(schema.safeParse('beauty').success).toBe(true);
 			expect(schema.safeParse('unsupported').success).toBe(true);
 			expect(schema.safeParse('other').success).toBe(false);
 		});

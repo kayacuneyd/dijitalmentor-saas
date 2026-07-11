@@ -4,7 +4,8 @@ import type { Site } from '$lib/schema/site';
 import { getPublished, saveDraft, setSiteIdentity } from '$lib/server/db/repo';
 import { POST } from './+server';
 
-const user = { id: 'publish-quality-user', email: 'publish-quality@example.com', isAdmin: false };
+const user = { id: 'publish-quality-user', email: 'publish-quality@example.com', isAdmin: true };
+const freeUser = { id: 'publish-free-user', email: 'publish-free@example.com', isAdmin: false };
 
 function jsonRequest(body: unknown) {
 	return { json: async () => body } as Request;
@@ -64,6 +65,48 @@ describe('site publish API quality gate', () => {
 		expect(body.quality.blockers.map((issue: { code: string }) => issue.code)).toContain(
 			'unsafe_professional_claim'
 		);
+	});
+
+	it('limits Free users to one first-time published website', async () => {
+		const first = structuredClone(seedSites.law);
+		first.id = 'site-publish-free-first';
+		first.tenantId = 'tenant-publish-free-first';
+		saveDraft(first, { ownerUserId: freeUser.id });
+		const firstIdentity = setSiteIdentity({
+			siteId: first.id,
+			siteName: first.settings.siteName,
+			publicHandle: 'pub-free-first',
+			contactEmail: first.settings.contactEmail ?? ''
+		});
+		if (!firstIdentity.ok) throw new Error(firstIdentity.message);
+
+		const second = structuredClone(seedSites.dental);
+		second.id = 'site-publish-free-second';
+		second.tenantId = 'tenant-publish-free-second';
+		saveDraft(second, { ownerUserId: freeUser.id });
+		const secondIdentity = setSiteIdentity({
+			siteId: second.id,
+			siteName: second.settings.siteName,
+			publicHandle: 'pub-free-second',
+			contactEmail: second.settings.contactEmail ?? ''
+		});
+		if (!secondIdentity.ok) throw new Error(secondIdentity.message);
+
+		const firstResponse = await POST({
+			params: { siteId: first.id },
+			locals: { user: freeUser }
+		} as never);
+		expect(firstResponse.status).toBe(200);
+
+		const secondResponse = await POST({
+			params: { siteId: second.id },
+			locals: { user: freeUser }
+		} as never);
+		expect(secondResponse.status).toBe(403);
+		await expect(secondResponse.json()).resolves.toMatchObject({
+			ok: false,
+			code: 'published-site-limit'
+		});
 	});
 });
 

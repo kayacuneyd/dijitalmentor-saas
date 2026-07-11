@@ -15,6 +15,7 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -28,7 +29,7 @@
 					'Answer a few questions and saaskaya will prepare a multilingual website through a validated structure.',
 				label: 'saaskaya.app / new site',
 				home: 'Home',
-				back: '← saaskaya',
+				back: 'saaskaya',
 				h1: 'A few questions, one website.',
 				intro:
 					'You can start without an account. Answer the questions, then create your account at the final step. Your answers are saved.',
@@ -46,7 +47,7 @@
 				doneSignedOut: 'Create your account and the site will be ready to generate.',
 				doneSignedIn: 'Now your site can be generated.',
 				credits: [
-					'This uses 1 site-generation credit.',
+					'Free accounts can keep up to 3 preview sites.',
 					'Text, theme, and image edits are free.',
 					'Creative AI rewrites use extra credits.',
 					'If generation fails, your answers are preserved and you can retry.'
@@ -55,7 +56,7 @@
 					'Example: I am Dr. Ada Smith. I offer online therapy for adults in Berlin...',
 				rawCount: 'min. 30',
 				send: 'Send',
-				backToQuestions: '← Back to questions',
+				backToQuestions: 'Back to questions',
 				visualDirection: 'Visual direction',
 				kit: 'Kit',
 				continue: 'Continue',
@@ -67,13 +68,16 @@
 				startFree: 'Start free',
 				generating: 'Generating your site...',
 				redirecting: 'Redirecting...',
-				rawToggle: 'I want to describe it in my own words →',
+				rawToggle: 'I want to describe it in my own words',
 				stepWord: 'Step',
 				stepsDone: 'All done',
 				nicheDescriptions: {
 					psych: 'A calm, reassuring site for your therapy practice',
 					law: 'A serious, professional presence for your firm',
 					dental: 'A fresh, modern site for your clinic',
+					dietitian: 'A practical nutrition site for counseling and follow-up',
+					real_estate: 'A local-trust site for listings and buyer/seller leads',
+					beauty: 'A booking-focused site for services and appointment requests',
 					unsupported: 'Manual beta review instead of forcing the wrong preset'
 				} as Record<string, string>,
 				unsupportedTitle: 'This field needs manual beta review.',
@@ -102,7 +106,7 @@
 					'Birkaç soruya yanıt ver, saaskaya senin için doğrulanmış bir yapı üzerinden çok dilli bir web sitesi hazırlasın.',
 				label: 'saaskaya.app / yeni site',
 				home: 'Anasayfa',
-				back: '← saaskaya',
+				back: 'saaskaya',
 				h1: 'Birkaç soru, bir site.',
 				intro:
 					'Üye olmadan da başlayabilirsin — sorulara yanıt ver, en sonda "Ücretsiz Başla" ile hesabını oluştur. Cevapların kaybolmaz.',
@@ -120,7 +124,7 @@
 				doneSignedOut: 'Hesabını oluşturunca sitenin oluşturulmaya hazır olacak.',
 				doneSignedIn: 'Şimdi sitenin oluşturulabilir.',
 				credits: [
-					'Bu işlem 1 site üretim kredisi kullanır.',
+					'Free hesapta en fazla 3 preview sitesi tutulabilir.',
 					'Metin, tema ve görsel düzenlemeleri ücretsizdir.',
 					'AI ile yaratıcı yeniden yazımlar ayrıca kredi kullanır.',
 					'Üretim başarısız olursa cevapların kaybolmaz; tekrar deneyebilirsin.'
@@ -129,7 +133,7 @@
 					"Örn: Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve boşanma davalarına bakıyorum. Ofisim Kadıköy'de…",
 				rawCount: 'min. 30',
 				send: 'Gönder',
-				backToQuestions: '← Sorulara dön',
+				backToQuestions: 'Sorulara dön',
 				visualDirection: 'Görsel yön',
 				kit: 'Kit',
 				continue: 'Devam et',
@@ -141,13 +145,16 @@
 				startFree: 'Ücretsiz Başla',
 				generating: 'Siten oluşturuluyor…',
 				redirecting: 'Yönlendiriliyor…',
-				rawToggle: 'Kendi cümlelerimle anlatmak istiyorum →',
+				rawToggle: 'Kendi cümlelerimle anlatmak istiyorum',
 				stepWord: 'Adım',
 				stepsDone: 'Tamamlandı',
 				nicheDescriptions: {
 					psych: 'Danışanlarına güven veren, sakin bir terapi sitesi',
 					law: 'Büron için kurumsal ve ciddi bir vitrin',
 					dental: 'Kliniğin için ferah ve modern bir site',
+					dietitian: 'Beslenme danışmanlığı ve takip için uygulanabilir bir site',
+					real_estate: 'Portföy ve alıcı/satıcı talepleri için güven veren bir site',
+					beauty: 'Hizmetler ve randevu talepleri için net bir güzellik salonu sitesi',
 					unsupported: 'Yanlış preset’e düşürmek yerine manuel beta incelemesi'
 				} as Record<string, string>,
 				unsupportedTitle: 'Bu alan manuel beta incelemesi gerektiriyor.',
@@ -176,7 +183,7 @@
 					'Beantworte einige Fragen und saaskaya erstellt eine mehrsprachige Website mit validierter Struktur.',
 				label: 'saaskaya.app / neue website',
 				home: 'Startseite',
-				back: '← saaskaya',
+				back: 'saaskaya',
 				h1: 'Ein paar Fragen, eine Website.',
 				intro:
 					'Du kannst ohne Konto beginnen. Beantworte die Fragen und erstelle dein Konto im letzten Schritt. Deine Antworten bleiben erhalten.',
@@ -194,7 +201,7 @@
 				doneSignedOut: 'Erstelle dein Konto, dann kann die Website generiert werden.',
 				doneSignedIn: 'Jetzt kann deine Website generiert werden.',
 				credits: [
-					'Dies nutzt 1 Website-Generierungs-Credit.',
+					'Free-Konten können bis zu 3 Vorschau-Websites behalten.',
 					'Text-, Theme- und Bildänderungen sind kostenlos.',
 					'Kreative AI-Umschreibungen nutzen zusätzliche Credits.',
 					'Wenn die Generierung fehlschlägt, bleiben deine Antworten erhalten.'
@@ -203,7 +210,7 @@
 					'Beispiel: Ich bin Dr. Ada Müller. Ich biete Online-Therapie für Erwachsene in Berlin...',
 				rawCount: 'min. 30',
 				send: 'Senden',
-				backToQuestions: '← Zurück zu Fragen',
+				backToQuestions: 'Zurück zu Fragen',
 				visualDirection: 'Visuelle Richtung',
 				kit: 'Kit',
 				continue: 'Weiter',
@@ -215,13 +222,16 @@
 				startFree: 'Kostenlos starten',
 				generating: 'Website wird generiert...',
 				redirecting: 'Weiterleitung...',
-				rawToggle: 'Ich möchte es in eigenen Worten beschreiben →',
+				rawToggle: 'Ich möchte es in eigenen Worten beschreiben',
 				stepWord: 'Schritt',
 				stepsDone: 'Abgeschlossen',
 				nicheDescriptions: {
 					psych: 'Eine ruhige, vertrauensvolle Website für deine Praxis',
 					law: 'Ein seriöser Auftritt für deine Kanzlei',
 					dental: 'Eine frische, moderne Website für deine Klinik',
+					dietitian: 'Eine praktische Website für Ernährungsberatung und Begleitung',
+					real_estate: 'Eine vertrauensbildende Website für Immobilienanfragen',
+					beauty: 'Eine terminorientierte Website für Beauty-Leistungen',
 					unsupported: 'Manuelle Beta-Prüfung statt falschem Preset'
 				} as Record<string, string>,
 				unsupportedTitle: 'Dieses Feld benötigt eine manuelle Beta-Prüfung.',
@@ -259,12 +269,24 @@
 	let generationStage = $state('');
 	let useRaw = $state(false);
 	let rawText = $state('');
+	let promptSeedApplied = $state(false);
 
 	// Per-question input buffers — reset whenever the active question changes.
 	let textValue = $state('');
 	let multiValue = $state<string[]>([]);
 	let listItems = $state<string[]>([]);
 	let listInput = $state('');
+
+	$effect(() => {
+		if (promptSeedApplied || typeof window === 'undefined') return;
+		if (Object.keys(answers).length > 0) return;
+		const seed = window.localStorage.getItem('saaskaya.promptSeed')?.trim();
+		if (!seed) return;
+		rawText = seed;
+		useRaw = true;
+		promptSeedApplied = true;
+		window.localStorage.removeItem('saaskaya.promptSeed');
+	});
 
 	const hasRaw = $derived(
 		typeof answers.rawDescription === 'string' &&
@@ -296,6 +318,11 @@
 		law: 'M12 3v18M4 7h16M6.5 7l-3.5 6.5a3.8 3.8 0 0 0 7 0L6.5 7ZM17.5 7 14 13.5a3.8 3.8 0 0 0 7 0L17.5 7ZM8 21h8',
 		dental:
 			'M12 5.5C10.5 4 8.8 3 7.2 3 4.7 3 3 5 3 7.5c0 4 2 6.6 3 10.1.4 1.4 1 2.4 2 2.4s1.4-1 1.6-2.4c.3-1.9.7-3.1 2.4-3.1s2.1 1.2 2.4 3.1c.2 1.4.6 2.4 1.6 2.4s1.6-1 2-2.4c1-3.5 3-6.1 3-10.1C21 5 19.3 3 16.8 3c-1.6 0-3.3 1-4.8 2.5Z',
+		dietitian:
+			'M12 21c-3.8-2.6-6-5.8-6-9.5C6 7.9 8.3 5 12 5s6 2.9 6 6.5c0 3.7-2.2 6.9-6 9.5ZM12 5V3M8 8c2.8 0 5.2 2 5.8 4.8',
+		real_estate: 'M3 11l9-7 9 7M5 10.5V21h14V10.5M9 21v-6h6v6',
+		beauty:
+			'M12 3c1.6 3 3.8 5.2 7 6-3.2.8-5.4 3-7 6-1.6-3-3.8-5.2-7-6 3.2-.8 5.4-3 7-6ZM6 15c.7 1.4 1.7 2.4 3 3-1.3.6-2.3 1.6-3 3-.7-1.4-1.7-2.4-3-3 1.3-.6 2.3-1.6 3-3Z',
 		unsupported:
 			'M12 3l7 4v5c0 4.2-2.8 7.8-7 9-4.2-1.2-7-4.8-7-9V7l7-4ZM9.5 9.5a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 17h.01'
 	};
@@ -395,6 +422,22 @@
 		listItems = listItems.filter((v) => v !== value);
 	}
 
+	async function readApiResponse(res: Response) {
+		const text = await res.text();
+		if (!text) return {};
+		try {
+			return JSON.parse(text);
+		} catch {
+			return {
+				ok: false,
+				message:
+					res.status >= 500
+						? `${copy.errors.generation} HTTP ${res.status}.`
+						: `${copy.errors.generic} HTTP ${res.status}.`
+			};
+		}
+	}
+
 	async function completeFlow() {
 		if (!data.user) {
 			await goto(l('/login'));
@@ -409,7 +452,7 @@
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({ kitSlug: data.selectedKit?.slug })
 			});
-			const finishData = await finishRes.json();
+			const finishData = await readApiResponse(finishRes);
 			if (!finishRes.ok || !finishData.ok) {
 				errorMessage = finishData.message ?? copy.errors.generic;
 				return;
@@ -423,7 +466,7 @@
 					onboardingPendingId: finishData.pendingId
 				})
 			});
-			const genData = await genRes.json();
+			const genData = await readApiResponse(genRes);
 			if (!genRes.ok || !genData.ok) {
 				const message = genData.message ?? copy.errors.generation;
 				const reference =
@@ -457,7 +500,11 @@
 
 	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
 		<div class="pt-2">
-			<a href={l('/')} class="sk-link text-sm text-[var(--sk-faint)]">{copy.back}</a>
+			<a
+				href={l('/')}
+				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
+				>{@html uiIcons.arrowLeft(14)}{copy.back}</a
+			>
 			<h1 class="sk-display mt-3 text-4xl leading-none sm:text-[42px]">{copy.h1}</h1>
 			<p class="mt-3 text-[15px] leading-6 text-[var(--sk-muted)]">
 				{copy.intro}
@@ -584,6 +631,7 @@
 							disabled={busy}
 							onclick={() => (useRaw = false)}
 						>
+							{@html uiIcons.arrowLeft(14)}
 							{copy.backToQuestions}
 						</button>
 					</div>
@@ -803,6 +851,7 @@
 					onclick={() => (useRaw = true)}
 				>
 					{copy.rawToggle}
+					{@html uiIcons.arrowRight(14)}
 				</button>
 			{/if}
 

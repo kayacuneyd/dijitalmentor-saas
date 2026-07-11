@@ -44,6 +44,7 @@ import {
 	type PaymentMethod
 } from '$lib/server/reservations';
 import { getSetting } from '$lib/server/config';
+import { assertCanPublishFreeSite, SiteQuotaError } from '$lib/server/siteQuota';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals, url }) => {
@@ -99,6 +100,14 @@ export const actions: Actions = {
 		if (!locals.user) redirect(303, '/login');
 		const siteId = String((await request.formData()).get('siteId') ?? '');
 		const meta = requireManageableSite(locals.user, siteId);
+		try {
+			assertCanPublishFreeSite(locals.user, meta);
+		} catch (err) {
+			if (err instanceof SiteQuotaError) {
+				return fail(err.status, { message: err.message, siteId });
+			}
+			throw err;
+		}
 		if (!meta.publishedVersion) {
 			return fail(400, {
 				message:

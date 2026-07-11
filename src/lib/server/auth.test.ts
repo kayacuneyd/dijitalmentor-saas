@@ -41,10 +41,12 @@ describe('users + sessions', () => {
 
 describe('canManageSite', () => {
 	const user = { id: 'user-1', email: 'a@b.co' };
-	it('ownerless (seed) sites are open; owned sites are owner-only', () => {
+	const admin = { id: 'admin-1', email: 'admin@saaskaya.com', isAdmin: true };
+	it('ownerless (seed) sites are open; owned sites are owner/admin only', () => {
 		expect(canManageSite(null, null)).toBe(true);
 		expect(canManageSite(user, null)).toBe(true);
 		expect(canManageSite(user, 'user-1')).toBe(true);
+		expect(canManageSite(admin, 'user-2')).toBe(true);
 		expect(canManageSite(user, 'user-2')).toBe(false);
 		expect(canManageSite(null, 'user-2')).toBe(false);
 	});

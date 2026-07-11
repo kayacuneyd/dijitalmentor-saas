@@ -38,6 +38,9 @@ export const NICHE_OPTIONS: ChoiceOption[] = [
 	{ value: 'psych', label: 'Psikolog / Terapist' },
 	{ value: 'law', label: 'Avukat / Hukuk Bürosu' },
 	{ value: 'dental', label: 'Diş Hekimi / Klinik' },
+	{ value: 'dietitian', label: 'Diyetisyen' },
+	{ value: 'real_estate', label: 'Emlak Danışmanı' },
+	{ value: 'beauty', label: 'Güzellik Salonu' },
 	{ value: UNSUPPORTED_NICHE, label: 'Başka bir alan' }
 ];
 

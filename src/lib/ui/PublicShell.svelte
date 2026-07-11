@@ -3,6 +3,7 @@
 	import PublicFooter from '$lib/ui/PublicFooter.svelte';
 	import PublicHeader from '$lib/ui/PublicHeader.svelte';
 	import ScrollToTop from '$lib/ui/ScrollToTop.svelte';
+	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
 	import type { Locale } from '$lib/i18n';
 
 	let {
@@ -24,7 +25,7 @@
 	} = $props();
 </script>
 
-<AppCanvasShell {label} {max} {contentClass} flush>
+<AppCanvasShell {label} {max} {contentClass} flush chrome={false}>
 	<div class="flex min-h-full flex-col">
 		<PublicHeader {locale} {currentPath} {userEmail} />
 		<div class="min-w-0 flex-1">
@@ -33,4 +34,5 @@
 		<PublicFooter {locale} />
 	</div>
 </AppCanvasShell>
+<SiteAssistantDock {locale} {currentPath} userEmail={userEmail ?? ''} />
 <ScrollToTop />

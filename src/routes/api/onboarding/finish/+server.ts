@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod';
-import { psychKitBySlug, type PsychKitSlug } from '$lib/kits';
+import { kitBySlug } from '$lib/kits';
 import { nextQuestion } from '$lib/onboarding/questions';
 import {
 	isUnsupportedNicheAnswer,
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 		return json({ ok: false, message: body.error.issues[0].message }, { status: 400 });
 	}
 	const kitSlug = body.data?.kitSlug;
-	if (kitSlug && !psychKitBySlug(kitSlug)) {
+	if (kitSlug && !kitBySlug(kitSlug)) {
 		return json({ ok: false, message: 'Unknown kit.' }, { status: 400 });
 	}
 
@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 		);
 	}
 
-	const description = composeDescription(pending.answers, { kitSlug: kitSlug as PsychKitSlug });
+	const description = composeDescription(pending.answers, { kitSlug });
 	if (description.trim().length < 30) {
 		return json(
 			{ ok: false, message: 'Please add a bit more detail before finishing.' },

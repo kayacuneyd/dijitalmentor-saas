@@ -10,6 +10,7 @@ import {
 } from '$lib/server/db/repo';
 import { siteSchema } from '$lib/schema/site';
 import { siteQualityCheck } from '$lib/quality/siteQuality';
+import { assertCanPublishFreeSite, SiteQuotaError } from '$lib/server/siteQuota';
 import type { RequestHandler } from './$types';
 
 function guard(locals: App.Locals, siteId: string): Response | null {
@@ -65,6 +66,14 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			},
 			{ status: 422 }
 		);
+	}
+	try {
+		assertCanPublishFreeSite(locals.user!, meta!);
+	} catch (err) {
+		if (err instanceof SiteQuotaError) {
+			return json({ ok: false, code: err.code, message: err.message }, { status: err.status });
+		}
+		throw err;
 	}
 
 	const draft = getOrSeedDraft(params.siteId);

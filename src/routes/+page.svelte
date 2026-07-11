@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { seedSites } from '$lib/seed';
 	import FlowAnimation from '$lib/ui/FlowAnimation.svelte';
-	import MessageBubble from '$lib/ui/MessageBubble.svelte';
+	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
@@ -29,8 +30,8 @@
 				beta: 'closed beta',
 				pills: ['For professionals', 'TR · EN · DE', 'Closed beta'],
 				h1: 'Launch a multilingual website for your practice without code.',
-				lead: 'An AI-assisted website platform. Get a professional practice website in minutes without learning web design or trusting AI-generated code. No code risk: AI only fills a validated structure.',
-				primary: 'Describe your practice → see your site',
+				lead: 'Describe your practice, get a multilingual site draft, edit it safely, and publish when ready. AI fills a validated structure; it never writes site code.',
+				primary: 'Describe your practice',
 				heroTrust: [
 					[
 						'AI writes no code',
@@ -62,7 +63,7 @@
 				priceLabel: 'Pricing',
 				perMonth: '/month',
 				recommended: 'Recommended',
-				allFeatures: 'See all features →',
+				allFeatures: 'See all features',
 				faq: 'Frequently asked questions',
 				trust: 'Trust',
 				finalTitle: 'Ready?',
@@ -148,8 +149,8 @@
 				beta: 'kapalı beta',
 				pills: ['Uzman meslekler için', 'TR · EN · DE', 'Kapalı beta'],
 				h1: 'Pratiğin için çok dilli web siteni kod yazmadan yayına al.',
-				lead: "AI destekli web sitesi platformu. Web tasarım öğrenmeden, AI'in ürettiği koda güvenmeden, birkaç dakikada profesyonel bir pratik sitesi. Kod riski yok — AI yalnızca doğrulanmış yapısal veri üretir.",
-				primary: 'Pratiğini anlat → siteni gör',
+				lead: 'Pratiğini anlat, çok dilli site taslağını gör, güvenle düzenle ve hazır olunca yayınla. AI yalnızca doğrulanmış yapıyı doldurur; site kodu yazmaz.',
+				primary: 'Pratiğini anlat',
 				heroTrust: [
 					['AI kod yazmaz', 'Her çıktı yayınlanmadan doğrulanır — sitenin bozulma riski yok.'],
 					['Site senin', 'Pro sitelerde tam export desteği var. Kilit yok, emeğin kaybolmaz.']
@@ -177,7 +178,7 @@
 				priceLabel: 'Fiyatlandırma',
 				perMonth: '/ay',
 				recommended: 'Önerilen',
-				allFeatures: 'Tüm özellikleri gör →',
+				allFeatures: 'Tüm özellikleri gör',
 				faq: 'Sıkça sorulan sorular',
 				trust: 'Güven',
 				finalTitle: 'Hazır mısın?',
@@ -270,7 +271,7 @@
 				pills: ['Für Expertenberufe', 'TR · EN · DE', 'Geschlossene Beta'],
 				h1: 'Starte eine mehrsprachige Website für deine Praxis ohne Code.',
 				lead: 'Eine AI-gestützte Website-Plattform. Erhalte in Minuten eine professionelle Praxis-Website, ohne Webdesign zu lernen oder AI-Code zu vertrauen. Kein Code-Risiko: AI füllt nur eine validierte Struktur.',
-				primary: 'Praxis beschreiben → Website sehen',
+				primary: 'Praxis beschreiben',
 				heroTrust: [
 					[
 						'AI schreibt keinen Code',
@@ -302,7 +303,7 @@
 				priceLabel: 'Preise',
 				perMonth: '/Monat',
 				recommended: 'Empfohlen',
-				allFeatures: 'Alle Funktionen ansehen →',
+				allFeatures: 'Alle Funktionen ansehen',
 				faq: 'Häufige Fragen',
 				trust: 'Vertrauen',
 				finalTitle: 'Bereit?',
@@ -419,33 +420,29 @@
 
 <PublicShell {locale} currentPath="/" userEmail={data.user?.email ?? null} label="saaskaya.com">
 	<!-- Hero -->
-	<div
-		class="mx-auto grid w-full max-w-6xl gap-8 px-5 pt-8 sm:px-10 sm:pt-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(26rem,1.08fr)] lg:items-start"
+	<MarketingSection
+		class="grid gap-8 pt-8 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(30rem,1.05fr)] lg:items-start"
 	>
-		<div class="flex max-w-2xl flex-col items-start gap-4 lg:pt-1">
-			<div class="flex flex-wrap gap-2">
-				{#each copy.pills as pill (pill)}
-					<StatusPill>{pill}</StatusPill>
-				{/each}
-			</div>
-			<h1 class="sk-display max-w-[12ch] text-3xl leading-[1.08] sm:text-[40px] lg:text-[46px]">
+		<div class="flex max-w-3xl flex-col items-start gap-4 lg:pt-1">
+			<h1 class="sk-display max-w-[24ch] text-3xl leading-[1.08] sm:text-[2rem] lg:text-[2.5rem]">
 				{copy.h1}
 			</h1>
-			<p class="max-w-lg text-[16px] leading-7 text-[var(--sk-muted)]">
+			<p class="max-w-2xl text-[15px] leading-6 text-[var(--sk-muted)]">
 				{copy.lead}
 			</p>
 			<div class="flex flex-wrap items-center gap-3">
-				<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg">{copy.primary}</a>
+				<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
+					>{copy.primary}{@html uiIcons.arrowRight(16)}</a
+				>
 				<a href="#ornekler" class="sk-btn sk-btn-secondary sk-btn-lg">{copy.examples}</a>
 				<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-lg">{copy.pricing}</a>
 			</div>
-
 			<!-- The two decisive trust answers, before the fold (full Trust section stays below) -->
-			<div class="mt-2 grid w-full gap-3 sm:grid-cols-2">
+			<div class="mt-1 grid w-full gap-3 sm:grid-cols-2">
 				{#each heroTrust as card (card.title)}
-					<div class="sk-soft flex items-start gap-3 p-4">
+					<div class="flex min-h-24 items-start gap-2.5 border-t border-[var(--sk-line)] pt-3">
 						<svg
-							class="mt-0.5 size-5 shrink-0 text-[var(--sk-ink)]"
+							class="mt-0.5 size-4 shrink-0 text-[var(--sk-ink)]"
 							viewBox="0 0 24 24"
 							fill="none"
 							stroke="currentColor"
@@ -458,8 +455,8 @@
 							<path d="M9 12l2 2 4-4" />
 						</svg>
 						<div>
-							<h3 class="text-sm font-semibold">{card.title}</h3>
-							<p class="mt-0.5 text-xs leading-5 text-[var(--sk-muted)]">{card.desc}</p>
+							<h3 class="text-[13px] font-semibold">{card.title}</h3>
+							<p class="mt-0.5 text-xs leading-4 text-[var(--sk-muted)]">{card.desc}</p>
 						</div>
 					</div>
 				{/each}
@@ -468,13 +465,12 @@
 
 		<!-- Flow animation: the whole product story in ~20s -->
 		<div class="w-full lg:pt-1">
-			<div class="sk-mono mb-3 text-[10.5px] text-[var(--sk-faint)]">{copy.flowLabel}</div>
-			<FlowAnimation sceneLabels={copy.flowScenes} />
+			<FlowAnimation sceneLabels={copy.flowScenes} loopCaption="" reducedMotionCaption="" />
 		</div>
-	</div>
+	</MarketingSection>
 
 	<!-- Process -->
-	<div class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.process}</div>
 		<div class="mt-4 grid gap-4 sm:grid-cols-4">
 			{#each steps as step, i (step.n)}
@@ -502,9 +498,9 @@
 				</div>
 			{/each}
 		</div>
-	</div>
+	</MarketingSection>
 
-	<div class="mx-auto mt-8 w-full max-w-6xl px-5 sm:px-10">
+	<MarketingSection class="mt-8">
 		<div class="sk-soft flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
 			<div>
 				<h2 class="text-lg font-semibold">{copy.midCtaTitle}</h2>
@@ -512,13 +508,10 @@
 			</div>
 			<a href={l('/beta')} class="sk-btn sk-btn-primary shrink-0">{copy.midCtaAction}</a>
 		</div>
-	</div>
+	</MarketingSection>
 
 	<!-- Examples -->
-	<div
-		id="ornekler"
-		class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10"
-	>
+	<MarketingSection id="ornekler" class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.exampleSites}</div>
 		<ul class="mt-4 grid gap-4 sm:grid-cols-3">
 			{#each seeds as [preset, site] (preset)}
@@ -569,10 +562,10 @@
 				</li>
 			{/each}
 		</ul>
-	</div>
+	</MarketingSection>
 
 	<!-- Features -->
-	<div class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.features}</div>
 		<div class="mt-4 grid gap-4 sm:grid-cols-2">
 			{#each features as f (f.title)}
@@ -582,10 +575,10 @@
 				</div>
 			{/each}
 		</div>
-	</div>
+	</MarketingSection>
 
 	<!-- Pricing teaser -->
-	<div class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.priceLabel}</div>
 		<div class="mt-4 grid gap-4 sm:grid-cols-3">
 			<div class="sk-card p-4">
@@ -596,10 +589,10 @@
 				</div>
 				<p class="mt-2 text-xs text-[var(--sk-muted)]">
 					{locale === 'tr'
-						? '1 site, alt alan adı, 10 AI düzenleme.'
+						? '3 preview site, 1 yayınlanan site, 10 AI düzenleme.'
 						: locale === 'de'
-							? '1 Website, Subdomain, 10 AI-Bearbeitungen.'
-							: '1 site, subdomain, 10 AI edits.'}
+							? '3 Vorschau-Websites, 1 veröffentlichte Website, 10 AI-Bearbeitungen.'
+							: '3 preview sites, 1 published website, 10 AI edits.'}
 				</p>
 			</div>
 			<div class="sk-card p-4 border-[var(--sk-ink)] ring-1 ring-[var(--sk-ink)]">
@@ -633,11 +626,13 @@
 				</p>
 			</div>
 		</div>
-		<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-sm mt-4">{copy.allFeatures}</a>
-	</div>
+		<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-sm mt-4"
+			>{copy.allFeatures}{@html uiIcons.arrowRight(14)}</a
+		>
+	</MarketingSection>
 
 	<!-- FAQ -->
-	<div class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.faq}</div>
 		<div class="mt-4 flex flex-col gap-3">
 			{#each faqs as faq (faq.q)}
@@ -657,10 +652,10 @@
 				</details>
 			{/each}
 		</div>
-	</div>
+	</MarketingSection>
 
 	<!-- Trust -->
-	<div class="mx-auto mt-12 w-full max-w-6xl border-t border-[var(--sk-line)] px-5 pt-7 sm:px-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.trust}</div>
 		<div class="mt-4 grid gap-3 sm:grid-cols-2">
 			{#each trustCards as card (card.title)}
@@ -687,17 +682,18 @@
 				>{copy.legal.disclaimer}</a
 			>
 		</div>
-	</div>
+	</MarketingSection>
 
 	<!-- Final CTA -->
-	<div class="mx-auto mt-12 w-full max-w-6xl px-5 pb-12 sm:px-10">
+	<MarketingSection class="mt-12 pb-12">
 		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
 			<h2 class="sk-display text-2xl">{copy.finalTitle}</h2>
 			<p class="max-w-md text-sm text-[var(--sk-muted)]">
 				{copy.finalBody}
 			</p>
-			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg">{copy.primary}</a>
+			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
+				>{copy.primary}{@html uiIcons.arrowRight(16)}</a
+			>
 		</div>
-	</div>
-	<MessageBubble {locale} userEmail={data.user?.email ?? ''} />
+	</MarketingSection>
 </PublicShell>

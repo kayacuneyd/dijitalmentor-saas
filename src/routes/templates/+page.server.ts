@@ -11,6 +11,11 @@ const sectionLabels: Record<SectionType, string> = {
 	contact: 'İletişim',
 	cta: 'CTA',
 	faq: 'SSS',
+	testimonials: 'Referanslar',
+	pricing: 'Fiyatlar',
+	process: 'Süreç',
+	booking: 'Randevu',
+	credentials: 'Sertifikalar',
 	team: 'Ekip',
 	footer: 'Footer'
 };

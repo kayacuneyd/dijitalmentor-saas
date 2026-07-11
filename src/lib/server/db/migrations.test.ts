@@ -19,6 +19,10 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'users',
 				'sessions',
 				'login_tokens',
+				'owner_sessions',
+				'owner_trusted_devices',
+				'owner_email_codes',
+				'owner_login_events',
 				'app_settings',
 				'contact_submissions',
 				'custom_domains',
@@ -49,6 +53,28 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				.prepare(`SELECT 1 FROM pragma_table_info('request_probe_stats') WHERE name='pattern'`)
 				.get()
 		).toBeTruthy();
+		// v20: private owner login sessions + trusted devices + email code checks
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('owner_sessions') WHERE name='email'`).get()
+		).toBeTruthy();
+		expect(
+			client
+				.prepare(
+					`SELECT 1 FROM pragma_table_info('owner_trusted_devices') WHERE name='device_hash'`
+				)
+				.get()
+		).toBeTruthy();
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('owner_email_codes') WHERE name='code_hash'`)
+				.get()
+		).toBeTruthy();
+		const ownerEventsIdx = client
+			.prepare(
+				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='owner_login_events_created_idx'`
+			)
+			.get();
+		expect(ownerEventsIdx).toBeTruthy();
 		expect(
 			client
 				.prepare(`SELECT 1 FROM pragma_table_info('ai_usage') WHERE name='generation_count'`)

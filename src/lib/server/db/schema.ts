@@ -115,6 +115,70 @@ export const sessions = sqliteTable('sessions', {
 	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
 });
 
+export const ownerSessions = sqliteTable('owner_sessions', {
+	tokenHash: text('token_hash').primaryKey(),
+	email: text('email').notNull(),
+	deviceHash: text('device_hash').notNull(),
+	ipPrefixHash: text('ip_prefix_hash'),
+	userAgentHash: text('user_agent_hash'),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+});
+
+export const ownerTrustedDevices = sqliteTable(
+	'owner_trusted_devices',
+	{
+		deviceHash: text('device_hash').primaryKey(),
+		email: text('email').notNull(),
+		ipPrefixHash: text('ip_prefix_hash'),
+		userAgentHash: text('user_agent_hash'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		lastSeenAt: integer('last_seen_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('owner_trusted_devices_email_idx').on(table.email)]
+);
+
+export const ownerEmailCodes = sqliteTable(
+	'owner_email_codes',
+	{
+		id: text('id').primaryKey(),
+		email: text('email').notNull(),
+		deviceHash: text('device_hash').notNull(),
+		codeHash: text('code_hash').notNull(),
+		ipPrefixHash: text('ip_prefix_hash'),
+		userAgentHash: text('user_agent_hash'),
+		attempts: integer('attempts').notNull().default(0),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+	},
+	(table) => [
+		index('owner_email_codes_lookup_idx').on(table.email, table.deviceHash, table.createdAt)
+	]
+);
+
+export const ownerLoginEvents = sqliteTable(
+	'owner_login_events',
+	{
+		id: text('id').primaryKey(),
+		email: text('email'),
+		event: text('event').notNull(),
+		ipPrefixHash: text('ip_prefix_hash'),
+		userAgentHash: text('user_agent_hash'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('owner_login_events_created_idx').on(table.createdAt)]
+);
+
 // Per-tenant, per-month AI accounting. Credits (edits/generations) are what the
 // plan limits enforce; raw tokens remain only as an abuse backstop (gatekeeper spec).
 export const aiUsage = sqliteTable(

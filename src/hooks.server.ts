@@ -9,6 +9,7 @@ import {
 } from '$lib/i18n';
 import { getSessionUser, isAdminEmail, SESSION_COOKIE } from '$lib/server/auth';
 import { recordError, shouldRecordError } from '$lib/server/error-log';
+import { getOwnerSessionUser, OWNER_SESSION_COOKIE } from '$lib/server/ownerAuth';
 import { recordRequestProbe } from '$lib/server/requestProbes';
 
 const LOCALIZED_PUBLIC_PATHS = new Set([
@@ -34,8 +35,9 @@ function isLocalizedPublicPath(pathname: string): boolean {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const user = getSessionUser(event.cookies.get(SESSION_COOKIE));
-	event.locals.user = user ? { ...user, isAdmin: isAdminEmail(user.email) } : null;
+	const owner = getOwnerSessionUser(event.cookies.get(OWNER_SESSION_COOKIE));
+	const user = owner ?? getSessionUser(event.cookies.get(SESSION_COOKIE));
+	event.locals.user = user ? { ...user, isAdmin: owner ? true : isAdminEmail(user.email) } : null;
 	const pathLocale = localeFromPath(event.url.pathname);
 	const locale =
 		pathLocale ??

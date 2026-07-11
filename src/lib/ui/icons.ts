@@ -11,6 +11,11 @@ export const uiIcons = {
 		),
 	home: (size = 16) =>
 		stroke('<path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M9 20v-6h6v6"/>', size),
+	lock: (size = 16) =>
+		stroke(
+			'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+			size
+		),
 	mail: (size = 16) =>
 		stroke('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>', size),
 	message: (size = 16) =>

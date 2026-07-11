@@ -601,6 +601,54 @@ export const migrations: Migration[] = [
 			WHERE status = 404
 			GROUP BY pattern`);
 		}
+	},
+	{
+		version: 20,
+		name: 'owner-login',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS owner_sessions (
+				token_hash text PRIMARY KEY,
+				email text NOT NULL,
+				device_hash text NOT NULL,
+				ip_prefix_hash text,
+				user_agent_hash text,
+				created_at integer NOT NULL,
+				expires_at integer NOT NULL
+			)`);
+			client.exec(`CREATE TABLE IF NOT EXISTS owner_trusted_devices (
+				device_hash text PRIMARY KEY,
+				email text NOT NULL,
+				ip_prefix_hash text,
+				user_agent_hash text,
+				created_at integer NOT NULL,
+				last_seen_at integer NOT NULL
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS owner_trusted_devices_email_idx
+				ON owner_trusted_devices (email)`);
+			client.exec(`CREATE TABLE IF NOT EXISTS owner_email_codes (
+				id text PRIMARY KEY,
+				email text NOT NULL,
+				device_hash text NOT NULL,
+				code_hash text NOT NULL,
+				ip_prefix_hash text,
+				user_agent_hash text,
+				attempts integer NOT NULL DEFAULT 0,
+				created_at integer NOT NULL,
+				expires_at integer NOT NULL
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS owner_email_codes_lookup_idx
+				ON owner_email_codes (email, device_hash, created_at)`);
+			client.exec(`CREATE TABLE IF NOT EXISTS owner_login_events (
+				id text PRIMARY KEY,
+				email text,
+				event text NOT NULL,
+				ip_prefix_hash text,
+				user_agent_hash text,
+				created_at integer NOT NULL
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS owner_login_events_created_idx
+				ON owner_login_events (created_at)`);
+		}
 	}
 ];
 

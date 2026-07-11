@@ -45,7 +45,11 @@ module.exports = {
 				// Development-only magic-link echo; must stay empty in production.
 				AUTH_DEV_ECHO_LINK: fileEnv.AUTH_DEV_ECHO_LINK || '',
 				// super admins come from env on purpose: the gate must not live in the DB it protects
-				ADMIN_EMAILS: fileEnv.ADMIN_EMAILS || ''
+				ADMIN_EMAILS: fileEnv.ADMIN_EMAILS || '',
+				// private owner login; secret values stay in .env, never in the repo
+				OWNER_LOGIN_PATH: fileEnv.OWNER_LOGIN_PATH || '',
+				OWNER_EMAIL: fileEnv.OWNER_EMAIL || '',
+				OWNER_PASSWORD_HASH: fileEnv.OWNER_PASSWORD_HASH || ''
 			}
 		}
 	]

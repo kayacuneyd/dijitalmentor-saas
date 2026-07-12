@@ -2141,3 +2141,19 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   warnings, full `npm test` passed (70 files / 441 tests), and `npm run build` succeeded. Dev smoke:
   `/blog` 200, `/blog/ai-assisted-website-building` 200, `/admin/blog` 303 to `/login` when
   unauthenticated.
+
+### 2026-07-12 — Mobile roadmap Phase 0: reusable mobile audit script + baseline
+
+- Kicked off the mobile optimization roadmap (nav → hero animation → onboarding wizard → editor →
+  PWA → sweep; plan reviewed with the operator). Added `scripts/mobile-audit.mjs` (playwright-core,
+  read-only): for each route × viewport it reports HTTP status, horizontal overflow, console errors,
+  the widest overflowing elements, inputs under 16px (iOS focus-zoom triggers), and interactive
+  elements with sub-44×40px hit areas; screenshots + `report.json` per run.
+- **Baseline (375/390px, dev):** zero document-level horizontal overflow and zero console errors on
+  all 13 audited routes — the `overflow-x: clip` guards hold. The real issues are *clipping inside*
+  containers (FlowAnimation `grid-plane` measures 1388px inside a 375px stage; templates carousel is
+  intentional scroll-snap), plus ~10 sub-44×40px tap targets per page (`sk-btn-sm` ≈30px tall) and
+  sub-16px inputs on `/en`, `/en/contact`, `/en/beta`.
+- Note: `/editor/seed-law` redirects to `/en/login` on this dev DB (editor auth), so editor-phase
+  verification will need a signed-in session.
+- Verification: baseline audit run captured to scratchpad; script formatted with prettier.

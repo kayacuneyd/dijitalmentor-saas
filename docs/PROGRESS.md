@@ -2504,3 +2504,20 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   `SETTING_DEFS`'e `SHARE_PAGE_ENABLED` (Ops) eklendi — '1' değilken /share 404 verecek.
 - Verification: 499/499 test (yeni shareAssets + migration assert'leri dahil), `svelte-check` 0
   hata, production build OK.
+
+### 2026-07-12 — Story paylaşım sistemi M2: /admin/share yöneticisi
+
+- **`/admin/share`**: operatörün story asset kütüphanesi — multipart form-action ile görsel/MP4
+  upload (server-side magic-byte doğrulama, temiz hata mesajları), TR/EN/DE caption alanları
+  (upload sırasında ve sonradan düzenlenebilir), aktif/gizli toggle, ↑/↓ sıralama, onaylı silme
+  (R2 temizliğiyle), ve `/share` sayfasını açıp kapatan `SHARE_PAGE_ENABLED` toggle'ı. Tüm load +
+  action'lar `requireAdmin`; `AdminShell` nav'ına "Share" (Growth) eklendi.
+- **`ecosystem.config.cjs`**: `BODY_SIZE_LIMIT` (default 80M) — adapter-node'un 512KB gövde
+  varsayılanı MP4 upload'unu engelliyordu. ⚠️ **Operatör deploy adımı:** nginx
+  `client_max_body_size` da yükseltilmeli (örn. `client_max_body_size 80m;` — en azından
+  `location /admin/` için), yoksa nginx 1MB'ta 413 döndürür.
+- Verification: playwright ile admin akışı (14 kontrol) — non-admin 403; satır listesi/sıralama/
+  toggle/caption/silme round-trip'leri; sahte PNG upload'u action hattından temiz 400 mesajıyla
+  döner ("Upload a valid JPEG…"); 375px'te sıfır taşma; sıfır konsol hatası. R2 dev'de
+  yapılandırılmadığı için gerçek R2 yazımı prod'da ilk upload'la doğrulanacak (validasyon +
+  kütüphane operasyonları unit-testli). 499/499 test, `svelte-check` 0 hata, build OK.

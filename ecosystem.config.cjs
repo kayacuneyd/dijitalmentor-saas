@@ -36,6 +36,9 @@ module.exports = {
 				// Safe because :3021 is loopback-only behind nginx.
 				PROTOCOL_HEADER: 'x-forwarded-proto',
 				HOST_HEADER: 'host',
+				// Story-share MP4 uploads at /admin/share (adapter-node default is 512KB).
+				// nginx client_max_body_size must be raised alongside this.
+				BODY_SIZE_LIMIT: fileEnv.BODY_SIZE_LIMIT || '80M',
 				PUBLIC_APP_HOST: fileEnv.PUBLIC_APP_HOST || 'saaskaya.com',
 				// Production must never share the DATABASE_URL used by local Vite/dev tooling.
 				DATABASE_URL: productionDatabase,

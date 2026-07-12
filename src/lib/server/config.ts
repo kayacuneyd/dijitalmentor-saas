@@ -13,7 +13,7 @@ import { appSettings } from '$lib/server/db/schema';
 export type SettingDef = {
 	key: string;
 	label: string;
-	group: 'AI' | 'AI Providers' | 'Email' | 'Billing' | 'Domains' | 'Media' | 'Ops';
+	group: 'AI' | 'AI Providers' | 'Email' | 'Billing' | 'Domains' | 'Media' | 'Marketing' | 'Ops';
 	secret: boolean;
 	help?: string;
 };
@@ -178,6 +178,20 @@ export const SETTING_DEFS: SettingDef[] = [
 		group: 'Ops',
 		secret: false,
 		help: 'optional code required by /beta?code=...; leave empty for an open self-serve beta form'
+	},
+	{
+		key: 'GA_MEASUREMENT_ID',
+		label: 'Google Analytics measurement id',
+		group: 'Marketing',
+		secret: false,
+		help: 'GA4 id, e.g. G-XXXXXXXXXX; applied only to the saaskaya app host, not customer sites'
+	},
+	{
+		key: 'GOOGLE_SITE_VERIFICATION',
+		label: 'Google Search Console verification',
+		group: 'Marketing',
+		secret: false,
+		help: 'content value for the google-site-verification meta tag'
 	},
 	{ key: 'STRIPE_SECRET_KEY', label: 'Stripe secret key', group: 'Billing', secret: true },
 	{ key: 'STRIPE_WEBHOOK_SECRET', label: 'Stripe webhook secret', group: 'Billing', secret: true },

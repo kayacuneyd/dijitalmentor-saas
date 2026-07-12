@@ -2464,3 +2464,25 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: targeted GTM/onboarding/render/schema tests passed (7 files / 66 tests),
   `npm run check` passed with 0 warnings, full `npm test` passed (73 files / 484 tests), touched
   files passed Prettier, and `npm run build` succeeded.
+
+### 2026-07-12 — Owner GTM gözlem, GA settings ve blog JSON import
+
+- Admin menüsüne `/admin/gtm` eklendi. Sayfa son 7 gün için Q&A start, Q&A complete, preview
+  generated ve editor opened metriklerini; kampanya source bazlı dönüşüm tablosunu; ayrıca inquiry
+  mesajlarından yeniden hesaplanan `hot_lead`, `beta_candidate`, `compliance_sensitive` lead triage
+  özetlerini gösteriyor. Bu, GTM kampanya linklerinin owner tarafından doğrudan gözlemlenebilir
+  hale gelmesini sağladı.
+- `/admin/settings` registry'sine `Marketing` grubu eklendi: `GA_MEASUREMENT_ID` ve
+  `GOOGLE_SITE_VERIFICATION`. Root layout bu değerleri DB/env fallback ile okuyor; GA4 sadece
+  doğrulanmış `G-...` measurement id ile ve yalnızca saaskaya app host'unda render ediliyor, tenant
+  sitelerine otomatik enjekte edilmiyor.
+- Blog CMS tarafında yayın güvenliği server seviyesine taşındı: `published` statüsündeki yazılar
+  EN/TR/DE title, description, category ve body içeriği tamam değilse kaydedilmiyor. Admin blog
+  listesinde her yazı için TR/EN/DE completeness pill'leri gösteriliyor.
+- Admin blog listesine çok dilli JSON import formu eklendi. Import tek dosyada slug/status/date/
+  readingMinutes/cover ve EN/TR/DE translations alıyor; sections veya rich `body` kabul ediyor;
+  slug çakışmasında açık `update existing` onayı istiyor; published importlar aynı 3 dil kilidinden
+  geçiyor.
+- Verification: targeted blog/import/GTM/layout/config/inquiry/telemetry tests passed
+  (6 files / 18 tests), `npm run check` passed with 0 warnings, full `npm test` passed
+  (76 files / 491 tests), touched files passed Prettier, and `npm run build` succeeded.

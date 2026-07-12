@@ -26,6 +26,7 @@
 
 	const nav: AdminNavItem[] = [
 		{ href: '/admin', label: 'Overview', eyebrow: 'Ops', match: '/admin' },
+		{ href: '/admin/gtm', label: 'GTM', eyebrow: 'Growth', match: '/admin/gtm' },
 		{ href: '/admin/customers', label: 'Customers', eyebrow: 'CRM', match: '/admin/customers' },
 		{ href: '/admin/inbox', label: 'Inbox', eyebrow: 'Public', match: '/admin/inbox' },
 		{ href: '/admin/blog', label: 'Blog', eyebrow: 'Content', match: '/admin/blog' },

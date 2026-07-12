@@ -32,6 +32,21 @@
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="theme-color" content="#ece7dd" />
 		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+		{#if data.googleSiteVerification}
+			<meta name="google-site-verification" content={data.googleSiteVerification} />
+		{/if}
+		{#if data.gaMeasurementId}
+			<script
+				async
+				src={`https://www.googletagmanager.com/gtag/js?id=${data.gaMeasurementId}`}
+			></script>
+			{@html `<script>
+				window.dataLayer = window.dataLayer || [];
+				function gtag(){dataLayer.push(arguments);}
+				gtag('js', new Date());
+				gtag('config', '${data.gaMeasurementId}');
+			</script>`}
+		{/if}
 	{/if}
 </svelte:head>
 {@render children()}

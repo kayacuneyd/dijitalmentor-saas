@@ -6,7 +6,11 @@ import { getSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { inquiries, inquiryMessages } from '$lib/server/db/schema';
 import { sendEmail } from '$lib/server/email';
-import { classifyLead } from '$lib/server/leadTriage';
+import {
+	classifyLead,
+	type LeadTriageCategory,
+	type LeadTriageResult
+} from '$lib/server/leadTriage';
 
 export const INQUIRY_SOURCES = ['contact', 'chat', 'assistant'] as const;
 export const INQUIRY_CATEGORIES = [
@@ -24,6 +28,11 @@ export type InquiryStatus = (typeof INQUIRY_STATUSES)[number];
 export type Inquiry = typeof inquiries.$inferSelect;
 export type InquiryMessage = typeof inquiryMessages.$inferSelect;
 export type InquiryDetail = Inquiry & { messages: InquiryMessage[] };
+export type TriagedInquirySummary = {
+	inquiry: Inquiry;
+	message: string;
+	triage: LeadTriageResult;
+};
 
 export class InquiryClosedError extends Error {}
 
@@ -163,6 +172,37 @@ export function getInquiryDetail(inquiryId: string): InquiryDetail | null {
 	const inquiry = db.select().from(inquiries).where(eq(inquiries.id, inquiryId)).get();
 	if (!inquiry) return null;
 	return { ...inquiry, messages: listMessages(inquiryId) };
+}
+
+export function listTriagedInquiries(
+	options: {
+		limit?: number;
+		categories?: LeadTriageCategory[];
+	} = {}
+): TriagedInquirySummary[] {
+	const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
+	const categorySet = options.categories ? new Set(options.categories) : null;
+	return listInquiries()
+		.map((inquiry) => {
+			const visitorMessage =
+				listMessages(inquiry.id)
+					.filter((message) => message.authorKind === 'visitor')
+					.at(-1)?.body ?? '';
+			const triage = classifyLead({
+				name: inquiry.name,
+				email: inquiry.email,
+				category: inquiry.category,
+				source: inquiry.source,
+				message: visitorMessage
+			});
+			return { inquiry, message: visitorMessage, triage };
+		})
+		.filter((item) => !categorySet || categorySet.has(item.triage.category))
+		.sort((a, b) => {
+			if (a.triage.score !== b.triage.score) return b.triage.score - a.triage.score;
+			return b.inquiry.createdAt.getTime() - a.inquiry.createdAt.getTime();
+		})
+		.slice(0, limit);
 }
 
 export function addInquiryMessage(input: {

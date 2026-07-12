@@ -6,7 +6,16 @@
 
 	let { data, form } = $props();
 
-	const groups = ['AI', 'AI Providers', 'Email', 'Billing', 'Domains', 'Media', 'Ops'] as const;
+	const groups = [
+		'AI',
+		'AI Providers',
+		'Email',
+		'Billing',
+		'Domains',
+		'Media',
+		'Marketing',
+		'Ops'
+	] as const;
 	const groupMeta = {
 		AI: { label: 'AI', detail: 'Budgets, models and quota controls' },
 		'AI Providers': { label: 'Providers', detail: 'Groq, DeepSeek and fallback keys' },
@@ -14,6 +23,7 @@
 		Billing: { label: 'Billing', detail: 'Subscriptions and checkout providers' },
 		Domains: { label: 'Domains', detail: 'Reservation, pricing and registrar settings' },
 		Media: { label: 'Media', detail: 'R2 and upload infrastructure' },
+		Marketing: { label: 'Marketing', detail: 'GA4, Search Console and GTM visibility' },
 		Ops: { label: 'Ops', detail: 'Monitoring, beta gates and cron controls' }
 	} as const;
 

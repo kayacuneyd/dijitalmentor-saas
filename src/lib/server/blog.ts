@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { LOCALES, type Locale } from '$lib/i18n';
 import {
 	blogDocSchema,
+	blogDocText,
 	emptyBlogDoc,
 	parseBlogDoc,
 	sectionsToBlogDoc,
@@ -32,6 +33,12 @@ export type PublicBlogPost = {
 	seoTitle: Record<Locale, string>;
 	seoDescription: Record<Locale, string>;
 	body: Record<Locale, BlogDoc>;
+};
+
+export type BlogLocaleCompleteness = {
+	locale: Locale;
+	complete: boolean;
+	missing: string[];
 };
 
 type BlogPostRow = typeof blogPosts.$inferSelect;
@@ -66,6 +73,33 @@ const saveSchema = z.object({
 	)
 });
 
+const importSectionSchema = z.object({
+	heading: z.string().trim().min(2).max(160),
+	body: z.string().trim().min(20).max(8000)
+});
+
+const importTranslationSchema = z.object({
+	title: z.string().trim().min(3).max(140),
+	description: z.string().trim().min(20).max(280),
+	category: z.string().trim().min(2).max(60),
+	seoTitle: z.string().trim().max(160).optional(),
+	seoDescription: z.string().trim().max(280).optional(),
+	body: blogDocSchema.optional(),
+	sections: z.array(importSectionSchema).min(1).max(40).optional()
+});
+
+const importSchema = z.object({
+	slug: slugSchema,
+	status: z.enum(BLOG_STATUSES).default('draft'),
+	date: z.string().trim().optional(),
+	publishedAt: z.string().trim().optional(),
+	readingMinutes: z.coerce.number().int().min(1).max(30).default(4),
+	authorName: z.string().trim().min(2).max(120).default('Cüneyt Kaya'),
+	coverImageUrl: z.string().trim().max(700).optional(),
+	coverAlt: z.string().trim().max(220).optional(),
+	translations: z.record(z.enum(LOCALES), importTranslationSchema)
+});
+
 export type BlogSaveInput = {
 	id?: unknown;
 	slug: unknown;
@@ -89,6 +123,9 @@ export type BlogSaveInput = {
 };
 export type BlogSaveResult =
 	{ ok: true; post: PublicBlogPost } | { ok: false; message: string; field?: string };
+export type BlogImportResult =
+	| { ok: true; post: PublicBlogPost; updatedExisting: boolean }
+	| { ok: false; message: string; field?: string; issues?: string[] };
 
 let seeded = false;
 
@@ -146,6 +183,32 @@ function translationsFor(postIds: string[]): BlogTranslationRow[] {
 		.from(blogPostTranslations)
 		.all()
 		.filter((translation) => postIds.includes(translation.postId));
+}
+
+export function blogCompleteness(post: PublicBlogPost): BlogLocaleCompleteness[] {
+	return LOCALES.map((locale) => {
+		const missing: string[] = [];
+		if (!post.title[locale]?.trim()) missing.push('title');
+		if (!post.description[locale]?.trim()) missing.push('description');
+		if (!post.category[locale]?.trim()) missing.push('category');
+		if (blogDocText(post.body[locale]).length < 20) missing.push('body');
+		return { locale, complete: missing.length === 0, missing };
+	});
+}
+
+function validatePublishedInput(input: z.infer<typeof saveSchema>): string[] {
+	if (input.status !== 'published') return [];
+	const issues: string[] = [];
+	for (const locale of LOCALES) {
+		const translation = input.translations[locale];
+		if (!translation?.title?.trim()) issues.push(`${locale}: title is required`);
+		if (!translation?.description?.trim()) issues.push(`${locale}: description is required`);
+		if (!translation?.category?.trim()) issues.push(`${locale}: category is required`);
+		if (!translation || blogDocText(translation.body).length < 20) {
+			issues.push(`${locale}: body must contain at least 20 characters`);
+		}
+	}
+	return issues;
 }
 
 export function ensureBlogSeeded(): void {
@@ -282,6 +345,15 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 		};
 	}
 
+	const publishIssues = validatePublishedInput(parsed.data);
+	if (publishIssues.length > 0) {
+		return {
+			ok: false,
+			field: 'status',
+			message: `Published posts require complete EN/TR/DE translations. ${publishIssues.join('; ')}`
+		};
+	}
+
 	ensureBlogSeeded();
 	const current = parsed.data.id ? getBlogPostById(parsed.data.id) : null;
 	if (parsed.data.id && !current) return { ok: false, message: 'Blog post not found.' };
@@ -369,4 +441,67 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 	const post = getBlogPostById(id);
 	if (!post) return { ok: false, message: 'Blog post could not be saved.' };
 	return { ok: true, post };
+}
+
+function importBody(translation: z.infer<typeof importTranslationSchema>): BlogDoc {
+	if (translation.body) return translation.body;
+	if (translation.sections) return sectionsToBlogDoc(translation.sections);
+	return emptyBlogDoc();
+}
+
+export function importBlogPostJson(
+	rawJson: string,
+	options: { updateExisting?: boolean } = {}
+): BlogImportResult {
+	let raw: unknown;
+	try {
+		raw = JSON.parse(rawJson);
+	} catch {
+		return { ok: false, message: 'The uploaded file is not valid JSON.' };
+	}
+
+	const parsed = importSchema.safeParse(raw);
+	if (!parsed.success) {
+		return {
+			ok: false,
+			message: 'The JSON file does not match the blog import format.',
+			issues: parsed.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+		};
+	}
+
+	const existing = getBlogPostBySlug(parsed.data.slug, { includeDrafts: true });
+	if (existing && !options.updateExisting) {
+		return {
+			ok: false,
+			field: 'slug',
+			message: `A blog post with slug "${parsed.data.slug}" already exists. Enable update existing to overwrite it.`
+		};
+	}
+
+	const translations = {} as BlogSaveInput['translations'];
+	for (const locale of LOCALES) {
+		const translation = parsed.data.translations[locale];
+		translations[locale] = {
+			title: translation.title,
+			description: translation.description,
+			category: translation.category,
+			seoTitle: translation.seoTitle ?? '',
+			seoDescription: translation.seoDescription ?? '',
+			body: importBody(translation)
+		};
+	}
+
+	const result = saveBlogPost({
+		id: existing?.id,
+		slug: parsed.data.slug,
+		status: parsed.data.status,
+		coverImageUrl: parsed.data.coverImageUrl ?? '',
+		coverAlt: parsed.data.coverAlt ?? '',
+		readingMinutes: parsed.data.readingMinutes,
+		authorName: parsed.data.authorName,
+		publishedAt: parsed.data.publishedAt ?? parsed.data.date ?? '',
+		translations
+	});
+	if (!result.ok) return result;
+	return { ok: true, post: result.post, updatedExisting: Boolean(existing) };
 }

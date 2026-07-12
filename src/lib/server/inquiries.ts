@@ -6,6 +6,7 @@ import { getSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { inquiries, inquiryMessages } from '$lib/server/db/schema';
 import { sendEmail } from '$lib/server/email';
+import { classifyLead } from '$lib/server/leadTriage';
 
 export const INQUIRY_SOURCES = ['contact', 'chat', 'assistant'] as const;
 export const INQUIRY_CATEGORIES = [
@@ -101,10 +102,30 @@ export function createInquiry(input: z.output<typeof inquirySchema>): Inquiry {
 export async function notifyNewInquiry(inquiry: Inquiry, body: string): Promise<void> {
 	const alertEmail = getSetting('ALERT_EMAIL');
 	if (!alertEmail) return;
+	const triage = classifyLead({
+		name: inquiry.name,
+		email: inquiry.email,
+		category: inquiry.category,
+		message: body,
+		source: inquiry.source
+	});
 	const result = await sendEmail({
 		to: alertEmail,
 		subject: `New ${inquiry.source} inquiry: ${inquiry.category}`,
-		text: `${inquiry.name} <${inquiry.email}> sent a ${inquiry.category} inquiry via ${inquiry.source} (${inquiry.id}).\n\n${body}\n\nOpen: /admin/inbox/${inquiry.id}`
+		text: `${inquiry.name} <${inquiry.email}> sent a ${inquiry.category} inquiry via ${inquiry.source} (${inquiry.id}).
+
+Triage: ${triage.category} / score ${triage.score}${triage.slaHours ? ` / SLA ${triage.slaHours}h` : ''}
+Human review: ${triage.requiresHumanReview ? 'yes' : 'no'}
+Reasons:
+${triage.reasons.map((reason) => `- ${reason}`).join('\n')}
+
+Draft reply:
+${triage.draftReply}
+
+Message:
+${body}
+
+Open: /admin/inbox/${inquiry.id}`
 	});
 	if (!result.sent) {
 		console.error(`[inquiries] operator notification failed for ${inquiry.id}: ${result.error}`);

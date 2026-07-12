@@ -1,4 +1,4 @@
-import { siteSchema, type Locale, type Section, type Site } from '$lib/schema/site';
+import { siteSchema, type Locale, type Section, type SectionType, type Site } from '$lib/schema/site';
 
 export type QualitySeverity = 'blocker' | 'warning';
 
@@ -379,6 +379,33 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 				'pages',
 				'Psychologist sites should make the appointment/session path explicit.'
 			);
+		}
+	}
+
+	// --- Integration quality warnings ---
+	const integrations = site.settings.integrations ?? [];
+	const sectionTypes = new Set(site.pages.flatMap((p) => p.sections.map((s) => s.type)));
+
+	const integrationBlockMap: Record<string, { type: string; block: string; message: string }> = {
+		'booking-external': {
+			type: 'booking-external',
+			block: 'booking',
+			message: 'Booking bloğu var ama booking-external entegrasyonu aktif değil — randevu butonu pasif görünecek.'
+		},
+		'payment-link': {
+			type: 'payment-link',
+			block: 'pricing',
+			message: 'Pricing bloğu var ama payment-link entegrasyonu aktif değil — ödeme butonu görünmeyecek.'
+		}
+	};
+
+	for (const [key, cfg] of Object.entries(integrationBlockMap)) {
+		// Only warn if the block exists AND the integration is either missing or disabled
+		if (sectionTypes.has(cfg.block as SectionType)) {
+			const entry = integrations.find((i) => i.type === cfg.type);
+			if (!entry || !entry.enabled) {
+				addIssue(issues, 'warning', `integration_${key}_inactive`, 'settings.integrations', cfg.message);
+			}
 		}
 	}
 

@@ -151,11 +151,11 @@ function translationsFor(postIds: string[]): BlogTranslationRow[] {
 export function ensureBlogSeeded(): void {
 	if (seeded) return;
 	seeded = true;
-	const existing = db.select().from(blogPosts).limit(1).get();
-	if (existing) return;
 
 	const now = new Date();
 	for (const seed of seedPosts) {
+		const existing = db.select().from(blogPosts).where(eq(blogPosts.slug, seed.slug)).get();
+		if (existing) continue;
 		const id = `bp-${randomUUID().slice(0, 10)}`;
 		const publishedAt = new Date(`${seed.date}T12:00:00.000Z`);
 		db.insert(blogPosts)

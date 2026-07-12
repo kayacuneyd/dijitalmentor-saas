@@ -86,7 +86,7 @@ export function setGeneratedSiteId(id: string, siteId: string): void {
 }
 
 /** Lazily creates a pending row + `sk_pending` cookie if none exists yet. */
-export function createOrGetPending(cookies: Cookies): PendingRecord {
+export function createOrGetPending(cookies: Cookies, source = 'pending'): PendingRecord {
 	const existing = getPendingByToken(cookies.get(PENDING_COOKIE));
 	if (existing) return existing;
 
@@ -105,7 +105,7 @@ export function createOrGetPending(cookies: Cookies): PendingRecord {
 			expiresAt: new Date(now.getTime() + PENDING_TTL_MS)
 		})
 		.run();
-	recordOnboardingEvent({ event: 'started', pendingId: id, route: '/new', source: 'pending' });
+	recordOnboardingEvent({ event: 'started', pendingId: id, route: '/new', source });
 	// Opportunistic cleanup, same idiom as createLoginToken/createSession.
 	db.delete(pendingOnboarding).where(lt(pendingOnboarding.expiresAt, now)).run();
 	setCookie(cookies, token);
@@ -123,9 +123,10 @@ export function createOrGetPending(cookies: Cookies): PendingRecord {
 export function savePendingAnswer(
 	cookies: Cookies,
 	questionId: string,
-	value: unknown
+	value: unknown,
+	source?: string | null
 ): PendingRecord {
-	const pending = createOrGetPending(cookies);
+	const pending = createOrGetPending(cookies, source || 'pending');
 	const answers = { ...pending.answers, [questionId]: value };
 	const now = new Date();
 	db.update(pendingOnboarding)

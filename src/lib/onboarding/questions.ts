@@ -112,7 +112,7 @@ export const ONBOARDING_QUESTIONS: Question[] = [
 	{
 		id: 'differentiator',
 		kind: 'open_text',
-		prompt: 'Seni farklı kılan nedir? Neden seni tercih etmeliler?',
+		prompt: 'Seni arayan kişiler ilk olarak neyi anlamalı? Yaklaşımını kısaca anlat.',
 		required: true,
 		guarded: true,
 		schema: shortText(400)

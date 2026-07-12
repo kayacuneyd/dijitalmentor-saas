@@ -3,7 +3,8 @@ import {
 	hasEditorOpenedEvent,
 	listRecentOnboardingEvents,
 	onboardingFunnelSummary,
-	recordOnboardingEvent
+	recordOnboardingEvent,
+	weeklyOnboardingGtmSummary
 } from './telemetry';
 
 describe('onboarding telemetry', () => {
@@ -44,6 +45,30 @@ describe('onboarding telemetry', () => {
 		expect(summary.starts).toBeGreaterThanOrEqual(2);
 		expect(summary.generated).toBeGreaterThanOrEqual(1);
 		expect(summary.previewReachPct).not.toBeNull();
+	});
+
+	it('summarizes campaign sources for GTM reporting', () => {
+		recordOnboardingEvent({
+			event: 'started',
+			pendingId: 'pending-source-a',
+			source: 'linkedin:gtm-30:psych'
+		});
+		recordOnboardingEvent({
+			event: 'completed',
+			pendingId: 'pending-source-a',
+			source: 'linkedin:gtm-30:psych'
+		});
+		recordOnboardingEvent({
+			event: 'editor_opened',
+			pendingId: 'pending-source-a',
+			siteId: 'site-source-a',
+			source: 'linkedin:gtm-30:psych'
+		});
+
+		const summary = weeklyOnboardingGtmSummary();
+		expect(summary.bySource['linkedin:gtm-30:psych'].started).toBeGreaterThanOrEqual(1);
+		expect(summary.bySource['linkedin:gtm-30:psych'].completed).toBeGreaterThanOrEqual(1);
+		expect(summary.editorOpenPct).not.toBeNull();
 	});
 
 	it('detects whether a site already recorded editor_opened', () => {

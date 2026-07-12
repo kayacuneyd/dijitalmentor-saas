@@ -140,7 +140,9 @@ describe('POST /api/onboarding/finish', () => {
 		expect(res.status).toBe(200);
 		expect(data.description).toContain('Kit referansı: Modern Diyetisyen');
 		expect(data.description).toContain('Meslek: Diyetisyen');
-		expect(data.description).toContain('Önerilen feature kitleri: booking-request');
+		expect(data.description).toContain(
+			'Önerilen feature kitleri: booking-external, menu-digital, whatsapp-order'
+		);
 	});
 
 	it('rejects an unknown selected kit before consuming the pending record', async () => {

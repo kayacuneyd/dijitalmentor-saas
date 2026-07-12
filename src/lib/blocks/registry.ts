@@ -1,5 +1,6 @@
 import type { Component } from 'svelte';
 import type { Locale, Section, SectionContent, SectionProps, SectionType } from '$lib/schema/site';
+import type { Integration } from '$lib/render/context';
 import Hero from './Hero.svelte';
 import About from './About.svelte';
 import Services from './Services.svelte';
@@ -20,6 +21,7 @@ export type BlockProps<T extends SectionType> = {
 	locale: Locale;
 	props: SectionProps<T>;
 	content: SectionContent<T>;
+	integrations?: Integration[];
 };
 
 export const registry: { [T in SectionType]: Component<BlockProps<T>> } = {

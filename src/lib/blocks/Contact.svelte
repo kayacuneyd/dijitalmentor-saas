@@ -1,11 +1,21 @@
 <script lang="ts">
 	import type { Locale } from '$lib/schema/site';
-	import { getRenderContext } from '$lib/render/context';
+	import { getRenderContext, getSiteIntegration, type Integration } from '$lib/render/context';
+	import { INTEGRATION_DEFAULT_LABELS } from '$lib/kits/integrations';
 	import type { BlockProps } from './registry';
 
-	let { props, content, locale }: BlockProps<'contact'> = $props();
+	let { props, content, locale, integrations }: BlockProps<'contact'> & { integrations?: Integration[] } = $props();
 
 	const render = getRenderContext();
+
+	const social = $derived(getSiteIntegration(integrations ?? [], 'social-link'));
+	const video = $derived(getSiteIntegration(integrations ?? [], 'video-consult'));
+	const extraLinks = $derived(
+		[
+			social ? { href: social.url!, label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link'] } : null,
+			video ? { href: video.url!, label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult'] } : null
+		].filter(Boolean) as { href: string; label: string }[]
+	);
 
 	// Platform UI chrome (field labels) is the block's own dictionary — tenant copy stays in `content`.
 	const labels: Record<
@@ -147,6 +157,17 @@
 					</div>
 				</form>
 			{/if}
+			{#if extraLinks.length > 0}
+					<div class="mt-6 flex flex-wrap justify-center gap-3">
+						{#each extraLinks as link}
+							<a href={link.href} target="_blank" rel="noopener nofollow"
+								class="btn btn-outline btn-sm rounded-full"
+							>
+								{link.label}
+							</a>
+						{/each}
+					</div>
+				{/if}
 		</div>
 	</div>
 </section>

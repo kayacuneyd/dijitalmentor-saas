@@ -42,6 +42,31 @@
 				examples: 'See example sites',
 				pricing: 'Pricing',
 				process: 'How it works',
+				segmentsLabel: 'Focused beta segments',
+				segmentsTitle: 'Start with the draft that matches your profession.',
+				segmentCards: [
+					[
+						'Psychologists',
+						'A calm, safe first impression for people evaluating your practice.',
+						'Approach, services, credentials, contact flow',
+						'Create psychology draft',
+						'/new?profession=psych&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Lawyers',
+						'A serious, informative website that presents practice areas without exaggerated claims.',
+						'Practice areas, office profile, trust signals, inquiry path',
+						'Create lawyer draft',
+						'/new?profession=law&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Dietitians, dentists, academics',
+						'Second-wave kits use the same controlled blocks and conservative messaging.',
+						'Clear services, no risky promises, multilingual readiness',
+						'Explore guided start',
+						'/new?utm_source=homepage&utm_campaign=gtm-30'
+					]
+				],
 				flowLabel: 'See it in action',
 				flowScenes: ['Describe yourself', 'AI generates', 'Live preview', 'Edit', 'Publish'] as [
 					string,
@@ -158,6 +183,31 @@
 				examples: 'Örnek siteleri gör',
 				pricing: 'Fiyatlandırma',
 				process: 'Nasıl çalışır',
+				segmentsLabel: 'Odak beta segmentleri',
+				segmentsTitle: 'Mesleğine uygun ilk taslakla başla.',
+				segmentCards: [
+					[
+						'Psikologlar',
+						'Danışanın seni değerlendirirken sakin, güvenli ve anlaşılır bir ilk izlenim görsün.',
+						'Yaklaşım, hizmetler, unvanlar, iletişim akışı',
+						'Psikolog taslağı oluştur',
+						'/new?profession=psych&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Avukatlar',
+						'Çalışma alanlarını abartılı iddia olmadan ciddi ve bilgilendirici biçimde anlat.',
+						'Çalışma alanları, büro profili, güven sinyalleri, talep akışı',
+						'Avukat taslağı oluştur',
+						'/new?profession=law&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Diyetisyen, diş hekimi, akademisyen',
+						'İkinci dalga kitler aynı kontrollü bloklar ve muhafazakar mesaj diliyle ilerler.',
+						'Net hizmetler, risksiz vaat dili, çok dilli hazırlık',
+						'Rehberli başlangıcı aç',
+						'/new?utm_source=homepage&utm_campaign=gtm-30'
+					]
+				],
 				flowLabel: 'Canlı akışta gör',
 				flowScenes: ['Kendini anlat', 'AI üretiyor', 'Canlı önizleme', 'Düzenle', 'Yayında'] as [
 					string,
@@ -282,6 +332,31 @@
 				examples: 'Beispiele ansehen',
 				pricing: 'Preise',
 				process: 'So funktioniert es',
+				segmentsLabel: 'Fokussierte Beta-Segmente',
+				segmentsTitle: 'Starte mit dem Entwurf, der zu deinem Beruf passt.',
+				segmentCards: [
+					[
+						'Psychologinnen und Psychologen',
+						'Ein ruhiger, sicherer erster Eindruck für Menschen, die deine Praxis prüfen.',
+						'Ansatz, Leistungen, Qualifikationen, Kontaktablauf',
+						'Psychologie-Entwurf erstellen',
+						'/new?profession=psych&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Anwältinnen und Anwälte',
+						'Ein seriöser, informativer Auftritt für Tätigkeitsfelder ohne überzogene Versprechen.',
+						'Tätigkeitsfelder, Kanzleiprofil, Vertrauenssignale, Anfrageweg',
+						'Kanzlei-Entwurf erstellen',
+						'/new?profession=law&utm_source=homepage&utm_campaign=gtm-30'
+					],
+					[
+						'Ernährung, Zahnmedizin, Wissenschaft',
+						'Zweite Welle: dieselben kontrollierten Blöcke und sachliche Kommunikation.',
+						'Klare Leistungen, keine riskanten Versprechen, mehrsprachig bereit',
+						'Geführten Start öffnen',
+						'/new?utm_source=homepage&utm_campaign=gtm-30'
+					]
+				],
 				flowLabel: 'In Aktion ansehen',
 				flowScenes: [
 					'Beschreibe dich',
@@ -396,6 +471,15 @@
 	const steps = $derived(
 		copy.steps.map(([title, desc], index) => ({ n: String(index + 1), title, desc }))
 	);
+	const segmentCards = $derived(
+		copy.segmentCards.map(([title, desc, details, action, href]) => ({
+			title,
+			desc,
+			details,
+			action,
+			href
+		}))
+	);
 	const features = $derived(copy.featureItems.map(([title, desc]) => ({ title, desc })));
 	const faqs = $derived(copy.faqs.map(([q, a]) => ({ q, a })));
 	const trustCards = $derived(copy.trustCards.map(([title, desc]) => ({ title, desc })));
@@ -507,6 +591,34 @@
 				<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">{copy.midCtaBody}</p>
 			</div>
 			<a href={l('/beta')} class="sk-btn sk-btn-primary shrink-0">{copy.midCtaAction}</a>
+		</div>
+	</MarketingSection>
+
+	<!-- Profession-specific GTM hooks -->
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
+		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.segmentsLabel}</div>
+		<div class="mt-3 flex max-w-3xl flex-col gap-2">
+			<h2 class="sk-display text-2xl leading-tight sm:text-3xl">{copy.segmentsTitle}</h2>
+		</div>
+		<div class="mt-5 grid gap-4 lg:grid-cols-3">
+			{#each segmentCards as segment (segment.title)}
+				<a
+					href={l(segment.href)}
+					class="sk-card group flex min-h-56 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+				>
+					<h3 class="text-base font-semibold text-[var(--sk-ink)]">{segment.title}</h3>
+					<p class="mt-2 text-sm leading-6 text-[var(--sk-muted)]">{segment.desc}</p>
+					<p
+						class="mt-4 border-t border-[var(--sk-line)] pt-3 text-xs leading-5 text-[var(--sk-faint)]"
+					>
+						{segment.details}
+					</p>
+					<span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold">
+						{segment.action}
+						<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+					</span>
+				</a>
+			{/each}
 		</div>
 	</MarketingSection>
 

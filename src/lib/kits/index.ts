@@ -18,8 +18,8 @@ import { professionKits, type ControlledKit } from './professions';
 const psychAsControlledKits: ControlledKit[] = psychProfessionalKits.map((kit) => ({
 	...kit,
 	profession: 'Psikolog / Terapist',
-	category: 'psychology',
-	featureKits: ['booking-request', 'faq', 'contact-form'],
+	category: 'psychology' as const,
+	featureKits: ['booking-external', 'whatsapp-order'],
 	promptRecipes: [
 		{
 			title: `${kit.label} taslağını kişiselleştir`,

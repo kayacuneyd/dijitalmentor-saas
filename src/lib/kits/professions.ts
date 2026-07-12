@@ -1,5 +1,6 @@
 import type { Locale, Site } from '$lib/schema/site';
 import { seedSites } from '$lib/seed';
+import { coerceFeatureKits, type IntegrationType } from '$lib/kits/integrations';
 
 export type PromptRecipe = {
 	title: string;
@@ -14,7 +15,7 @@ export type ControlledKit = {
 	category: 'psychology' | 'health' | 'local-service' | 'property';
 	audience: string;
 	outcome: string;
-	featureKits: string[];
+	featureKits: IntegrationType[];
 	promptRecipes: PromptRecipe[];
 	createSite: () => Site;
 };
@@ -407,6 +408,16 @@ function createProfessionSite(config: ProfessionKitConfig): Site {
 		} as never);
 	}
 	if (home.sections.length > 12) throw new Error('Kit ' + config.slug + ' has ' + home.sections.length + ' sections (max 12).');
+
+	// --- Write kit default integrations into settings (enabled: false, no url/phone) ---
+	const integrationTypes = coerceFeatureKits(config.featureKits);
+	if (integrationTypes.length > 0) {
+		site.settings.integrations = integrationTypes.map((t) => ({
+			type: t,
+			enabled: false
+		}));
+	}
+
 	return site;
 }
 
@@ -900,4 +911,14 @@ const configs: ProfessionKitConfig[] = [
 		credentials: { title: { tr: 'Baro ve yetkinlikler', en: 'Bar admission', de: 'Zulassung' }, intro: { tr: '', en: '', de: '' }, items: { tr: [{ name: 'İstanbul Barosu', issuer: 'TBB', year: '2010' }, { name: 'Arabuluculuk Yetki Belgesi', issuer: 'Adalet Bakanlığı', year: '2017' }], en: [{ name: 'Istanbul Bar', issuer: 'UBA', year: '2010' }, { name: 'Mediation License', issuer: 'Ministry of Justice', year: '2017' }], de: [{ name: 'Rechtsanwaltskammer', issuer: 'TBB', year: '2010' }, { name: 'Mediationslizenz', issuer: 'Justizministerium', year: '2017' }] } },
 		testimonials: { title: { tr: 'Danışan yorumları', en: 'Client feedback', de: 'Mandantenfeedback' }, intro: { tr: 'İsimler kısaltılmıştır.', en: 'Names shortened.', de: 'Namen gekürzt.' }, items: { tr: [{ quote: 'Süreci adım adım anlatması çok rahatlattı.', name: 'N.Y.', role: 'danışan', rating: 5 }, { quote: 'Hukuki dili sadeleştirerek anlatması karar vermemi kolaylaştırdı.', name: 'F.K.', role: 'danışan', rating: 5 }, { quote: 'Dosyamın takibinde her zaman ulaşılabilirdi.', name: 'S.D.', role: 'danışan', rating: 4 }], en: [{ quote: 'Step-by-step explanation was very reassuring.', name: 'N.Y.', role: 'client', rating: 5 }, { quote: 'Simplifying legal language helped me decide.', name: 'F.K.', role: 'client', rating: 5 }, { quote: 'Always reachable for case updates.', name: 'S.D.', role: 'client', rating: 4 }], de: [{ quote: 'Schrittweise Erklärung war beruhigend.', name: 'N.Y.', role: 'Mandant*in', rating: 5 }, { quote: 'Vereinfachung half bei Entscheidungen.', name: 'F.K.', role: 'Mandant*in', rating: 5 }, { quote: 'Immer erreichbar für Updates.', name: 'S.D.', role: 'Mandant*in', rating: 4 }] } }
 	}
-];export const professionKits: ControlledKit[] = configs.map((config) => ({ slug: config.slug, label: config.label, profession: config.profession, category: config.category, audience: config.audience, outcome: config.outcome, featureKits: config.featureKits, promptRecipes: config.promptRecipes, createSite: () => createProfessionSite(config)}));
+];export const professionKits: ControlledKit[] = configs.map((config) => ({
+		slug: config.slug,
+		label: config.label,
+		profession: config.profession,
+		category: config.category,
+		audience: config.audience,
+		outcome: config.outcome,
+		featureKits: coerceFeatureKits(config.featureKits),
+		promptRecipes: config.promptRecipes,
+		createSite: () => createProfessionSite(config)
+	}));

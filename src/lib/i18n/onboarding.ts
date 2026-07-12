@@ -16,13 +16,18 @@ const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 				psych: 'Psychologist / Therapist',
 				law: 'Lawyer / Law Office',
 				dental: 'Dentist / Clinic',
-				unsupported: 'Anderes Feld'
+				dietitian: 'Dietitian',
+				real_estate: 'Real estate advisor',
+				beauty: 'Beauty salon',
+				unsupported: 'Another field'
 			}
 		},
 		businessName: { prompt: 'What is the name of your practice or business?' },
 		city: { prompt: 'Which city or district do you serve?' },
 		audience: { prompt: 'Who do you help? Briefly describe your audience.' },
-		differentiator: { prompt: 'What makes your practice different? Why should people choose you?' },
+		differentiator: {
+			prompt: 'What should people understand first when they evaluate your practice?'
+		},
 		tone: {
 			prompt: 'What tone should your site have?',
 			options: {
@@ -90,14 +95,17 @@ const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 				psych: 'Psychologe / Therapeut',
 				law: 'Anwalt / Kanzlei',
 				dental: 'Zahnarzt / Klinik',
-				unsupported: 'Another field'
+				dietitian: 'Ernährungsberater',
+				real_estate: 'Immobilienberater',
+				beauty: 'Beauty-Salon',
+				unsupported: 'Anderes Feld'
 			}
 		},
 		businessName: { prompt: 'Wie heißt deine Praxis oder dein Unternehmen?' },
 		city: { prompt: 'In welcher Stadt oder welchem Bezirk bist du tätig?' },
 		audience: { prompt: 'Wem hilfst du? Beschreibe deine Zielgruppe kurz.' },
 		differentiator: {
-			prompt: 'Was macht deine Praxis besonders? Warum sollten Menschen dich wählen?'
+			prompt: 'Was sollen Menschen zuerst verstehen, wenn sie deine Praxis prüfen?'
 		},
 		tone: {
 			prompt: 'Welchen Ton soll deine Website haben?',

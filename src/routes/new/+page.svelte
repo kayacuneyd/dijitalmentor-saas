@@ -34,6 +34,35 @@
 				intro:
 					'You can start without an account. Answer the questions, then create your account at the final step. Your answers are saved.',
 				flow: 'Guided flow',
+				campaignLabel: 'Campaign start',
+				campaignPrompt: 'You came here for a profession-specific draft. Start with this path:',
+				campaignCta: 'Start this draft',
+				professionHooks: {
+					psych: {
+						title: 'Psychology practice website draft',
+						body: 'Describe your approach and see a calm, reassuring first draft before creating an account.'
+					},
+					law: {
+						title: 'Law office website draft',
+						body: 'Describe your practice areas and see a serious, informative first draft before creating an account.'
+					},
+					dental: {
+						title: 'Dental clinic website draft',
+						body: 'Describe your clinic and services, then review a clear first draft without technical setup.'
+					},
+					dietitian: {
+						title: 'Dietitian website draft',
+						body: 'Describe your nutrition approach without outcome promises; get a clear counseling-site draft.'
+					},
+					real_estate: {
+						title: 'Real estate advisor website draft',
+						body: 'Describe your local market and services; get a trust-led site draft for inquiries.'
+					},
+					beauty: {
+						title: 'Service website draft',
+						body: 'Describe your services and booking flow; get a clean first draft for appointment requests.'
+					}
+				} as Record<string, { title: string; body: string }>,
 				steps: [
 					'answer a few questions',
 					'create a free account',
@@ -112,6 +141,35 @@
 				intro:
 					'Üye olmadan da başlayabilirsin — sorulara yanıt ver, en sonda "Ücretsiz Başla" ile hesabını oluştur. Cevapların kaybolmaz.',
 				flow: 'Rehberli akış',
+				campaignLabel: 'Kampanya başlangıcı',
+				campaignPrompt: 'Mesleğine özel site taslağı için geldin. Bu yoldan başla:',
+				campaignCta: 'Bu taslağı başlat',
+				professionHooks: {
+					psych: {
+						title: 'Psikolog sitesi taslağı',
+						body: 'Yaklaşımını anlat; hesap oluşturmadan önce sakin ve güven veren ilk taslağı gör.'
+					},
+					law: {
+						title: 'Avukat sitesi taslağı',
+						body: 'Çalışma alanlarını anlat; ciddi ve bilgilendirici ilk taslağı hesap oluşturmadan gör.'
+					},
+					dental: {
+						title: 'Diş kliniği sitesi taslağı',
+						body: 'Kliniğini ve hizmetlerini anlat; teknik kurulum olmadan net bir ilk taslak gör.'
+					},
+					dietitian: {
+						title: 'Diyetisyen sitesi taslağı',
+						body: 'Beslenme yaklaşımını sonuç vaadine kaçmadan anlat; sade danışmanlık sitesi taslağı al.'
+					},
+					real_estate: {
+						title: 'Emlak danışmanı sitesi taslağı',
+						body: 'Bölgeni ve hizmetini anlat; portföy ve talepler için güven veren ilk taslağı gör.'
+					},
+					beauty: {
+						title: 'Hizmet sitesi taslağı',
+						body: 'Hizmetlerini ve randevu akışını anlat; talep toplamaya uygun temiz bir taslak gör.'
+					}
+				} as Record<string, { title: string; body: string }>,
 				steps: [
 					'birkaç soruya yanıt ver',
 					'ücretsiz hesabını oluştur',
@@ -190,6 +248,36 @@
 				intro:
 					'Du kannst ohne Konto beginnen. Beantworte die Fragen und erstelle dein Konto im letzten Schritt. Deine Antworten bleiben erhalten.',
 				flow: 'Geführter Ablauf',
+				campaignLabel: 'Kampagnenstart',
+				campaignPrompt:
+					'Du bist für einen berufsspezifischen Entwurf hier. Starte mit diesem Pfad:',
+				campaignCta: 'Diesen Entwurf starten',
+				professionHooks: {
+					psych: {
+						title: 'Website-Entwurf für psychologische Praxis',
+						body: 'Beschreibe deinen Ansatz und sieh vor der Kontoerstellung einen ruhigen, vertrauensvollen Entwurf.'
+					},
+					law: {
+						title: 'Website-Entwurf für Kanzlei',
+						body: 'Beschreibe deine Tätigkeitsfelder und sieh einen seriösen, informativen Entwurf.'
+					},
+					dental: {
+						title: 'Website-Entwurf für Zahnarztpraxis',
+						body: 'Beschreibe Praxis und Leistungen und prüfe einen klaren ersten Entwurf ohne Technikstress.'
+					},
+					dietitian: {
+						title: 'Website-Entwurf für Ernährungsberatung',
+						body: 'Beschreibe deine Beratung sachlich und ohne Ergebnisversprechen; erhalte einen klaren Entwurf.'
+					},
+					real_estate: {
+						title: 'Website-Entwurf für Immobilienberatung',
+						body: 'Beschreibe deinen Markt und deine Leistungen; erhalte einen vertrauensbildenden Entwurf.'
+					},
+					beauty: {
+						title: 'Website-Entwurf für Dienstleistungen',
+						body: 'Beschreibe Leistungen und Terminablauf; erhalte einen klaren Entwurf für Anfragen.'
+					}
+				} as Record<string, { title: string; body: string }>,
 				steps: [
 					'einige Fragen beantworten',
 					'kostenloses Konto erstellen',
@@ -310,6 +398,9 @@
 	const directions = $derived(
 		VISUAL_DIRECTIONS.map((direction) => localizeDirection(direction, locale))
 	);
+	const campaignHook = $derived(
+		data.preselectedNiche ? copy.professionHooks[data.preselectedNiche] : null
+	);
 
 	// Keep the newest bubble in view — on phones the transcript is height-capped
 	// and new content would otherwise appear below the fold.
@@ -404,7 +495,7 @@
 			const res = await fetch('/api/onboarding/answer', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ questionId, value })
+				body: JSON.stringify({ questionId, value, source: data.campaignSource ?? undefined })
 			});
 			const resData = await res.json();
 			if (!res.ok || !resData.ok) {
@@ -541,6 +632,29 @@
 					{/each}
 				</div>
 			</div>
+			{#if campaignHook && !answers.niche}
+				<div class="sk-card mt-4 p-4">
+					<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.campaignLabel}</div>
+					<h2 class="mt-1 text-base font-semibold text-[var(--sk-ink)]">
+						{campaignHook.title}
+					</h2>
+					<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+						{campaignHook.body}
+					</p>
+					<p class="mt-3 text-[11px] leading-4 text-[var(--sk-faint)]">
+						{copy.campaignPrompt}
+					</p>
+					<button
+						type="button"
+						class="sk-btn sk-btn-primary sk-btn-sm mt-3"
+						disabled={busy}
+						onclick={() => submitAnswer('niche', data.preselectedNiche)}
+					>
+						{copy.campaignCta}
+						{@html uiIcons.arrowRight(14)}
+					</button>
+				</div>
+			{/if}
 			{#if data.selectedKit}
 				<div class="sk-card mt-4 p-4">
 					<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.selectedKit}</div>

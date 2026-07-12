@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { INTEGRATION_TYPES, type IntegrationType, validateIntegrationTarget } from '$lib/kits/integrations';
 
 export const LOCALES = ['tr', 'en', 'de'] as const;
 export const localeSchema = z.enum(LOCALES);
@@ -137,9 +138,20 @@ export type Theme = z.infer<typeof themeSchema>;
 export const navSchema = z.strictObject({ items: z.array(z.strictObject({ pageSlug: slug, label: localized(nonEmpty) })).min(1).max(8) });
 export type Nav = z.infer<typeof navSchema>;
 
+const integrationEntrySchema = z.strictObject({
+	type: z.enum(INTEGRATION_TYPES),
+	enabled: z.boolean(),
+	url: z.string().url().optional(),
+	phone: z.string().regex(/^\+[1-9]\d{6,14}$/).optional(),
+	label: localized(nonEmpty).optional()
+}).superRefine((entry, ctx) => {
+	validateIntegrationTarget(entry as { type: IntegrationType; enabled: boolean; phone?: string; url?: string }, ctx);
+});
+
 export const siteSettingsSchema = z.strictObject({
 	siteName: nonEmpty, contactEmail: z.email().optional(), poweredByBadge: z.boolean().default(true),
-	seo: z.strictObject({ description: localized(nonEmpty) }).optional()
+	seo: z.strictObject({ description: localized(nonEmpty) }).optional(),
+	integrations: z.array(integrationEntrySchema).max(8).optional()
 });
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 
@@ -155,5 +167,17 @@ export const siteSchema = z.strictObject({
 	if (new Set(slugs).size !== slugs.length) ctx.addIssue({ code: 'custom', path: ['pages'], message: 'page slugs must be unique' });
 	for (const [i, item] of site.nav.items.entries())
 		if (!slugs.includes(item.pageSlug)) ctx.addIssue({ code: 'custom', path: ['nav', 'items', i, 'pageSlug'], message: `nav item points to unknown page "${item.pageSlug}"` });
+	// Validate integration entries per type (domain allowlist, field consistency)
+	const integrations = site.settings.integrations ?? [];
+	for (const [i, entry] of integrations.entries()) {
+		validateIntegrationTarget(entry as { type: IntegrationType; enabled: boolean; phone?: string; url?: string }, {
+			addIssue: (arg) => ctx.addIssue({ ...arg, path: ['settings', 'integrations', i, ...arg.path] })
+		});
+	}
+	// Integration type uniqueness
+	const types = integrations.map((e) => e.type);
+	if (new Set(types).size !== types.length) {
+		ctx.addIssue({ code: 'custom', path: ['settings', 'integrations'], message: 'integration types must be unique' });
+	}
 });
 export type Site = z.infer<typeof siteSchema>;

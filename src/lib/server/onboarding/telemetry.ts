@@ -1,4 +1,4 @@
-import { desc, eq, sql } from 'drizzle-orm';
+import { desc, eq, gte, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { onboardingEvents } from '$lib/server/db/schema';
 
@@ -51,24 +51,60 @@ export function listRecentOnboardingEvents(limit = 30) {
 		.all();
 }
 
-export function onboardingFunnelSummary() {
-	const rows = db
+export function onboardingFunnelSummary(options: { since?: Date } = {}) {
+	const base = db
 		.select({ event: onboardingEvents.event, n: sql<number>`count(*)` })
-		.from(onboardingEvents)
-		.groupBy(onboardingEvents.event)
-		.all();
+		.from(onboardingEvents);
+	const rows = options.since
+		? base
+				.where(gte(onboardingEvents.createdAt, options.since))
+				.groupBy(onboardingEvents.event)
+				.all()
+		: base.groupBy(onboardingEvents.event).all();
 	const byEvent = Object.fromEntries(rows.map((row) => [row.event, row.n])) as Record<
 		string,
 		number
 	>;
 	const starts = byEvent.started ?? 0;
 	const generated = byEvent.generation_succeeded ?? 0;
+	const completed = byEvent.completed ?? 0;
+	const editorOpened = byEvent.editor_opened ?? 0;
+	const sourceBase = db
+		.select({
+			source: onboardingEvents.source,
+			event: onboardingEvents.event,
+			n: sql<number>`count(*)`
+		})
+		.from(onboardingEvents);
+	const sourceRows = (
+		options.since
+			? sourceBase
+					.where(gte(onboardingEvents.createdAt, options.since))
+					.groupBy(onboardingEvents.source, onboardingEvents.event)
+					.all()
+			: sourceBase.groupBy(onboardingEvents.source, onboardingEvents.event).all()
+	).filter((row) => row.source);
+	const bySource = sourceRows.reduce<Record<string, Record<string, number>>>((acc, row) => {
+		const source = row.source ?? 'unknown';
+		acc[source] = acc[source] ?? {};
+		acc[source][row.event] = row.n;
+		return acc;
+	}, {});
 	return {
 		byEvent,
+		bySource,
 		starts,
+		completed,
 		generated,
-		previewReachPct: starts > 0 ? Math.round((generated / starts) * 1000) / 10 : null
+		editorOpened,
+		completionPct: starts > 0 ? Math.round((completed / starts) * 1000) / 10 : null,
+		previewReachPct: starts > 0 ? Math.round((generated / starts) * 1000) / 10 : null,
+		editorOpenPct: starts > 0 ? Math.round((editorOpened / starts) * 1000) / 10 : null
 	};
+}
+
+export function weeklyOnboardingGtmSummary(now = new Date()) {
+	return onboardingFunnelSummary({ since: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) });
 }
 
 export function hasEditorOpenedEvent(siteId: string): boolean {

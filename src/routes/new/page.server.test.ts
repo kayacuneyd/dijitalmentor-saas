@@ -34,4 +34,26 @@ describe('GET /new (load)', () => {
 		} as never) as { selectedKit: unknown };
 		expect(result.selectedKit).toBeNull();
 	});
+
+	it('preselects supported profession campaigns and records a compact campaign source', () => {
+		const result = load({
+			locals: { user: null },
+			cookies,
+			url: new URL('http://localhost/new?profession=psych&utm_source=linkedin&utm_campaign=gtm-30')
+		} as never) as { preselectedNiche: string | null; campaignSource: string | null };
+
+		expect(result.preselectedNiche).toBe('psych');
+		expect(result.campaignSource).toBe('linkedin:gtm-30:psych');
+	});
+
+	it('ignores unsupported profession campaign values', () => {
+		const result = load({
+			locals: { user: null },
+			cookies,
+			url: new URL('http://localhost/new?profession=random-job&utm_source=email')
+		} as never) as { preselectedNiche: string | null; campaignSource: string | null };
+
+		expect(result.preselectedNiche).toBeNull();
+		expect(result.campaignSource).toBe('email:random-job');
+	});
 });

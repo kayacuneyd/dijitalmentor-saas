@@ -2425,3 +2425,42 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   checks returned 200 for `/`, `/pricing`, and `/templates`.
 - Note: release metadata still has `git_dirty=1`; the currently deployed state includes uncommitted
   working-tree changes and should be committed when this batch is accepted.
+
+### 2026-07-12 — Feature Kit / entegrasyon spec'i rev. 2
+
+- `docs/specs/2026-07-12-yeni-ozellik-onerileri.md` analiz edilip revize edildi (yalnızca doküman;
+  kod yok). Ana kararlar: **v1 = link-out only** (Instagram/Maps embed + Mailchimp form v2'ye,
+  click-to-load facade şartıyla — KVKK/çerez bandı, LCP ve tenant'a-üçüncü-parti-script-yok
+  disiplini nedeniyle); **tür başına domain allowlist** + WhatsApp için URL yerine E.164 telefon
+  (`wa.me` linkini render üretir) + `rel="noopener nofollow"`; **AI patch'e `url`/`phone` kapalı**
+  (prompt-injection ile link değiştirme yüzeyi kapandı); ilk taslaktaki jenerik
+  `blockTarget/propKey/generateProps` motoru kaldırıldı — bloklar `settings.integrations`'ı
+  doğrudan okur; entegrasyon girişi admin paneli değil **editör Settings kartı + onboarding'e niş
+  bazlı opsiyonel sorular**; `siteQualityCheck`'e "kitin ana entegrasyonu boş" uyarısı ve plan
+  gating (payment-link → Pro) eklendi.
+- Implementasyon ayrı milestone olarak bekliyor (spec §9 fazları); şema değişikliği fixture +
+  test şartına bağlandı.
+
+### 2026-07-12 — 30 günlük GTM planı uygulama altyapısı
+
+- Ana büyüme kancasını ürün akışına bağladık: landing sayfasına psikolog/avukat/ikinci dalga
+  meslek kartları eklendi ve CTA'lar UTM + `profession` parametresiyle doğrudan `/new` akışına
+  gidiyor. `/new` artık desteklenen meslek kampanyasını tanıyor, kullanıcıya mesleğe özel başlangıç
+  kartı gösteriyor ve seçimi üyelik istemeden ilk Q&A cevabı olarak kaydediyor.
+- Onboarding event kaynakları kampanya bilgisi taşıyacak şekilde genişletildi. `answer` endpoint'i
+  source bilgisini kabul ediyor, pending-session başlangıcı kaynakla kaydediliyor ve haftalık GTM
+  funnel özeti `bySource`, completion, preview ve editor-open yüzdelerini raporlayabiliyor.
+- Güven/inbound içerik ayağı için iki çok dilli blog seed'i eklendi: domain/SSL/hosting'i sade
+  anlatan rehber ve psikolog/avukat sitelerinde güven veren yapı rehberi. Blog seed işlemi artık
+  var olan DB'lerde yalnızca eksik slug'ları ekliyor; mevcut post var diye yeni seed'leri atlamıyor.
+- Operasyonel otomasyon için deterministik `leadTriage` modülü eklendi. Gelen inquiry mesajları
+  `hot_lead`, `beta_candidate`, `support_existing`, `compliance_sensitive`, `low_fit` olarak
+  sınıflandırılıyor; skor, SLA, manuel inceleme ihtiyacı, gerekçeler ve taslak cevap üretiliyor.
+  Operator e-posta bildirimi bu triage özetini içeriyor; yüksek riskli sağlık/hukuk iddiaları
+  otomatik gönderim yerine manuel review'a düşüyor.
+- Mevcut entegrasyon branch'indeki render-context değişikliğinin check'i bloklamaması için
+  `SiteRenderer` aktif `settings.integrations` listesini context'e ve blok prop'larına geçiriyor.
+  Eski feature-kit test beklentisi de yeni integration tipleriyle uyumlu hale getirildi.
+- Verification: targeted GTM/onboarding/render/schema tests passed (7 files / 66 tests),
+  `npm run check` passed with 0 warnings, full `npm test` passed (73 files / 484 tests), touched
+  files passed Prettier, and `npm run build` succeeded.

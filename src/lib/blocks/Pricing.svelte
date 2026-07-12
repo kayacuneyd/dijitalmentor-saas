@@ -1,13 +1,18 @@
 <script lang="ts">
+	import { getSiteIntegration, type Integration } from '$lib/render/context';
+	import { INTEGRATION_DEFAULT_LABELS } from '$lib/kits/integrations';
 	import type { BlockProps } from '$lib/blocks/registry';
 
-	let { sectionId, props, content }: BlockProps<'pricing'> = $props();
+	let { sectionId, props, content, integrations }: BlockProps<'pricing'> & { integrations?: Integration[] } = $props();
 
 	const variant = $derived(props.variant ?? 'cards');
 	const currency = $derived(props.currency ?? '₺');
 	const title = $derived(content.title);
 	const intro = $derived(content.intro);
 	const items = $derived(content.items);
+
+	const payment = $derived(getSiteIntegration(integrations ?? [], 'payment-link'));
+	const paymentLabel = $derived(payment?.label?.tr ?? INTEGRATION_DEFAULT_LABELS['payment-link']);
 </script>
 
 <section id={sectionId} class="bg-base-200/70 px-4 py-16" data-section-type="pricing">
@@ -70,6 +75,15 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
+		{/if}
+	{#if payment?.url}
+			<div class="mt-8 text-center">
+				<a href={payment.url} target="_blank" rel="noopener nofollow"
+					class="btn btn-primary rounded-full px-8"
+				>
+					{paymentLabel}
+				</a>
 			</div>
 		{/if}
 	</div>

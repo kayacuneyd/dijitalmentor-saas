@@ -1,6 +1,20 @@
 import { PENDING_COOKIE, getPendingByToken } from '$lib/server/onboarding/session';
 import { kitBySlug } from '$lib/kits';
+import { SUPPORTED_NICHES } from '$lib/onboarding/support';
 import type { PageServerLoad } from './$types';
+
+const supportedNiches = new Set<string>(SUPPORTED_NICHES);
+
+function campaignSource(url: URL): string | null {
+	const parts = [
+		url.searchParams.get('utm_source'),
+		url.searchParams.get('utm_campaign'),
+		url.searchParams.get('profession')
+	]
+		.map((value) => value?.trim())
+		.filter(Boolean);
+	return parts.length > 0 ? parts.join(':').slice(0, 120) : null;
+}
 
 /**
  * Anonymous-reachable (Hostinger Horizons roadmap Phase 2): the guided Q&A can be
@@ -11,9 +25,13 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ locals, cookies, url }) => {
 	const pending = getPendingByToken(cookies.get(PENDING_COOKIE));
 	const selectedKit = kitBySlug(url.searchParams.get('kit'));
+	const profession = url.searchParams.get('profession')?.trim().toLowerCase() ?? '';
+	const preselectedNiche = supportedNiches.has(profession) ? profession : null;
 	return {
 		user: locals.user,
 		pending,
+		preselectedNiche,
+		campaignSource: campaignSource(url),
 		selectedKit: selectedKit
 			? {
 					slug: selectedKit.slug,

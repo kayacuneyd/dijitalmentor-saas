@@ -15,7 +15,8 @@ import type { RequestHandler } from './$types';
 
 const bodySchema = z.object({
 	questionId: z.string().trim().min(1),
-	value: z.unknown()
+	value: z.unknown(),
+	source: z.string().trim().max(120).optional()
 });
 
 /**
@@ -132,7 +133,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 	}
 
 	createOrGetPending(cookies);
-	const updated = savePendingAnswer(cookies, question.id, parsedValue.data);
+	const updated = savePendingAnswer(cookies, question.id, parsedValue.data, body.data.source);
 	// The escape hatch is a standalone complete submission, independent of the
 	// fixed script's own sequencing.
 	const isRawEscapeHatch = question.id === RAW_DESCRIPTION_QUESTION.id;

@@ -53,10 +53,14 @@
 		},
 		get contactState() {
 			return contactState;
+		},
+		get integrations() {
+			return site.settings.integrations ?? [];
 		}
 	});
 
 	const appHost = env.PUBLIC_APP_HOST || 'localhost:5173';
+	const integrations = $derived(site.settings.integrations ?? []);
 </script>
 
 <div
@@ -73,6 +77,7 @@
 				{locale}
 				props={section.props}
 				content={section.content[locale]}
+				{integrations}
 			/>
 		{/each}
 	</main>

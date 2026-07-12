@@ -204,6 +204,134 @@ export const blogPosts: BlogPost[] = [
 				}
 			]
 		}
+	},
+	{
+		slug: 'domain-ssl-hosting-for-professionals',
+		date: '2026-07-12',
+		readingMinutes: 4,
+		title: {
+			en: 'Domain, SSL, and hosting in plain language',
+			tr: 'Domain, SSL ve hosting: profesyoneller için sade anlatım',
+			de: 'Domain, SSL und Hosting einfach erklärt'
+		},
+		description: {
+			en: 'A non-technical guide for professionals who want a website without managing domain, security, DNS, and email forwarding separately.',
+			tr: 'Domain, güvenlik, DNS ve e-posta yönlendirmesini ayrı ayrı yönetmek istemeyen profesyoneller için sade rehber.',
+			de: 'Ein einfacher Leitfaden für Fachleute, die Domain, Sicherheit, DNS und E-Mail-Weiterleitung nicht getrennt verwalten möchten.'
+		},
+		category: {
+			en: 'Guide',
+			tr: 'Rehber',
+			de: 'Leitfaden'
+		},
+		sections: {
+			en: [
+				{
+					heading: 'A domain is the address people remember',
+					body: 'Your domain is the address clients type or see on a business card. With saaskaya Pro Yearly, one standard .com domain can be included so you do not need a separate registrar workflow.'
+				},
+				{
+					heading: 'SSL is the lock icon, not a design detail',
+					body: 'SSL makes the connection secure and prevents visitors from seeing browser warnings. For a professional practice, this is basic trust infrastructure rather than an optional extra.'
+				},
+				{
+					heading: 'Hosting, DNS, and email forwarding are the hidden work',
+					body: 'A website needs a server, DNS records, renewal tracking, and a clean way to forward messages such as info@yourdomain.com. The point of a managed package is to remove those separate technical chores.'
+				}
+			],
+			tr: [
+				{
+					heading: 'Domain insanların hatırladığı adrestir',
+					body: 'Domain, danışanın ya da müvekkilin kartvizitte gördüğü ve tarayıcıya yazdığı adrestir. saaskaya Yıllık Pro’da bir standart .com alan adı dahil olabilir; ayrı bir domain sağlayıcı süreciyle uğraşmanız gerekmez.'
+				},
+				{
+					heading: 'SSL kilit ikonudur, süs değildir',
+					body: 'SSL bağlantıyı güvenli hale getirir ve ziyaretçinin tarayıcı uyarısı görmesini engeller. Profesyonel bir pratik için bu, tasarım detayı değil temel güven altyapısıdır.'
+				},
+				{
+					heading: 'Hosting, DNS ve e-posta yönlendirme görünmeyen iştir',
+					body: 'Bir sitenin sunucuya, DNS kayıtlarına, yenileme takibine ve info@alanadiniz.com gibi adresleri yönlendiren sade bir yapıya ihtiyacı vardır. Yönetilen paketin amacı bu teknik işleri ayrı ayrı takip ettirmemektir.'
+				}
+			],
+			de: [
+				{
+					heading: 'Eine Domain ist die Adresse, die man sich merkt',
+					body: 'Die Domain ist die Adresse, die Klienten in den Browser eingeben oder auf einer Visitenkarte sehen. Bei saaskaya Pro jährlich kann eine standard .com Domain enthalten sein, ohne separaten Registrar-Prozess.'
+				},
+				{
+					heading: 'SSL ist das Schloss-Symbol, kein Designdetail',
+					body: 'SSL sichert die Verbindung und verhindert Browserwarnungen. Für eine professionelle Praxis ist das Vertrauensinfrastruktur, nicht optionales Feintuning.'
+				},
+				{
+					heading: 'Hosting, DNS und E-Mail-Weiterleitung sind die versteckte Arbeit',
+					body: 'Eine Website braucht Server, DNS-Einträge, Verlängerungskontrolle und einen sauberen Weg für Weiterleitungen wie info@ihredomain.com. Ein verwaltetes Paket nimmt diese technischen Einzelaufgaben ab.'
+				}
+			]
+		}
+	},
+	{
+		slug: 'trustworthy-websites-for-psychologists-and-lawyers',
+		date: '2026-07-12',
+		readingMinutes: 5,
+		title: {
+			en: 'What makes a professional website feel trustworthy?',
+			tr: 'Profesyonel bir web sitesi nasıl güven verir?',
+			de: 'Was macht eine professionelle Website vertrauenswürdig?'
+		},
+		description: {
+			en: 'A practical structure for psychologists and lawyers: calm, serious, informative pages without exaggerated claims.',
+			tr: 'Psikologlar ve avukatlar için pratik yapı: sakin, ciddi, bilgilendirici ve abartısız sayfalar.',
+			de: 'Eine praktische Struktur für Psychologen und Anwälte: ruhig, seriös, informativ und ohne überzogene Versprechen.'
+		},
+		category: {
+			en: 'Positioning',
+			tr: 'Konumlandırma',
+			de: 'Positionierung'
+		},
+		sections: {
+			en: [
+				{
+					heading: 'For psychologists: calm before persuasion',
+					body: 'A psychology website should first reduce uncertainty. Clear language, visible credentials, service boundaries, and a gentle contact path matter more than aggressive conversion copy.'
+				},
+				{
+					heading: 'For lawyers: seriousness before slogans',
+					body: 'A law office website should help people understand practice areas and next steps. It should stay informative and avoid promises about outcomes or superiority.'
+				},
+				{
+					heading: 'The shared structure',
+					body: 'Both professions need a clear hero, services, about/credentials, process, FAQ, contact, legal/privacy basics, and multilingual readiness when serving international clients.'
+				}
+			],
+			tr: [
+				{
+					heading: 'Psikolog için: ikna etmeden önce sakinlik',
+					body: 'Psikolog sitesinin ilk görevi belirsizliği azaltmaktır. Açık dil, görünür unvanlar, hizmet sınırları ve yumuşak iletişim yolu agresif satış metninden daha önemlidir.'
+				},
+				{
+					heading: 'Avukat için: slogandan önce ciddiyet',
+					body: 'Avukat sitesinin görevi çalışma alanlarını ve sonraki adımı anlaşılır kılmaktır. Bilgilendirici kalmalı; sonuç garantisi, üstünlük iddiası ve abartılı ifadelerden uzak durmalıdır.'
+				},
+				{
+					heading: 'Ortak yapı',
+					body: 'İki meslek için de net hero, hizmetler, hakkımda/unvanlar, süreç, SSS, iletişim, yasal/gizlilik temelleri ve gerekirse çok dilli hazırlık güveni artırır.'
+				}
+			],
+			de: [
+				{
+					heading: 'Für Psychologen: Ruhe vor Überzeugung',
+					body: 'Eine psychologische Praxis-Website sollte zuerst Unsicherheit reduzieren. Klare Sprache, sichtbare Qualifikationen, Leistungsgrenzen und ein ruhiger Kontaktweg sind wichtiger als aggressive Conversion-Texte.'
+				},
+				{
+					heading: 'Für Anwälte: Seriosität vor Slogans',
+					body: 'Eine Kanzlei-Website sollte Tätigkeitsfelder und nächste Schritte verständlich machen. Sie sollte informativ bleiben und keine Erfolgs- oder Überlegenheitsversprechen nutzen.'
+				},
+				{
+					heading: 'Die gemeinsame Struktur',
+					body: 'Beide Berufsgruppen brauchen einen klaren Einstieg, Leistungen, Über-uns/Qualifikationen, Ablauf, FAQ, Kontakt, rechtliche Grundlagen und Mehrsprachigkeit, wenn internationale Klienten angesprochen werden.'
+				}
+			]
+		}
 	}
 ];
 

@@ -34,6 +34,7 @@ const genSection = <
 		content: shape.content
 	});
 
+/** All 14 section types the AI can generate. Must stay in sync with SECTION_TYPES. */
 export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('hero', sectionShapes.hero),
 	genSection('about', sectionShapes.about),
@@ -42,9 +43,21 @@ export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('contact', sectionShapes.contact),
 	genSection('cta', sectionShapes.cta),
 	genSection('faq', sectionShapes.faq),
+	genSection('testimonials', sectionShapes.testimonials),
+	genSection('pricing', sectionShapes.pricing),
+	genSection('process', sectionShapes.process),
+	genSection('booking', sectionShapes.booking),
+	genSection('credentials', sectionShapes.credentials),
 	genSection('team', sectionShapes.team),
 	genSection('footer', sectionShapes.footer)
 ]);
+
+// Drift guard: the generated schema MUST have exactly the same count as SECTION_TYPES.
+if (genSectionSchema.options.length !== SECTION_TYPES.length) {
+	throw new Error(
+		`genSectionSchema has ${genSectionSchema.options.length} types but SECTION_TYPES has ${SECTION_TYPES.length}. Add the new block to genSectionSchema.`
+	);
+}
 
 export const genPageSchema = z.strictObject({
 	slug,
@@ -73,6 +86,24 @@ export type GeneratedSite = z.infer<typeof generatedSiteSchema>;
 // Translation — the localizable slice of a generated site, re-emitted per target locale.
 // ---------------------------------------------------------------------------
 
+/** All 14 content shapes — must stay in sync with SECTION_TYPES. */
+const translatableContentShapes = z.union([
+	sectionShapes.hero.content,
+	sectionShapes.about.content,
+	sectionShapes.services.content,
+	sectionShapes.gallery.content,
+	sectionShapes.contact.content,
+	sectionShapes.cta.content,
+	sectionShapes.faq.content,
+	sectionShapes.testimonials.content,
+	sectionShapes.pricing.content,
+	sectionShapes.process.content,
+	sectionShapes.booking.content,
+	sectionShapes.credentials.content,
+	sectionShapes.team.content,
+	sectionShapes.footer.content
+]);
+
 export const translatablePayloadSchema = z.strictObject({
 	pages: z.array(
 		z.strictObject({
@@ -82,17 +113,7 @@ export const translatablePayloadSchema = z.strictObject({
 				z.strictObject({
 					id: nonEmpty,
 					type: z.enum(SECTION_TYPES),
-					content: z.union([
-						sectionShapes.hero.content,
-						sectionShapes.about.content,
-						sectionShapes.services.content,
-						sectionShapes.gallery.content,
-						sectionShapes.contact.content,
-						sectionShapes.cta.content,
-						sectionShapes.faq.content,
-						sectionShapes.team.content,
-						sectionShapes.footer.content
-					])
+					content: translatableContentShapes
 				})
 			)
 		})
@@ -235,13 +256,9 @@ export const gateSchema = gateObjectSchema.superRefine((gate, ctx) => {
 export type GateResult = z.infer<typeof gateSchema>;
 
 // ---------------------------------------------------------------------------
-// Guided onboarding topic-guard (Hostinger Horizons roadmap Phase 2) — binary
-// on-topic classification only. Unlike the chat gatekeeper above, this has no
-// question/help_request branches and no override: onboarding never answers a
-// meta-question, it only ever redirects back to the specific question asked.
+// Guided onboarding topic-guard — binary on-topic classification only.
 // ---------------------------------------------------------------------------
 
-/** Plain object shape — used for the tool input_schema (refinements are not JSON-schema-able). */
 export const onboardingGuardObjectSchema = z.strictObject({
 	onTopic: z.boolean(),
 	reply: z

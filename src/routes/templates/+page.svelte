@@ -1,5 +1,4 @@
 <script lang="ts">
-	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
@@ -19,7 +18,6 @@
 				description:
 					'Controlled saaskaya website kits for professional groups, with feature kits and prompt recipes that steer AI generation without leaving the fixed block set.',
 				create: 'Create site',
-				back: 'saaskaya',
 				pills: [
 					'Profession kits',
 					`${data.kits.length} controlled starts`,
@@ -48,7 +46,6 @@
 				description:
 					'Meslek grupları için kontrollü saaskaya site kitleri; feature kitler ve hazır prompt tarifleriyle AI üretimini sabit blok setinde tutar.',
 				create: 'Site oluştur',
-				back: 'saaskaya',
 				pills: [
 					'Meslek kitleri',
 					`${data.kits.length} kontrollü başlangıç`,
@@ -77,7 +74,6 @@
 				description:
 					'Kontrollierte saaskaya Website-Kits für Berufsgruppen mit Feature- und Prompt-Rezepten.',
 				create: 'Website erstellen',
-				back: 'saaskaya',
 				pills: [
 					'Berufs-Kits',
 					`${data.kits.length} kontrollierte Starts`,
@@ -123,14 +119,9 @@
 >
 	<MarketingSection class="flex flex-col gap-8 py-10 sm:py-14">
 		<header class="flex flex-col items-start gap-5">
-			<a
-				href={l('/')}
-				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
-				>{@html uiIcons.arrowLeft(14)}{copy.back}</a
-			>
-			<BrandMark href={l('/')} />
+			<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.pills[0]}</div>
 			<div class="flex flex-wrap gap-2">
-				{#each copy.pills as pill (pill)}
+				{#each copy.pills.slice(1) as pill (pill)}
 					<StatusPill>{pill}</StatusPill>
 				{/each}
 			</div>
@@ -150,9 +141,9 @@
 			</div>
 		</header>
 
-		<section class="grid gap-4 lg:grid-cols-2">
+		<section class="template-showcase" aria-label={copy.title}>
 			{#each data.kits as kit, i (kit.slug)}
-				<article class="sk-card flex min-h-full flex-col overflow-hidden">
+				<article class="sk-card template-card flex min-h-full flex-col overflow-hidden">
 					{#if kit.hasImage}
 						<img
 							src="/templates/{kit.slug}.jpg"
@@ -185,7 +176,7 @@
 							</p>
 						</div>
 						<span
-							class="size-10 shrink-0 rounded-2xl"
+							class="size-10 shrink-0 rounded"
 							style:background={swatches[i % swatches.length]}
 							aria-hidden="true"
 						></span>
@@ -260,3 +251,59 @@
 		</section>
 	</MarketingSection>
 </PublicShell>
+
+<style>
+	.template-showcase {
+		display: grid;
+		grid-auto-columns: minmax(18.5rem, 74vw);
+		grid-auto-flow: column;
+		gap: 1rem;
+		margin-inline: -1.25rem;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		padding: 0.25rem 1.25rem 1rem;
+		scroll-padding-inline: 1.25rem;
+		scroll-snap-type: x mandatory;
+	}
+
+	.template-card {
+		scroll-snap-align: start;
+		transition:
+			transform 0.18s ease,
+			box-shadow 0.18s ease,
+			border-color 0.18s ease;
+	}
+
+	.template-card:hover,
+	.template-card:focus-within {
+		border-color: rgb(23 22 20 / 0.24);
+		box-shadow: 0 18px 34px -28px rgb(23 22 20 / 0.42);
+		transform: translateY(-2px);
+	}
+
+	@media (min-width: 768px) {
+		.template-showcase {
+			grid-auto-columns: minmax(26rem, 48%);
+			margin-inline: 0;
+			padding-inline: 0;
+			scroll-padding-inline: 0;
+		}
+	}
+
+	@media (min-width: 1180px) {
+		.template-showcase {
+			grid-auto-columns: minmax(30rem, calc((100% - 1rem) / 2));
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.template-card {
+			transition: none;
+		}
+
+		.template-card:hover,
+		.template-card:focus-within {
+			transform: none;
+		}
+	}
+</style>

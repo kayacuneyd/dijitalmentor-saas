@@ -1,5 +1,4 @@
 <script lang="ts">
-	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
@@ -302,14 +301,22 @@
 	label="saaskaya.com / pricing"
 >
 	<MarketingSection class="flex flex-col items-start gap-5 pt-10 sm:pt-12">
-		<BrandMark href={l('/')} />
+		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.pills[0]}</div>
 		<div class="flex flex-wrap gap-2">
-			{#each copy.pills as pill (pill)}
+			{#each copy.pills.slice(1) as pill (pill)}
 				<StatusPill>{pill}</StatusPill>
 			{/each}
 		</div>
-		<h1 class="sk-display text-4xl leading-none sm:text-[42px]">{copy.h1}</h1>
-		<p class="max-w-xl text-[17px] leading-8 text-[var(--sk-muted)]">{copy.lead}</p>
+		<div>
+			<h1 class="sk-display max-w-4xl text-4xl leading-tight sm:text-[46px]">{copy.h1}</h1>
+			<p class="mt-4 max-w-2xl text-[17px] leading-8 text-[var(--sk-muted)]">{copy.lead}</p>
+		</div>
+		<div class="flex flex-wrap gap-2">
+			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
+				>{copy.cta}{@html uiIcons.arrowRight(16)}</a
+			>
+			<a href="#pricing-faq" class="sk-btn sk-btn-secondary sk-btn-lg">{copy.faqLabel}</a>
+		</div>
 	</MarketingSection>
 
 	<MarketingSection class="mt-10">
@@ -363,7 +370,7 @@
 		<div class="sk-soft p-4 text-xs text-[var(--sk-muted)]">{copy.domainNote}</div>
 	</MarketingSection>
 
-	<MarketingSection class="mt-10 border-t border-[var(--sk-line)] pt-7">
+	<MarketingSection id="pricing-faq" class="mt-10 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.faqLabel}</div>
 		<dl class="mt-4 flex flex-col gap-4">
 			{#each faqs as faq (faq.q)}

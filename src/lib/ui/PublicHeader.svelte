@@ -26,7 +26,7 @@
 				nav: [
 					['Home', '/'],
 					['Pricing', '/pricing'],
-					['Templates', '/templates'],
+					['About', '/about'],
 					['Blog', '/blog'],
 					['Contact', '/contact']
 				],
@@ -38,7 +38,7 @@
 				nav: [
 					['Ana sayfa', '/'],
 					['Fiyat', '/pricing'],
-					['Kitler', '/templates'],
+					['Hakkımızda', '/about'],
 					['Blog', '/blog'],
 					['İletişim', '/contact']
 				],
@@ -50,7 +50,7 @@
 				nav: [
 					['Start', '/'],
 					['Preise', '/pricing'],
-					['Kits', '/templates'],
+					['Über uns', '/about'],
 					['Blog', '/blog'],
 					['Kontakt', '/contact']
 				],

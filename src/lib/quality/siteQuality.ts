@@ -62,6 +62,20 @@ function imageRefsInSection(section: Section, locale: Locale): string[] {
 				.filter((url): url is string => Boolean(url))
 		);
 	}
+	if (section.type === 'testimonials') {
+		refs.push(
+			...section.content[locale].items
+				.map((item) => item.avatarUrl)
+				.filter((url): url is string => Boolean(url))
+		);
+	}
+	if (section.type === 'credentials') {
+		refs.push(
+			...section.content[locale].items
+				.map((item) => item.iconUrl)
+				.filter((url): url is string => Boolean(url))
+		);
+	}
 	return refs;
 }
 
@@ -179,8 +193,66 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 			if (section.type === 'services') {
 				serviceItemCount += section.content[site.defaultLocale].items.length;
 			}
-			if (section.type === 'cta' || (section.type === 'hero' && section.props.ctaHref)) {
+			if (
+				section.type === 'cta' ||
+				section.type === 'booking' ||
+				(section.type === 'hero' && section.props.ctaHref)
+			) {
 				hasCtaPath = true;
+			}
+
+			if (section.type === 'testimonials') {
+				if (section.content[site.defaultLocale].items.length < 2) {
+					addIssue(
+						issues,
+						'warning',
+						'testimonials_too_few',
+						sectionPath,
+						'A single testimonial looks thin; add at least two.'
+					);
+				}
+			}
+			if (section.type === 'pricing') {
+				const plans = section.content[site.defaultLocale].items;
+				if (plans.length < 2) {
+					addIssue(
+						issues,
+						'warning',
+						'pricing_too_few_plans',
+						sectionPath,
+						'Pricing sections read better with at least two plans.'
+					);
+				}
+				if (plans.length > 0 && !plans.some((plan) => plan.highlighted)) {
+					addIssue(
+						issues,
+						'warning',
+						'pricing_no_highlight',
+						sectionPath,
+						'Highlight one pricing plan to guide the visitor.'
+					);
+				}
+			}
+			if (section.type === 'booking' && (section.props.href === '#' || section.props.href === '/')) {
+				addIssue(
+					issues,
+					'warning',
+					'booking_href_placeholder',
+					`${sectionPath}.props.href`,
+					'Booking button points at a placeholder target; link it to the contact section or a booking page.'
+				);
+			}
+			if (section.type === 'credentials') {
+				const items = section.content[site.defaultLocale].items;
+				if (items.length > 0 && items.every((item) => !item.issuer)) {
+					addIssue(
+						issues,
+						'warning',
+						'credentials_issuer_missing',
+						sectionPath,
+						'Credentials are more trustworthy with an issuing institution.'
+					);
+				}
 			}
 
 			for (const locale of site.locales) {

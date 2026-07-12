@@ -44,6 +44,7 @@
 					}}
 				>
 					<label class="text-sm font-medium" for="code">Email onay kodu</label>
+					<input type="hidden" name="deviceToken" value={form?.deviceToken ?? ''} />
 					<input
 						id="code"
 						name="code"

@@ -4,6 +4,12 @@ import { siteQualityCheck } from './siteQuality';
 
 const clone = <T>(value: T): T => structuredClone(value);
 
+const loc = <T>(value: T): { tr: T; en: T; de: T } => ({
+	tr: clone(value),
+	en: clone(value),
+	de: clone(value)
+});
+
 function scrubPsychBookingTerms(value: unknown): unknown {
 	if (typeof value === 'string') {
 		return value
@@ -104,6 +110,121 @@ describe('siteQualityCheck', () => {
 		const report = siteQualityCheck(site);
 		expect(report.canPublish).toBe(true);
 		expect(report.warnings.map((issue) => issue.code)).toContain('contrast_low_primary');
+	});
+
+	it('counts a booking section as a CTA path', () => {
+		const site = clone(seedSites.dental);
+		for (const page of site.pages) {
+			page.sections = page.sections.filter((section) => section.type !== 'cta');
+		}
+		const hero = site.pages[0].sections.find((section) => section.type === 'hero');
+		if (!hero || hero.type !== 'hero') throw new Error('dental seed hero missing');
+		hero.props.ctaHref = undefined;
+
+		const withoutBooking = siteQualityCheck(site);
+		expect(withoutBooking.warnings.map((issue) => issue.code)).toContain('cta_path_missing');
+
+		site.pages[0].sections.splice(site.pages[0].sections.length - 1, 0, {
+			id: 'booking-test',
+			type: 'booking',
+			props: { variant: 'inline', href: '#contact' },
+			content: loc({ title: 'Randevu planla', buttonLabel: 'Görüşme iste' })
+		});
+		const withBooking = siteQualityCheck(site);
+		expect(withBooking.canPublish).toBe(true);
+		expect(withBooking.warnings.map((issue) => issue.code)).not.toContain('cta_path_missing');
+	});
+
+	it('warns on thin or misconfigured new-block content', () => {
+		const site = clone(seedSites.dental);
+		site.pages[0].sections.splice(
+			site.pages[0].sections.length - 1,
+			0,
+			{
+				id: 'testimonials-test',
+				type: 'testimonials',
+				props: { variant: 'grid' },
+				content: loc({
+					title: 'Danışan yorumları',
+					items: [{ quote: 'Çok memnun kaldım.', name: 'A.K.' }]
+				})
+			},
+			{
+				id: 'pricing-test',
+				type: 'pricing',
+				props: { variant: 'cards', currency: '₺' },
+				content: loc({
+					title: 'Paketler',
+					items: [{ name: 'Başlangıç', price: '1500', highlighted: false }]
+				})
+			},
+			{
+				id: 'booking-test',
+				type: 'booking',
+				props: { variant: 'inline', href: '#' },
+				content: loc({ title: 'Randevu planla', buttonLabel: 'Görüşme iste' })
+			},
+			{
+				id: 'credentials-test',
+				type: 'credentials',
+				props: { variant: 'grid' },
+				content: loc({ title: 'Belgeler', items: [{ name: 'Uygulayıcı Sertifikası' }] })
+			}
+		);
+
+		const report = siteQualityCheck(site);
+		expect(report.canPublish).toBe(true);
+		expect(report.warnings.map((issue) => issue.code)).toEqual(
+			expect.arrayContaining([
+				'testimonials_too_few',
+				'pricing_too_few_plans',
+				'pricing_no_highlight',
+				'booking_href_placeholder',
+				'credentials_issuer_missing'
+			])
+		);
+	});
+
+	it('routes testimonial avatars and credential icons through the media checks', () => {
+		const site = clone(seedSites.dental);
+		for (const page of site.pages) {
+			page.sections = page.sections.filter((section) => section.type !== 'gallery');
+			for (const section of page.sections) {
+				if ('imageUrl' in section.props) section.props.imageUrl = undefined;
+			}
+		}
+		const clean = siteQualityCheck(site);
+		expect(clean.warnings.map((issue) => issue.code)).not.toContain('seed_media_in_use');
+
+		site.pages[0].sections.splice(
+			site.pages[0].sections.length - 1,
+			0,
+			{
+				id: 'testimonials-media',
+				type: 'testimonials',
+				props: { variant: 'grid' },
+				content: loc({
+					title: 'Danışan yorumları',
+					items: [
+						{ quote: 'Çok memnun kaldım.', name: 'A.K.', avatarUrl: '/seed/dental/avatar.svg' },
+						{ quote: 'Süreç net ilerledi.', name: 'M.T.', avatarUrl: '/uploads/untracked.jpg' }
+					]
+				})
+			},
+			{
+				id: 'credentials-media',
+				type: 'credentials',
+				props: { variant: 'grid' },
+				content: loc({
+					title: 'Belgeler',
+					items: [{ name: 'Sertifika', issuer: 'Meslek Odası', iconUrl: '/uploads/icon.png' }]
+				})
+			}
+		);
+		const report = siteQualityCheck(site);
+		const codes = report.warnings.map((issue) => issue.code);
+		expect(codes).toContain('seed_media_in_use');
+		expect(codes).toContain('unknown_local_media_ref');
 	});
 
 	it('adds psych-specific warnings for missing FAQ, confidentiality, booking, and thin services', () => {

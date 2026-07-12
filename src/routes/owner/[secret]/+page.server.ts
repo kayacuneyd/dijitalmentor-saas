@@ -42,7 +42,11 @@ export const actions: Actions = {
 		}
 		setOwnerDeviceCookie(cookies, result.deviceToken);
 		if (result.status === 'code-sent') {
-			return { needsCode: true, message: 'Onay kodunu e-postana gönderdim.' };
+			return {
+				needsCode: true,
+				deviceToken: result.deviceToken,
+				message: 'Onay kodunu e-postana gönderdim.'
+			};
 		}
 		setOwnerSessionCookie(cookies, result.sessionToken);
 		redirect(303, '/admin');
@@ -51,10 +55,12 @@ export const actions: Actions = {
 		assertOwnerRoute(params.secret);
 		const form = await request.formData();
 		const code = String(form.get('code') ?? '');
+		const formDeviceToken = String(form.get('deviceToken') ?? '');
+		const deviceToken = cookies.get(OWNER_DEVICE_COOKIE) ?? formDeviceToken;
 		const fingerprint = requestFingerprint({ request, getClientAddress });
 		const result = verifyOwnerEmailCode({
 			code,
-			deviceToken: cookies.get(OWNER_DEVICE_COOKIE),
+			deviceToken,
 			fingerprint,
 			rateLimitKey: fingerprint.ipPrefixHash ?? getClientAddress()
 		});
@@ -64,6 +70,7 @@ export const actions: Actions = {
 				message: GENERIC_FAILURE
 			});
 		}
+		setOwnerDeviceCookie(cookies, deviceToken);
 		setOwnerSessionCookie(cookies, result.sessionToken);
 		redirect(303, '/admin');
 	}

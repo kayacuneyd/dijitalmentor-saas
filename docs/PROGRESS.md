@@ -2064,3 +2064,40 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - **Doğrulama:** `npm run check` 0 errors/warnings, `npm test` 69 files / 430 tests passing, `npm run build` succeeded
 - **Deploy:** release `20260711T234238Z`, PM2 online, production smoke temiz
 - **Henüz yapılmayan:** AI generation prompt'larına yeni blok tiplerinin tanıtılması (mevcut generation hâlâ eski 9 blokla çalışır), profesyonel kitlere yeni blokların eklenmesi
+
+### 2026-07-12 — Owner email code fallback
+
+- Incident: owner login sent the email verification code, but entering the correct code could still
+  return the generic failure.
+- Root cause: production `owner_login_events` showed `code_sent` with the pending
+  `owner_email_codes.attempts=0`, meaning the verify request failed before code comparison. The
+  `/owner/[secret]` verify action required `sk_owner_device`; if that cookie was not present on the
+  second POST (browser/fetch/protocol/cookie edge case), a valid code was rejected as
+  `not-configured` without logging `code_failed`.
+- Fix: after password success, the owner page now carries the same short-lived device token in a
+  hidden field as a fallback. Verification uses the cookie first, then the form token, and rewrites
+  the device cookie on success so trusted-device login continues to work.
+- Prevention: added a route regression test proving a valid email code is accepted when the device
+  cookie is missing but the hidden device token is present.
+- Verification: targeted owner tests passed (`src/routes/owner/[secret]/page.server.test.ts` +
+  `src/lib/server/ownerAuth.test.ts`, 4 tests), owner/migration tests passed (10 tests),
+  `npm run check` passed, and `npm run build` succeeded. Full `npm test` is currently blocked by an
+  unrelated pre-existing parse error in `src/lib/kits/professions.ts:408` (`process:` inside the
+  `configs` array); owner-specific coverage is green.
+
+### 2026-07-12 — Public nav + templates/pricing page polish
+
+- **Navigation adjusted:** public header now keeps Templates/Kits out of the primary navbar and adds
+  About/Über uns/Hakkımızda. Templates/Kits remains available from the footer product column.
+- **Pricing hero cleaned up:** removed the repeated brand/logo block from `/pricing`; the page now
+  follows the same simpler public-page hero rhythm as About/Contact with kicker, pills, H1, lead and
+  direct CTA/FAQ actions.
+- **Templates hero/showcase cleaned up:** removed the redundant back-link/logo stack from `/templates`
+  and converted the kit list into a horizontal scroll-snap showcase with card hover/focus motion and
+  reduced-motion fallback.
+- **Incidental blocker fixed:** `src/lib/kits/professions.ts` had partially inserted extra kit
+  sections outside their config objects, and the helper injected non-localized content into the Zod
+  `Section` schema. Moved those blocks into their kit configs and made the helper emit localized
+  schema-valid `process`, `pricing`, `testimonials`, `credentials`, and `booking` sections.
+- **Verification:** `npm run check` passed, targeted templates/professions tests passed (8 tests),
+  full `npm test` passed (70 files / 434 tests), and `npm run build` succeeded.

@@ -227,6 +227,40 @@ export function createCalmIntakePsychSite(): Site {
 						}
 					},
 					{
+						id: 'testimonials-calm-intake',
+						type: 'testimonials',
+						props: { variant: 'grid' },
+						content: {
+							tr: {
+								title: 'Danışan yorumları',
+								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
+								items: [
+									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
+									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
+									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+								]
+							},
+							en: {
+								title: 'Client feedback',
+								intro: 'Names are shortened for confidentiality.',
+								items: [
+									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
+									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
+									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+								]
+							},
+							de: {
+								title: 'Rückmeldungen',
+								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
+								items: [
+									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+								]
+							}
+						}
+					},
+					{
 						id: 'faq-calm-intake',
 						type: 'faq',
 						props: { variant: 'accordion' },
@@ -315,6 +349,31 @@ export function createCalmIntakePsychSite(): Site {
 								subtitle:
 									'Senden Sie eine kurze Terminanfrage; Zeit und Format klären wir gemeinsam.',
 								buttonLabel: 'Termin anfragen'
+							}
+						}
+					},
+					{
+						id: 'booking-calm-intake',
+						type: 'booking',
+						props: { variant: 'inline', href: '#contact-calm-intake' },
+						content: {
+							tr: {
+								title: 'İlk görüşme için adım atın',
+								subtitle: 'Size uygun gün ve saat için aşağıdaki formdan ulaşabilirsiniz.',
+								buttonLabel: 'Randevu talep et',
+								note: 'Her mesaj gizlilik çerçevesinde değerlendirilir.'
+							},
+							en: {
+								title: 'Take the first step',
+								subtitle: 'Reach out via the form below for a suitable appointment time.',
+								buttonLabel: 'Request an appointment',
+								note: 'Every message is handled confidentially.'
+							},
+							de: {
+								title: 'Machen Sie den ersten Schritt',
+								subtitle: 'Kontaktieren Sie uns über das Formular für einen passenden Termin.',
+								buttonLabel: 'Termin anfragen',
+								note: 'Jede Nachricht wird vertraulich behandelt.'
 							}
 						}
 					},
@@ -534,6 +593,40 @@ export function createModernClinicPsychSite(): Site {
 						}
 					},
 					{
+						id: 'testimonials-modern-clinic',
+						type: 'testimonials',
+						props: { variant: 'grid' },
+						content: {
+							tr: {
+								title: 'Danışan yorumları',
+								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
+								items: [
+									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
+									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
+									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+								]
+							},
+							en: {
+								title: 'Client feedback',
+								intro: 'Names are shortened for confidentiality.',
+								items: [
+									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
+									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
+									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+								]
+							},
+							de: {
+								title: 'Rückmeldungen',
+								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
+								items: [
+									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+								]
+							}
+						}
+					},
+					{
 						id: 'faq-modern-clinic',
 						type: 'faq',
 						props: { variant: 'list' },
@@ -619,6 +712,31 @@ export function createModernClinicPsychSite(): Site {
 								subtitle:
 									'Hinterlassen Sie Ihre Kontaktdaten; Terminoptionen werden per E-Mail geteilt.',
 								buttonLabel: 'Formular ausfüllen'
+							}
+						}
+					},
+					{
+						id: 'booking-modern-clinic',
+						type: 'booking',
+						props: { variant: 'inline', href: '#contact-modern-clinic' },
+						content: {
+							tr: {
+								title: 'İlk görüşme için adım atın',
+								subtitle: 'Size uygun gün ve saat için aşağıdaki formdan ulaşabilirsiniz.',
+								buttonLabel: 'Randevu talep et',
+								note: 'Her mesaj gizlilik çerçevesinde değerlendirilir.'
+							},
+							en: {
+								title: 'Take the first step',
+								subtitle: 'Reach out via the form below for a suitable appointment time.',
+								buttonLabel: 'Request an appointment',
+								note: 'Every message is handled confidentially.'
+							},
+							de: {
+								title: 'Machen Sie den ersten Schritt',
+								subtitle: 'Kontaktieren Sie uns über das Formular für einen passenden Termin.',
+								buttonLabel: 'Termin anfragen',
+								note: 'Jede Nachricht wird vertraulich behandelt.'
 							}
 						}
 					},
@@ -818,6 +936,40 @@ export function createOnlineTherapyPsychSite(): Site {
 						}
 					},
 					{
+						id: 'testimonials-online-therapy',
+						type: 'testimonials',
+						props: { variant: 'grid' },
+						content: {
+							tr: {
+								title: 'Danışan yorumları',
+								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
+								items: [
+									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
+									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
+									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+								]
+							},
+							en: {
+								title: 'Client feedback',
+								intro: 'Names are shortened for confidentiality.',
+								items: [
+									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
+									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
+									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+								]
+							},
+							de: {
+								title: 'Rückmeldungen',
+								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
+								items: [
+									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
+									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+								]
+							}
+						}
+					},
+					{
 						id: 'faq-online-therapy',
 						type: 'faq',
 						props: { variant: 'accordion' },
@@ -923,6 +1075,31 @@ export function createOnlineTherapyPsychSite(): Site {
 								title: 'Für ein Online-Erstgespräch schreiben',
 								subtitle: 'Passende Zeiten und Online-Bedingungen können wir per E-Mail klären.',
 								buttonLabel: 'Termin anfragen'
+							}
+						}
+					},
+					{
+						id: 'booking-online-therapy',
+						type: 'booking',
+						props: { variant: 'inline', href: '#contact-online-therapy' },
+						content: {
+							tr: {
+								title: 'İlk görüşme için adım atın',
+								subtitle: 'Size uygun gün ve saat için aşağıdaki formdan ulaşabilirsiniz.',
+								buttonLabel: 'Randevu talep et',
+								note: 'Her mesaj gizlilik çerçevesinde değerlendirilir.'
+							},
+							en: {
+								title: 'Take the first step',
+								subtitle: 'Reach out via the form below for a suitable appointment time.',
+								buttonLabel: 'Request an appointment',
+								note: 'Every message is handled confidentially.'
+							},
+							de: {
+								title: 'Machen Sie den ersten Schritt',
+								subtitle: 'Kontaktieren Sie uns über das Formular für einen passenden Termin.',
+								buttonLabel: 'Termin anfragen',
+								note: 'Jede Nachricht wird vertraulich behandelt.'
 							}
 						}
 					},

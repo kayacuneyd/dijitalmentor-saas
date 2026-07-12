@@ -2157,3 +2157,25 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Note: `/editor/seed-law` redirects to `/en/login` on this dev DB (editor auth), so editor-phase
   verification will need a signed-in session.
 - Verification: baseline audit run captured to scratchpad; script formatted with prettier.
+
+### 2026-07-12 — Mobile roadmap Phase 1: hamburger menu + language dropdown
+
+- **PublicHeader restructured for mobile.** Below `lg` the header is now a single row: brand mark,
+  a compact language dropdown, and a hamburger button. The full nav/pills/CTA row is unchanged at
+  `lg+` (desktop pixel-identical). Previously there was no mobile menu at all — nav links just
+  `flex-wrap`ped, and the flag-pill switcher rendered twice.
+- **Menu = native `<dialog>` (`showModal()`), not a DaisyUI drawer.** The top layer gives focus
+  trap, Escape close, `aria-modal`, and renders above the `z-index:70` assistant dock with no
+  stacking-context edits. Full-screen sheet: nav links (`min-h-12`, active route highlighted),
+  full-width Login/Panel + Betaya başla CTAs. Closes on Escape, backdrop click, and `afterNavigate`;
+  focus returns to the trigger natively; body scroll locked via
+  `body:has(dialog[data-nav][open])`. Entrance fade is gated on `prefers-reduced-motion`.
+- **LanguageSwitcher gained a `variant="dropdown"`** (`<details>`-based, native semantics): current
+  flag + code as the trigger, full locale names in the panel, closes on outside pointerdown and
+  after navigation. Pills variant untouched for desktop. Added `uiIcons.menu`.
+- **Global touch-target rule:** `@media (pointer: coarse) { .sk-btn-sm { min-height: 2.5rem } }` —
+  raises the ≈30px small buttons to 40px on touch devices without changing desktop density.
+- Verification: 33-check playwright run at 375px + 1280px passed (open/close semantics, `:modal`
+  top-layer assert, scroll lock/unlock, focus return, locale switch `/en/pricing → /tr/pricing`
+  preserving path, outside-click close, zero overflow and zero console errors on en/tr/de);
+  screenshots reviewed; `npm run check` 0 errors, 441/441 tests, production build OK.

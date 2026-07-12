@@ -18,6 +18,7 @@ export const uiIcons = {
 		),
 	mail: (size = 16) =>
 		stroke('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>', size),
+	menu: (size = 16) => stroke('<path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/>', size),
 	message: (size = 16) =>
 		stroke('<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/>', size),
 	minus: (size = 16) => stroke('<path d="M5 12h14"/>', size),

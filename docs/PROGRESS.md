@@ -2245,3 +2245,44 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   mobile / open on desktop; chat input 16px and pinned on-screen; publish button fully inside the
   viewport; zero overflow/console errors; desktop two-column layout unchanged (sidebar 312px,
   presets visible). `svelte-check` 0 errors, 445/445 tests, production build OK.
+
+### 2026-07-12 — Mobile roadmap Phase 5: PWA (SaaS host only)
+
+- **Host gate:** `locals.isTenantHost` set in `hooks.server.ts` from the unit-tested
+  `resolveHostReroute(event.url, PUBLIC_APP_HOST)` and exposed through the root layout. Three
+  independent gates keep the PWA off tenant origins: SvelteKit auto-registration disabled
+  (`serviceWorker.register: false` in vite.config.ts), manual registration in `+layout.svelte`
+  behind `!dev && !isTenantHost`, and manifest/theme-color/apple-touch-icon head tags plus the
+  `/manifest.webmanifest` endpoint (404 on tenant hosts) behind the same flag.
+- **`viewport-fit=cover` added to app.html** — this activates the previously-inert
+  `env(safe-area-inset-*)` usages (assistant dock bottom offset, footer clearance) on notched
+  iPhones. Applies to tenant pages too (plain flow content; spot-check landscape after deploy).
+- **Icons:** `scripts/generate-pwa-icons.mjs` rasterizes `static/favicon.svg` via the
+  playwright-core chromium (no sharp dependency) → `static/icons/{icon-192,icon-512,
+  maskable-512,apple-touch-icon}.png`; maskable/apple variants are full-bleed `#171614` with the
+  glyph in the safe zone. PNGs committed; script kept for regeneration.
+- **Service worker (`src/service-worker.ts`):** precaches hashed build assets + small static
+  files + `/offline` into a `sk-${version}` cache; navigations are ALWAYS network-first with the
+  offline page as the only fallback — SSR HTML and `/api/` are never cached (stale-deploy
+  firewall); activate purges old `sk-*` caches; deliberately **no `skipWaiting()`** (a mid-session
+  swap would delete the cache a running old page still resolves against). `/service-worker.js`
+  ships without long-lived Cache-Control and modern browsers bypass HTTP cache for SW update
+  checks, so no nginx change is needed.
+- **`/offline` page is fully self-contained** (inline styles, plain `<a href="/">` retry, no
+  hydration): the SW serves it at arbitrary URL depths where the app's relative asset paths break
+  — the first cut relied on the CSS/JS bundle and rendered unstyled with a dead JS retry button;
+  also dropped `prerender = true` (the inline kit config ignored `prerender.entries`, failing the
+  build; the SW simply caches the SSR response at install instead).
+- **Backlog spec** for tenant-branded PWAs written to `docs/specs/2026-07-12-tenant-pwa-backlog.md`
+  (would touch the Zod `Site` schema for a tenant icon slot — separately scoped by design).
+- Verification (production build on :3998 against local.db): app host → manifest 200
+  `application/manifest+json`, head tags present, icons 200, SW active (scope `/`), 318-entry
+  versioned precache, `context.setOffline` navigation renders the styled offline fallback with a
+  no-JS retry link, back-online renders normally, rebuild rotates the `sk-` cache; tenant Host
+  (`seed-law.saaskaya.com`) → page renders tenant content with ZERO PWA tags and manifest 404.
+  `svelte-check` 0 errors, 445/445 tests, build OK.
+- **Incident (resolved, logged for prevention):** while stopping the :3998 test server, a broad
+  `pkill -f "[b]uild/index.js"` also SIGTERMed the PM2 production process (adapter-node closes its
+  listener on SIGTERM), taking saaskaya.com offline for ~60s until PM2 respawned it; health 200
+  confirmed on loopback and the public site, other PM2 apps unaffected (3-day uptimes intact).
+  Rule going forward: kill test servers by exact PID (`$!`), never by pattern on this shared box.

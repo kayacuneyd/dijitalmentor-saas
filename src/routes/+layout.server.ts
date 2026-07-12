@@ -4,5 +4,6 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = ({ locals }) => ({
 	user: locals.user,
 	locale: locals.locale,
-	unprefixedPath: locals.unprefixedPath
+	unprefixedPath: locals.unprefixedPath,
+	isTenantHost: locals.isTenantHost
 });

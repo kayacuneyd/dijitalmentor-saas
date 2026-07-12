@@ -13,6 +13,12 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 			adapter: adapter(),
+			serviceWorker: {
+				// No automatic registration: the same app serves every tenant origin
+				// (Host rerouting), and the SW must only install on the SaaS host.
+				// +layout.svelte registers it manually behind the isTenantHost gate.
+				register: false
+			},
 			typescript: {
 				config: (config) => {
 					config.include.push('../drizzle.config.ts');

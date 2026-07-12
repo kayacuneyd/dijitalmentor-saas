@@ -1,4 +1,5 @@
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
+import { env } from '$env/dynamic/public';
 import {
 	detectLocale,
 	LOCALE_COOKIE,
@@ -7,6 +8,7 @@ import {
 	stripLocale,
 	withLocale
 } from '$lib/i18n';
+import { resolveHostReroute } from '$lib/hostRouting';
 import { getSessionUser, isAdminEmail, SESSION_COOKIE } from '$lib/server/auth';
 import { recordError, shouldRecordError } from '$lib/server/error-log';
 import { getOwnerSessionUser, OWNER_SESSION_COOKIE } from '$lib/server/ownerAuth';
@@ -48,6 +50,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		);
 	event.locals.locale = locale;
 	event.locals.unprefixedPath = stripLocale(event.url.pathname);
+	event.locals.isTenantHost = Boolean(resolveHostReroute(event.url, env.PUBLIC_APP_HOST));
 	if (pathLocale) rememberLocale(event.cookies, pathLocale);
 
 	if (!pathLocale && event.request.method === 'GET' && isLocalizedPublicPath(event.url.pathname)) {

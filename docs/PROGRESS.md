@@ -2179,3 +2179,22 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   top-layer assert, scroll lock/unlock, focus return, locale switch `/en/pricing → /tr/pricing`
   preserving path, outside-click close, zero overflow and zero console errors on en/tr/de);
   screenshots reviewed; `npm run check` 0 errors, 441/441 tests, production build OK.
+
+### 2026-07-12 — Mobile roadmap Phase 2: FlowAnimation scale-to-fit stage
+
+- **The hero animation now renders its scenes at a fixed 720px design width and uniformly
+  `transform: scale()`s to the container.** Structure: outer `.flow-viewport` (real layout size,
+  16:9, `overflow:hidden`, keeps radius/border/shadow/background so the frame never scales) +
+  inner absolute `.flow-stage` (720px, `transform-origin: top left`, `scale(clientWidth/720)` via
+  `bind:clientWidth`). The IntersectionObserver target moved to the outer frame; reduced-motion
+  static scene scales identically; `data-testid="flow-animation-stage"` stays on the outer element.
+- **Key finding: desktop was broken too, not just mobile.** The hero column is only ~574px wide at
+  1280 (max-w-7xl grid), so scene 3's fixed-px devices (460px desktop mock + phone + tablet,
+  >700px intrinsic) overlapped each other and the publish card clipped — screenshots confirmed
+  garbled text overlap before the fix. After: all 5 scenes render as composed at 574px (scale 0.80)
+  and at 301px/375-viewport (scale 0.42); text is small on phones but legible for a decorative loop
+  (documented escape hatch: bump label fonts inside the stage via one media query if review wants).
+- The `.grid-plane` background (intentional 3D bleed, clipped by the frame) still measures wider
+  than the viewport in getBoundingClientRect terms but contributes no document overflow.
+- Verification: scenes 1/3/5 screenshot-reviewed at 1280 + 375; `svelte-check` 0 errors, 441/441
+  tests, production build OK; mobile audit on `/en` reports 0px document overflow, 0 console errors.

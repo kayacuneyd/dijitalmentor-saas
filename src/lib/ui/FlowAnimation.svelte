@@ -92,13 +92,20 @@
 		});
 	}
 
+	/* Scenes are composed at a fixed design width and scaled uniformly to the
+	   container, so fixed-px scene elements never clip or overlap at any width. */
+	const DESIGN_WIDTH = 720;
+
 	let stageEl: HTMLDivElement | undefined = $state();
+	let stageWidth = $state(0);
 	let reduced = $state(false);
 	let visible = $state(false);
 	let scene = $state(0);
 	let typed = $state('');
 	let editIdx = $state(0);
 	let confetti = $state<ReturnType<typeof makeConfetti>>([]);
+
+	const stageScale = $derived(stageWidth > 0 ? stageWidth / DESIGN_WIDTH : 1);
 
 	const editState = $derived(EDIT_STATES[editIdx]);
 	const heroColor = $derived(PRESET_COLORS[editState.preset]);
@@ -166,255 +173,265 @@
 
 <div
 	bind:this={stageEl}
+	bind:clientWidth={stageWidth}
 	data-testid="flow-animation-stage"
-	class="flow-stage"
+	class="flow-viewport"
 	style:aspect-ratio="16 / 9"
 >
-	<!-- scene chrome: label + progress dots -->
-	<div class="scene-chrome-label">
-		<span class="dot"></span>
-		<span>0{scene + 1} / 05 · {sceneLabels[scene]}</span>
-	</div>
-	<div class="scene-dots">
-		{#each sceneLabels as _, i (i)}
-			<span class="dot-bar" class:active={i === scene}></span>
-		{/each}
-	</div>
-
-	{#if scene === 0}
-		<!-- ============ SCENE 1: Describe yourself ============ -->
-		<div class="scene sk-anim">
-			<div class="grid-wrap">
-				<div class="grid-plane sk-anim"></div>
-			</div>
-			<div class="describe-card">
-				<div class="describe-card-head">
-					<div class="mono-label">tell saaskaya about you</div>
-					<div class="dots-row">
-						<span class="chrome-dot"></span>
-						<span class="chrome-dot"></span>
-						<span class="chrome-dot"></span>
-					</div>
-				</div>
-				<div class="typed-text">
-					{typedText}<span class="cursor sk-anim"></span>
-				</div>
-				<div class="describe-card-foot">
-					<div class="mono-label">TR · EN · DE</div>
-					<button type="button" class="generate-btn sk-anim">
-						Generate my site
-						<svg
-							viewBox="0 0 24 24"
-							width="14"
-							height="14"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.9"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							aria-hidden="true"
-						>
-							<path d="M5 12h14" />
-							<path d="m12 5 7 7-7 7" />
-						</svg>
-					</button>
-				</div>
-			</div>
+	<div
+		class="flow-stage"
+		style:width="{DESIGN_WIDTH}px"
+		style:aspect-ratio="16 / 9"
+		style:transform="scale({stageScale})"
+	>
+		<!-- scene chrome: label + progress dots -->
+		<div class="scene-chrome-label">
+			<span class="dot"></span>
+			<span>0{scene + 1} / 05 · {sceneLabels[scene]}</span>
 		</div>
-	{:else if scene === 1}
-		<!-- ============ SCENE 2: AI generates ============ -->
-		<div class="scene sk-anim scene2-grid">
-			<div class="chat-col">
-				<div class="bubble bubble-user sk-anim" style="animation-delay: .1s">
-					Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve arabuluculuk yapıyorum.
+		<div class="scene-dots">
+			{#each sceneLabels as _, i (i)}
+				<span class="dot-bar" class:active={i === scene}></span>
+			{/each}
+		</div>
+
+		{#if scene === 0}
+			<!-- ============ SCENE 1: Describe yourself ============ -->
+			<div class="scene sk-anim">
+				<div class="grid-wrap">
+					<div class="grid-plane sk-anim"></div>
 				</div>
-				<div class="bubble bubble-ai sk-anim" style="animation-delay: .7s">
-					Anladım. Sana <em class="ai-preset-name">law</em> preset'iyle üç dilli bir site hazırlıyorum.
-					Hizmetler, Hakkımda, İletişim.
-				</div>
-				<div class="bubble bubble-user narrow sk-anim" style="animation-delay: 1.3s">
-					Referanslar bölümü de ekle.
+				<div class="describe-card">
+					<div class="describe-card-head">
+						<div class="mono-label">tell saaskaya about you</div>
+						<div class="dots-row">
+							<span class="chrome-dot"></span>
+							<span class="chrome-dot"></span>
+							<span class="chrome-dot"></span>
+						</div>
+					</div>
+					<div class="typed-text">
+						{typedText}<span class="cursor sk-anim"></span>
+					</div>
+					<div class="describe-card-foot">
+						<div class="mono-label">TR · EN · DE</div>
+						<button type="button" class="generate-btn sk-anim">
+							Generate my site
+							<svg
+								viewBox="0 0 24 24"
+								width="14"
+								height="14"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.9"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<path d="M5 12h14" />
+								<path d="m12 5 7 7-7 7" />
+							</svg>
+						</button>
+					</div>
 				</div>
 			</div>
-			<div class="schema-col">
-				<div class="mono-label" style="margin-bottom: 4px;">site schema · validated json</div>
-				{#each SCHEMA_BLOCKS as b (b.title)}
-					<div class="schema-block sk-anim" style="animation-delay: {b.delay}">
-						<div class="schema-block-text">
-							<div class="schema-block-title">{b.title}</div>
-							<div class="schema-block-meta">{b.meta}</div>
-						</div>
-						<div class="schema-block-tag">{b.tag}</div>
+		{:else if scene === 1}
+			<!-- ============ SCENE 2: AI generates ============ -->
+			<div class="scene sk-anim scene2-grid">
+				<div class="chat-col">
+					<div class="bubble bubble-user sk-anim" style="animation-delay: .1s">
+						Ben Av. Zeynep Demir. İstanbul'da 12 yıldır aile hukuku ve arabuluculuk yapıyorum.
 					</div>
-				{/each}
-				<div class="progress-list">
-					{#each PROGRESS_STEPS as p (p.label)}
-						<div class="progress-row sk-anim" style="animation-delay: {p.delay}">
-							<span style="color: {p.color};">{p.mark}</span>
-							<span>{p.label}</span>
+					<div class="bubble bubble-ai sk-anim" style="animation-delay: .7s">
+						Anladım. Sana <em class="ai-preset-name">law</em> preset'iyle üç dilli bir site hazırlıyorum.
+						Hizmetler, Hakkımda, İletişim.
+					</div>
+					<div class="bubble bubble-user narrow sk-anim" style="animation-delay: 1.3s">
+						Referanslar bölümü de ekle.
+					</div>
+				</div>
+				<div class="schema-col">
+					<div class="mono-label" style="margin-bottom: 4px;">site schema · validated json</div>
+					{#each SCHEMA_BLOCKS as b (b.title)}
+						<div class="schema-block sk-anim" style="animation-delay: {b.delay}">
+							<div class="schema-block-text">
+								<div class="schema-block-title">{b.title}</div>
+								<div class="schema-block-meta">{b.meta}</div>
+							</div>
+							<div class="schema-block-tag">{b.tag}</div>
 						</div>
 					{/each}
-				</div>
-			</div>
-		</div>
-	{:else if scene === 2}
-		<!-- ============ SCENE 3: Live preview (3 devices) ============ -->
-		<div class="scene sk-anim scene3-devices">
-			<div class="device device-mobile">
-				<div class="device-screen">
-					<div class="device-hero"></div>
-					<div class="device-body">
-						<div class="bar w-60 h-6 dark"></div>
-						<div class="bar h-4"></div>
-						<div class="bar w-80 h-4"></div>
-						<div class="bar w-50 h-4"></div>
-						<div class="block-placeholder"></div>
-					</div>
-				</div>
-			</div>
-
-			<div class="device device-desktop">
-				<div class="device-screen desktop-screen">
-					<div class="browser-chrome">
-						<span class="chrome-dot" style="background:#d97070;"></span>
-						<span class="chrome-dot" style="background:#e6c168;"></span>
-						<span class="chrome-dot" style="background:#7dbf7a;"></span>
-						<span class="browser-url">demirhukuk.av.tr</span>
-					</div>
-					<div class="desktop-hero">
-						<div class="desktop-hero-title">Aile hukukunda<br />güvenilir eller.</div>
-						<div class="desktop-hero-nav">
-							<span>Hizmetler</span><span>Hakkımda</span><span>İletişim</span>
-						</div>
-					</div>
-					<div class="desktop-body">
-						<div class="bar w-40 h-6 dark"></div>
-						<div class="bar h-4"></div>
-						<div class="bar w-88 h-4"></div>
-						<div class="bar w-76 h-4"></div>
-						<div class="desktop-grid">
-							<div class="block-placeholder"></div>
-							<div class="block-placeholder"></div>
-							<div class="block-placeholder"></div>
-						</div>
-					</div>
-					<div class="scan-light sk-anim"></div>
-				</div>
-			</div>
-
-			<div class="device device-tablet">
-				<div class="device-screen">
-					<div class="device-hero tablet-hero"></div>
-					<div class="device-body">
-						<div class="bar w-55 h-6 dark"></div>
-						<div class="bar h-4"></div>
-						<div class="bar w-82 h-4"></div>
-						<div class="tablet-grid">
-							<div class="block-placeholder tall"></div>
-							<div class="block-placeholder tall"></div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="viewport-labels">
-				<span>375</span><span class="accent">desktop</span><span>768</span>
-			</div>
-		</div>
-	{:else if scene === 3}
-		<!-- ============ SCENE 4: Edit ============ -->
-		<div class="scene sk-anim scene4-grid">
-			<div class="editor-sidebar">
-				<div class="mono-label">editor</div>
-				<div class="sidebar-nav">
-					<div class="sidebar-item">Chat</div>
-					<div class="sidebar-item">Content</div>
-					<div class="sidebar-item active">Theme</div>
-				</div>
-				<div class="sidebar-section">
-					<div class="mono-label small">PRESET</div>
-					<div class="preset-row">
-						{#each presets as p (p.name)}
-							<div class="preset-item" style="opacity: {p.opacity};">
-								<span class="preset-swatch" style="background: {p.color}; border-color: {p.border};"
-								></span>
-								<span class="preset-name">{p.name}</span>
+					<div class="progress-list">
+						{#each PROGRESS_STEPS as p (p.label)}
+							<div class="progress-row sk-anim" style="animation-delay: {p.delay}">
+								<span style="color: {p.color};">{p.mark}</span>
+								<span>{p.label}</span>
 							</div>
 						{/each}
 					</div>
 				</div>
-				<div class="sidebar-section">
-					<div class="mono-label small">LOCALE</div>
-					<div class="locale-row">
-						{#each locales as l (l.code)}
-							<span
-								class="locale-pill"
-								style="background: {l.bg}; color: {l.fg}; border-color: {l.border};"
-							>
-								{l.code}
-							</span>
-						{/each}
+			</div>
+		{:else if scene === 2}
+			<!-- ============ SCENE 3: Live preview (3 devices) ============ -->
+			<div class="scene sk-anim scene3-devices">
+				<div class="device device-mobile">
+					<div class="device-screen">
+						<div class="device-hero"></div>
+						<div class="device-body">
+							<div class="bar w-60 h-6 dark"></div>
+							<div class="bar h-4"></div>
+							<div class="bar w-80 h-4"></div>
+							<div class="bar w-50 h-4"></div>
+							<div class="block-placeholder"></div>
+						</div>
 					</div>
 				</div>
-			</div>
 
-			<div class="editor-preview">
-				<div
-					class="editor-preview-hero"
-					style="background: linear-gradient(120deg, {heroColor}, {heroColor}dd);"
-				>
-					<div class="editor-preview-headline">{editState.headline}</div>
-					<div class="editor-preview-sub">{editState.sub}</div>
-				</div>
-				<div class="editor-preview-body">
-					<div class="mono-label">EDITING · body copy</div>
-					<div class="editor-preview-text">
-						{editState.body}<span class="cursor cursor-sm sk-anim"></span>
+				<div class="device device-desktop">
+					<div class="device-screen desktop-screen">
+						<div class="browser-chrome">
+							<span class="chrome-dot" style="background:#d97070;"></span>
+							<span class="chrome-dot" style="background:#e6c168;"></span>
+							<span class="chrome-dot" style="background:#7dbf7a;"></span>
+							<span class="browser-url">demirhukuk.av.tr</span>
+						</div>
+						<div class="desktop-hero">
+							<div class="desktop-hero-title">Aile hukukunda<br />güvenilir eller.</div>
+							<div class="desktop-hero-nav">
+								<span>Hizmetler</span><span>Hakkımda</span><span>İletişim</span>
+							</div>
+						</div>
+						<div class="desktop-body">
+							<div class="bar w-40 h-6 dark"></div>
+							<div class="bar h-4"></div>
+							<div class="bar w-88 h-4"></div>
+							<div class="bar w-76 h-4"></div>
+							<div class="desktop-grid">
+								<div class="block-placeholder"></div>
+								<div class="block-placeholder"></div>
+								<div class="block-placeholder"></div>
+							</div>
+						</div>
+						<div class="scan-light sk-anim"></div>
 					</div>
-					<div class="editor-preview-bars">
-						<div class="bar w-40 h-6"></div>
-						<div class="bar w-30 h-6"></div>
-					</div>
 				</div>
-			</div>
-		</div>
-	{:else}
-		<!-- ============ SCENE 5: Publish ============ -->
-		<div class="scene sk-anim publish-scene">
-			<div class="confetti-layer">
-				{#each confetti as c, i (i)}
-					<span
-						class="confetti-piece sk-anim"
-						style="left: {c.x}; width: {c.size}; height: {c.size}; background: {c.color};
-							--dx: {c.dx}; --dy: {c.dy}; --r: {c.r}; animation-delay: {c.delay};"
-					></span>
-				{/each}
-			</div>
 
-			<div class="publish-card sk-anim">
-				<div class="publish-card-top">
-					<svg
-						width="18"
-						height="18"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="#2f6f6a"
-						stroke-width="2"
+				<div class="device device-tablet">
+					<div class="device-screen">
+						<div class="device-hero tablet-hero"></div>
+						<div class="device-body">
+							<div class="bar w-55 h-6 dark"></div>
+							<div class="bar h-4"></div>
+							<div class="bar w-82 h-4"></div>
+							<div class="tablet-grid">
+								<div class="block-placeholder tall"></div>
+								<div class="block-placeholder tall"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="viewport-labels">
+					<span>375</span><span class="accent">desktop</span><span>768</span>
+				</div>
+			</div>
+		{:else if scene === 3}
+			<!-- ============ SCENE 4: Edit ============ -->
+			<div class="scene sk-anim scene4-grid">
+				<div class="editor-sidebar">
+					<div class="mono-label">editor</div>
+					<div class="sidebar-nav">
+						<div class="sidebar-item">Chat</div>
+						<div class="sidebar-item">Content</div>
+						<div class="sidebar-item active">Theme</div>
+					</div>
+					<div class="sidebar-section">
+						<div class="mono-label small">PRESET</div>
+						<div class="preset-row">
+							{#each presets as p (p.name)}
+								<div class="preset-item" style="opacity: {p.opacity};">
+									<span
+										class="preset-swatch"
+										style="background: {p.color}; border-color: {p.border};"
+									></span>
+									<span class="preset-name">{p.name}</span>
+								</div>
+							{/each}
+						</div>
+					</div>
+					<div class="sidebar-section">
+						<div class="mono-label small">LOCALE</div>
+						<div class="locale-row">
+							{#each locales as l (l.code)}
+								<span
+									class="locale-pill"
+									style="background: {l.bg}; color: {l.fg}; border-color: {l.border};"
+								>
+									{l.code}
+								</span>
+							{/each}
+						</div>
+					</div>
+				</div>
+
+				<div class="editor-preview">
+					<div
+						class="editor-preview-hero"
+						style="background: linear-gradient(120deg, {heroColor}, {heroColor}dd);"
 					>
-						<rect x="4" y="10" width="16" height="11" rx="2" />
-						<path d="M8 10V7a4 4 0 0 1 8 0v3" />
-					</svg>
-					<div class="publish-url">https://<span>demirhukuk.av.tr</span></div>
-					<span class="live-pill"><span class="live-dot"></span>Live</span>
+						<div class="editor-preview-headline">{editState.headline}</div>
+						<div class="editor-preview-sub">{editState.sub}</div>
+					</div>
+					<div class="editor-preview-body">
+						<div class="mono-label">EDITING · body copy</div>
+						<div class="editor-preview-text">
+							{editState.body}<span class="cursor cursor-sm sk-anim"></span>
+						</div>
+						<div class="editor-preview-bars">
+							<div class="bar w-40 h-6"></div>
+							<div class="bar w-30 h-6"></div>
+						</div>
+					</div>
 				</div>
-				<div class="publish-title">Yayında.</div>
-				<div class="publish-meta">
-					<span>TLS ✓</span><span>Caddy ✓</span><span>TR · EN · DE</span>
-				</div>
-				<div class="publish-badge">powered by saaskaya</div>
 			</div>
-		</div>
-	{/if}
+		{:else}
+			<!-- ============ SCENE 5: Publish ============ -->
+			<div class="scene sk-anim publish-scene">
+				<div class="confetti-layer">
+					{#each confetti as c, i (i)}
+						<span
+							class="confetti-piece sk-anim"
+							style="left: {c.x}; width: {c.size}; height: {c.size}; background: {c.color};
+							--dx: {c.dx}; --dy: {c.dy}; --r: {c.r}; animation-delay: {c.delay};"
+						></span>
+					{/each}
+				</div>
+
+				<div class="publish-card sk-anim">
+					<div class="publish-card-top">
+						<svg
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="#2f6f6a"
+							stroke-width="2"
+						>
+							<rect x="4" y="10" width="16" height="11" rx="2" />
+							<path d="M8 10V7a4 4 0 0 1 8 0v3" />
+						</svg>
+						<div class="publish-url">https://<span>demirhukuk.av.tr</span></div>
+						<span class="live-pill"><span class="live-dot"></span>Live</span>
+					</div>
+					<div class="publish-title">Yayında.</div>
+					<div class="publish-meta">
+						<span>TLS ✓</span><span>Caddy ✓</span><span>TR · EN · DE</span>
+					</div>
+					<div class="publish-badge">powered by saaskaya</div>
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>
 
 {#if loopCaption || reducedMotionCaption}
@@ -538,16 +555,25 @@
 		}
 	}
 
-	.flow-stage {
+	/* Frame: real size in layout; never scales, so radius/border/shadow stay crisp. */
+	.flow-viewport {
 		position: relative;
 		width: 100%;
-		perspective: 1200px;
-		perspective-origin: 50% 45%;
-		border-radius: 20px;
 		overflow: hidden;
+		border-radius: 20px;
 		background: linear-gradient(180deg, #f2ede3 0%, #e6dfd1 100%);
 		border: 1px solid rgba(0, 0, 0, 0.09);
 		box-shadow: 0 40px 60px -40px rgba(30, 20, 10, 0.35);
+	}
+
+	/* Stage: fixed design width, scaled uniformly to fill the frame. */
+	.flow-stage {
+		position: absolute;
+		top: 0;
+		left: 0;
+		transform-origin: top left;
+		perspective: 1200px;
+		perspective-origin: 50% 45%;
 	}
 
 	.scene-chrome-label {

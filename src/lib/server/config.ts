@@ -350,6 +350,13 @@ export const SETTING_DEFS: SettingDef[] = [
 		help: 'when on, only emails in /admin/invites can sign in'
 	},
 	{
+		key: 'SHARE_PAGE_ENABLED',
+		label: 'Public share page (1 = on)',
+		group: 'Ops',
+		secret: false,
+		help: 'enables /share (story-share assets from /admin/share); empty = 404'
+	},
+	{
 		key: 'GRACE_DAYS',
 		label: 'Grace period after cancellation (days)',
 		group: 'Ops',

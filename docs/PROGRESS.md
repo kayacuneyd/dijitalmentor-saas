@@ -2486,3 +2486,21 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: targeted blog/import/GTM/layout/config/inquiry/telemetry tests passed
   (6 files / 18 tests), `npm run check` passed with 0 warnings, full `npm test` passed
   (76 files / 491 tests), touched files passed Prettier, and `npm run build` succeeded.
+
+### 2026-07-12 — Story paylaşım sistemi M1: share_assets şeması + server modülü
+
+- Story-paylaşım yol haritasının (owner-yönetimli 1080×1920 görsel/video kütüphanesi → public /share
+  → publish-sonrası kişisel kart) ilk milestone'u. **Migration v24 `share-assets`**: owner-global
+  `share_assets` tablosu (kind image|video, object_key/url, sort_order, active, localized JSON
+  caption) + unique(object_key) + (active, sort_order) index; `schema.ts` karşılığı ve migration
+  test assert'leri eklendi.
+- **`src/lib/server/shareAssets.ts`**: `validateShareAsset` — görseller mevcut `validateImage`'a
+  delege, video için `video/mp4` + ftyp magic-byte (isom/mp42/avc1… major brand) doğrulaması;
+  limitler görsel 8MB / video 60MB. `uploadShareAsset` `share/<uuid>.<ext>` anahtarıyla R2'ye yazar
+  (immutable CacheControl, DB-insert başarısızsa objeyi geri siler — media.ts ile aynı politika);
+  list/active-list (sort_order), toggle, komşu-swap ile up/down sıralama, caption kaydet (boşları
+  ayıklar), delete (best-effort R2 temizliği).
+- `media.ts`'te `r2Config`/`r2Client`/`imageExtension` export edildi (davranış değişikliği yok);
+  `SETTING_DEFS`'e `SHARE_PAGE_ENABLED` (Ops) eklendi — '1' değilken /share 404 verecek.
+- Verification: 499/499 test (yeni shareAssets + migration assert'leri dahil), `svelte-check` 0
+  hata, production build OK.

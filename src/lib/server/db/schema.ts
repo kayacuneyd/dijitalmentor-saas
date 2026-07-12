@@ -392,6 +392,34 @@ export const mediaAssets = sqliteTable(
 	]
 );
 
+// Operator-curated story-share library (images + MP4 videos): shown on the public
+// /share page, managed at /admin/share. Owner-global — deliberately not site-scoped.
+export const shareAssets = sqliteTable(
+	'share_assets',
+	{
+		id: text('id').primaryKey(),
+		kind: text('kind', { enum: ['image', 'video'] }).notNull(),
+		objectKey: text('object_key').notNull(),
+		url: text('url').notNull(),
+		fileName: text('file_name').notNull(),
+		mimeType: text('mime_type').notNull(),
+		sizeBytes: integer('size_bytes').notNull(),
+		width: integer('width'),
+		height: integer('height'),
+		sortOrder: integer('sort_order').notNull().default(0),
+		active: integer('active', { mode: 'boolean' }).notNull().default(true),
+		/** JSON: localized caption {"tr": "...", "en": "...", "de": "..."} */
+		caption: text('caption'),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [
+		uniqueIndex('share_assets_object_key_unique').on(table.objectKey),
+		index('share_assets_active_order_idx').on(table.active, table.sortOrder)
+	]
+);
+
 // Audit trail shared by every /admin/customers action (subscription override, AI
 // credit top-up, domain detach, publish, unpublish, site delete). A flat "who did
 // what to whom, when" record, not a quota ledger — quota adjustments live in ai_usage.

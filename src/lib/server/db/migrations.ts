@@ -726,6 +726,35 @@ export const migrations: Migration[] = [
 			ensureColumn(client, 'domain_reservations', 'email_rule_id', 'text');
 			ensureColumn(client, 'domain_reservations', 'email_destination_verified_at', 'integer');
 		}
+	},
+	{
+		// Operator-curated story-share library (images + MP4 videos) served on /share
+		// and managed at /admin/share. Owner-global, not site-scoped like media_assets.
+		version: 24,
+		name: 'share-assets',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS share_assets (
+				id text PRIMARY KEY,
+				kind text NOT NULL,
+				object_key text NOT NULL,
+				url text NOT NULL,
+				file_name text NOT NULL,
+				mime_type text NOT NULL,
+				size_bytes integer NOT NULL,
+				width integer,
+				height integer,
+				sort_order integer NOT NULL DEFAULT 0,
+				active integer NOT NULL DEFAULT 1,
+				caption text,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE UNIQUE INDEX IF NOT EXISTS share_assets_object_key_unique ON share_assets (object_key)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS share_assets_active_order_idx ON share_assets (active, sort_order)`
+			);
+		}
 	}
 ];
 

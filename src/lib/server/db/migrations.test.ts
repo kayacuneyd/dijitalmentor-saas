@@ -32,6 +32,7 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'onboarding_events',
 				'media_assets',
 				'domain_credits',
+				'share_assets',
 				'schema_migrations'
 			])
 		);
@@ -215,6 +216,21 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 					.get(column)
 			).toBeTruthy();
 		}
+
+		// v24: operator-curated story-share asset library
+		expect(tables(client)).toContain('share_assets');
+		for (const column of ['kind', 'sort_order', 'active', 'caption']) {
+			expect(
+				client.prepare(`SELECT 1 FROM pragma_table_info('share_assets') WHERE name=?`).get(column)
+			).toBeTruthy();
+		}
+		expect(
+			client
+				.prepare(
+					`SELECT 1 FROM sqlite_master WHERE type='index' AND name='share_assets_active_order_idx'`
+				)
+				.get()
+		).toBeTruthy();
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

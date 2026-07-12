@@ -38,7 +38,7 @@ const IMAGE_TYPES = {
 
 type ImageMime = keyof typeof IMAGE_TYPES;
 
-function r2Config() {
+export function r2Config() {
 	const endpoint = getSetting('R2_ENDPOINT');
 	const accessKeyId = getSetting('R2_ACCESS_KEY_ID');
 	const secretAccessKey = getSetting('R2_SECRET_ACCESS_KEY');
@@ -50,7 +50,7 @@ function r2Config() {
 	return { endpoint, accessKeyId, secretAccessKey, bucket, publicBaseUrl };
 }
 
-function client(config: ReturnType<typeof r2Config>) {
+export function r2Client(config: ReturnType<typeof r2Config>) {
 	return new S3Client({
 		region: 'auto',
 		endpoint: config.endpoint,
@@ -68,6 +68,10 @@ export function validateImage(bytes: Uint8Array, mimeType: string): ImageMime {
 		throw new Error('Upload a valid JPEG, PNG, GIF, or WebP image.');
 	}
 	return type;
+}
+
+export function imageExtension(mime: ImageMime): string {
+	return IMAGE_TYPES[mime].extension;
 }
 
 export function siteMediaUsage(siteId: string): number {
@@ -90,7 +94,7 @@ export async function deleteMediaObjects(objectKeys: string[]): Promise<void> {
 	} catch {
 		return; // R2 unconfigured — nothing to clean up remotely
 	}
-	const s3 = client(config);
+	const s3 = r2Client(config);
 	await Promise.all(
 		objectKeys.map((key) =>
 			s3.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key })).catch(() => undefined)
@@ -120,7 +124,7 @@ export async function uploadMedia(input: {
 	const objectKey = `sites/${input.siteId}/${id}.${IMAGE_TYPES[mimeType].extension}`;
 	const url = `${config.publicBaseUrl.replace(/\/$/, '')}/${objectKey}`;
 
-	await client(config).send(
+	await r2Client(config).send(
 		new PutObjectCommand({
 			Bucket: config.bucket,
 			Key: objectKey,
@@ -145,7 +149,7 @@ export async function uploadMedia(input: {
 		db.insert(mediaAssets).values(asset).run();
 		return asset;
 	} catch (error) {
-		await client(config)
+		await r2Client(config)
 			.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: objectKey }))
 			.catch(() => undefined);
 		throw error;

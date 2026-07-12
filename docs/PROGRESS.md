@@ -2286,3 +2286,27 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   listener on SIGTERM), taking saaskaya.com offline for ~60s until PM2 respawned it; health 200
   confirmed on loopback and the public site, other PM2 apps unaffected (3-day uptimes intact).
   Rule going forward: kill test servers by exact PID (`$!`), never by pattern on this shared box.
+
+### 2026-07-12 — Mobile roadmap Phase 6: responsive sweep + final audit (roadmap complete)
+
+- **Global coarse-pointer touch rules extended** (`layout.css`): base `.sk-btn` 44px min-height on
+  touch (primary CTAs like "Send message" were 36px), `.sk-btn-sm` 40px, and a 16px font floor on
+  `.sk-input`/`.sk-textarea`/`.sk-select`/assistant-dock input — clears every iOS focus-zoom
+  trigger on contact/beta/landing without changing desktop density.
+- **Hit-area fixes:** PublicFooter nav links 19px → 32px tall (`inline-flex min-h-8 py-1`);
+  landing example-card TR/EN/DE preview chips 19px → 28px. Remaining audit flags are compact-by-
+  design and WCAG 2.2 AA compliant (≥24px), inline text links (WCAG inline exception), or the
+  decorative FlowAnimation button.
+- **Audit script hardening** (`scripts/mobile-audit.mjs`): contexts now emulate touch
+  (`hasTouch`/`isMobile`) so `(pointer: coarse)` rules measure as on real phones, and each route
+  gets a fresh page — a fullPage screenshot on an emulated-mobile page can drop the coarse-pointer
+  emulation for the next navigation in the same page, which was silently skewing font/hit-area
+  readings for every route after the first.
+- **Final audit state (13 routes × 375/390, touch-emulated):** zero horizontal overflow, zero
+  console errors, zero sub-16px inputs everywhere. Signed-in `/dashboard` and `/account` also
+  0px overflow at 375. Remaining "wide element" reports are the FlowAnimation background plane
+  (intentional bleed, clipped) and the templates scroll-snap carousel (intentional). Pricing/
+  templates/blog/about needed no structural changes.
+- Backlog noted: tenant-site block tap targets (nav pills 32px, locale pills 23px, "Powered by"
+  15px in `SiteRenderer`/blocks) — shared-block work, scoped separately per the constitution.
+- Verification: `svelte-check` 0 errors, 445/445 tests, production build OK.

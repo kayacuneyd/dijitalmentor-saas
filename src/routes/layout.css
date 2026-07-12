@@ -858,9 +858,21 @@ body:has(dialog[data-nav][open]) {
 	box-shadow: 0 12px 32px rgb(23 22 20 / 0.12);
 }
 
-/* Comfortable touch targets on coarse pointers without changing desktop density */
+/* Comfortable touch targets on coarse pointers without changing desktop density.
+   The 16px input floor also stops iOS Safari's focus auto-zoom. */
 @media (pointer: coarse) {
+	.sk-btn {
+		min-height: 2.75rem;
+	}
+
 	.sk-btn-sm {
 		min-height: 2.5rem;
+	}
+
+	.sk-input,
+	.sk-textarea,
+	.sk-select,
+	.sk-assistant-bar input {
+		font-size: 1rem;
 	}
 }

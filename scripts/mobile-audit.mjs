@@ -105,16 +105,19 @@ const auditInPage = () => {
 
 try {
 	for (const viewport of viewports) {
-		const context = await browser.newContext({ viewport });
-		const page = await context.newPage();
-		const consoleErrors = [];
-		page.on('console', (message) => {
-			if (message.type() === 'error') consoleErrors.push(message.text());
-		});
-		page.on('pageerror', (error) => consoleErrors.push(error.message));
+		// hasTouch/isMobile make `(pointer: coarse)` match, as on real phones.
+		const context = await browser.newContext({ viewport, hasTouch: true, isMobile: true });
 
 		for (const route of routes) {
-			consoleErrors.length = 0;
+			// Fresh page per route: a fullPage screenshot temporarily resizes the
+			// emulated viewport and can drop the coarse-pointer emulation for the
+			// next navigation in the same page, skewing font/hit-area readings.
+			const page = await context.newPage();
+			const consoleErrors = [];
+			page.on('console', (message) => {
+				if (message.type() === 'error') consoleErrors.push(message.text());
+			});
+			page.on('pageerror', (error) => consoleErrors.push(error.message));
 			const entry = { route, viewport: `${viewport.width}x${viewport.height}` };
 			try {
 				const response = await page.goto(`${baseUrl}${route}`, {
@@ -148,6 +151,7 @@ try {
 			);
 			for (const line of entry.wideElements ?? []) console.log(`    wide: ${line}`);
 			for (const line of entry.consoleErrors ?? []) console.log(`    console: ${line}`);
+			await page.close();
 		}
 		await context.close();
 	}

@@ -544,7 +544,7 @@
 							{#each site.locales as locale (locale)}
 								<a
 									href="/preview/{site.id}?locale={locale}"
-									class="rounded border border-[var(--sk-line-strong)] px-1.5 py-0.5 font-[var(--font-mono)] text-[10px]"
+									class="inline-flex min-h-7 items-center rounded border border-[var(--sk-line-strong)] px-2 py-0.5 font-[var(--font-mono)] text-[10px]"
 								>
 									{locale.toUpperCase()}
 								</a>

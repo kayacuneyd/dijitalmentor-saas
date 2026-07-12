@@ -128,12 +128,12 @@
 			{#each columns as column (column.title)}
 				<div>
 					<h2 class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{column.title}</h2>
-					<ul class="mt-3 space-y-2">
+					<ul class="mt-3 space-y-1">
 						{#each column.links as [label, href] (`${column.title}-${href}`)}
 							<li>
 								<a
 									href={href === '/dashboard' ? href : l(href)}
-									class="text-sm text-[var(--sk-muted)] hover:text-[var(--sk-ink)]"
+									class="inline-flex min-h-8 items-center py-1 text-sm text-[var(--sk-muted)] hover:text-[var(--sk-ink)]"
 								>
 									{label}
 								</a>

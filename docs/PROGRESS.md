@@ -2543,3 +2543,17 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   (isim/tür/boyut) ve caption'ı aldı, pano `https://saaskaya.com/tr/share`, toast görünür,
   thumbnail geçişi, stub'sız oturumda fallback yönergesi + proxy'ye işaret eden download linki,
   masaüstünde QR paneli; 375'te sıfır taşma/konsol hatası. 499/499 test, check 0 hata, build OK.
+
+### 2026-07-12 — Story paylaşım sistemi M4: FlowAnimation'dan ilk video + başlangıç görselleri
+
+- **`/dev/story-stage`** (dev-only, prod build'de 404 doğrulandı): 1080×1920 markalı sahne — üst:
+  marka + "Pratiğini anlat…" claim + AI·TR·EN·DE eyebrow; orta: mevcut `FlowAnimation` (720px
+  self-scale); alt: altın çizgi + `saaskaya.com` mono + `/share`'e işaret eden QR.
+- **`scripts/generate-share-video.mjs`**: chromium `recordVideo` ile sahneyi tam bir 5×4s döngü
+  boyunca kaydeder → sistem ffmpeg'iyle H.264/yuv420p/faststart 20s sessiz MP4'e transcode
+  (`-ss 1` ilk boyama kırpması; sessiz MP4 Instagram'da geçerli, gerekirse anullsrc notu script
+  başlığında) → ek olarak sahne 1/3/5'ten üç 1080×1920 PNG başlangıç görseli. Çıktılar gitignore'lu
+  `data/share-video/`; **operatör bunları `/admin/share`'den yükler** (boru hattı tek tip).
+- Üretilen ilk çıktılar doğrulandı: ffprobe `h264 / 1080x1920 / yuv420p / 20.0s`; sahne-3 karesi
+  gözle kontrol edildi (kompozisyon net, taşma yok). `svelte-check` 0 hata, build OK, prod'da
+  `/dev/story-stage` 404 / `/en` 200.

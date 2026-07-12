@@ -50,8 +50,7 @@
 						name="code"
 						inputmode="numeric"
 						autocomplete="one-time-code"
-						pattern="[0-9]{6}"
-						maxlength="6"
+						maxlength="11"
 						required
 						class="sk-input text-center font-[var(--font-mono)] text-xl tracking-[0.3em]"
 						disabled={busy}

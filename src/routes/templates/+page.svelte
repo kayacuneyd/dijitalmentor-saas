@@ -146,9 +146,9 @@
 				<article class="sk-card template-card flex min-h-full flex-col overflow-hidden">
 					{#if kit.hasImage}
 						<img
-							src="/templates/{kit.slug}.jpg"
-							alt="{kit.label} — {kit.headline}"
-							loading="lazy"
+								src="/templates/{kit.slug}.jpg"
+								alt="{kit.label} — {kit.headline}"
+								loading="eager"
 							width="1280"
 							height="860"
 							class="aspect-3/2 w-full border-b border-[var(--sk-line)] object-cover object-top"

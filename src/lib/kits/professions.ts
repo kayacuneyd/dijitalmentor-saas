@@ -22,6 +22,16 @@ export type ControlledKit = {
 type LocalizedText = Record<Locale, string>;
 type ServiceItem = { name: string; description: string };
 type FaqItem = { question: string; answer: string };
+type TestimonialItem = { quote: string; name: string; role: string; rating: number };
+type PricingItem = {
+	name: string;
+	price: string;
+	description: string;
+	features: string[];
+	highlighted: boolean;
+};
+type ProcessStep = { label: string; description: string };
+type CredentialItem = { name: string; issuer: string; year: string };
 
 type ProfessionKitConfig = {
 	slug: string;
@@ -43,15 +53,156 @@ type ProfessionKitConfig = {
 	seo: LocalizedText;
 	featureKits: string[];
 	promptRecipes: PromptRecipe[];
-	testimonials?: { title: LocalizedText; intro: LocalizedText; items: Record<string, { quote: string; name: string; role: string; rating: number }[]> };
-	pricing?: { title: LocalizedText; intro: LocalizedText; items: Record<string, { name: string; price: string; description: string; features: string[]; highlighted: boolean }[]> };
-	process?: { title: LocalizedText; intro: LocalizedText; steps: Record<string, { label: string; description: string }[]> };
+	testimonials?: {
+		title: LocalizedText;
+		intro: LocalizedText;
+		items: Record<Locale, TestimonialItem[]>;
+	};
+	pricing?: {
+		title: LocalizedText;
+		intro: LocalizedText;
+		items: Record<Locale, PricingItem[]>;
+	};
+	process?: { title: LocalizedText; intro: LocalizedText; steps: Record<Locale, ProcessStep[]> };
 	booking?: { title: LocalizedText; subtitle: LocalizedText; buttonLabel: LocalizedText; note: LocalizedText };
-	credentials?: { title: LocalizedText; intro: LocalizedText; items: Record<string, { name: string; issuer: string; year: string }[]> };
+	credentials?: {
+		title: LocalizedText;
+		intro: LocalizedText;
+		items: Record<Locale, CredentialItem[]>;
+	};
 };
 
 function cloneSite(site: Site): Site {
 	return structuredClone(site);
+}
+
+function localizedOptionalSection(
+	type: 'testimonials' | 'pricing' | 'process' | 'booking' | 'credentials',
+	config: ProfessionKitConfig
+) {
+	switch (type) {
+		case 'testimonials':
+			return config.testimonials
+				? {
+						tr: {
+							title: config.testimonials.title.tr,
+							intro: config.testimonials.intro.tr,
+							items: config.testimonials.items.tr
+						},
+						en: {
+							title: config.testimonials.title.en,
+							intro: config.testimonials.intro.en,
+							items: config.testimonials.items.en
+						},
+						de: {
+							title: config.testimonials.title.de,
+							intro: config.testimonials.intro.de,
+							items: config.testimonials.items.de
+						}
+					}
+				: null;
+		case 'pricing':
+			return config.pricing
+				? {
+						tr: {
+							title: config.pricing.title.tr,
+							intro: config.pricing.intro.tr,
+							items: config.pricing.items.tr
+						},
+						en: {
+							title: config.pricing.title.en,
+							intro: config.pricing.intro.en,
+							items: config.pricing.items.en
+						},
+						de: {
+							title: config.pricing.title.de,
+							intro: config.pricing.intro.de,
+							items: config.pricing.items.de
+						}
+					}
+				: null;
+		case 'process':
+			return config.process
+				? {
+						tr: {
+							title: config.process.title.tr,
+							intro: config.process.intro.tr,
+							steps: config.process.steps.tr
+						},
+						en: {
+							title: config.process.title.en,
+							intro: config.process.intro.en,
+							steps: config.process.steps.en
+						},
+						de: {
+							title: config.process.title.de,
+							intro: config.process.intro.de,
+							steps: config.process.steps.de
+						}
+					}
+				: null;
+		case 'booking':
+			return config.booking
+				? {
+						tr: {
+							title: config.booking.title.tr,
+							subtitle: config.booking.subtitle.tr,
+							buttonLabel: config.booking.buttonLabel.tr,
+							note: config.booking.note.tr
+						},
+						en: {
+							title: config.booking.title.en,
+							subtitle: config.booking.subtitle.en,
+							buttonLabel: config.booking.buttonLabel.en,
+							note: config.booking.note.en
+						},
+						de: {
+							title: config.booking.title.de,
+							subtitle: config.booking.subtitle.de,
+							buttonLabel: config.booking.buttonLabel.de,
+							note: config.booking.note.de
+						}
+					}
+				: null;
+		case 'credentials':
+			return config.credentials
+				? {
+						tr: {
+							title: config.credentials.title.tr,
+							intro: config.credentials.intro.tr,
+							items: config.credentials.items.tr
+						},
+						en: {
+							title: config.credentials.title.en,
+							intro: config.credentials.intro.en,
+							items: config.credentials.items.en
+						},
+						de: {
+							title: config.credentials.title.de,
+							intro: config.credentials.intro.de,
+							items: config.credentials.items.de
+						}
+					}
+				: null;
+	}
+}
+
+function optionalSectionProps(
+	type: 'testimonials' | 'pricing' | 'process' | 'booking' | 'credentials',
+	config: ProfessionKitConfig
+) {
+	switch (type) {
+		case 'booking':
+			return { variant: 'inline', href: `#contact-${config.slug}` };
+		case 'process':
+			return { variant: 'vertical' };
+		case 'pricing':
+			return { variant: 'cards', currency: '₺' };
+		case 'testimonials':
+			return { variant: 'grid', columns: 3 };
+		case 'credentials':
+			return { variant: 'grid' };
+	}
 }
 
 function createProfessionSite(config: ProfessionKitConfig): Site {
@@ -227,23 +378,33 @@ function createProfessionSite(config: ProfessionKitConfig): Site {
 	}
 
 	// --- Insertion helper for optional kit sections ---
-	const insertions: { key: string; matchers: string[] }[] = [
-		{ key: 'process',     matchers: ['faq', 'cta', 'contact'] },
-		{ key: 'pricing',     matchers: ['faq', 'cta', 'contact', 'testimonials'] },
-		{ key: 'testimonials',matchers: ['faq', 'cta', 'contact'] },
+	const insertions: {
+		key: 'testimonials' | 'pricing' | 'process' | 'booking' | 'credentials';
+		matchers: string[];
+	}[] = [
+		{ key: 'process', matchers: ['faq', 'cta', 'contact'] },
+		{ key: 'pricing', matchers: ['faq', 'cta', 'contact', 'testimonials'] },
+		{ key: 'testimonials', matchers: ['faq', 'cta', 'contact'] },
 		{ key: 'credentials', matchers: ['faq', 'cta', 'contact'] },
-		{ key: 'booking',     matchers: ['contact', 'footer'] }
+		{ key: 'booking', matchers: ['contact', 'footer'] }
 	];
 	for (const ins of insertions) {
-		const content = (config as Record<string,unknown>)[ins.key];
+		const content = localizedOptionalSection(ins.key, config);
 		if (!content) continue;
 		let at = home.sections.length;
 		for (let i = 0; i < home.sections.length; i++) {
-			if (ins.matchers.includes(home.sections[i].type)) { at = i; break; }
+			if (ins.matchers.includes(home.sections[i].type)) {
+				at = i;
+				break;
+			}
 		}
 		// Dynamic kit section insertion — type-erased; validated by siteSchema on read
-
-		home.sections.push({ id: ins.key + "-" + config.slug, type: ins.key, props: (ins.key === "booking" ? { variant: "inline", href: "#contact-" + config.slug } : ins.key === "process" ? { variant: "vertical" } : ins.key === "pricing" ? { variant: "cards", currency: "₺" } : { variant: "grid" }), content } as never);
+		home.sections.splice(at, 0, {
+			id: `${ins.key}-${config.slug}`,
+			type: ins.key,
+			props: optionalSectionProps(ins.key, config),
+			content
+		} as never);
 	}
 	if (home.sections.length > 12) throw new Error('Kit ' + config.slug + ' has ' + home.sections.length + ' sections (max 12).');
 	return site;

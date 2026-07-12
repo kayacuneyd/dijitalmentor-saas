@@ -23,7 +23,10 @@ describe('GET /templates (load)', () => {
 			'trauma-informed',
 			'dietitian-modern',
 			'real-estate-agent',
-			'beauty-salon'
+			'beauty-salon',
+			'physiotherapist-modern',
+			'dentist-clinic',
+			'lawyer-trust'
 		]);
 		expect(result.kits.find((kit) => kit.slug === 'dietitian-modern')?.profession).toBe(
 			'Diyetisyen'

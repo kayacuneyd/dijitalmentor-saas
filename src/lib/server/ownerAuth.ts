@@ -261,6 +261,10 @@ function hashCode(email: string, deviceHash: string, code: string): string {
 	return sha256(`${email}:${deviceHash}:${code}`);
 }
 
+function normalizeOwnerCode(code: string): string {
+	return code.replace(/\D/g, '');
+}
+
 async function sendOwnerCode(
 	email: string,
 	deviceHash: string,
@@ -351,7 +355,7 @@ export function verifyOwnerEmailCode(input: {
 		.set({ attempts: row.attempts + 1 })
 		.where(eq(ownerEmailCodes.id, row.id))
 		.run();
-	if (row.codeHash !== hashCode(email, deviceHash, input.code.trim())) {
+	if (row.codeHash !== hashCode(email, deviceHash, normalizeOwnerCode(input.code))) {
 		logOwnerEvent('code_failed', email, input.fingerprint);
 		return { ok: false, reason: 'invalid' };
 	}

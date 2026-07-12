@@ -2099,5 +2099,24 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   sections outside their config objects, and the helper injected non-localized content into the Zod
   `Section` schema. Moved those blocks into their kit configs and made the helper emit localized
   schema-valid `process`, `pricing`, `testimonials`, `credentials`, and `booking` sections.
-- **Verification:** `npm run check` passed, targeted templates/professions tests passed (8 tests),
-  full `npm test` passed (70 files / 434 tests), and `npm run build` succeeded.
+- **Verification:** `npm run check` passed, targeted templates/professions tests passed, full
+  `npm test` passed (70 files / 441 tests), and `npm run build` succeeded. First production deploy
+  (`20260712T020411Z`) reached PM2 online but exposed a smoke-script hang in the image-load wait and
+  a mobile templates false-positive on lazy, offscreen showcase images. Added a bounded image wait to
+  `scripts/smoke-production.mjs` and made the six template showcase JPGs eager-loaded. Targeted
+  templates/professions/owner route tests passed (16 tests), `npm run check` and `npm run build`
+  passed again, and the second production deploy `20260712T021313Z` completed with production smoke
+  passing.
+
+### 2026-07-12 — Owner code input accepts spaced autofill
+
+- Incident: owner login email code entry could show the browser-native "match the requested format"
+  error before the form reached the server when the code was entered as spaced digits
+  (`7 7 6 9 5 1`).
+- Root cause: the owner code input required exactly six contiguous digits via client-side pattern and
+  `maxlength=6`, while browsers/password managers can autofill one-time codes with spaces.
+- Fix: removed the fragile client-side pattern, allowed longer input for spaced digits, and normalized
+  owner email codes server-side by stripping non-digits before hashing/comparison.
+- Prevention: added an owner route regression test for spaced one-time-code input.
+- Verification: targeted owner tests passed (2 files / 5 tests), `npm run check` passed, and
+  `npm run build` succeeded.

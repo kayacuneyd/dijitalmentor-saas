@@ -9,6 +9,7 @@ const baseUrl = process.env.SMOKE_BASE_URL || 'https://saaskaya.com';
 const tenantSmokeUrl = process.env.SMOKE_TENANT_URL || 'https://seed-law.saaskaya.com/en';
 const executablePath =
 	process.env.CHROMIUM_PATH || '/root/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome';
+const imageWaitMs = 5_000;
 
 const browser = await chromium.launch({ executablePath, args: ['--no-sandbox'] });
 const failures = [];
@@ -52,20 +53,27 @@ try {
 				for (const image of images) image.scrollIntoView({ block: 'center', inline: 'center' });
 			});
 			await page.waitForLoadState('networkidle');
-			await page.locator('img').evaluateAll((images) =>
-				Promise.all(
-					images.map(
-						(image) =>
-							new Promise((resolve) => {
-								if (image.complete) {
-									resolve(undefined);
-									return;
-								}
-								image.addEventListener('load', () => resolve(undefined), { once: true });
-								image.addEventListener('error', () => resolve(undefined), { once: true });
-							})
-					)
-				)
+			await page.locator('img').evaluateAll(
+				(images, timeoutMs) =>
+					Promise.all(
+						images.map(
+							(image) =>
+								new Promise((resolve) => {
+									if (image.complete) {
+										resolve(undefined);
+										return;
+									}
+									const timer = window.setTimeout(() => resolve(undefined), timeoutMs);
+									const done = () => {
+										window.clearTimeout(timer);
+										resolve(undefined);
+									};
+									image.addEventListener('load', done, { once: true });
+									image.addEventListener('error', done, { once: true });
+								})
+						)
+					),
+				imageWaitMs
 			);
 			const brokenImages = await page
 				.locator('img')

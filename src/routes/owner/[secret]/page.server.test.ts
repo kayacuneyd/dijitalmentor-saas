@@ -86,4 +86,28 @@ describe('owner route actions', () => {
 		expect(verifyCookies.jar.has(OWNER_DEVICE_COOKIE)).toBe(true);
 		expect(db.select().from(ownerSessions).all()).toHaveLength(1);
 	});
+
+	it('accepts a valid email code when the browser autofill inserts spaces', async () => {
+		const login = (await actions.login({
+			request: request({ password: 'correct password' }),
+			params: { secret: 'private-owner-slug' },
+			cookies: cookies(),
+			getClientAddress: () => '203.0.113.42'
+		} as never)) as { needsCode: boolean; deviceToken: string };
+		const code = sentEmails[0].text.match(/\b\d{6}\b/)?.[0];
+		const spacedCode = code!.split('').join(' ');
+
+		expect(login.needsCode).toBe(true);
+
+		await expect(
+			actions.verifyCode({
+				request: request({ code: spacedCode, deviceToken: login.deviceToken }),
+				params: { secret: 'private-owner-slug' },
+				cookies: cookies(),
+				getClientAddress: () => '203.0.113.42'
+			} as never)
+		).rejects.toMatchObject({ status: 303, location: '/admin' });
+
+		expect(db.select().from(ownerSessions).all()).toHaveLength(1);
+	});
 });

@@ -8,7 +8,10 @@ describe('controlled profession kits', () => {
 		expect(professionKits.map((kit) => kit.slug)).toEqual([
 			'dietitian-modern',
 			'real-estate-agent',
-			'beauty-salon'
+			'beauty-salon',
+			'physiotherapist-modern',
+			'dentist-clinic',
+			'lawyer-trust'
 		]);
 		expect(controlledKits.length).toBeGreaterThanOrEqual(9);
 		expect(kitBySlug('dietitian-modern')?.profession).toBe('Diyetisyen');

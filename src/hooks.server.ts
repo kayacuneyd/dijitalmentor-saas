@@ -25,6 +25,7 @@ const LOCALIZED_PUBLIC_PATHS = new Set([
 	'/login',
 	'/login/verify',
 	'/beta',
+	'/share',
 	'/profile/start'
 ]);
 const LOCALIZED_PREFIXES = ['/legal', '/blog'];

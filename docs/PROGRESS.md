@@ -2521,3 +2521,25 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   döner ("Upload a valid JPEG…"); 375px'te sıfır taşma; sıfır konsol hatası. R2 dev'de
   yapılandırılmadığı için gerçek R2 yazımı prod'da ilk upload'la doğrulanacak (validasyon +
   kütüphane operasyonları unit-testli). 499/499 test, `svelte-check` 0 hata, build OK.
+
+### 2026-07-12 — Story paylaşım sistemi M3: public /share sayfası
+
+- **`/share`** (localized: `/en|tr|de/share`, iki LOCALIZED_PUBLIC_PATHS listesine eklendi):
+  `SHARE_PAGE_ENABLED !== '1'` veya sıfır aktif asset'te 404. PublicShell + SeoHead (og:image =
+  ilk aktif görsel — WhatsApp/Telegram link önizlemesi için). UI: 9:16 öne çıkan önizleme
+  (video `muted playsinline loop autoplay` / görsel), >1 asset'te thumbnail şeridi, locale
+  caption; **"Story'de paylaş"** → sayfa URL'si panoya + "Link etiketi" ipucu toast'ı →
+  prefetch'li blob → `File` → `navigator.canShare/share`. Fallback A (in-app webview / dosya
+  paylaşımı yok): indir + 3 adımlı yönerge; Fallback B (masaüstü): QR ("Telefonundan aç") +
+  link kopyala. Blob'lar tap'ten ÖNCE prefetch edilir (iOS user-gesture penceresi).
+- **`/share/asset/[id]`** same-origin proxy: R2 `GetObjectCommand` stream (yalnız aktif asset,
+  content-type/disposition/1h cache) — `fetch()→blob` akışı için R2 bucket CORS konfigürasyonu
+  tamamen gereksiz; `<img>/<video>` önizlemeleri CDN URL'den. `src/lib/share/webShare.ts`:
+  `shareStory()` (`shared|fallback|cancelled`) + `canShareFiles()` — M5 de kullanacak.
+- Yeni bağımlılık: **`uqr`** (~3KB saf JS QR-SVG, server-side render — client bundle'a girmez).
+- Verification: ayar kapalı 404 → açık 200 (3 locale) + `/share` 307; gizli asset proxy'de 404;
+  R2'siz dev'de proxy 503 (beklenen — prod'da ilk gerçek asset'le 200 doğrulanacak); playwright
+  16 kontrol — route-interception ile beslenen blob + `navigator.share` stub'ı gerçek `File`
+  (isim/tür/boyut) ve caption'ı aldı, pano `https://saaskaya.com/tr/share`, toast görünür,
+  thumbnail geçişi, stub'sız oturumda fallback yönergesi + proxy'ye işaret eden download linki,
+  masaüstünde QR paneli; 375'te sıfır taşma/konsol hatası. 499/499 test, check 0 hata, build OK.

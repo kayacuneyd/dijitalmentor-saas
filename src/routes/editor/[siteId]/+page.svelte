@@ -8,6 +8,7 @@
 	import SettingsTab from './SettingsTab.svelte';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import {
 		buildCompletionChecklist,
@@ -413,13 +414,20 @@
 								<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
 							</div>
 							{#if publishNotice.tone === 'success'}
-								<a
-									href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
-									target="_blank"
-									class="sk-btn sk-btn-secondary sk-btn-sm"
-								>
-									Canlı siteyi aç {@html uiIcons.external(13)}
-								</a>
+								<div class="flex flex-wrap items-start gap-2">
+									<a
+										href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
+										target="_blank"
+										class="sk-btn sk-btn-secondary sk-btn-sm"
+									>
+										Canlı siteyi aç {@html uiIcons.external(13)}
+									</a>
+									<ShareStoryButton
+										siteName={store.site.settings.siteName}
+										liveUrl={data.liveUrl}
+										locale={store.site.defaultLocale}
+									/>
+								</div>
 							{/if}
 						</div>
 					</div>

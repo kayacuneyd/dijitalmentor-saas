@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
+	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import SitePreviewThumb from '$lib/ui/SitePreviewThumb.svelte';
 	import { uiIcons } from '$lib/ui/icons';
@@ -295,6 +296,14 @@
 											{/if}
 										</a>
 										{#if site.publishedVersion}
+											<div class="px-2 py-1.5">
+										<ShareStoryButton
+											siteName={site.siteName}
+											liveUrl={site.liveUrl}
+											locale={site.defaultLocale as 'tr' | 'en' | 'de'}
+													class="w-full rounded px-0 py-0 text-left text-sm hover:underline"
+												/>
+											</div>
 											<form method="POST" action="?/publish" use:enhance>
 												<input type="hidden" name="siteId" value={site.id} />
 												<button

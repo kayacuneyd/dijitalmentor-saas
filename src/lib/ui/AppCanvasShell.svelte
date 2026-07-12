@@ -21,13 +21,13 @@
 </script>
 
 <main class="sk-page">
-	<section class="mx-auto flex min-h-screen w-full {max} flex-col px-4 py-4 sm:px-6 sm:py-6">
+	<section class="mx-auto flex min-h-screen w-full {max} flex-col px-2 py-2 sm:px-6 sm:py-6">
 		{#if chrome}
 			<div class="sk-shell flex {minHeight} flex-col overflow-hidden">
 				<div
 					class="flex shrink-0 items-center gap-3 border-b border-[var(--sk-line)] bg-[var(--sk-shell)] px-4 py-3"
 				>
-					<div class="sk-browser-dots flex gap-1.5" aria-hidden="true">
+					<div class="sk-browser-dots hidden gap-1.5 sm:flex" aria-hidden="true">
 						<span></span><span></span><span></span>
 					</div>
 					<div

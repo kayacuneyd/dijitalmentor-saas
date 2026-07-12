@@ -62,6 +62,7 @@
 				continue: 'Continue',
 				addService: 'Write a service and add it...',
 				add: 'Add',
+				remove: 'Remove',
 				answerPlaceholder: 'Write your answer...',
 				skip: 'Skip',
 				createSite: 'Generate my site',
@@ -139,6 +140,7 @@
 				continue: 'Devam et',
 				addService: 'Bir hizmet yaz ve ekle…',
 				add: 'Ekle',
+				remove: 'Kaldır',
 				answerPlaceholder: 'Yanıtını yaz…',
 				skip: 'Boş geç',
 				createSite: 'Siteni oluştur',
@@ -216,6 +218,7 @@
 				continue: 'Weiter',
 				addService: 'Leistung schreiben und hinzufügen...',
 				add: 'Hinzufügen',
+				remove: 'Entfernen',
 				answerPlaceholder: 'Antwort schreiben...',
 				skip: 'Überspringen',
 				createSite: 'Website generieren',
@@ -277,6 +280,12 @@
 	let listItems = $state<string[]>([]);
 	let listInput = $state('');
 
+	let transcriptEl: HTMLDivElement | undefined = $state();
+
+	function keepInputVisible(event: FocusEvent) {
+		(event.currentTarget as HTMLElement | null)?.scrollIntoView({ block: 'center' });
+	}
+
 	$effect(() => {
 		if (promptSeedApplied || typeof window === 'undefined') return;
 		if (Object.keys(answers).length > 0) return;
@@ -301,6 +310,21 @@
 	const directions = $derived(
 		VISUAL_DIRECTIONS.map((direction) => localizeDirection(direction, locale))
 	);
+
+	// Keep the newest bubble in view — on phones the transcript is height-capped
+	// and new content would otherwise appear below the fold.
+	$effect(() => {
+		void answeredQuestions.length;
+		void busy;
+		void offTopicMessage;
+		void errorMessage;
+		if (!transcriptEl) return;
+		const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		transcriptEl.scrollTo({
+			top: transcriptEl.scrollHeight,
+			behavior: smooth ? 'smooth' : 'auto'
+		});
+	});
 
 	// Progress: "Adım X / Y" + bar. Totals adapt as showWhen questions appear.
 	const visibleNow = $derived(visibleQuestions(answers));
@@ -495,10 +519,10 @@
 <AppCanvasShell label={copy.label}>
 	{#snippet right()}
 		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm">{copy.home}</a>
-		<LanguageSwitcher {locale} />
+		<LanguageSwitcher {locale} variant="dropdown" />
 	{/snippet}
 
-	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
+	<div class="mx-auto flex w-full max-w-2xl flex-col gap-5 sm:gap-8">
 		<div class="pt-2">
 			<a
 				href={l('/')}
@@ -533,7 +557,7 @@
 			{/if}
 		</div>
 
-		<AppCard class="flex flex-col gap-3 p-6 sm:p-8">
+		<AppCard class="flex flex-col gap-3 p-4 sm:p-8">
 			<div class="flex flex-col gap-1.5">
 				<div class="flex items-center justify-between">
 					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
@@ -551,7 +575,10 @@
 				</div>
 			</div>
 
-			<div class="flex max-h-[28rem] min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
+			<div
+				bind:this={transcriptEl}
+				class="flex max-h-[min(28rem,55dvh)] min-h-32 flex-1 flex-col gap-2 overflow-y-auto"
+			>
 				{#each answeredQuestions as q (q.id)}
 					{@const displayedQuestion = localizeQuestion(q, locale)}
 					<ChatBubble role="assistant">{displayedQuestion.prompt}</ChatBubble>
@@ -605,10 +632,11 @@
 				<div class="flex flex-col gap-2">
 					<div class="relative">
 						<textarea
-							class="sk-textarea min-h-40 text-[14.5px]"
+							class="sk-textarea min-h-40 text-base sm:text-[14.5px]"
 							rows="7"
 							placeholder={copy.rawPlaceholder}
 							bind:value={rawText}
+							onfocus={keepInputVisible}
 							disabled={busy}></textarea>
 						<div
 							class="absolute right-4 bottom-3 font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]"
@@ -742,7 +770,8 @@
 									{item}
 									<button
 										type="button"
-										class="ml-1 opacity-60 hover:opacity-100"
+										class="ml-0.5 inline-flex size-7 items-center justify-center rounded-full opacity-60 hover:opacity-100"
+										aria-label="{copy.remove}: {item}"
 										onclick={() => removeListItem(item)}>×</button
 									>
 								</span>
@@ -758,9 +787,10 @@
 					>
 						<input
 							type="text"
-							class="sk-input min-h-9 flex-1 py-1.5 text-sm"
+							class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.addService}
 							bind:value={listInput}
+							onfocus={keepInputVisible}
 							disabled={busy || listItems.length >= 8}
 						/>
 						<button
@@ -790,16 +820,18 @@
 				>
 					{#if current.kind === 'open_text'}
 						<textarea
-							class="sk-textarea min-h-20 flex-1 py-1.5 text-sm"
+							class="sk-textarea min-h-20 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.answerPlaceholder}
 							bind:value={textValue}
+							onfocus={keepInputVisible}
 							disabled={busy}></textarea>
 					{:else}
 						<input
 							type="text"
-							class="sk-input min-h-9 flex-1 py-1.5 text-sm"
+							class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.answerPlaceholder}
 							bind:value={textValue}
+							onfocus={keepInputVisible}
 							disabled={busy}
 						/>
 					{/if}

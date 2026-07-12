@@ -2198,3 +2198,25 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   than the viewport in getBoundingClientRect terms but contributes no document overflow.
 - Verification: scenes 1/3/5 screenshot-reviewed at 1280 + 375; `svelte-check` 0 errors, 441/441
   tests, production build OK; mobile audit on `/en` reports 0px document overflow, 0 console errors.
+
+### 2026-07-12 — Mobile roadmap Phase 3: onboarding wizard mobile polish (/new)
+
+- **Transcript behaves like a chat on phones:** height cap `max-h-[min(28rem,55dvh)]` (was a fixed
+  `28rem` that pushed the input off short screens) + a new autoscroll `$effect` (there was none —
+  new bubbles appeared below the fold) that follows answered questions / typing indicator / error
+  bubbles, instant under `prefers-reduced-motion`.
+- **iOS keyboard/zoom fixes:** all wizard inputs (`short_text`, `open_text`, `list_text`, raw
+  textarea) are `text-base sm:text-sm` (16px on phones — Safari no longer zooms on focus) with an
+  `onfocus` `scrollIntoView({ block: 'center' })`; no fixed positioning anywhere, so the flex-bottom
+  input stays reachable above the keyboard thanks to the dvh cap.
+- **Tap targets:** the `list_text` pill remove button is now a 28px square with a localized
+  `aria-label` (added `remove` copy in TR/EN/DE); `sk-btn-sm` buttons get 40px min-height from the
+  Phase 1 `pointer: coarse` rule.
+- **AppCanvasShell (all consumers):** outer padding `px-2 py-2` below `sm` (was `px-4 py-4`) and
+  decorative browser-chrome dots hidden below `sm`; the chrome bar itself stays (it carries the
+  Home link + language switcher). The `/new` chrome switcher now uses `variant="dropdown"` (pills
+  overflowed the bar at 375). Card padding `p-4 sm:p-8`, page gap `gap-5 sm:gap-8`.
+- Verification: playwright drove 4 wizard steps at 375 (touch emulation): autoscroll pinned to the
+  newest bubble, transcript ≤55% of viewport, inputs report 16px computed, coarse-pointer media
+  matches, zero overflow/console errors on `/tr/new`, `/tr/login`, `/tr/beta`; desktop chrome dots
+  and question cards unchanged; `svelte-check` 0 errors, 441/441 tests, production build OK.

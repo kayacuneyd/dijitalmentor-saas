@@ -7,13 +7,36 @@ vi.mock('$lib/server/domains', async (importActual) => {
 		porkbunConfigured: vi.fn(() => true),
 		checkDomainAvailability: vi.fn(async () => ({ available: true })),
 		registerDomain: vi.fn(async () => {}),
-		createARecord: vi.fn(async () => {}),
+		updateNameservers: vi.fn(async () => {}),
 		provisionDomain: vi.fn(async () => ({ ran: false })),
 		attachSiteDomain: vi.fn(() => ({ ok: true, hostname: 'x' }))
 	};
 });
 
+vi.mock('$lib/server/cloudflare', () => ({
+	cloudflareConfigured: vi.fn(() => true),
+	defaultEmailLocalPart: vi.fn(() => 'info'),
+	createOrGetZone: vi.fn(async () => ({
+		id: 'zone-1',
+		name: 'example.com',
+		status: 'pending',
+		nameServers: ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com']
+	})),
+	getZoneNameservers: vi.fn(async () => ['ada.ns.cloudflare.com', 'bob.ns.cloudflare.com']),
+	createOrUpdateDnsRecord: vi.fn(async () => ({ id: 'dns-1' })),
+	enableEmailRoutingDns: vi.fn(async () => {}),
+	createDestinationAddress: vi.fn(async (email: string) => ({
+		id: 'addr-1',
+		email,
+		verified: null
+	})),
+	createEmailRoutingRule: vi.fn(async () => ({ id: 'rule-1' })),
+	getEmailRoutingStatus: vi.fn(async () => 'enabled')
+}));
+
+import * as cloudflare from '$lib/server/cloudflare';
 import * as domains from '$lib/server/domains';
+import { getOrCreateUser } from '$lib/server/auth';
 import {
 	cancelReservation,
 	confirmPayment,
@@ -26,14 +49,18 @@ import {
 } from './reservations';
 import { clearSetting, setSetting } from './config';
 
-const base = { userId: 'u-res', siteId: 's-res' };
 let seq = 0;
 const freshDomain = () => `res-test-${seq++}.example`;
+const base = () => ({
+	userId: getOrCreateUser(`reservation-${seq}@example.com`).id,
+	siteId: 's-res'
+});
 
 beforeEach(() => vi.clearAllMocks());
 afterEach(() => {
 	vi.clearAllMocks();
 	clearSetting('PAYMENT_MODE');
+	clearSetting('SERVER_IP');
 });
 
 describe('domain reservations', () => {
@@ -44,22 +71,24 @@ describe('domain reservations', () => {
 
 	it('rejects an invalid domain and a bad payment method', () => {
 		expect(
-			createReservation({ ...base, domain: 'not a domain', paymentMethod: 'bank_transfer' })
+			createReservation({ ...base(), domain: 'not a domain', paymentMethod: 'bank_transfer' })
 		).toEqual({ ok: false, reason: 'invalid-domain' });
 		expect(
-			createReservation({ ...base, domain: freshDomain(), paymentMethod: 'paypal' as never })
+			createReservation({ ...base(), domain: freshDomain(), paymentMethod: 'paypal' as never })
 		).toEqual({ ok: false, reason: 'bad-method' });
 	});
 
 	it('walks the bank-transfer lifecycle create→report→confirm→fulfill→active', async () => {
+		setSetting('SERVER_IP', '203.0.113.10');
+		const owner = base();
 		const domain = freshDomain();
-		const created = createReservation({ ...base, domain, paymentMethod: 'bank_transfer' });
+		const created = createReservation({ ...owner, domain, paymentMethod: 'bank_transfer' });
 		expect(created.ok).toBe(true);
 		if (!created.ok) return;
 		const id = created.reservation.id;
 		expect(created.reservation.status).toBe('pending');
 
-		expect(reportBankTransfer(id, base.userId)).toBe(true);
+		expect(reportBankTransfer(id, owner.userId)).toBe(true);
 		expect(getReservation(id)?.operatorNotes).toContain('user reported bank transfer');
 
 		expect(confirmPayment(id)).toBe(true);
@@ -69,35 +98,54 @@ describe('domain reservations', () => {
 		expect(result).toEqual({ ok: true, status: 'active' });
 		expect(getReservation(id)?.status).toBe('active');
 		expect(domains.registerDomain).toHaveBeenCalledWith(domain);
+		expect(domains.updateNameservers).toHaveBeenCalledWith(domain, [
+			'ada.ns.cloudflare.com',
+			'bob.ns.cloudflare.com'
+		]);
+		expect(cloudflare.createOrUpdateDnsRecord).toHaveBeenCalledWith({
+			zoneId: 'zone-1',
+			name: domain,
+			type: 'A',
+			content: '203.0.113.10',
+			proxied: false
+		});
+		expect(cloudflare.createEmailRoutingRule).toHaveBeenCalledWith({
+			zoneId: 'zone-1',
+			domain,
+			localPart: 'info',
+			destinationEmail: expect.stringContaining('@example.com')
+		});
 		expect(domains.attachSiteDomain).toHaveBeenCalled();
 	});
 
 	it('report never confirms payment itself (constitution §5)', () => {
 		const created = createReservation({
-			...base,
+			...base(),
 			domain: freshDomain(),
 			paymentMethod: 'bank_transfer'
 		});
 		if (!created.ok) throw new Error('expected ok');
-		reportBankTransfer(created.reservation.id, base.userId);
+		reportBankTransfer(created.reservation.id, created.reservation.userId);
 		expect(getReservation(created.reservation.id)?.status).toBe('pending'); // still pending
 	});
 
 	it('one live reservation per domain; a cancelled one does not block a retry', () => {
+		const owner = base();
 		const domain = freshDomain();
-		const first = createReservation({ ...base, domain, paymentMethod: 'bank_transfer' });
+		const first = createReservation({ ...owner, domain, paymentMethod: 'bank_transfer' });
 		expect(first.ok).toBe(true);
-		const second = createReservation({ ...base, domain, paymentMethod: 'bank_transfer' });
+		const second = createReservation({ ...owner, domain, paymentMethod: 'bank_transfer' });
 		expect(second).toEqual({ ok: false, reason: 'domain-taken' });
 
-		if (first.ok) cancelReservation(first.reservation.id, base.userId);
-		const third = createReservation({ ...base, domain, paymentMethod: 'bank_transfer' });
+		if (first.ok) cancelReservation(first.reservation.id, owner.userId);
+		const third = createReservation({ ...owner, domain, paymentMethod: 'bank_transfer' });
 		expect(third.ok).toBe(true); // cancelled row freed the domain
 	});
 
 	it('fulfillment is idempotent and guards on status', async () => {
+		setSetting('SERVER_IP', '203.0.113.10');
 		const created = createReservation({
-			...base,
+			...base(),
 			domain: freshDomain(),
 			paymentMethod: 'bank_transfer'
 		});
@@ -117,9 +165,10 @@ describe('domain reservations', () => {
 	});
 
 	it('a failed fulfillment lands on failed and is retryable', async () => {
+		setSetting('SERVER_IP', '203.0.113.10');
 		vi.mocked(domains.checkDomainAvailability).mockResolvedValueOnce({ available: false });
 		const created = createReservation({
-			...base,
+			...base(),
 			domain: freshDomain(),
 			paymentMethod: 'bank_transfer'
 		});
@@ -137,9 +186,46 @@ describe('domain reservations', () => {
 		expect(retried).toEqual({ ok: true, status: 'active' });
 	});
 
+	it('does not re-register a domain when retrying after a post-registration failure', async () => {
+		setSetting('SERVER_IP', '203.0.113.10');
+		vi.mocked(cloudflare.createOrUpdateDnsRecord).mockRejectedValueOnce(new Error('dns failed'));
+		const created = createReservation({
+			...base(),
+			domain: freshDomain(),
+			paymentMethod: 'bank_transfer'
+		});
+		if (!created.ok) throw new Error('expected ok');
+		confirmPayment(created.reservation.id);
+
+		const failed = await fulfillReservation(created.reservation.id);
+		expect(failed.status).toBe('failed');
+		expect(getReservation(created.reservation.id)?.registeredAt).toBeInstanceOf(Date);
+
+		const retried = await fulfillReservation(created.reservation.id);
+		expect(retried).toEqual({ ok: true, status: 'active' });
+		expect(domains.registerDomain).toHaveBeenCalledTimes(1);
+	});
+
 	it('skips fulfillment when the domain provider is not configured', async () => {
 		vi.mocked(domains.porkbunConfigured).mockReturnValueOnce(false);
-		const created = createReservation({ ...base, domain: freshDomain(), paymentMethod: 'stripe' });
+		const created = createReservation({
+			...base(),
+			domain: freshDomain(),
+			paymentMethod: 'stripe'
+		});
+		if (!created.ok) throw new Error('expected ok');
+		confirmPayment(created.reservation.id);
+		const result = await fulfillReservation(created.reservation.id);
+		expect(result.status).toBe('skipped');
+	});
+
+	it('skips fulfillment when Cloudflare is not configured', async () => {
+		vi.mocked(cloudflare.cloudflareConfigured).mockReturnValueOnce(false);
+		const created = createReservation({
+			...base(),
+			domain: freshDomain(),
+			paymentMethod: 'stripe'
+		});
 		if (!created.ok) throw new Error('expected ok');
 		confirmPayment(created.reservation.id);
 		const result = await fulfillReservation(created.reservation.id);
@@ -148,7 +234,7 @@ describe('domain reservations', () => {
 
 	it('reject cancels the reservation with a note', () => {
 		const created = createReservation({
-			...base,
+			...base(),
 			domain: freshDomain(),
 			paymentMethod: 'bank_transfer'
 		});

@@ -210,6 +210,13 @@ export async function registerDomain(domain: string): Promise<void> {
 	await porkbunPost(`/domain/create/${domain}`, { years: 1 });
 }
 
+/** Delegate DNS to Cloudflare after registration; not used until the Cloudflare fulfillment path is on. */
+export async function updateNameservers(domain: string, nameservers: string[]): Promise<void> {
+	const ns = nameservers.map((item) => item.trim().toLowerCase()).filter(Boolean);
+	if (ns.length < 2) throw new Error('at least two nameservers are required');
+	await porkbunPost(`/domain/updateNs/${domain}`, { ns });
+}
+
 /** Point the fresh domain at this server. */
 export async function createARecord(domain: string): Promise<void> {
 	const serverIp = getSetting('SERVER_IP');

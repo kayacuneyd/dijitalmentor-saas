@@ -1,16 +1,27 @@
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { domainCredits, domainReservations } from '$lib/server/db/schema';
+import { domainCredits, domainReservations, users } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
+import {
+	cloudflareConfigured,
+	createDestinationAddress,
+	createEmailRoutingRule,
+	createOrGetZone,
+	createOrUpdateDnsRecord,
+	defaultEmailLocalPart,
+	enableEmailRoutingDns,
+	getEmailRoutingStatus,
+	getZoneNameservers
+} from '$lib/server/cloudflare';
 import {
 	attachSiteDomain,
 	checkDomainAvailability,
-	createARecord,
 	normalizeDomain,
 	porkbunConfigured,
 	provisionDomain,
 	registerDomain,
+	updateNameservers,
 	validateDomain
 } from '$lib/server/domains';
 
@@ -64,6 +75,19 @@ export function listReservationsByUser(userId: string): Reservation[] {
 		.where(eq(domainReservations.userId, userId))
 		.orderBy(desc(domainReservations.createdAt))
 		.all();
+}
+
+export function domainSetupLabel(row: Pick<Reservation, 'status' | 'emailRoutingStatus'>): string {
+	if (row.status === 'active') {
+		return row.emailRoutingStatus === 'pending_verification'
+			? 'E-posta doğrulaması bekleniyor'
+			: 'Aktif';
+	}
+	if (row.status === 'registering') return 'Alan adı hazırlanıyor';
+	if (row.status === 'paid') return 'Alan adı hazırlanıyor';
+	if (row.status === 'failed') return 'Kurulum inceleniyor';
+	if (row.status === 'manual_review') return 'Manuel inceleme';
+	return 'Ödeme bekleniyor';
 }
 
 export function listPendingReservations(): Reservation[] {
@@ -125,6 +149,14 @@ export function createReservation(input: {
 		paymentMethod: input.paymentMethod,
 		priceEur: domainPriceEur(),
 		priceTry: domainPriceTry(),
+		cloudflareZoneId: null,
+		cloudflareNameservers: null,
+		cloudflareZoneStatus: null,
+		emailRoutingStatus: null,
+		emailLocalPart: null,
+		emailDestination: null,
+		emailRuleId: null,
+		emailDestinationVerifiedAt: null,
 		operatorNotes: input.operatorNotes ?? null,
 		createdAt: now,
 		paidAt: null,
@@ -230,7 +262,10 @@ export function grantYearlyProDomainCredit(input: {
 	return credit;
 }
 
-export function unusedDomainCreditForSite(userId: string, siteId: string): DomainCredit | undefined {
+export function unusedDomainCreditForSite(
+	userId: string,
+	siteId: string
+): DomainCredit | undefined {
 	const now = new Date();
 	return db
 		.select()
@@ -255,11 +290,7 @@ export function consumeDomainCredit(input: {
 	reservationId: string;
 	domain: string;
 }): boolean {
-	const credit = db
-		.select()
-		.from(domainCredits)
-		.where(eq(domainCredits.id, input.creditId))
-		.get();
+	const credit = db.select().from(domainCredits).where(eq(domainCredits.id, input.creditId)).get();
 	if (!credit || credit.userId !== input.userId || credit.siteId !== input.siteId) return false;
 	if (credit.status !== 'unused') return false;
 	if (credit.expiresAt && credit.expiresAt.getTime() <= Date.now()) return false;
@@ -350,6 +381,9 @@ export async function fulfillReservation(id: string): Promise<FulfillResult> {
 	if (!porkbunConfigured()) {
 		return { ok: false, status: 'skipped', error: 'domain provider (Porkbun) not configured' };
 	}
+	if (!cloudflareConfigured()) {
+		return { ok: false, status: 'skipped', error: 'Cloudflare is not configured' };
+	}
 
 	db.update(domainReservations)
 		.set({ status: 'registering', updatedAt: new Date() })
@@ -366,10 +400,70 @@ export async function fulfillReservation(id: string): Promise<FulfillResult> {
 	};
 
 	try {
-		const availability = await checkDomainAvailability(row.domain);
-		if (!availability.available) return fail(`${row.domain} no longer available`);
-		await registerDomain(row.domain);
-		await createARecord(row.domain);
+		const fresh = getReservation(id) ?? row;
+		const user = db.select().from(users).where(eq(users.id, row.userId)).get();
+		if (!user) return fail('reservation user not found');
+		const serverIp = getSetting('SERVER_IP');
+		if (!serverIp) return fail('SERVER_IP is not configured');
+
+		if (!fresh.registeredAt) {
+			const availability = await checkDomainAvailability(row.domain);
+			if (!availability.available) return fail(`${row.domain} no longer available`);
+			await registerDomain(row.domain);
+			db.update(domainReservations)
+				.set({ registeredAt: new Date(), updatedAt: new Date() })
+				.where(eq(domainReservations.id, id))
+				.run();
+			appendNote(id, 'domain registered via Porkbun');
+		}
+
+		const zone = await createOrGetZone(row.domain);
+		const nameservers =
+			zone.nameServers.length > 0 ? zone.nameServers : await getZoneNameservers(zone.id);
+		if (nameservers.length === 0) return fail('Cloudflare zone has no nameservers yet');
+		db.update(domainReservations)
+			.set({
+				cloudflareZoneId: zone.id,
+				cloudflareNameservers: nameservers,
+				cloudflareZoneStatus: zone.status,
+				updatedAt: new Date()
+			})
+			.where(eq(domainReservations.id, id))
+			.run();
+
+		await updateNameservers(row.domain, nameservers);
+		await createOrUpdateDnsRecord({
+			zoneId: zone.id,
+			name: row.domain,
+			type: 'A',
+			content: serverIp,
+			proxied: false
+		});
+		await enableEmailRoutingDns(zone.id);
+
+		const localPart = defaultEmailLocalPart();
+		const destination = await createDestinationAddress(user.email);
+		const rule = await createEmailRoutingRule({
+			zoneId: zone.id,
+			domain: row.domain,
+			localPart,
+			destinationEmail: user.email
+		});
+		const emailRoutingStatus = destination.verified
+			? await getEmailRoutingStatus(zone.id)
+			: 'pending_verification';
+		db.update(domainReservations)
+			.set({
+				emailRoutingStatus,
+				emailLocalPart: localPart,
+				emailDestination: user.email,
+				emailRuleId: rule.id,
+				emailDestinationVerifiedAt: destination.verified,
+				updatedAt: new Date()
+			})
+			.where(eq(domainReservations.id, id))
+			.run();
+
 		const provision = await provisionDomain(row.domain);
 		if (provision.ran && provision.ok === false) {
 			return fail(`provisioning failed: ${provision.output?.slice(0, 200)}`);
@@ -381,10 +475,14 @@ export async function fulfillReservation(id: string): Promise<FulfillResult> {
 	}
 
 	db.update(domainReservations)
-		.set({ status: 'active', registeredAt: new Date(), updatedAt: new Date() })
+		.set({
+			status: 'active',
+			registeredAt: getReservation(id)?.registeredAt ?? new Date(),
+			updatedAt: new Date()
+		})
 		.where(eq(domainReservations.id, id))
 		.run();
-	appendNote(id, 'fulfilled: domain registered and attached');
+	appendNote(id, 'fulfilled: domain registered, Cloudflare DNS/email prepared, and attached');
 	return { ok: true, status: 'active' };
 }
 

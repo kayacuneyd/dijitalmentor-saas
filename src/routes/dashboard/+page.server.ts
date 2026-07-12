@@ -41,6 +41,7 @@ import {
 	createReservation,
 	consumeDomainCredit,
 	customerDomainGate,
+	domainSetupLabel,
 	getReservation,
 	listReservationsByUser,
 	paymentMode,
@@ -55,20 +56,22 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ locals, url }) => {
 	if (!locals.user) redirect(303, '/login');
 	const reservations = listReservationsByUser(locals.user.id);
-	const sites = listSitesByOwner(locals.user.id).map((site) => ({
-		...site,
-		plan: siteSubscriptionState(site.id, locals.user!.id),
-		planDetails: siteSubscriptionDetails(site.id, locals.user!.id),
-		canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
-		liveUrl: `${url.protocol}//${site.publicHandle ?? site.id}.${url.host}`,
-		previewUrl: `/preview/${site.id}?locale=${site.defaultLocale}&source=persisted`,
-		domain: getDomainForSite(site.id),
-		hasDomainCredit: Boolean(unusedDomainCreditForSite(locals.user!.id, site.id)),
-		messageCount: countSubmissions(site.id),
-		reservation: reservations.find(
-			(r) => r.siteId === site.id && r.status !== 'cancelled' && r.status !== 'active'
-		)
-	}));
+	const sites = listSitesByOwner(locals.user.id).map((site) => {
+		const reservation = reservations.find((r) => r.siteId === site.id && r.status !== 'cancelled');
+		return {
+			...site,
+			plan: siteSubscriptionState(site.id, locals.user!.id),
+			planDetails: siteSubscriptionDetails(site.id, locals.user!.id),
+			canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
+			liveUrl: `${url.protocol}//${site.publicHandle ?? site.id}.${url.host}`,
+			previewUrl: `/preview/${site.id}?locale=${site.defaultLocale}&source=persisted`,
+			domain: getDomainForSite(site.id),
+			hasDomainCredit: Boolean(unusedDomainCreditForSite(locals.user!.id, site.id)),
+			messageCount: countSubmissions(site.id),
+			reservation,
+			domainSetupLabel: reservation ? domainSetupLabel(reservation) : null
+		};
+	});
 	const subscription = subscriptionState(locals.user.id);
 	return {
 		user: locals.user,
@@ -196,16 +199,20 @@ export const actions: Actions = {
 		const method: PaymentMethod =
 			credit && gate.status === 'available'
 				? 'included'
-			: requestedMethod === 'stripe' && billingProvider() === 'creem'
-				? 'creem'
-				: requestedMethod;
+				: requestedMethod === 'stripe' && billingProvider() === 'creem'
+					? 'creem'
+					: requestedMethod;
 		const result = createReservation({
 			userId: locals.user.id,
 			siteId,
 			domain,
 			paymentMethod: method,
 			initialStatus:
-				gate.status === 'manual_review' ? 'manual_review' : method === 'included' ? 'paid' : 'pending',
+				gate.status === 'manual_review'
+					? 'manual_review'
+					: method === 'included'
+						? 'paid'
+						: 'pending',
 			operatorNotes: gate.status === 'manual_review' ? gate.note : null
 		});
 		if (!result.ok) {

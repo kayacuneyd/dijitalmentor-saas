@@ -223,6 +223,14 @@ export const domainReservations = sqliteTable('domain_reservations', {
 	paymentMethod: text('payment_method').notNull().default('bank_transfer'),
 	priceEur: text('price_eur'),
 	priceTry: text('price_try'),
+	cloudflareZoneId: text('cloudflare_zone_id'),
+	cloudflareNameservers: text('cloudflare_nameservers', { mode: 'json' }).$type<string[]>(),
+	cloudflareZoneStatus: text('cloudflare_zone_status'),
+	emailRoutingStatus: text('email_routing_status'),
+	emailLocalPart: text('email_local_part'),
+	emailDestination: text('email_destination'),
+	emailRuleId: text('email_rule_id'),
+	emailDestinationVerifiedAt: integer('email_destination_verified_at', { mode: 'timestamp' }),
 	operatorNotes: text('operator_notes'),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()

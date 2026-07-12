@@ -687,7 +687,12 @@ export const migrations: Migration[] = [
 		version: 22,
 		name: 'creem-yearly-domain-products',
 		up(client) {
-			ensureColumn(client, 'site_subscriptions', 'plan_interval', "text NOT NULL DEFAULT 'monthly'");
+			ensureColumn(
+				client,
+				'site_subscriptions',
+				'plan_interval',
+				"text NOT NULL DEFAULT 'monthly'"
+			);
 			ensureColumn(client, 'site_subscriptions', 'price_eur', 'integer NOT NULL DEFAULT 17');
 			client.exec(`CREATE TABLE IF NOT EXISTS domain_credits (
 				id text PRIMARY KEY,
@@ -706,6 +711,20 @@ export const migrations: Migration[] = [
 				ON domain_credits (user_id, site_id)`);
 			client.exec(`CREATE INDEX IF NOT EXISTS domain_credits_status_idx
 				ON domain_credits (status)`);
+		}
+	},
+	{
+		version: 23,
+		name: 'cloudflare-domain-email-routing',
+		up(client) {
+			ensureColumn(client, 'domain_reservations', 'cloudflare_zone_id', 'text');
+			ensureColumn(client, 'domain_reservations', 'cloudflare_nameservers', 'text');
+			ensureColumn(client, 'domain_reservations', 'cloudflare_zone_status', 'text');
+			ensureColumn(client, 'domain_reservations', 'email_routing_status', 'text');
+			ensureColumn(client, 'domain_reservations', 'email_local_part', 'text');
+			ensureColumn(client, 'domain_reservations', 'email_destination', 'text');
+			ensureColumn(client, 'domain_reservations', 'email_rule_id', 'text');
+			ensureColumn(client, 'domain_reservations', 'email_destination_verified_at', 'integer');
 		}
 	}
 ];

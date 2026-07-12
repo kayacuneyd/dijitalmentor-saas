@@ -217,8 +217,8 @@
 										{/if}
 									</p>
 									<p class="mt-1 text-xs text-[var(--sk-muted)]">
-										Pro: {data.proSitePriceEur}€/ay veya {data.proSiteYearlyPriceEur}€/yıl.
-										Yıllık Pro'ya standart .com alan adı, SSL ve teknik kurulum dahildir.
+										Pro: {data.proSitePriceEur}€/ay veya {data.proSiteYearlyPriceEur}€/yıl. Yıllık
+										Pro'ya standart .com alan adı, SSL ve teknik kurulum dahildir.
 									</p>
 								</div>
 								{#if site.plan.state === 'free'}
@@ -397,7 +397,7 @@
 										>
 											{site.domain}
 										</a>
-										<StatusPill tone="success">Güvenli (SSL)</StatusPill>
+										<StatusPill tone="success">{site.domainSetupLabel ?? 'Aktif'}</StatusPill>
 										<form method="POST" action="?/detachDomain" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
 											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
@@ -405,6 +405,15 @@
 											</button>
 										</form>
 									</div>
+									{#if site.reservation?.emailLocalPart && site.reservation?.emailDestination}
+										<p class="text-xs text-[var(--sk-muted)]">
+											{site.reservation.emailLocalPart}@{site.domain} → {site.reservation
+												.emailDestination}
+											{site.reservation.emailRoutingStatus === 'pending_verification'
+												? ' · e-posta doğrulaması bekleniyor'
+												: ''}
+										</p>
+									{/if}
 								{:else if site.reservation}
 									{@const res = site.reservation}
 									<div class="flex flex-col gap-2 text-sm">
@@ -423,11 +432,11 @@
 													: res.status === 'manual_review'
 														? 'manuel inceleme'
 														: res.status === 'paid'
-															? 'ödeme alındı'
+															? 'alan adı hazırlanıyor'
 															: res.status === 'registering'
-																? 'kuruluyor'
+																? 'alan adı hazırlanıyor'
 																: res.status === 'failed'
-																	? 'kurulum hatası'
+																	? 'kurulum inceleniyor'
 																	: res.status}
 											</StatusPill>
 										</div>
@@ -442,9 +451,9 @@
 											{#if data.billingConfigured}
 												<div class="flex flex-wrap gap-2">
 													<form method="POST" action="/api/billing/checkout">
-												<input type="hidden" name="siteId" value={site.id} />
-												<input type="hidden" name="planInterval" value="monthly" />
-												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+														<input type="hidden" name="siteId" value={site.id} />
+														<input type="hidden" name="planInterval" value="monthly" />
+														<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
 															Aylık Pro + domain seç
 														</button>
 													</form>
@@ -512,9 +521,20 @@
 												geçeceğiz.
 											</p>
 										{:else}
-											<p class="text-xs text-[var(--sk-muted)]">
-												Ödemen alındı, domainin kuruluyor. Hazır olduğunda burada görünecek.
-											</p>
+											<div class="rounded-md bg-[#171614]/5 p-3 text-xs text-[var(--sk-muted)]">
+												<p>Alan adı hazırlanıyor.</p>
+												<p>SSL hazırlanıyor.</p>
+												{#if res.emailLocalPart && res.emailDestination}
+													<p>
+														{res.emailLocalPart}@{res.domain} → {res.emailDestination}
+														{res.emailRoutingStatus === 'pending_verification'
+															? ' · e-posta yönlendirme doğrulaması bekleniyor'
+															: ''}
+													</p>
+												{:else}
+													<p>E-posta yönlendirme hazırlanıyor.</p>
+												{/if}
+											</div>
 										{/if}
 									</div>
 								{:else}
@@ -571,17 +591,12 @@
 												Dahil .com alan adımı seç
 											</button>
 										</form>
-									{:else if site.planDetails.planInterval === 'monthly' &&
-										site.plan.state !== 'free' &&
-										(data.payment.mode === 'stripe_only' ||
-											data.payment.mode === 'card_only' ||
-											data.payment.mode === 'hybrid')}
+									{:else if site.planDetails.planInterval === 'monthly' && site.plan.state !== 'free' && (data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only' || data.payment.mode === 'hybrid')}
 										<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
 											<p class="font-semibold">Sıradaki adım: .com alan adını seç.</p>
 											<p class="mt-1 text-[var(--sk-muted)]">
 												Aylık Pro siten yayında kalır; kendi .com adresin için yıllık alan adı
-												hizmeti 15€'dur. SSL, DNS kurulumu ve siteye bağlama tarafımızdan
-												yönetilir.
+												hizmeti 15€'dur. SSL, DNS kurulumu ve siteye bağlama tarafımızdan yönetilir.
 											</p>
 										</div>
 										<form

@@ -198,6 +198,23 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 		expect(
 			client.prepare(`SELECT 1 FROM pragma_table_info('domain_credits') WHERE name='tld'`).get()
 		).toBeTruthy();
+		// v23: Cloudflare DNS + Email Routing automation state on domain reservations
+		for (const column of [
+			'cloudflare_zone_id',
+			'cloudflare_nameservers',
+			'cloudflare_zone_status',
+			'email_routing_status',
+			'email_local_part',
+			'email_destination',
+			'email_rule_id',
+			'email_destination_verified_at'
+		]) {
+			expect(
+				client
+					.prepare(`SELECT 1 FROM pragma_table_info('domain_reservations') WHERE name=?`)
+					.get(column)
+			).toBeTruthy();
+		}
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

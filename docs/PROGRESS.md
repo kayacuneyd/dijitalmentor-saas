@@ -2369,3 +2369,59 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   and Cloudflare as DNS/Email Routing provider. The token help text explicitly calls out narrow
   DNS/Zone/Email Routing scope.
 - Verification: `npm run check` passed with 0 warnings.
+
+### 2026-07-12 — Cloudflare DNS + Email Routing Phase 1
+
+- Added `src/lib/server/cloudflare.ts`, a server-only Cloudflare provider seam for the upcoming
+  domain fulfillment path. It can check configuration/readiness, create or reuse a zone, read
+  nameservers, upsert DNS records, enable Email Routing DNS, create destination addresses, create
+  forwarding rules, and read Email Routing status.
+- Added a Porkbun nameserver delegation seam (`updateNameservers`) so the next phase can register
+  domains at Porkbun but delegate authoritative DNS to Cloudflare.
+- Added migration v23 and schema fields on `domain_reservations` to track Cloudflare zone id,
+  nameservers, zone status, email routing status, local part, destination address, routing rule id,
+  and destination verification timestamp.
+- Applied v23 to production SQLite and verified `schema_migrations.max(version)=23` plus all new
+  `domain_reservations` columns exist.
+- This phase intentionally does **not** change live fulfillment yet: existing paid-domain fulfillment
+  still follows the current path until Phase 2 wires Cloudflare into registration/attach.
+- Verification: targeted Cloudflare/domains/migrations/reservations tests passed (4 files / 32 tests),
+  `npm run check` passed with 0 warnings, and the full unit suite passed (71 files / 456 tests).
+
+### 2026-07-12 — Cloudflare domain fulfillment Aşama 2
+
+- Connected paid domain fulfillment to the Cloudflare DNS + Email Routing path. `fulfillReservation`
+  now registers via Porkbun only after `paid`, creates/gets the Cloudflare zone, updates Porkbun
+  authoritative nameservers to Cloudflare, creates the Cloudflare apex A record, enables Email
+  Routing DNS, creates the destination address, and routes the configured local part (default
+  `info`) to the user's account email before nginx/TLS provisioning and `attachSiteDomain`.
+- Added retry safety for partial external failures: `registeredAt` is written immediately after
+  successful Porkbun registration, so a later Cloudflare/TLS failure can be retried without trying
+  to buy the same domain again. Cloudflare failures still move the reservation to `failed`, keeping
+  the existing operator retry path.
+- Added migration v23 fields on `domain_reservations` for Cloudflare zone/nameserver status and
+  email-routing state, plus schema/test coverage. Active domains can remain active while email
+  forwarding is `pending_verification`.
+- Dashboard domain copy now stays non-technical: users see "Alan adı hazırlanıyor", "SSL
+  hazırlanıyor", "E-posta yönlendirme doğrulaması bekleniyor", the forwarding summary
+  `info@domain → account email`, or "Aktif"; nameservers/provider details stay out of the customer
+  UI.
+- Verification: targeted Cloudflare/domain/reservation/migration tests passed (4 files / 32 tests),
+  `npm run check` passed with 0 warnings, and full `npm test` passed (71 files / 456 tests).
+  `npm run build` was not run because this checkout is tied to the live build directory and should
+  be paired with an explicit PM2 restart/deploy.
+
+### 2026-07-12 — Cloudflare fulfillment deployed
+
+- Reviewed the Phase 2 Cloudflare fulfillment wiring before production deploy. One live-safety fix was
+  added: Cloudflare Email Routing destination addresses and forwarding rules are now reused when they
+  already exist, so a webhook/cron retry does not fail just because `owner@email` or `info@domain`
+  was created during a previous partial run.
+- Deployed production release `20260712T154428Z` with `scripts/deploy-production.sh`. The release was
+  built into `releases/`, `current` was switched atomically, and PM2 app `saaskaya` was restarted.
+- Verification: targeted Cloudflare/domain/reservation/migration tests passed (4 files / 33 tests),
+  `npm run check` passed with 0 warnings, full `npm test` passed (71 files / 457 tests), production
+  build passed, deploy smoke passed for `https://saaskaya.com` on mobile + desktop, and live HTTPS
+  checks returned 200 for `/`, `/pricing`, and `/templates`.
+- Note: release metadata still has `git_dirty=1`; the currently deployed state includes uncommitted
+  working-tree changes and should be committed when this batch is accepted.

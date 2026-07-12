@@ -539,3 +539,42 @@ export const siteChatMessages = sqliteTable(
 	},
 	(table) => [index('site_chat_messages_site_idx').on(table.siteId, table.createdAt)]
 );
+
+export const blogPosts = sqliteTable(
+	'blog_posts',
+	{
+		id: text('id').primaryKey(),
+		slug: text('slug').notNull(),
+		status: text('status').notNull().default('draft'),
+		coverImageUrl: text('cover_image_url'),
+		coverAlt: text('cover_alt'),
+		readingMinutes: integer('reading_minutes').notNull().default(3),
+		authorName: text('author_name').notNull().default('Cüneyt Kaya'),
+		publishedAt: integer('published_at', { mode: 'timestamp' }),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [
+		uniqueIndex('blog_posts_slug_unique').on(table.slug),
+		index('blog_posts_status_published_idx').on(table.status, table.publishedAt)
+	]
+);
+
+export const blogPostTranslations = sqliteTable(
+	'blog_post_translations',
+	{
+		postId: text('post_id').notNull(),
+		locale: text('locale').notNull(),
+		title: text('title').notNull(),
+		description: text('description').notNull(),
+		category: text('category').notNull(),
+		seoTitle: text('seo_title'),
+		seoDescription: text('seo_description'),
+		body: text('body', { mode: 'json' }).notNull()
+	},
+	(table) => [primaryKey({ columns: [table.postId, table.locale] })]
+);

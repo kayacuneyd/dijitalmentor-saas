@@ -1,35 +1,38 @@
 import type { RequestHandler } from './$types';
 import { LOCALES, withLocale } from '$lib/i18n';
-import { blogPosts } from '$lib/public/blog';
+import { listBlogPosts } from '$lib/server/blog';
 
 const BASE = 'https://saaskaya.com';
 const now = new Date().toISOString();
 
-const pages = [
-	{ loc: '/', priority: '1.0', changefreq: 'weekly' },
-	{ loc: '/pricing', priority: '0.9', changefreq: 'monthly' },
-	{ loc: '/templates', priority: '0.8', changefreq: 'monthly' },
-	{ loc: '/about', priority: '0.7', changefreq: 'monthly' },
-	{ loc: '/contact', priority: '0.7', changefreq: 'monthly' },
-	{ loc: '/blog', priority: '0.7', changefreq: 'weekly' },
-	...blogPosts.map((post) => ({
-		loc: `/blog/${post.slug}`,
-		priority: '0.6',
-		changefreq: 'monthly'
-	})),
-	{ loc: '/legal/privacy', priority: '0.3', changefreq: 'yearly' },
-	{ loc: '/legal/terms', priority: '0.3', changefreq: 'yearly' },
-	{ loc: '/legal/kvkk', priority: '0.3', changefreq: 'yearly' },
-	{ loc: '/legal/acceptable-use', priority: '0.3', changefreq: 'yearly' },
-	{ loc: '/legal/refund', priority: '0.3', changefreq: 'yearly' },
-	{ loc: '/legal/disclaimer', priority: '0.3', changefreq: 'yearly' }
-];
+function pages() {
+	const posts = listBlogPosts();
+	return [
+		{ loc: '/', priority: '1.0', changefreq: 'weekly' },
+		{ loc: '/pricing', priority: '0.9', changefreq: 'monthly' },
+		{ loc: '/templates', priority: '0.8', changefreq: 'monthly' },
+		{ loc: '/about', priority: '0.7', changefreq: 'monthly' },
+		{ loc: '/contact', priority: '0.7', changefreq: 'monthly' },
+		{ loc: '/blog', priority: '0.7', changefreq: 'weekly' },
+		...posts.map((post) => ({
+			loc: `/blog/${post.slug}`,
+			priority: '0.6',
+			changefreq: 'monthly'
+		})),
+		{ loc: '/legal/privacy', priority: '0.3', changefreq: 'yearly' },
+		{ loc: '/legal/terms', priority: '0.3', changefreq: 'yearly' },
+		{ loc: '/legal/kvkk', priority: '0.3', changefreq: 'yearly' },
+		{ loc: '/legal/acceptable-use', priority: '0.3', changefreq: 'yearly' },
+		{ loc: '/legal/refund', priority: '0.3', changefreq: 'yearly' },
+		{ loc: '/legal/disclaimer', priority: '0.3', changefreq: 'yearly' }
+	];
+}
 
-const localizedPages = pages.flatMap((page) =>
-	LOCALES.map((locale) => ({ ...page, loc: withLocale(locale, page.loc) }))
-);
-
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+function buildSitemap() {
+	const localizedPages = pages().flatMap((page) =>
+		LOCALES.map((locale) => ({ ...page, loc: withLocale(locale, page.loc) }))
+	);
+	return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${localizedPages
 	.map(
@@ -43,9 +46,10 @@ ${localizedPages
 	.join('\n')}
 </urlset>
 `;
+}
 
 export const GET: RequestHandler = () =>
-	new Response(sitemap, {
+	new Response(buildSitemap(), {
 		headers: {
 			'Content-Type': 'application/xml; charset=utf-8',
 			'Cache-Control': 'public, max-age=3600'

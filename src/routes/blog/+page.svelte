@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { blogPosts } from '$lib/public/blog';
 	import { organizationJsonLd, webSiteJsonLd } from '$lib/seo';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
@@ -69,8 +68,17 @@
 		</div>
 
 		<div class="grid gap-4 lg:grid-cols-3">
-			{#each blogPosts as post (post.slug)}
+			{#each data.posts as post (post.slug)}
 				<article class="sk-card flex min-h-full flex-col p-5">
+					{#if post.coverImageUrl}
+						<img
+							src={post.coverImageUrl}
+							alt={post.coverAlt ?? post.title[locale]}
+							class="mb-4 aspect-[16/9] w-full rounded-[10px] border border-[var(--sk-line)] object-cover"
+							loading="lazy"
+							decoding="async"
+						/>
+					{/if}
 					<div class="flex flex-wrap items-center gap-2">
 						<StatusPill>{post.category[locale]}</StatusPill>
 						<span class="text-xs text-[var(--sk-faint)]">{post.readingMinutes} {copy.min}</span>
@@ -85,6 +93,10 @@
 						{copy.read}
 					</a>
 				</article>
+			{:else}
+				<div class="sk-card p-5 text-sm text-[var(--sk-muted)] lg:col-span-3">
+					No published articles yet.
+				</div>
 			{/each}
 		</div>
 	</MarketingSection>

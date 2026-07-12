@@ -2120,3 +2120,24 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Prevention: added an owner route regression test for spaced one-time-code input.
 - Verification: targeted owner tests passed (2 files / 5 tests), `npm run check` passed, and
   `npm run build` succeeded.
+
+### 2026-07-12 — Owner-managed multilingual blog CMS + WYSIWYG
+
+- **Blog moved from static content to DB-backed CMS:** added `blog_posts` and
+  `blog_post_translations` (migration v21) with status, slug, author, reading time, cover/SEO image,
+  and per-locale TR/EN/DE title/summary/category/SEO/body fields. Existing static blog posts seed
+  into the DB on first blog access so the public blog does not go empty after migration.
+- **WYSIWYG decision:** added TipTap/ProseMirror for owner/admin editing, but store/render the body as
+  validated ProseMirror JSON rather than raw HTML. This keeps the platform aligned with the
+  constitution's “no arbitrary HTML/CSS render” principle while still giving comfortable article
+  writing controls.
+- **Admin UI:** added `/admin/blog` and `/admin/blog/[postId]` with create/edit flows, draft/published
+  states, cover image URL + alt text, SEO title/description, and three separate language bodies.
+- **Public UI/SEO:** `/blog` and `/blog/[slug]` now read published DB posts; single articles use a
+  breadcrumb instead of the old back-link, support cover images, render body content via Svelte
+  components (no `{@html}`), and include article image + breadcrumb JSON-LD. `sitemap.xml` now uses
+  published DB blog slugs.
+- **Verification:** installed TipTap packages, formatted changed files, `npm run check` passed with 0
+  warnings, full `npm test` passed (70 files / 441 tests), and `npm run build` succeeded. Dev smoke:
+  `/blog` 200, `/blog/ai-assisted-website-building` 200, `/admin/blog` 303 to `/login` when
+  unauthenticated.

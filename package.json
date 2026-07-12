@@ -54,6 +54,12 @@
 		"@fontsource/playfair-display": "^5.2.8",
 		"@fontsource/poppins": "^5.2.7",
 		"@fontsource/roboto": "^5.2.10",
+		"@tiptap/core": "^3.27.3",
+		"@tiptap/extension-image": "^3.27.3",
+		"@tiptap/extension-link": "^3.27.3",
+		"@tiptap/extension-placeholder": "^3.27.3",
+		"@tiptap/extension-underline": "^3.27.3",
+		"@tiptap/starter-kit": "^3.27.3",
 		"better-sqlite3": "^12.10.0",
 		"nodemailer": "^9.0.3",
 		"zod": "^4.4.3"

@@ -649,6 +649,39 @@ export const migrations: Migration[] = [
 			client.exec(`CREATE INDEX IF NOT EXISTS owner_login_events_created_idx
 				ON owner_login_events (created_at)`);
 		}
+	},
+	{
+		version: 21,
+		name: 'blog-cms',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS blog_posts (
+				id text PRIMARY KEY,
+				slug text NOT NULL,
+				status text NOT NULL DEFAULT 'draft',
+				cover_image_url text,
+				cover_alt text,
+				reading_minutes integer NOT NULL DEFAULT 3,
+				author_name text NOT NULL DEFAULT 'Cüneyt Kaya',
+				published_at integer,
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL
+			)`);
+			client.exec(`CREATE UNIQUE INDEX IF NOT EXISTS blog_posts_slug_unique
+				ON blog_posts (slug)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS blog_posts_status_published_idx
+				ON blog_posts (status, published_at)`);
+			client.exec(`CREATE TABLE IF NOT EXISTS blog_post_translations (
+				post_id text NOT NULL,
+				locale text NOT NULL,
+				title text NOT NULL,
+				description text NOT NULL,
+				category text NOT NULL,
+				seo_title text,
+				seo_description text,
+				body text NOT NULL,
+				PRIMARY KEY (post_id, locale)
+			)`);
+		}
 	}
 ];
 

@@ -2359,3 +2359,13 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: targeted billing/reservation/assistant KB tests passed (3 files / 44 tests),
   `npm run check` passed with 0 warnings, and the full unit suite passed (70 files / 445 tests).
   `npm run build` was not run because it should be paired with an explicit production deploy/restart.
+
+### 2026-07-12 — Cloudflare domain/email settings exposed
+
+- Added `/admin/settings` inputs for the upcoming Cloudflare DNS + Email Routing automation:
+  `CLOUDFLARE_API_TOKEN` (secret), `CLOUDFLARE_ACCOUNT_ID`, and
+  `CLOUDFLARE_EMAIL_DEFAULT_LOCAL_PART`.
+- Kept them in the `Domains` group beside Porkbun because the intended flow is Porkbun as registrar
+  and Cloudflare as DNS/Email Routing provider. The token help text explicitly calls out narrow
+  DNS/Zone/Email Routing scope.
+- Verification: `npm run check` passed with 0 warnings.

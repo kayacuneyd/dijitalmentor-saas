@@ -271,6 +271,27 @@ export const SETTING_DEFS: SettingDef[] = [
 	{ key: 'PORKBUN_API_KEY', label: 'Porkbun API key', group: 'Domains', secret: true },
 	{ key: 'PORKBUN_SECRET_KEY', label: 'Porkbun secret key', group: 'Domains', secret: true },
 	{
+		key: 'CLOUDFLARE_API_TOKEN',
+		label: 'Cloudflare API token',
+		group: 'Domains',
+		secret: true,
+		help: 'DNS + Email Routing automation token; keep scoped to DNS/Zone/Email Routing only'
+	},
+	{
+		key: 'CLOUDFLARE_ACCOUNT_ID',
+		label: 'Cloudflare account id',
+		group: 'Domains',
+		secret: false,
+		help: 'used for Email Routing destination addresses'
+	},
+	{
+		key: 'CLOUDFLARE_EMAIL_DEFAULT_LOCAL_PART',
+		label: 'Default email forwarding local part',
+		group: 'Domains',
+		secret: false,
+		help: 'default info; used for info@customer-domain.com style forwarding'
+	},
+	{
 		key: 'SERVER_IP',
 		label: 'Server IPv4',
 		group: 'Domains',

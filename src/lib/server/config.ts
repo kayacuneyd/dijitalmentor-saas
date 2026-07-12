@@ -198,7 +198,25 @@ export const SETTING_DEFS: SettingDef[] = [
 	{ key: 'CREEM_WEBHOOK_SECRET', label: 'Creem webhook secret', group: 'Billing', secret: true },
 	{
 		key: 'CREEM_PRO_PRODUCT_ID',
-		label: 'Creem Pro product id',
+		label: 'Creem Pro product id (legacy monthly fallback)',
+		group: 'Billing',
+		secret: false
+	},
+	{
+		key: 'CREEM_PRO_MONTHLY_PRODUCT_ID',
+		label: 'Creem Pro Monthly product id',
+		group: 'Billing',
+		secret: false
+	},
+	{
+		key: 'CREEM_PRO_YEARLY_PRODUCT_ID',
+		label: 'Creem Pro Yearly product id',
+		group: 'Billing',
+		secret: false
+	},
+	{
+		key: 'CREEM_DOMAIN_PRODUCT_ID',
+		label: 'Creem .com Domain product id',
 		group: 'Billing',
 		secret: false
 	},
@@ -214,7 +232,7 @@ export const SETTING_DEFS: SettingDef[] = [
 		label: 'Domain payment mode',
 		group: 'Billing',
 		secret: false,
-		help: 'disabled / bank_only / hybrid / stripe_only; default bank_only'
+		help: 'disabled / bank_only / hybrid / card_only; legacy stripe_only also means card checkout through the active provider'
 	},
 	{
 		key: 'DOMAIN_PRICE_EUR',

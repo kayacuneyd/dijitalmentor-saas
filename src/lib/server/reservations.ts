@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { domainReservations } from '$lib/server/db/schema';
+import { domainCredits, domainReservations } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
 import {
 	attachSiteDomain,
@@ -24,7 +24,7 @@ import {
  * status machine invoked by the admin panel and the daily cron.
  */
 
-export type PaymentMethod = 'bank_transfer' | 'stripe';
+export type PaymentMethod = 'bank_transfer' | 'stripe' | 'creem' | 'included';
 export type ReservationStatus =
 	'pending' | 'manual_review' | 'paid' | 'registering' | 'active' | 'failed' | 'cancelled';
 
@@ -45,10 +45,12 @@ export function domainPriceTry(): string {
 	return getSetting('DOMAIN_PRICE_TRY') || '500';
 }
 
-export type PaymentMode = 'disabled' | 'bank_only' | 'hybrid' | 'stripe_only';
+export type PaymentMode = 'disabled' | 'bank_only' | 'hybrid' | 'stripe_only' | 'card_only';
 export function paymentMode(): PaymentMode {
 	const mode = getSetting('PAYMENT_MODE');
-	return mode === 'disabled' || mode === 'hybrid' || mode === 'stripe_only' ? mode : 'bank_only';
+	return mode === 'disabled' || mode === 'hybrid' || mode === 'stripe_only' || mode === 'card_only'
+		? mode
+		: 'bank_only';
 }
 
 export function getReservation(id: string): Reservation | undefined {
@@ -90,12 +92,17 @@ export function createReservation(input: {
 	siteId: string;
 	domain: string;
 	paymentMethod: PaymentMethod;
-	initialStatus?: 'pending' | 'manual_review';
+	initialStatus?: 'pending' | 'manual_review' | 'paid';
 	operatorNotes?: string | null;
 }): CreateReservationResult {
 	const domain = normalizeDomain(input.domain);
 	if (!validateDomain(domain)) return { ok: false, reason: 'invalid-domain' };
-	if (input.paymentMethod !== 'bank_transfer' && input.paymentMethod !== 'stripe') {
+	if (
+		input.paymentMethod !== 'bank_transfer' &&
+		input.paymentMethod !== 'stripe' &&
+		input.paymentMethod !== 'creem' &&
+		input.paymentMethod !== 'included'
+	) {
 		return { ok: false, reason: 'bad-method' };
 	}
 	// The partial unique index enforces one live reservation per domain, but check
@@ -164,7 +171,7 @@ export async function customerDomainGate(domain: string): Promise<CustomerDomain
 		return { status: 'unavailable', note: 'live reservation/domain conflict' };
 	}
 	const tld = domainTld(normalized);
-	const allowed = configuredTlds('DOMAIN_AUTO_TLDS', ['com', 'net', 'org', 'de', 'com.tr']);
+	const allowed = configuredTlds('DOMAIN_AUTO_TLDS', ['com']);
 	const manual = configuredTlds('DOMAIN_MANUAL_REVIEW_TLDS', []);
 	if (manual.has(tld) || !allowed.has(tld)) {
 		return { status: 'manual_review', note: `tld ${tld || '(unknown)'} requires manual review` };
@@ -183,6 +190,89 @@ export async function customerDomainGate(domain: string): Promise<CustomerDomain
 			note: `provider availability check failed: ${String(error)}`
 		};
 	}
+}
+
+export type DomainCredit = typeof domainCredits.$inferSelect;
+
+export function grantYearlyProDomainCredit(input: {
+	userId: string;
+	siteId: string;
+	expiresAt?: Date;
+}): DomainCredit {
+	const existing = db
+		.select()
+		.from(domainCredits)
+		.where(
+			and(
+				eq(domainCredits.userId, input.userId),
+				eq(domainCredits.siteId, input.siteId),
+				eq(domainCredits.source, 'yearly_pro')
+			)
+		)
+		.orderBy(desc(domainCredits.createdAt))
+		.get();
+	if (existing) return existing;
+	const now = new Date();
+	const credit = {
+		id: `dc-${randomUUID().slice(0, 8)}`,
+		userId: input.userId,
+		siteId: input.siteId,
+		source: 'yearly_pro',
+		tld: 'com',
+		status: 'unused',
+		domain: null,
+		reservationId: null,
+		expiresAt: input.expiresAt ?? null,
+		createdAt: now,
+		usedAt: null
+	};
+	db.insert(domainCredits).values(credit).run();
+	return credit;
+}
+
+export function unusedDomainCreditForSite(userId: string, siteId: string): DomainCredit | undefined {
+	const now = new Date();
+	return db
+		.select()
+		.from(domainCredits)
+		.where(
+			and(
+				eq(domainCredits.userId, userId),
+				eq(domainCredits.siteId, siteId),
+				eq(domainCredits.tld, 'com'),
+				eq(domainCredits.status, 'unused')
+			)
+		)
+		.orderBy(desc(domainCredits.createdAt))
+		.all()
+		.find((credit) => !credit.expiresAt || credit.expiresAt.getTime() > now.getTime());
+}
+
+export function consumeDomainCredit(input: {
+	creditId: string;
+	userId: string;
+	siteId: string;
+	reservationId: string;
+	domain: string;
+}): boolean {
+	const credit = db
+		.select()
+		.from(domainCredits)
+		.where(eq(domainCredits.id, input.creditId))
+		.get();
+	if (!credit || credit.userId !== input.userId || credit.siteId !== input.siteId) return false;
+	if (credit.status !== 'unused') return false;
+	if (credit.expiresAt && credit.expiresAt.getTime() <= Date.now()) return false;
+	db.update(domainCredits)
+		.set({
+			status: 'used',
+			domain: input.domain,
+			reservationId: input.reservationId,
+			usedAt: new Date()
+		})
+		.where(eq(domainCredits.id, input.creditId))
+		.run();
+	return true;
 }
 
 function appendNote(id: string, note: string): void {

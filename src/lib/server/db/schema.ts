@@ -219,7 +219,7 @@ export const domainReservations = sqliteTable('domain_reservations', {
 	domain: text('domain').notNull(),
 	// pending | paid | registering | active | failed | cancelled
 	status: text('status').notNull().default('pending'),
-	// bank_transfer | stripe
+	// bank_transfer | stripe | creem | included
 	paymentMethod: text('payment_method').notNull().default('bank_transfer'),
 	priceEur: text('price_eur'),
 	priceTry: text('price_try'),
@@ -233,6 +233,31 @@ export const domainReservations = sqliteTable('domain_reservations', {
 		.notNull()
 		.$defaultFn(() => new Date())
 });
+
+// One included standard .com entitlement, currently granted by yearly Pro.
+// It is consumed only after a customer selects an available domain.
+export const domainCredits = sqliteTable(
+	'domain_credits',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id').notNull(),
+		siteId: text('site_id').notNull(),
+		source: text('source').notNull(), // yearly_pro | manual
+		tld: text('tld').notNull().default('com'),
+		status: text('status').notNull().default('unused'), // unused | used | expired | revoked
+		domain: text('domain'),
+		reservationId: text('reservation_id'),
+		expiresAt: integer('expires_at', { mode: 'timestamp' }),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		usedAt: integer('used_at', { mode: 'timestamp' })
+	},
+	(table) => [
+		index('domain_credits_user_site_idx').on(table.userId, table.siteId),
+		index('domain_credits_status_idx').on(table.status)
+	]
+);
 
 // Gatekeeper telemetry (Layer 1): one row per gate/agent decision. Feeds the
 // admin Ops card and validates the cost model's off-topic/approval assumptions.
@@ -405,6 +430,8 @@ export const siteSubscriptions = sqliteTable(
 		providerCustomerId: text('provider_customer_id'),
 		providerSubscriptionId: text('provider_subscription_id'),
 		status: text('status').notNull().default('active'),
+		planInterval: text('plan_interval').notNull().default('monthly'),
+		priceEur: integer('price_eur').notNull().default(17),
 		priceEurMonthly: integer('price_eur_monthly').notNull().default(17),
 		currentPeriodEnd: integer('current_period_end', { mode: 'timestamp' }),
 		graceUntil: integer('grace_until', { mode: 'timestamp' }),

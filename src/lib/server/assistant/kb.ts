@@ -40,9 +40,9 @@ export const KB: KbEntry[] = [
 			de: ['kosten', 'preis', 'abo', 'wie viel']
 		},
 		reply: {
-			tr: 'Free ile deneyebilirsin; Pro site başına 17€/ay. Detayları fiyat sayfasında açıyorum.',
-			en: 'You can try Free first; Pro is 17€/month per site. I am opening the pricing page.',
-			de: 'Du kannst zuerst Free testen; Pro kostet 17€/Monat pro Website. Ich öffne die Preisseite.'
+			tr: 'Free ile deneyebilirsin. Aylık Pro 17€/ay; yönetilen .com alan adı eklenirse yıllık toplam 219€ olur. Yıllık Pro 200€/yıl ve .com alan adı dahildir. Fiyat sayfasını açıyorum.',
+			en: 'You can try Free first. Monthly Pro is 17€/month; with the managed .com domain service it totals 219€/year. Yearly Pro is 200€/year with the .com domain included. I am opening pricing.',
+			de: 'Du kannst zuerst Free testen. Pro monatlich kostet 17€/Monat; mit verwalteter .com Domain sind es 219€/Jahr. Pro jährlich kostet 200€/Jahr inklusive .com Domain. Ich öffne die Preisseite.'
 		}
 	},
 	{
@@ -140,9 +140,9 @@ export const KB: KbEntry[] = [
 			de: []
 		},
 		reply: {
-			tr: 'Özel domain Pro akışında ele alınır. Tescil yalnızca ödeme ve iç uygunluk onayından sonra yapılır; domain maliyeti kontrollü tutulur.',
-			en: 'Custom domains are handled in the Pro flow. Registration only happens after payment and internal approval, with provider cost controlled.',
-			de: 'Eigene Domains laufen über den Pro-Ablauf. Registrierung erfolgt erst nach Zahlung und interner Freigabe.'
+			tr: 'Özel domain Pro akışında ele alınır. Yıllık Pro’da standart .com dahildir; Aylık Pro’da .com alan adı hizmeti 15€/yıl eklenir. SSL, DNS, hosting bağlantısı ve e-posta yönlendirme kurulumu yönetilir.',
+			en: 'Custom domains are handled in the Pro flow. Yearly Pro includes a standard .com; Monthly Pro can add the managed .com service for 15€/year. SSL, DNS, hosting connection, and email forwarding setup are managed.',
+			de: 'Eigene Domains laufen über Pro. Pro jährlich enthält eine standard .com; Pro monatlich kann die verwaltete .com für 15€/Jahr hinzufügen. SSL, DNS, Hosting-Verbindung und E-Mail-Weiterleitung werden verwaltet.'
 		}
 	},
 	{

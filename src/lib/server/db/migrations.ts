@@ -682,6 +682,31 @@ export const migrations: Migration[] = [
 				PRIMARY KEY (post_id, locale)
 			)`);
 		}
+	},
+	{
+		version: 22,
+		name: 'creem-yearly-domain-products',
+		up(client) {
+			ensureColumn(client, 'site_subscriptions', 'plan_interval', "text NOT NULL DEFAULT 'monthly'");
+			ensureColumn(client, 'site_subscriptions', 'price_eur', 'integer NOT NULL DEFAULT 17');
+			client.exec(`CREATE TABLE IF NOT EXISTS domain_credits (
+				id text PRIMARY KEY,
+				user_id text NOT NULL,
+				site_id text NOT NULL,
+				source text NOT NULL,
+				tld text NOT NULL DEFAULT 'com',
+				status text NOT NULL DEFAULT 'unused',
+				domain text,
+				reservation_id text,
+				expires_at integer,
+				created_at integer NOT NULL,
+				used_at integer
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS domain_credits_user_site_idx
+				ON domain_credits (user_id, site_id)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS domain_credits_status_idx
+				ON domain_credits (status)`);
+		}
 	}
 ];
 

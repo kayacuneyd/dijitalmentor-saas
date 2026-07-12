@@ -2310,3 +2310,52 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Backlog noted: tenant-site block tap targets (nav pills 32px, locale pills 23px, "Powered by"
   15px in `SiteRenderer`/blocks) — shared-block work, scoped separately per the constitution.
 - Verification: `svelte-check` 0 errors, 445/445 tests, production build OK.
+### 2026-07-12 — Creem monthly/yearly/domain product integration
+
+- Split the Creem product integration into three operator-managed IDs: monthly Pro, yearly Pro,
+  and yearly `.com` domain service. `CREEM_PRO_PRODUCT_ID` remains as a legacy monthly fallback,
+  while `CREEM_PRO_MONTHLY_PRODUCT_ID`, `CREEM_PRO_YEARLY_PRODUCT_ID`, and
+  `CREEM_DOMAIN_PRODUCT_ID` are now exposed in `/admin/settings`.
+- Added `planInterval` support to Pro checkout metadata. Monthly Pro uses the monthly product; yearly
+  Pro uses the yearly product and, after a paid/active Creem webhook, grants one included standard
+  `.com` domain credit for that site.
+- Added `domain_credits` plus migration v22. The yearly Pro domain is modeled as an internal
+  entitlement, not as customer-facing product complexity. When the customer selects an available
+  `.com`, the credit is consumed and the reservation is marked paid; actual Porkbun registration
+  still only runs from the existing paid-reservation fulfillment path.
+- Added Creem domain checkout support for monthly Pro customers who add a `.com` yearly service.
+  Creem `kind=domain` webhooks route only to `confirmPayment(reservationId)` and never activate Pro.
+- Updated dashboard and pricing copy to expose the simple product surface: Free, Aylık/Monthly Pro,
+  and Yıllık/Yearly Pro with one standard `.com` included. The separate `.com` domain service remains
+  an add-on/payment path, not a public third pricing plan.
+- Tightened the default self-service TLD gate to `.com` only; other TLDs fall into manual review unless
+  explicitly configured.
+- Verification: targeted billing/migration/reservation tests passed (3 files / 37 tests),
+  `npm run check` passed with 0 warnings, and the full unit suite passed (70 files / 445 tests).
+  `npm run build` was intentionally not run because this checkout is tied to the live build directory
+  and should be paired with an explicit deploy/restart.
+
+### 2026-07-12 — Pro packaging refined for non-technical customers
+
+- Applied the operator product decision that the old `CREEM_PRO_PRODUCT_ID` is the monthly Pro product.
+  Production `app_settings` now has `CREEM_PRO_MONTHLY_PRODUCT_ID` copied from that legacy value,
+  `CREEM_PRO_YEARLY_PRODUCT_ID=prod_6Yq9NS6ySuTOOggMRLruCh`, `CREEM_DOMAIN_PRODUCT_ID` set from the
+  new Creem domain product, `PAYMENT_PROVIDER=creem`, and `PAYMENT_MODE=card_only`.
+- Added `card_only` as the clearer payment-mode alias while keeping legacy `stripe_only` working as
+  "card checkout through the active provider". Dashboard and config help now use that meaning.
+- Added site subscription detail reads (`planInterval`, `priceEur`) so dashboard copy can distinguish
+  monthly vs yearly Pro from actual DB state instead of guessing.
+- Reworked dashboard domain CTA copy: monthly Pro users are explicitly guided to choose a `.com`
+  domain as the next step (`15€/year`, managed SSL/DNS/hosting connection); yearly Pro users see their
+  included standard `.com` entitlement as ready to use.
+- Reworked pricing and assistant answers around the simple customer-facing comparison:
+  monthly Pro `17€/month + 15€/year domain = 219€/year` versus yearly Pro `200€/year` with one
+  standard `.com` included, approximately a 9% advantage. Copy now explains the managed bundle in
+  non-technical terms: website, hosting, SSL, DNS setup, renewal tracking, maintenance, contact forms,
+  and email forwarding setup.
+- Updated `docs/POLICY.md` and `/legal/terms` so policy matches the new model: yearly Pro includes one
+  standard `.com`, monthly Pro can add the managed `.com` service, premium/non-.com/extra domains stay
+  separate, and email is forwarding/routing rather than a mailbox product.
+- Verification: targeted billing/reservation/assistant KB tests passed (3 files / 44 tests),
+  `npm run check` passed with 0 warnings, and the full unit suite passed (70 files / 445 tests).
+  `npm run build` was not run because it should be paired with an explicit production deploy/restart.

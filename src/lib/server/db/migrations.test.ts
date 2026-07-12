@@ -31,6 +31,7 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'request_probe_stats',
 				'onboarding_events',
 				'media_assets',
+				'domain_credits',
 				'schema_migrations'
 			])
 		);
@@ -182,6 +183,21 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 			)
 			.get();
 		expect(chatSiteIdx).toBeTruthy();
+		// v22: Creem monthly/yearly/domain product split + included domain credits
+		expect(tables(client)).toContain('domain_credits');
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('site_subscriptions') WHERE name='plan_interval'`)
+				.get()
+		).toBeTruthy();
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('site_subscriptions') WHERE name='price_eur'`)
+				.get()
+		).toBeTruthy();
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('domain_credits') WHERE name='tld'`).get()
+		).toBeTruthy();
 	});
 
 	it('is idempotent: a second run applies nothing', () => {

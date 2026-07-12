@@ -217,18 +217,28 @@
 										{/if}
 									</p>
 									<p class="mt-1 text-xs text-[var(--sk-muted)]">
-										Pro: {data.proSitePriceEur}€/ay / yayınlanan site. Kendi domaini, Pro export ve
-										siteye bağlı ücretli özellikler sadece bu site için açılır.
+										Pro: {data.proSitePriceEur}€/ay veya {data.proSiteYearlyPriceEur}€/yıl.
+										Yıllık Pro'ya standart .com alan adı, SSL ve teknik kurulum dahildir.
 									</p>
 								</div>
 								{#if site.plan.state === 'free'}
 									{#if data.billingConfigured}
-										<form method="POST" action="/api/billing/checkout">
-											<input type="hidden" name="siteId" value={site.id} />
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-												Bu siteyi Pro yap
-											</button>
-										</form>
+										<div class="flex flex-wrap gap-2">
+											<form method="POST" action="/api/billing/checkout">
+												<input type="hidden" name="siteId" value={site.id} />
+												<input type="hidden" name="planInterval" value="monthly" />
+												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+													Aylık Pro + domain seç
+												</button>
+											</form>
+											<form method="POST" action="/api/billing/checkout">
+												<input type="hidden" name="siteId" value={site.id} />
+												<input type="hidden" name="planInterval" value="yearly" />
+												<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+													Yıllık Pro (.com dahil)
+												</button>
+											</form>
+										</div>
 									{:else}
 										<span class="text-xs text-[var(--sk-faint)]">
 											Pro ödemesi hazır olduğunda burada açılacak.
@@ -430,12 +440,22 @@
 												</p>
 											</div>
 											{#if data.billingConfigured}
-												<form method="POST" action="/api/billing/checkout">
-													<input type="hidden" name="siteId" value={site.id} />
-													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-														Bu siteyi Pro yap
-													</button>
-												</form>
+												<div class="flex flex-wrap gap-2">
+													<form method="POST" action="/api/billing/checkout">
+												<input type="hidden" name="siteId" value={site.id} />
+												<input type="hidden" name="planInterval" value="monthly" />
+												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+															Aylık Pro + domain seç
+														</button>
+													</form>
+													<form method="POST" action="/api/billing/checkout">
+														<input type="hidden" name="siteId" value={site.id} />
+														<input type="hidden" name="planInterval" value="yearly" />
+														<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+															Yıllık Pro (.com dahil)
+														</button>
+													</form>
+												</div>
 											{/if}
 										{:else if res.status === 'pending' && res.paymentMethod === 'bank_transfer'}
 											<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
@@ -466,12 +486,12 @@
 													</button>
 												</form>
 											</div>
-										{:else if res.status === 'pending' && res.paymentMethod === 'stripe'}
+										{:else if res.status === 'pending' && ['stripe', 'creem'].includes(res.paymentMethod)}
 											<div class="flex flex-wrap gap-2">
 												<form method="POST" action="?/payDomainStripe">
 													<input type="hidden" name="reservationId" value={res.id} />
 													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-														💳 Kredi kartıyla devam et
+														Kartla devam et
 													</button>
 												</form>
 												<form method="POST" action="?/cancelReservation" use:enhance>
@@ -522,11 +542,67 @@
 									<p class="text-[10.5px] text-[var(--sk-faint)]">
 										Kendi domainin varsa yukarıdan bağla (domainin bize yönlenmiş olmalı).
 									</p>
-									{#if data.payment.mode === 'disabled'}
+									{#if data.payment.mode === 'disabled' && !site.hasDomainCredit}
 										<p class="text-xs text-[var(--sk-muted)]">
 											Yeni domain satın alma kapalı beta sonrasında açılacak.
 										</p>
-									{:else if data.payment.mode === 'stripe_only'}
+									{:else if site.hasDomainCredit}
+										<div class="rounded-md bg-[#eef7ee] p-3 text-xs text-[#285c2a]">
+											<p class="font-semibold">Yıllık Pro alan adı hakkın hazır.</p>
+											<p class="mt-1">
+												Bir standart .com alan adı, SSL güvenliği, DNS kurulumu ve hosting
+												bağlantısı pakete dahil.
+											</p>
+										</div>
+										<form
+											method="POST"
+											action="?/reserveDomain"
+											use:enhance
+											class="flex flex-wrap items-center gap-2"
+										>
+											<input type="hidden" name="siteId" value={site.id} />
+											<input
+												type="text"
+												name="domain"
+												placeholder="istedigindomain.com"
+												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+											/>
+											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+												Dahil .com alan adımı seç
+											</button>
+										</form>
+									{:else if site.planDetails.planInterval === 'monthly' &&
+										site.plan.state !== 'free' &&
+										(data.payment.mode === 'stripe_only' ||
+											data.payment.mode === 'card_only' ||
+											data.payment.mode === 'hybrid')}
+										<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
+											<p class="font-semibold">Sıradaki adım: .com alan adını seç.</p>
+											<p class="mt-1 text-[var(--sk-muted)]">
+												Aylık Pro siten yayında kalır; kendi .com adresin için yıllık alan adı
+												hizmeti 15€'dur. SSL, DNS kurulumu ve siteye bağlama tarafımızdan
+												yönetilir.
+											</p>
+										</div>
+										<form
+											method="POST"
+											action="?/reserveDomain"
+											use:enhance
+											class="flex flex-wrap items-center gap-2"
+										>
+											<input type="hidden" name="siteId" value={site.id} />
+											<input type="hidden" name="paymentMethod" value="stripe" />
+											<input
+												type="text"
+												name="domain"
+												placeholder="istedigindomain.com"
+												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+											/>
+											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+												.com alan adımı seç
+											</button>
+										</form>
+									{:else if data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only'}
 										<form
 											method="POST"
 											action="?/reserveDomain"

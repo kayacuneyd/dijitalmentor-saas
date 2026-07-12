@@ -4,6 +4,7 @@ import {
 	billingConfigured,
 	billingProvider,
 	createCheckoutSession,
+	createDomainCheckoutSession,
 	handleStripeEvent,
 	handleCreemEvent,
 	hasActiveSiteSubscription,
@@ -16,7 +17,7 @@ import {
 } from './billing';
 import { getOrCreateUser } from './auth';
 import { clearSetting, setSetting } from './config';
-import { createReservation, getReservation } from './reservations';
+import { createReservation, getReservation, unusedDomainCreditForSite } from './reservations';
 
 const SECRET = 'whsec_test_secret';
 const CREEM_SECRET = 'creem_webhook_secret';
@@ -38,6 +39,9 @@ afterEach(() => {
 		'CREEM_API_KEY',
 		'CREEM_WEBHOOK_SECRET',
 		'CREEM_PRO_PRODUCT_ID',
+		'CREEM_PRO_MONTHLY_PRODUCT_ID',
+		'CREEM_PRO_YEARLY_PRODUCT_ID',
+		'CREEM_DOMAIN_PRODUCT_ID',
 		'CREEM_TEST_MODE',
 		'STRIPE_SECRET_KEY',
 		'STRIPE_PRICE_ID'
@@ -87,7 +91,7 @@ describe('billing provider selection and checkout', () => {
 	it('uses Creem when explicitly selected and creates a checkout session', async () => {
 		setSetting('PAYMENT_PROVIDER', 'creem');
 		setSetting('CREEM_API_KEY', 'creem_test_key');
-		setSetting('CREEM_PRO_PRODUCT_ID', 'prod_test');
+		setSetting('CREEM_PRO_MONTHLY_PRODUCT_ID', 'prod_monthly_test');
 		setSetting('CREEM_TEST_MODE', '1');
 		const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
 			new Response(JSON.stringify({ checkout_url: 'https://checkout.creem.io/test' }), {
@@ -116,7 +120,7 @@ describe('billing provider selection and checkout', () => {
 		);
 		const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
 		expect(body).toMatchObject({
-			product_id: 'prod_test',
+			product_id: 'prod_monthly_test',
 			success_url: 'https://saaskaya.com/dashboard?billing=success&site=site-creem-checkout',
 			customer: { email: 'creem-checkout@example.com' },
 			metadata: {
@@ -125,11 +129,85 @@ describe('billing provider selection and checkout', () => {
 				userId: 'user-creem-checkout',
 				referenceId: 'user-creem-checkout',
 				internal_customer_id: 'user-creem-checkout',
-				plan: 'pro',
+				plan: 'pro_monthly',
+				planInterval: 'monthly',
 				price: '17 EUR/month'
 			}
 		});
 		expect(String(body.request_id)).toContain('pro-site-site-creem-checkout-');
+	});
+
+	it('uses the yearly Creem product when yearly Pro is selected', async () => {
+		setSetting('PAYMENT_PROVIDER', 'creem');
+		setSetting('CREEM_API_KEY', 'creem_test_key');
+		setSetting('CREEM_PRO_MONTHLY_PRODUCT_ID', 'prod_monthly_test');
+		setSetting('CREEM_PRO_YEARLY_PRODUCT_ID', 'prod_yearly_test');
+		setSetting('CREEM_TEST_MODE', '1');
+		const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response(JSON.stringify({ checkout_url: 'https://checkout.creem.io/yearly' }), {
+				status: 200,
+				headers: { 'content-type': 'application/json' }
+			})
+		);
+
+		const url = await createCheckoutSession({
+			userId: 'user-creem-yearly',
+			email: 'creem-yearly@example.com',
+			origin: 'https://saaskaya.com',
+			siteId: 'site-creem-yearly',
+			planInterval: 'yearly'
+		});
+
+		expect(url).toBe('https://checkout.creem.io/yearly');
+		const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+		expect(body).toMatchObject({
+			product_id: 'prod_yearly_test',
+			metadata: {
+				kind: 'site_subscription',
+				siteId: 'site-creem-yearly',
+				userId: 'user-creem-yearly',
+				plan: 'pro_yearly',
+				planInterval: 'yearly',
+				price: '200 EUR/year'
+			}
+		});
+	});
+
+	it('creates a Creem checkout for the yearly .com domain service', async () => {
+		setSetting('PAYMENT_PROVIDER', 'creem');
+		setSetting('CREEM_API_KEY', 'creem_test_key');
+		setSetting('CREEM_PRO_MONTHLY_PRODUCT_ID', 'prod_monthly_test');
+		setSetting('CREEM_DOMAIN_PRODUCT_ID', 'prod_domain_test');
+		setSetting('CREEM_TEST_MODE', '1');
+		const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response(JSON.stringify({ checkout_url: 'https://checkout.creem.io/domain' }), {
+				status: 200,
+				headers: { 'content-type': 'application/json' }
+			})
+		);
+
+		const url = await createDomainCheckoutSession({
+			userId: 'user-creem-domain',
+			email: 'creem-domain@example.com',
+			origin: 'https://saaskaya.com',
+			domain: 'example-domain.com',
+			reservationId: 'res-creem-domain'
+		});
+
+		expect(url).toBe('https://checkout.creem.io/domain');
+		const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+		expect(body).toMatchObject({
+			product_id: 'prod_domain_test',
+			success_url: 'https://saaskaya.com/dashboard?domain=paid',
+			customer: { email: 'creem-domain@example.com' },
+			metadata: {
+				kind: 'domain',
+				reservationId: 'res-creem-domain',
+				domain: 'example-domain.com',
+				userId: 'user-creem-domain'
+			}
+		});
+		expect(String(body.request_id)).toContain('domain-res-creem-domain-');
 	});
 });
 
@@ -315,6 +393,64 @@ describe('handleCreemEvent → subscription status', () => {
 
 		expect(outcome).toMatch(/creem activated/);
 		expect(subscriptionState(user.id)).toEqual({ state: 'active' });
+	});
+
+	it('grants one included .com domain credit for yearly Pro site subscriptions', () => {
+		const user = getOrCreateUser('creem-yearly-credit@example.com');
+
+		const outcome = handleCreemEvent({
+			eventType: 'subscription.paid',
+			object: {
+				customer: { id: 'cust_creem_yearly' },
+				id: 'sub_creem_yearly',
+				metadata: {
+					userId: user.id,
+					siteId: 'site-yearly-credit',
+					kind: 'site_subscription',
+					planInterval: 'yearly'
+				},
+				current_period_end_date: '2027-07-12T00:00:00.000Z'
+			}
+		});
+
+		expect(outcome).toBe(`creem activated yearly site site-yearly-credit for ${user.id}`);
+		expect(hasActiveSiteSubscription('site-yearly-credit', user.id)).toBe(true);
+		expect(unusedDomainCreditForSite(user.id, 'site-yearly-credit')).toMatchObject({
+			userId: user.id,
+			siteId: 'site-yearly-credit',
+			source: 'yearly_pro',
+			tld: 'com',
+			status: 'unused'
+		});
+	});
+
+	it('routes Creem domain product payments to reservations, not Pro activation', () => {
+		const user = getOrCreateUser('creem-domain-pay@example.com');
+		const created = createReservation({
+			userId: user.id,
+			siteId: 's-creem-domain-webhook',
+			domain: 'creem-domain-webhook.com',
+			paymentMethod: 'creem'
+		});
+		if (!created.ok) throw new Error('expected ok');
+
+		const outcome = handleCreemEvent({
+			eventType: 'checkout.completed',
+			object: {
+				customer: 'cust_creem_domain',
+				checkout: {
+					metadata: {
+						kind: 'domain',
+						reservationId: created.reservation.id,
+						userId: user.id
+					}
+				}
+			}
+		});
+
+		expect(outcome).toBe(`creem domain reservation paid ${created.reservation.id}`);
+		expect(getReservation(created.reservation.id)?.status).toBe('paid');
+		expect(hasActiveSubscription(user.id)).toBe(false);
 	});
 
 	it('maps scheduled cancel and subscription.update status events', () => {

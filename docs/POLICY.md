@@ -20,19 +20,26 @@ settings/constants together.
 - **Bank transfer:** the user reserves, sees the IBAN + amount, and clicks "Havale yaptım, bildir".
   That is a note only — it never confirms payment. The operator confirms receipt at
   `/admin/settings` (Bekleyen ödemeler), which flips the reservation to `paid`.
-- **Stripe (one-time):** the user pays via Stripe checkout (`mode=payment`); the webhook marks the
-  reservation `paid`. This one-time domain payment never activates a Pro subscription.
+- **Card checkout:** the user pays through the active payment provider (currently Creem; Stripe remains
+  legacy/fallback). The webhook marks the reservation `paid`. A domain payment never activates a Pro
+  subscription.
+- **Yearly Pro included domain:** a paid yearly Pro site grants one standard `.com` domain credit. The
+  customer still selects an available domain; the credit then marks that reservation `paid` without a
+  second checkout.
 - **Fulfillment** (register → DNS → TLS → attach) runs after `paid`, decoupled and retryable: the
   daily cron auto-fulfills paid/failed reservations, and the operator can fulfill/retry manually.
   Availability is re-checked before registering; a failure lands the reservation on `failed` (kept
   with operator notes) for retry — money is never spent on an unavailable domain.
-- `PAYMENT_MODE` (`bank_only` / `hybrid` / `stripe_only`) controls which options the user sees;
-  price and IBAN come from settings (`DOMAIN_PRICE_EUR/TRY`, `BANK_IBAN`, `BANK_ACCOUNT_HOLDER`).
+- `PAYMENT_MODE` (`bank_only` / `hybrid` / `card_only` / legacy `stripe_only`) controls which options
+  the user sees; price and IBAN come from settings (`DOMAIN_PRICE_EUR/TRY`, `BANK_IBAN`,
+  `BANK_ACCOUNT_HOLDER`).
 
 ## Subscription & cancellation
 
-- The **Pro plan** unlocks custom domains (attach or register). Sites themselves — including
-  publishing on the `<siteId>.<app-host>` subdomain — stay available on the free tier.
+- The **Pro plan** unlocks custom domains (attach or register). Monthly Pro can add the managed `.com`
+  domain service yearly; Yearly Pro includes one standard `.com` while the yearly plan remains active.
+  Sites themselves — including publishing on the `<siteId>.<app-host>` subdomain — stay available on
+  the free tier.
 - On cancellation (or failed payment), paid features remain active until the **end of the paid
   period**, then for a **grace period of 30 days** (`GRACE_DAYS` setting). The dashboard shows the
   exact date.
@@ -44,9 +51,11 @@ settings/constants together.
 
 - Registration happens **only after payment** (constitution §5), for 1-year terms via the
   registrar API.
-- The domain belongs to the customer. Renewal is not automatic once the subscription lapses;
-  the sweep notice reminds the owner, and transfer-out is always possible per ICANN rules
-  (handled at the registrar).
+- The domain belongs to the customer. Renewal is managed while the relevant paid domain entitlement is
+  active. Once the subscription lapses past grace, the sweep notice reminds the owner, and transfer-out
+  is always possible per ICANN rules (handled at the registrar).
+- Email forwarding is a routing service, not a mailbox product: `info@customer-domain.com` can forward
+  to the customer's verified existing inbox once the destination address is confirmed.
 
 ## AI budget
 

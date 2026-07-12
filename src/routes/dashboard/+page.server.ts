@@ -2,9 +2,12 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { canManageSite } from '$lib/server/auth';
 import {
 	billingConfigured,
+	billingProvider,
 	createDomainCheckoutSession,
 	hasActiveSiteSubscription,
 	PRO_SITE_PRICE_EUR_MONTHLY,
+	PRO_SITE_PRICE_EUR_YEARLY,
+	siteSubscriptionDetails,
 	siteSubscriptionState,
 	subscriptionState
 } from '$lib/server/billing';
@@ -36,11 +39,13 @@ import {
 import {
 	cancelReservation,
 	createReservation,
+	consumeDomainCredit,
 	customerDomainGate,
 	getReservation,
 	listReservationsByUser,
 	paymentMode,
 	reportBankTransfer,
+	unusedDomainCreditForSite,
 	type PaymentMethod
 } from '$lib/server/reservations';
 import { getSetting } from '$lib/server/config';
@@ -53,10 +58,12 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	const sites = listSitesByOwner(locals.user.id).map((site) => ({
 		...site,
 		plan: siteSubscriptionState(site.id, locals.user!.id),
+		planDetails: siteSubscriptionDetails(site.id, locals.user!.id),
 		canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
 		liveUrl: `${url.protocol}//${site.publicHandle ?? site.id}.${url.host}`,
 		previewUrl: `/preview/${site.id}?locale=${site.defaultLocale}&source=persisted`,
 		domain: getDomainForSite(site.id),
+		hasDomainCredit: Boolean(unusedDomainCreditForSite(locals.user!.id, site.id)),
 		messageCount: countSubmissions(site.id),
 		reservation: reservations.find(
 			(r) => r.siteId === site.id && r.status !== 'cancelled' && r.status !== 'active'
@@ -71,6 +78,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 		billingConfigured: billingConfigured(),
 		porkbunConfigured: porkbunConfigured(),
 		proSitePriceEur: PRO_SITE_PRICE_EUR_MONTHLY,
+		proSiteYearlyPriceEur: PRO_SITE_PRICE_EUR_YEARLY,
 		payment: {
 			mode: paymentMode(),
 			iban: getSetting('BANK_IBAN') ?? '',
@@ -160,16 +168,18 @@ export const actions: Actions = {
 	// --- domain reservation + hybrid payment (beta-launch spec) ---------------
 	reserveDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
-		if (paymentMode() === 'disabled') {
-			return fail(503, {
-				domainMessage: 'Yeni domain satın alma kapalı beta süresince kullanılamıyor.'
-			});
-		}
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
-		const method = String(form.get('paymentMethod') ?? 'bank_transfer') as PaymentMethod;
+		const requestedMethod = String(form.get('paymentMethod') ?? 'bank_transfer') as PaymentMethod;
 		requireManageableSite(locals.user, siteId);
+		const credit = unusedDomainCreditForSite(locals.user.id, siteId);
+		if (paymentMode() === 'disabled' && !credit) {
+			return fail(503, {
+				domainMessage: 'Yeni domain satın alma kapalı beta süresince kullanılamıyor.',
+				siteId
+			});
+		}
 		if (!validateDomain(domain)) {
 			return fail(400, {
 				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
@@ -183,12 +193,19 @@ export const actions: Actions = {
 				siteId
 			});
 		}
+		const method: PaymentMethod =
+			credit && gate.status === 'available'
+				? 'included'
+			: requestedMethod === 'stripe' && billingProvider() === 'creem'
+				? 'creem'
+				: requestedMethod;
 		const result = createReservation({
 			userId: locals.user.id,
 			siteId,
 			domain,
 			paymentMethod: method,
-			initialStatus: gate.status === 'manual_review' ? 'manual_review' : 'pending',
+			initialStatus:
+				gate.status === 'manual_review' ? 'manual_review' : method === 'included' ? 'paid' : 'pending',
 			operatorNotes: gate.status === 'manual_review' ? gate.note : null
 		});
 		if (!result.ok) {
@@ -198,13 +215,30 @@ export const actions: Actions = {
 					: 'Domain rezerve edilemedi — adı kontrol edip tekrar dene.';
 			return fail(result.reason === 'domain-taken' ? 409 : 400, { domainMessage: msg, siteId });
 		}
+		if (method === 'included' && credit) {
+			const consumed = consumeDomainCredit({
+				creditId: credit.id,
+				userId: locals.user.id,
+				siteId,
+				reservationId: result.reservation.id,
+				domain
+			});
+			if (!consumed) {
+				return fail(409, {
+					domainMessage: 'Domain hakkı kullanılamadı. Sayfayı yenileyip tekrar dene.',
+					siteId
+				});
+			}
+		}
 		return {
 			reserved: result.reservation.domain,
 			siteId,
 			domainMessage:
 				gate.status === 'manual_review'
 					? 'Bu domain manuel inceleme gerektiriyor. Sizinle iletişime geçeceğiz.'
-					: 'Bu domain uygun. Bu site için Pro adımına devam edebilirsin.'
+					: method === 'included'
+						? 'Domain hakkın kullanıldı. Alan adın kurulum kuyruğuna alındı.'
+						: 'Bu domain uygun. Bu site için Pro adımına devam edebilirsin.'
 		};
 	},
 	reportTransfer: async ({ request, locals }) => {

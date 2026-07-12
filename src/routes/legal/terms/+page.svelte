@@ -91,7 +91,13 @@
 	<h2>9. Domain</h2>
 	<ul>
 		<li>Domain, tescil sonrası size aittir (ICANN kuralları)</li>
-		<li>Domain yenileme aboneliğe dahil değildir; yıllık ayrı ücretlendirilebilir</li>
+		<li>Aylık Pro’da yönetilen .com alan adı hizmeti yıllık ek ücretle sunulabilir</li>
+		<li>Yıllık Pro’da bir standart .com alan adı, yıllık plan aktif kaldığı sürece dahildir</li>
+		<li>Premium domainler, .com dışı uzantılar ve ikinci domainler ayrı değerlendirilir</li>
+		<li>
+			E-posta hizmeti posta kutusu değil yönlendirme hizmetidir; örn. info@domain.com adresine gelen
+			mesajlar doğrulanmış mevcut e-posta adresinize yönlendirilebilir
+		</li>
 		<li>Abonelik iptalinde domain 30 gün grace dönemi boyunca aktif kalır, sonra ayrılır</li>
 		<li>Domain transfer-out her zaman mümkündür (kayıtçı üzerinden)</li>
 	</ul>

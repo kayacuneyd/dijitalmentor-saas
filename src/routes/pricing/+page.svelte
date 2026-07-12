@@ -16,18 +16,19 @@
 			en: {
 				title: 'Pricing · saaskaya',
 				description:
-					'saaskaya pricing: Free and Pro at 17€/month for AI-assisted practice websites.',
+					'saaskaya pricing: Free, Pro Monthly, and Pro Yearly with an included standard .com domain.',
 				login: 'Sign in',
 				pills: ['Pricing', 'VAT excluded'],
 				h1: 'Clear pricing for a professional practice website',
-				lead: 'Start free and see the first draft. Pro gives one published site custom-domain readiness, multilingual site generation, and AI editing for 17€/month.',
+				lead: 'Start free and see the first draft. Monthly Pro plus a managed .com domain totals 219€/year; Yearly Pro is 200€/year with the .com domain included.',
 				month: '/month',
+				year: '/year',
 				recommended: 'Recommended',
 				startFree: 'Start free',
 				upgrade: 'Upgrade to',
 				start: 'Start',
 				domainNote:
-					'Custom domain registration is handled after payment and internal approval. Provider costs are never exposed in the checkout flow.',
+					'You are not buying only a domain. saaskaya manages the website, hosting, SSL security, DNS setup, domain renewal tracking, maintenance, contact forms, and professional email forwarding setup for your domain.',
 				faqLabel: 'Frequently asked questions',
 				ctaText: 'Not sure yet? Generate your first draft, then decide.',
 				cta: 'Describe your practice',
@@ -51,35 +52,47 @@
 					[
 						'Pro site',
 						'17€',
+						'/month',
 						'Per published site',
 						[
 							'1 published site',
-							'Custom domain + subdomain',
+							'*.saaskaya.com subdomain',
+							'Managed .com domain service: +15€/year',
+							'Annual total with .com: 219€',
 							'50 AI chat edits / month',
 							'8 pages',
 							'500 MB media',
 							'TR + 1 language (EN/DE)',
 							'Contact form + email notification',
+							'Hosting, SSL, DNS setup, maintenance',
+							'Professional email forwarding setup',
 							'saaskaya badge required',
 							'Full site data export',
 							'Priority email support'
 						]
 					],
 					[
-						'Premium',
-						'Later',
-						'To be decided',
+						'Pro Yearly',
+						'200€',
+						'/year',
+						'Best for going live',
 						[
-							'Top-ups and extra services will be clarified later',
-							'Human review remains a future service',
-							'No public Premium self-service yet'
+							'Everything in Monthly Pro',
+							'One standard .com domain included',
+							'200€/year instead of 219€/year',
+							'About 9% advantage versus monthly + domain',
+							'Domain renewal managed while yearly plan stays active',
+							'SSL, hosting, DNS, maintenance included',
+							'Professional email forwarding setup',
+							'Priority email support',
+							'Simpler yearly payment'
 						]
 					]
 				],
 				faqs: [
 					[
 						'Is a domain included?',
-						'Custom domains are available on Pro sites. Registration runs only after payment and internal approval.'
+						'Yearly Pro includes one standard .com domain. Monthly Pro customers are guided to add the managed .com domain service for 15€/year, so they do not need to buy or configure a domain elsewhere.'
 					],
 					[
 						'What is an AI credit?',
@@ -102,18 +115,19 @@
 			tr: {
 				title: 'Fiyatlandırma · saaskaya',
 				description:
-					'saaskaya fiyatlandırması: Free ve Pro 17€/ay. Psikologlar için AI web sitesi platformu.',
+					'saaskaya fiyatlandırması: Free, Aylık Pro ve standart .com alan adı dahil Yıllık Pro.',
 				login: 'Giriş',
 				pills: ['Fiyatlandırma', 'KDV hariç'],
 				h1: 'Profesyonel pratik için net fiyat',
-				lead: 'Ücretsiz dene, beğen. Pro ile bir yayınlanmış site için özel domain yolu + çok dilli site + AI düzenleme açılır. Pro fiyatı site başına 17€/ay.',
+				lead: 'Ücretsiz dene, beğen. Aylık Pro + yönetilen .com alan adı yılda 219€ tutar; Yıllık Pro 200€/yıl ve standart .com alan adı dahildir.',
 				month: '/ay',
+				year: '/yıl',
 				recommended: 'Önerilen',
 				startFree: 'Ücretsiz başla',
 				upgrade: 'Yükselt:',
 				start: 'Başla:',
 				domainNote:
-					'Özel domain tescili ödeme ve iç uygunluk onayından sonra yürütülür. Sağlayıcı maliyetleri ödeme akışında gösterilmez.',
+					'Sadece domain almıyorsunuz. saaskaya web sitesini, hosting’i, SSL güvenliğini, DNS kurulumunu, domain yenileme takibini, bakım-onarımı, iletişim formlarını ve profesyonel e-posta yönlendirme kurulumunu sizin için yönetir.',
 				faqLabel: 'Sıkça sorulan sorular',
 				ctaText: 'Henüz emin değil misiniz? Önce siteni üret, sonra karar ver.',
 				cta: 'Pratiğini anlat',
@@ -137,35 +151,47 @@
 					[
 						'Pro site',
 						'17€',
+						'/ay',
 						'Yayınlanan site başına',
 						[
 							'1 yayınlanmış site',
-							'Özel domain + alt alan adı',
+							'*.saaskaya.com alt alan adı',
+							'Yönetilen .com alan adı hizmeti: +15€/yıl',
+							'.com ile yıllık toplam: 219€',
 							'50 AI sohbet düzenleme / ay',
 							'8 sayfa',
 							'500 MB medya',
 							'TR + 1 dil (EN/DE)',
 							'İletişim formu + e-posta bildirimi',
+							'Hosting, SSL, DNS kurulumu, bakım',
+							'Profesyonel e-posta yönlendirme kurulumu',
 							'saaskaya rozeti (zorunlu)',
 							'Tam site veri exportu',
 							'Öncelikli e-posta destek'
 						]
 					],
 					[
-						'Premium',
-						'Sonra',
-						'Sonra netleşecek',
+						'Yıllık Pro',
+						'200€',
+						'/yıl',
+						'Yayına çıkmak için en net paket',
 						[
-							'Top-up ve ek servisler sonra netleşecek',
-							'İnsan incelemesi gelecek servis olarak kalır',
-							'Şu an public Premium self-service yok'
+							'Aylık Pro’daki her şey',
+							'Bir standart .com alan adı dahil',
+							'219€ yerine 200€/yıl',
+							'Aylık + domain toplamına göre yaklaşık %9 avantaj',
+							'Yıllık plan aktifken domain yenileme yönetilir',
+							'SSL, hosting, DNS ve bakım dahil',
+							'Profesyonel e-posta yönlendirme kurulumu',
+							'Öncelikli e-posta destek',
+							'Daha sade yıllık ödeme'
 						]
 					]
 				],
 				faqs: [
 					[
 						'Domain dahil mi?',
-						'Özel domain Pro sitelerde açılır. Tescil yalnızca ödeme ve iç uygunluk onayından sonra yapılır.'
+						'Yıllık Pro’ya bir standart .com alan adı dahildir. Aylık Pro müşterisi .com alan adını 15€/yıl yönetilen hizmet olarak ekler; ayrıca domain satın alma veya teknik kurulumla uğraşmaz.'
 					],
 					[
 						'AI kredisi ne demek?',
@@ -188,18 +214,19 @@
 			de: {
 				title: 'Preise · saaskaya',
 				description:
-					'saaskaya Preise: Free und Pro für 17€/Monat für AI-gestützte Praxis-Websites.',
+					'saaskaya Preise: Free, Pro monatlich und Pro jährlich mit standard .com Domain.',
 				login: 'Anmelden',
 				pills: ['Preise', 'zzgl. MwSt.'],
 				h1: 'Klare Preise für eine professionelle Praxis-Website',
-				lead: 'Kostenlos starten und den ersten Entwurf sehen. Pro bietet Domain-Bereitschaft, mehrsprachige Website und AI-Bearbeitung für eine veröffentlichte Website für 17€/Monat.',
+				lead: 'Kostenlos starten und den ersten Entwurf sehen. Pro monatlich plus verwaltete .com Domain ergibt 219€/Jahr; Pro jährlich kostet 200€/Jahr mit .com Domain inklusive.',
 				month: '/Monat',
+				year: '/Jahr',
 				recommended: 'Empfohlen',
 				startFree: 'Kostenlos starten',
 				upgrade: 'Upgrade auf',
 				start: 'Starten mit',
 				domainNote:
-					'Eigene Domains werden nach Zahlung und interner Freigabe registriert. Providerkosten werden im Checkout nicht angezeigt.',
+					'Sie kaufen nicht nur eine Domain. saaskaya verwaltet Website, Hosting, SSL-Sicherheit, DNS-Einrichtung, Domain-Verlängerung, Wartung, Kontaktformulare und professionelle E-Mail-Weiterleitung.',
 				faqLabel: 'Häufige Fragen',
 				ctaText: 'Noch unsicher? Erstelle zuerst deinen Entwurf und entscheide dann.',
 				cta: 'Praxis beschreiben',
@@ -223,35 +250,47 @@
 					[
 						'Pro site',
 						'17€',
+						'/Monat',
 						'Pro veröffentlichter Website',
 						[
 							'1 veröffentlichte Website',
-							'Eigene Domain + Subdomain',
+							'*.saaskaya.com Subdomain',
+							'Verwaltete .com Domain: +15€/Jahr',
+							'Jahressumme mit .com: 219€',
 							'50 AI-Chat-Bearbeitungen / Monat',
 							'8 Seiten',
 							'500 MB Medien',
 							'TR + 1 Sprache (EN/DE)',
 							'Kontaktformular + E-Mail-Benachrichtigung',
+							'Hosting, SSL, DNS-Einrichtung, Wartung',
+							'Professionelle E-Mail-Weiterleitung',
 							'saaskaya Badge erforderlich',
 							'Vollständiger Website-Datenexport',
 							'Priorisierter E-Mail-Support'
 						]
 					],
 					[
-						'Premium',
-						'Später',
-						'Wird später entschieden',
+						'Pro Jährlich',
+						'200€',
+						'/Jahr',
+						'Am einfachsten für den Livegang',
 						[
-							'Top-ups und Zusatzservices werden später geklärt',
-							'Menschliche Prüfung bleibt ein künftiger Service',
-							'Noch kein öffentliches Premium-Self-Service'
+							'Alles aus Pro monatlich',
+							'Eine standard .com Domain enthalten',
+							'200€/Jahr statt 219€/Jahr',
+							'Rund 9% Vorteil gegenüber monatlich + Domain',
+							'Domain-Verlängerung wird bei aktivem Jahresplan verwaltet',
+							'SSL, Hosting, DNS und Wartung enthalten',
+							'Professionelle E-Mail-Weiterleitung',
+							'Priorisierter E-Mail-Support',
+							'Einfachere jährliche Zahlung'
 						]
 					]
 				],
 				faqs: [
 					[
 						'Ist eine Domain enthalten?',
-						'Eigene Domains sind für Pro-Websites verfügbar. Registrierung erfolgt nur nach Zahlung und interner Freigabe.'
+						'Pro jährlich enthält eine standard .com Domain. Pro monatlich kann die verwaltete .com Domain für 15€/Jahr hinzufügen, ohne Domainkauf oder technische Einrichtung selbst zu erledigen.'
 					],
 					[
 						'Was ist ein AI-Credit?',
@@ -275,13 +314,22 @@
 	);
 
 	const plans = $derived(
-		copy.plans.map(([name, price, tagline, features]) => ({
+		copy.plans.map(([name, price, periodOrTagline, taglineOrFeatures, maybeFeatures]) => {
+			const hasPeriod = Array.isArray(maybeFeatures);
+			const tagline = hasPeriod ? String(taglineOrFeatures) : String(periodOrTagline);
+			const features = hasPeriod ? maybeFeatures : taglineOrFeatures;
+			return {
 			name,
 			price,
+			period: hasPeriod ? String(periodOrTagline) : '',
 			tagline,
 			features,
-			highlight: String(name).startsWith('Pro')
-		}))
+			highlight:
+				String(name).includes('Yearly') ||
+				String(name).includes('Yıllık') ||
+				String(name).includes('Jährlich')
+			};
+		})
 	);
 	const faqs = $derived(copy.faqs.map(([q, a]) => ({ q, a })));
 </script>
@@ -336,8 +384,8 @@
 					<p class="mt-1 text-xs text-[var(--sk-muted)]">{plan.tagline}</p>
 					<div class="mt-4 flex items-baseline gap-1">
 						<span class="sk-display text-3xl">{plan.price}</span>
-						{#if plan.name !== 'Premium'}
-							<span class="text-sm text-[var(--sk-faint)]">{copy.month}</span>
+						{#if plan.period}
+							<span class="text-sm text-[var(--sk-faint)]">{plan.period}</span>
 						{/if}
 					</div>
 					<ul class="mt-4 flex flex-1 flex-col gap-1.5">

@@ -3,7 +3,7 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { billingEvents, siteSubscriptions, users } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
-import { confirmPayment, domainPriceEur } from '$lib/server/reservations';
+import { confirmPayment, domainPriceEur, grantYearlyProDomainCredit } from '$lib/server/reservations';
 
 /**
  * Stripe subscriptions (PLAN §8) over the plain REST API — no SDK, one less
@@ -15,6 +15,8 @@ export class BillingNotConfiguredError extends Error {}
 
 export type BillingProvider = 'stripe' | 'creem';
 export const PRO_SITE_PRICE_EUR_MONTHLY = 17;
+export const PRO_SITE_PRICE_EUR_YEARLY = 200;
+export type ProPlanInterval = 'monthly' | 'yearly';
 
 function normalizedProvider(value: string | undefined): BillingProvider | undefined {
 	const normalized = value?.trim().toLowerCase();
@@ -23,7 +25,10 @@ function normalizedProvider(value: string | undefined): BillingProvider | undefi
 }
 
 export function creemConfigured(): boolean {
-	return Boolean(getSetting('CREEM_API_KEY') && getSetting('CREEM_PRO_PRODUCT_ID'));
+	return Boolean(
+		getSetting('CREEM_API_KEY') &&
+			(getSetting('CREEM_PRO_MONTHLY_PRODUCT_ID') || getSetting('CREEM_PRO_PRODUCT_ID'))
+	);
 }
 
 export function stripeConfigured(): boolean {
@@ -46,6 +51,7 @@ export async function createCheckoutSession(input: {
 	email: string;
 	origin: string;
 	siteId: string;
+	planInterval?: ProPlanInterval;
 }): Promise<string> {
 	if (billingProvider() === 'creem') return createCreemCheckoutSession(input);
 	return createStripeCheckoutSession(input);
@@ -56,6 +62,7 @@ export async function createStripeCheckoutSession(input: {
 	email: string;
 	origin: string;
 	siteId: string;
+	planInterval?: ProPlanInterval;
 }): Promise<string> {
 	const secretKey = getSetting('STRIPE_SECRET_KEY');
 	const priceId = getSetting('STRIPE_PRICE_ID');
@@ -119,12 +126,21 @@ export async function createCreemCheckoutSession(input: {
 	email: string;
 	origin: string;
 	siteId: string;
+	planInterval?: ProPlanInterval;
 }): Promise<string> {
 	const apiKey = getSetting('CREEM_API_KEY');
-	const productId = getSetting('CREEM_PRO_PRODUCT_ID');
+	const planInterval = input.planInterval === 'yearly' ? 'yearly' : 'monthly';
+	const productId =
+		planInterval === 'yearly'
+			? getSetting('CREEM_PRO_YEARLY_PRODUCT_ID')
+			: getSetting('CREEM_PRO_MONTHLY_PRODUCT_ID') || getSetting('CREEM_PRO_PRODUCT_ID');
 	if (!apiKey || !productId) {
 		throw new BillingNotConfiguredError('Creem billing is not configured yet.');
 	}
+	const price =
+		planInterval === 'yearly'
+			? `${PRO_SITE_PRICE_EUR_YEARLY} EUR/year`
+			: `${PRO_SITE_PRICE_EUR_MONTHLY} EUR/month`;
 	const res = await fetch(`${creemApiBase()}/checkouts`, {
 		method: 'POST',
 		headers: {
@@ -142,8 +158,9 @@ export async function createCreemCheckoutSession(input: {
 				userId: input.userId,
 				referenceId: input.userId,
 				internal_customer_id: input.userId,
-				plan: 'pro',
-				price: `${PRO_SITE_PRICE_EUR_MONTHLY} EUR/month`
+				plan: planInterval === 'yearly' ? 'pro_yearly' : 'pro_monthly',
+				planInterval,
+				price
 			}
 		})
 	});
@@ -162,6 +179,17 @@ export async function createCreemCheckoutSession(input: {
  * subscription activation.
  */
 export async function createDomainCheckoutSession(input: {
+	userId: string;
+	email: string;
+	origin: string;
+	domain: string;
+	reservationId: string;
+}): Promise<string> {
+	if (billingProvider() === 'creem') return createCreemDomainCheckoutSession(input);
+	return createStripeDomainCheckoutSession(input);
+}
+
+export async function createStripeDomainCheckoutSession(input: {
 	userId: string;
 	email: string;
 	origin: string;
@@ -198,6 +226,47 @@ export async function createDomainCheckoutSession(input: {
 		throw new Error(`Stripe domain checkout failed: ${session.error?.message ?? res.status}`);
 	}
 	return session.url;
+}
+
+export async function createCreemDomainCheckoutSession(input: {
+	userId: string;
+	email: string;
+	origin: string;
+	domain: string;
+	reservationId: string;
+}): Promise<string> {
+	const apiKey = getSetting('CREEM_API_KEY');
+	const productId = getSetting('CREEM_DOMAIN_PRODUCT_ID');
+	if (!apiKey || !productId) {
+		throw new BillingNotConfiguredError('Creem domain billing is not configured yet.');
+	}
+	const res = await fetch(`${creemApiBase()}/checkouts`, {
+		method: 'POST',
+		headers: {
+			'x-api-key': apiKey,
+			'content-type': 'application/json'
+		},
+		body: JSON.stringify({
+			product_id: productId,
+			request_id: `domain-${input.reservationId}-${Date.now()}`,
+			success_url: `${input.origin}/dashboard?domain=paid`,
+			customer: { email: input.email },
+			metadata: {
+				kind: 'domain',
+				reservationId: input.reservationId,
+				domain: input.domain,
+				userId: input.userId,
+				referenceId: input.userId,
+				internal_customer_id: input.userId
+			}
+		})
+	});
+	const session = (await res.json()) as CreemCheckoutResponse;
+	const checkoutUrl = session.checkout_url ?? session.checkoutUrl;
+	if (!res.ok || !checkoutUrl) {
+		throw new Error(`Creem domain checkout failed: ${messageFromCreemError(session, res.status)}`);
+	}
+	return checkoutUrl;
 }
 
 /**
@@ -241,6 +310,11 @@ export type SiteSubscriptionStatus =
 export type SiteSubscriptionState =
 	{ state: 'free' } | { state: 'active' } | { state: 'grace'; until: Date };
 
+export type SiteSubscriptionDetails = SiteSubscriptionState & {
+	planInterval: ProPlanInterval | null;
+	priceEur: number | null;
+};
+
 export function activateSiteSubscription(input: {
 	siteId: string;
 	userId: string;
@@ -249,6 +323,7 @@ export function activateSiteSubscription(input: {
 	providerSubscriptionId?: string | null;
 	status?: SiteSubscriptionStatus | string;
 	currentPeriodEnd?: Date;
+	planInterval?: ProPlanInterval;
 }): void {
 	const now = new Date();
 	const existing = input.providerSubscriptionId
@@ -279,6 +354,9 @@ export function activateSiteSubscription(input: {
 		providerCustomerId: input.providerCustomerId ?? null,
 		providerSubscriptionId: input.providerSubscriptionId ?? null,
 		status: input.status ?? 'active',
+		planInterval: input.planInterval ?? 'monthly',
+		priceEur:
+			input.planInterval === 'yearly' ? PRO_SITE_PRICE_EUR_YEARLY : PRO_SITE_PRICE_EUR_MONTHLY,
 		priceEurMonthly: PRO_SITE_PRICE_EUR_MONTHLY,
 		currentPeriodEnd: input.currentPeriodEnd,
 		graceUntil: input.currentPeriodEnd
@@ -300,19 +378,32 @@ export function activateSiteSubscription(input: {
 }
 
 export function siteSubscriptionState(siteId: string, userId: string): SiteSubscriptionState {
+	return siteSubscriptionDetails(siteId, userId);
+}
+
+export function siteSubscriptionDetails(siteId: string, userId: string): SiteSubscriptionDetails {
 	const row = db
 		.select()
 		.from(siteSubscriptions)
 		.where(and(eq(siteSubscriptions.siteId, siteId), eq(siteSubscriptions.userId, userId)))
 		.orderBy(desc(siteSubscriptions.updatedAt))
 		.get();
-	if (!row) return { state: 'free' };
+	if (!row) return { state: 'free', planInterval: null, priceEur: null };
+	const planInterval: ProPlanInterval = row.planInterval === 'yearly' ? 'yearly' : 'monthly';
+	const priceEur =
+		Number.isFinite(row.priceEur) && row.priceEur > 0
+			? row.priceEur
+			: planInterval === 'yearly'
+				? PRO_SITE_PRICE_EUR_YEARLY
+				: PRO_SITE_PRICE_EUR_MONTHLY;
 	if (row.status === 'active' || row.status === 'trialing' || row.status === 'comped') {
-		return { state: 'active' };
+		return { state: 'active', planInterval, priceEur };
 	}
 	const until = row.graceUntil ?? row.currentPeriodEnd;
-	if (!until) return { state: 'free' };
-	return until.getTime() > Date.now() ? { state: 'grace', until } : { state: 'free' };
+	if (!until) return { state: 'free', planInterval, priceEur };
+	return until.getTime() > Date.now()
+		? { state: 'grace', until, planInterval, priceEur }
+		: { state: 'free', planInterval, priceEur };
 }
 
 export function hasActiveSiteSubscription(siteId: string, userId: string): boolean {
@@ -442,6 +533,18 @@ export function handleStripeEvent(event: StripeEvent): string {
 	}
 }
 
+type CreemMetadata = {
+	reservationId?: string;
+	domain?: string;
+	userId?: string;
+	internal_customer_id?: string;
+	referenceId?: string;
+	siteId?: string;
+	kind?: string;
+	plan?: string;
+	planInterval?: string;
+};
+
 type CreemEvent = {
 	eventType?: string;
 	type?: string;
@@ -449,36 +552,18 @@ type CreemEvent = {
 		customer?: string | { id?: string | null; email?: string | null } | null;
 		status?: string | null;
 		id?: string | null;
-		metadata?: {
-			userId?: string;
-			internal_customer_id?: string;
-			referenceId?: string;
-			siteId?: string;
-			kind?: string;
-		} | null;
+		metadata?: CreemMetadata | null;
 		current_period_end_date?: string | null;
 		next_transaction_date?: string | null;
 		checkout?: {
 			id?: string | null;
-			metadata?: {
-				userId?: string;
-				internal_customer_id?: string;
-				referenceId?: string;
-				siteId?: string;
-				kind?: string;
-			} | null;
+			metadata?: CreemMetadata | null;
 		} | null;
 		subscription?: {
 			id?: string | null;
 			customer?: string | { id?: string | null } | null;
 			status?: string | null;
-			metadata?: {
-				userId?: string;
-				internal_customer_id?: string;
-				referenceId?: string;
-				siteId?: string;
-				kind?: string;
-			} | null;
+			metadata?: CreemMetadata | null;
 			current_period_end_date?: string | null;
 			next_transaction_date?: string | null;
 		} | null;
@@ -487,36 +572,18 @@ type CreemEvent = {
 		customer?: string | { id?: string | null; email?: string | null } | null;
 		status?: string | null;
 		id?: string | null;
-		metadata?: {
-			userId?: string;
-			internal_customer_id?: string;
-			referenceId?: string;
-			siteId?: string;
-			kind?: string;
-		} | null;
+		metadata?: CreemMetadata | null;
 		current_period_end_date?: string | null;
 		next_transaction_date?: string | null;
 		checkout?: {
 			id?: string | null;
-			metadata?: {
-				userId?: string;
-				internal_customer_id?: string;
-				referenceId?: string;
-				siteId?: string;
-				kind?: string;
-			} | null;
+			metadata?: CreemMetadata | null;
 		} | null;
 		subscription?: {
 			id?: string | null;
 			customer?: string | { id?: string | null } | null;
 			status?: string | null;
-			metadata?: {
-				userId?: string;
-				internal_customer_id?: string;
-				referenceId?: string;
-				siteId?: string;
-				kind?: string;
-			} | null;
+			metadata?: CreemMetadata | null;
 			current_period_end_date?: string | null;
 			next_transaction_date?: string | null;
 		} | null;
@@ -534,13 +601,17 @@ function creemCustomerId(object: NonNullable<CreemEvent['object']>): string | nu
 }
 
 function creemUserId(object: NonNullable<CreemEvent['object']>): string | undefined {
-	const metadata = object.metadata ?? object.subscription?.metadata ?? object.checkout?.metadata;
+	const metadata = creemMetadata(object);
 	return metadata?.userId ?? metadata?.internal_customer_id ?? metadata?.referenceId;
 }
 
 function creemSiteId(object: NonNullable<CreemEvent['object']>): string | undefined {
-	const metadata = object.metadata ?? object.subscription?.metadata ?? object.checkout?.metadata;
+	const metadata = creemMetadata(object);
 	return metadata?.siteId;
+}
+
+function creemMetadata(object: NonNullable<CreemEvent['object']>): CreemMetadata | null {
+	return object.metadata ?? object.subscription?.metadata ?? object.checkout?.metadata ?? null;
 }
 
 function creemSubscriptionId(object: NonNullable<CreemEvent['object']>): string | null {
@@ -587,7 +658,8 @@ function activateCreemSiteSubscription(
 	userId: string,
 	customerId: string | null,
 	subscriptionId: string | null,
-	periodEnd?: Date
+	periodEnd?: Date,
+	planInterval: ProPlanInterval = 'monthly'
 ): string {
 	activateSiteSubscription({
 		siteId,
@@ -596,8 +668,12 @@ function activateCreemSiteSubscription(
 		providerCustomerId: customerId,
 		providerSubscriptionId: subscriptionId,
 		status: 'active',
-		currentPeriodEnd: periodEnd
+		currentPeriodEnd: periodEnd,
+		planInterval
 	});
+	if (planInterval === 'yearly') {
+		grantYearlyProDomainCredit({ userId, siteId, expiresAt: periodEnd });
+	}
 	db.insert(billingEvents)
 		.values({
 			id: `be-${randomUUID().slice(0, 8)}`,
@@ -606,7 +682,7 @@ function activateCreemSiteSubscription(
 			stripeCustomerId: customerId
 		})
 		.run();
-	return `creem activated site ${siteId} for ${userId}`;
+	return `creem activated ${planInterval} site ${siteId} for ${userId}`;
 }
 
 function updateCreemSubscriptionStatus(
@@ -617,6 +693,8 @@ function updateCreemSubscriptionStatus(
 	const userId = creemUserId(object);
 	const siteId = creemSiteId(object);
 	const periodEnd = creemPeriodEnd(object);
+	const metadata = creemMetadata(object);
+	const planInterval = metadata?.planInterval === 'yearly' ? 'yearly' : 'monthly';
 	if (siteId && userId) {
 		activateSiteSubscription({
 			siteId,
@@ -625,7 +703,8 @@ function updateCreemSubscriptionStatus(
 			providerCustomerId: customerId,
 			providerSubscriptionId: creemSubscriptionId(object),
 			status,
-			currentPeriodEnd: periodEnd
+			currentPeriodEnd: periodEnd,
+			planInterval
 		});
 		return `creem site status ${status} for ${siteId}`;
 	}
@@ -650,16 +729,24 @@ export function handleCreemEvent(event: CreemEvent): string {
 		case 'checkout.completed':
 		case 'subscription.paid':
 		case 'subscription.active': {
+			const metadata = creemMetadata(object);
+			if (metadata?.kind === 'domain') {
+				if (!metadata.reservationId) return 'ignored: domain payment without reservationId';
+				confirmPayment(metadata.reservationId);
+				return `creem domain reservation paid ${metadata.reservationId}`;
+			}
 			const userId = creemUserId(object);
 			if (!userId) return 'ignored: no userId';
 			const siteId = creemSiteId(object);
+			const planInterval = metadata?.planInterval === 'yearly' ? 'yearly' : 'monthly';
 			if (siteId) {
 				return activateCreemSiteSubscription(
 					siteId,
 					userId,
 					creemCustomerId(object),
 					creemSubscriptionId(object),
-					creemPeriodEnd(object)
+					creemPeriodEnd(object),
+					planInterval
 				);
 			}
 			return activateCreemSubscription(userId, creemCustomerId(object), creemPeriodEnd(object));

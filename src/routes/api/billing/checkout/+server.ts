@@ -1,6 +1,10 @@
 import { json, redirect } from '@sveltejs/kit';
 import { canManageSite } from '$lib/server/auth';
-import { BillingNotConfiguredError, createCheckoutSession } from '$lib/server/billing';
+import {
+	BillingNotConfiguredError,
+	createCheckoutSession,
+	type ProPlanInterval
+} from '$lib/server/billing';
 import { getSiteMeta } from '$lib/server/db/repo';
 import type { RequestHandler } from './$types';
 
@@ -11,6 +15,8 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 	}
 	const form = await request.formData();
 	const siteId = String(form.get('siteId') ?? '');
+	const rawPlanInterval = String(form.get('planInterval') ?? 'monthly');
+	const planInterval: ProPlanInterval = rawPlanInterval === 'yearly' ? 'yearly' : 'monthly';
 	const meta = getSiteMeta(siteId);
 	if (!meta) return json({ ok: false, message: 'Site not found.' }, { status: 404 });
 	if (!canManageSite(locals.user, meta.ownerUserId)) {
@@ -22,7 +28,8 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 			userId: locals.user.id,
 			email: locals.user.email,
 			origin: url.origin,
-			siteId
+			siteId,
+			planInterval
 		});
 	} catch (error) {
 		if (error instanceof BillingNotConfiguredError) {

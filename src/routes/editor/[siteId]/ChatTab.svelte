@@ -21,6 +21,7 @@
 	let input = $state('');
 	let busy = $state(false);
 	let proposal = $state<Proposal | null>(null);
+	let transcriptEl = $state<HTMLDivElement>();
 	/** Original message behind the last off-topic redirect ("yine de gönder"). */
 	let redirected = $state<string | null>(null);
 	/** Draft as it was before the last applied AI edit — one-step Geri Al. */
@@ -31,6 +32,20 @@
 		medium: 'Bu değişiklik sitenin görünümünü değiştirecek.',
 		high: 'Bu büyük bir değişiklik — uygulandıktan sonra preview’da mutlaka kontrol et.'
 	};
+
+	// Keep the newest bubble/proposal in view inside the pinned-input layout.
+	$effect(() => {
+		void messages.length;
+		void busy;
+		void proposal;
+		void redirected;
+		if (!transcriptEl) return;
+		const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		transcriptEl.scrollTo({
+			top: transcriptEl.scrollHeight,
+			behavior: smooth ? 'smooth' : 'auto'
+		});
+	});
 
 	function historyForGate() {
 		return messages
@@ -64,6 +79,13 @@
 					store.replace(data.site); // server-persisted draft → live preview
 					proposal = null;
 					messages.push({ role: 'assistant', text: data.reply });
+					// Below lg the preview is behind the pane toggle — point at it.
+					if (window.matchMedia('(max-width: 1023px)').matches) {
+						messages.push({
+							role: 'assistant',
+							text: 'Değişikliği görmek için üstteki "Önizleme" sekmesine geç.'
+						});
+					}
 					break;
 				}
 				case 'proposal':
@@ -125,7 +147,7 @@
 </script>
 
 <div class="flex h-full flex-col gap-3">
-	<div class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
+	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 		{#if messages.length === 0}
 			<div class="sk-card max-w-[92%] p-3 text-sm leading-6">
 				<div class="sk-mono mb-2 text-[10px] text-[var(--sk-faint)]">Assistant</div>
@@ -196,9 +218,11 @@
 	>
 		<input
 			type="text"
-			class="sk-input min-h-9 flex-1 py-1.5 text-sm"
+			class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
 			placeholder="ör. Fiyatlandırma için bir SSS bölümü ekle…"
 			bind:value={input}
+			enterkeyhint="send"
+			onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
 			disabled={busy || proposal !== null}
 		/>
 		<button

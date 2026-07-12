@@ -14,6 +14,7 @@
 		nextChecklistItem,
 		type CompletionChecklistItem
 	} from '$lib/editor/completionChecklist';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { siteQualityCheck } from '$lib/quality/siteQuality';
 	import { checkCircleIcon, emptyCircleIcon, tabIcons, viewportIcons } from '$lib/editor/icons';
 	import { flagSvgs } from '$lib/ui/flags';
@@ -36,6 +37,12 @@
 		{ id: 'desktop', label: 'Desktop', width: '100%' }
 	] as const;
 	let viewport = $state<(typeof viewports)[number]>(viewports[2]);
+
+	/** Below lg the sidebar and preview become full-width panes behind this toggle.
+	 *  Both stay mounted (CSS hiding only) — unmounting the iframe would reload it
+	 *  and drop the postMessage live-draft session. */
+	let mobilePane = $state<'edit' | 'preview'>('edit');
+	const isDesktop = new MediaQuery('(min-width: 1024px)', false);
 
 	let iframeEl = $state<HTMLIFrameElement>();
 	const previewSrc = $derived(
@@ -148,7 +155,7 @@
 <AppCanvasShell
 	label={`saaskaya.app / editor / ${store.site.id}`}
 	max="max-w-[96rem]"
-	minHeight="h-[calc(100svh-2.5rem)]"
+	minHeight="h-[calc(100dvh-1rem)] sm:h-[calc(100svh-2.5rem)]"
 	contentClass=""
 	flush
 >
@@ -156,240 +163,290 @@
 		<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">Dashboard</a>
 	{/snippet}
 
-	<div class="flex h-full min-h-0 overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]">
-		<!-- Left sidebar -->
-		<aside
-			class="flex w-[19.5rem] max-w-[88vw] shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)]"
+	<div
+		class="flex h-full min-h-0 flex-col overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]"
+	>
+		<!-- Mobile pane toggle -->
+		<div
+			class="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--sk-line)] px-3 py-2 lg:hidden"
 		>
-			<header
-				class="flex items-start justify-between gap-3 border-b border-[var(--sk-line)] px-4 py-4"
-			>
-				<div class="min-w-0">
-					<BrandMark compact />
-					<h1 class="mt-3 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
-				</div>
-				<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
-					{statusBadge[store.status].label}
-				</StatusPill>
-			</header>
-
-			<div
-				role="tablist"
-				class="m-3 grid shrink-0 grid-cols-3 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1"
-			>
-				{#each tabs as tab (tab)}
-					<button
-						role="tab"
-						class="flex flex-col items-center gap-1 rounded-[7px] px-2 py-2 text-[10px] font-medium transition {tabClass(
-							tab
-						)}"
-						onclick={() => (activeTab = tab)}
-					>
-						{@html tabIcons[tab]}
-						{tab}
-					</button>
-				{/each}
+			<div class="flex flex-1 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1" role="group">
+				<button
+					type="button"
+					class="min-h-10 flex-1 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
+					'edit'
+						? 'bg-[#171614] text-[#f3ecdd]'
+						: 'text-[var(--sk-muted)]'}"
+					aria-pressed={mobilePane === 'edit'}
+					onclick={() => (mobilePane = 'edit')}
+				>
+					Düzenle
+				</button>
+				<button
+					type="button"
+					class="min-h-10 flex-1 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
+					'preview'
+						? 'bg-[#171614] text-[#f3ecdd]'
+						: 'text-[var(--sk-muted)]'}"
+					aria-pressed={mobilePane === 'preview'}
+					onclick={() => (mobilePane = 'preview')}
+				>
+					Önizleme
+				</button>
 			</div>
+			<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
+				{statusBadge[store.status].label}
+			</StatusPill>
+		</div>
 
-			<div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
-				<details class="sk-card mb-3 p-3" open>
-					<summary
-						class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
-					>
-						<div>
-							<div class="sk-mono text-[10px] text-[var(--sk-faint)]">İlk yayın checklist</div>
-							<h2 class="mt-1 text-sm font-semibold">Sıradaki adım: {nextAction.label}</h2>
-							<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">{nextAction.helper}</p>
-						</div>
-						<button
-							type="button"
-							class="sk-btn sk-btn-secondary sk-btn-sm shrink-0"
-							onclick={() => goToChecklistItem(nextAction)}
-						>
-							Aç
-						</button>
-					</summary>
-					<div class="mt-3 flex flex-col gap-2">
-						{#each checklist as item (item.id)}
-							<button
-								type="button"
-								class="flex items-start gap-2 rounded-[10px] px-2 py-1.5 text-left text-xs transition hover:bg-[var(--sk-shell)]"
-								onclick={() => goToChecklistItem(item)}
-							>
-								<span class="mt-0.5 shrink-0 {item.complete ? '' : 'text-amber-700'}">
-									{@html item.complete ? checkCircleIcon() : emptyCircleIcon()}
-								</span>
-								<span class={item.complete ? 'text-[var(--sk-muted)]' : 'text-[var(--sk-ink)]'}>
-									{item.label}
-								</span>
-							</button>
-						{/each}
+		<div class="flex min-h-0 flex-1 overflow-hidden">
+			<!-- Left sidebar -->
+			<aside
+				class="{mobilePane === 'preview'
+					? 'hidden lg:flex'
+					: 'flex'} w-full shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)] lg:w-[19.5rem]"
+			>
+				<header
+					class="flex items-start justify-between gap-3 border-b border-[var(--sk-line)] px-4 py-4"
+				>
+					<div class="min-w-0">
+						<BrandMark compact />
+						<h1 class="mt-3 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
-				</details>
+					<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
+						{statusBadge[store.status].label}
+					</StatusPill>
+				</header>
 
-				<details class="sk-card mb-3 p-3">
-					<summary
-						class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
-					>
-						<div>
-							<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Kalite kontrol</div>
-							<h2 class="mt-1 text-sm font-semibold">
-								{quality.blockers.length
-									? `${quality.blockers.length} yayın engeli var`
-									: quality.warnings.length
-										? `${quality.warnings.length} uyarı var`
-										: 'Yayın için kritik engel yok'}
-							</h2>
-							<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
-								Engeller yayınlamayı durdurur; uyarılar yayınlanabilir ama gözden geçirilmelidir.
-							</p>
-						</div>
-						<span
-							class="rounded-full px-2 py-1 text-[10px] font-semibold {quality.canPublish
-								? 'bg-emerald-100 text-emerald-800'
-								: 'bg-red-100 text-red-800'}"
-						>
-							{quality.canPublish ? 'Publish OK' : 'Blocked'}
-						</span>
-					</summary>
-					{#if quality.issues.length}
-						<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
-							{#each quality.issues.slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
-								<div class="rounded-[10px] bg-[var(--sk-shell)] px-3 py-2 text-xs leading-5">
-									<div
-										class={issue.severity === 'blocker'
-											? 'font-semibold text-red-800'
-											: 'font-semibold text-amber-800'}
-									>
-										{issue.severity === 'blocker' ? 'Engel' : 'Uyarı'} · {issue.code}
-									</div>
-									<div class="text-[var(--sk-muted)]">{issue.message}</div>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</details>
-
-				{#if activeTab === 'Chat'}
-					<ChatTab {store} history={data.chatHistory} />
-				{:else if activeTab === 'Content'}
-					<ContentTab {store} />
-				{:else if activeTab === 'Theme'}
-					<ThemeTab {store} />
-				{:else if activeTab === 'Pages'}
-					<PagesTab {store} />
-				{:else if activeTab === 'Languages'}
-					<LanguagesTab {store} />
-				{:else}
-					<SettingsTab {store} />
-				{/if}
-			</div>
-		</aside>
-
-		<!-- Right: toolbar + preview -->
-		<section class="flex min-w-0 flex-1 flex-col">
-			<div
-				class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--sk-line)] bg-[var(--sk-card)] px-4 py-3"
-			>
-				<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
-					{#each viewports as vp (vp.id)}
+				<div
+					role="tablist"
+					class="m-3 grid shrink-0 grid-cols-3 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1"
+				>
+					{#each tabs as tab (tab)}
 						<button
-							class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
-							onclick={() => (viewport = vp)}
-							aria-label={vp.label}
-							aria-pressed={viewport.id === vp.id}
-							title={vp.label}
+							role="tab"
+							class="flex flex-col items-center gap-1 rounded-[7px] px-2 py-2 text-[10px] font-medium transition {tabClass(
+								tab
+							)}"
+							onclick={() => (activeTab = tab)}
 						>
-							{@html viewportIcons[vp.id]}
+							{@html tabIcons[tab]}
+							{tab}
 						</button>
 					{/each}
 				</div>
-				<div class="flex items-center gap-2">
-					<div
-						class="hidden items-center gap-2 rounded-full border border-[var(--sk-line)] px-3 py-1 text-[11px] text-[var(--sk-muted)] xl:flex"
-					>
-						<span>{publishedVersion ? `Published v${publishedVersion}` : 'Not published'}</span>
-						<span class="text-[var(--sk-faint)]">·</span>
-						<span>{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}</span>
-					</div>
-					<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
-						{#each store.site.locales as locale (locale)}
+
+				<div class="flex min-h-0 flex-1 flex-col px-4 pb-4">
+					<details class="sk-card mb-3 shrink-0 p-3" open={isDesktop.current}>
+						<summary
+							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+						>
+							<div>
+								<div class="sk-mono text-[10px] text-[var(--sk-faint)]">İlk yayın checklist</div>
+								<h2 class="mt-1 text-sm font-semibold">Sıradaki adım: {nextAction.label}</h2>
+								<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">{nextAction.helper}</p>
+							</div>
 							<button
 								type="button"
-								class="inline-flex items-center gap-1.5 rounded-[7px] px-2 py-1 text-[10.5px] font-medium transition {store.editLocale ===
-								locale
-									? 'bg-[#171614] text-[#f3ecdd]'
-									: 'text-[var(--sk-muted)] hover:bg-white/70'}"
-								onclick={() => (store.editLocale = locale)}
-								aria-pressed={store.editLocale === locale}
-								aria-label={`Düzenleme dili: ${locale.toUpperCase()}`}
+								class="sk-btn sk-btn-secondary sk-btn-sm shrink-0"
+								onclick={() => goToChecklistItem(nextAction)}
 							>
-								{@html flagSvgs[locale]}
-								{locale.toUpperCase()}
+								Aç
 							</button>
-						{/each}
-					</div>
-					<button class="sk-btn sk-btn-secondary sk-btn-sm" onclick={() => store.save()}
-						>Save now</button
-					>
-					<a href={savedPreviewSrc} target="_blank" class="sk-btn sk-btn-ghost sk-btn-sm"
-						>Saved preview {@html uiIcons.external(13)}</a
-					>
-					<button
-						class="sk-btn sk-btn-primary sk-btn-sm"
-						onclick={publish}
-						disabled={publishing || !quality.canPublish}
-						title={quality.canPublish ? 'Publish' : 'Fix quality blockers before publishing'}
-					>
-						{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
-						{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
-					</button>
-				</div>
-			</div>
-
-			{#if publishNotice}
-				<div
-					class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'
-						? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-						: 'border-red-200 bg-red-50 text-red-900'}"
-				>
-					<div class="flex flex-wrap items-center justify-between gap-3">
-						<div>
-							<div class="font-semibold">{publishNotice.title}</div>
-							<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
+						</summary>
+						<div class="mt-3 flex flex-col gap-2">
+							{#each checklist as item (item.id)}
+								<button
+									type="button"
+									class="flex items-start gap-2 rounded-[10px] px-2 py-1.5 text-left text-xs transition hover:bg-[var(--sk-shell)]"
+									onclick={() => goToChecklistItem(item)}
+								>
+									<span class="mt-0.5 shrink-0 {item.complete ? '' : 'text-amber-700'}">
+										{@html item.complete ? checkCircleIcon() : emptyCircleIcon()}
+									</span>
+									<span class={item.complete ? 'text-[var(--sk-muted)]' : 'text-[var(--sk-ink)]'}>
+										{item.label}
+									</span>
+								</button>
+							{/each}
 						</div>
-						{#if publishNotice.tone === 'success'}
-							<a
-								href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
-								target="_blank"
-								class="sk-btn sk-btn-secondary sk-btn-sm"
+					</details>
+
+					<details class="sk-card mb-3 shrink-0 p-3">
+						<summary
+							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+						>
+							<div>
+								<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Kalite kontrol</div>
+								<h2 class="mt-1 text-sm font-semibold">
+									{quality.blockers.length
+										? `${quality.blockers.length} yayın engeli var`
+										: quality.warnings.length
+											? `${quality.warnings.length} uyarı var`
+											: 'Yayın için kritik engel yok'}
+								</h2>
+								<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+									Engeller yayınlamayı durdurur; uyarılar yayınlanabilir ama gözden geçirilmelidir.
+								</p>
+							</div>
+							<span
+								class="rounded-full px-2 py-1 text-[10px] font-semibold {quality.canPublish
+									? 'bg-emerald-100 text-emerald-800'
+									: 'bg-red-100 text-red-800'}"
 							>
-								Canlı siteyi aç {@html uiIcons.external(13)}
-							</a>
+								{quality.canPublish ? 'Publish OK' : 'Blocked'}
+							</span>
+						</summary>
+						{#if quality.issues.length}
+							<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
+								{#each quality.issues.slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
+									<div class="rounded-[10px] bg-[var(--sk-shell)] px-3 py-2 text-xs leading-5">
+										<div
+											class={issue.severity === 'blocker'
+												? 'font-semibold text-red-800'
+												: 'font-semibold text-amber-800'}
+										>
+											{issue.severity === 'blocker' ? 'Engel' : 'Uyarı'} · {issue.code}
+										</div>
+										<div class="text-[var(--sk-muted)]">{issue.message}</div>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</details>
+
+					<div
+						class="min-h-0 flex-1 {activeTab === 'Chat' ? 'overflow-hidden' : 'overflow-y-auto'}"
+					>
+						{#if activeTab === 'Chat'}
+							<ChatTab {store} history={data.chatHistory} />
+						{:else if activeTab === 'Content'}
+							<ContentTab {store} />
+						{:else if activeTab === 'Theme'}
+							<ThemeTab {store} />
+						{:else if activeTab === 'Pages'}
+							<PagesTab {store} />
+						{:else if activeTab === 'Languages'}
+							<LanguagesTab {store} />
+						{:else}
+							<SettingsTab {store} />
 						{/if}
 					</div>
 				</div>
-			{/if}
+			</aside>
 
-			<div class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] p-4 sm:p-6">
+			<!-- Right: toolbar + preview -->
+			<section class="{mobilePane === 'edit' ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col">
 				<div
-					class="relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
-					style="width: {viewport.width}; max-width: 100%;"
+					class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--sk-line)] bg-[var(--sk-card)] px-4 py-3"
+				>
+					<div class="hidden gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:flex">
+						{#each viewports as vp (vp.id)}
+							<button
+								class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
+								onclick={() => (viewport = vp)}
+								aria-label={vp.label}
+								aria-pressed={viewport.id === vp.id}
+								title={vp.label}
+							>
+								{@html viewportIcons[vp.id]}
+							</button>
+						{/each}
+					</div>
+					<div class="flex min-w-0 flex-wrap items-center gap-2">
+						<div
+							class="hidden items-center gap-2 rounded-full border border-[var(--sk-line)] px-3 py-1 text-[11px] text-[var(--sk-muted)] xl:flex"
+						>
+							<span>{publishedVersion ? `Published v${publishedVersion}` : 'Not published'}</span>
+							<span class="text-[var(--sk-faint)]">·</span>
+							<span>{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}</span>
+						</div>
+						<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
+							{#each store.site.locales as locale (locale)}
+								<button
+									type="button"
+									class="inline-flex items-center gap-1.5 rounded-[7px] px-2 py-1 text-[10.5px] font-medium transition {store.editLocale ===
+									locale
+										? 'bg-[#171614] text-[#f3ecdd]'
+										: 'text-[var(--sk-muted)] hover:bg-white/70'}"
+									onclick={() => (store.editLocale = locale)}
+									aria-pressed={store.editLocale === locale}
+									aria-label={`Düzenleme dili: ${locale.toUpperCase()}`}
+								>
+									{@html flagSvgs[locale]}
+									{locale.toUpperCase()}
+								</button>
+							{/each}
+						</div>
+						<button class="sk-btn sk-btn-secondary sk-btn-sm" onclick={() => store.save()}
+							>Save now</button
+						>
+						<a
+							href={savedPreviewSrc}
+							target="_blank"
+							class="sk-btn sk-btn-ghost sk-btn-sm"
+							aria-label="Saved preview"
+							><span class="hidden sm:inline">Saved preview</span>
+							{@html uiIcons.external(13)}</a
+						>
+						<button
+							class="sk-btn sk-btn-primary sk-btn-sm"
+							onclick={publish}
+							disabled={publishing || !quality.canPublish}
+							title={quality.canPublish ? 'Publish' : 'Fix quality blockers before publishing'}
+						>
+							{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
+							{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
+						</button>
+					</div>
+				</div>
+
+				{#if publishNotice}
+					<div
+						class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'
+							? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+							: 'border-red-200 bg-red-50 text-red-900'}"
+					>
+						<div class="flex flex-wrap items-center justify-between gap-3">
+							<div>
+								<div class="font-semibold">{publishNotice.title}</div>
+								<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
+							</div>
+							{#if publishNotice.tone === 'success'}
+								<a
+									href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
+									target="_blank"
+									class="sk-btn sk-btn-secondary sk-btn-sm"
+								>
+									Canlı siteyi aç {@html uiIcons.external(13)}
+								</a>
+							{/if}
+						</div>
+					</div>
+				{/if}
+
+				<div
+					class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] p-2 sm:p-4 lg:p-6"
 				>
 					<div
-						class="pointer-events-none absolute top-3 left-3 z-10 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
+						class="relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
+						style="width: {viewport.width}; max-width: 100%;"
 					>
-						Live draft
+						<div
+							class="pointer-events-none absolute top-3 left-3 z-10 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
+						>
+							Live draft
+						</div>
+						<iframe
+							bind:this={iframeEl}
+							src={previewSrc}
+							onload={sendDraft}
+							title="Site preview"
+							class="h-full w-full"
+						></iframe>
 					</div>
-					<iframe
-						bind:this={iframeEl}
-						src={previewSrc}
-						onload={sendDraft}
-						title="Site preview"
-						class="h-full w-full"
-					></iframe>
 				</div>
-			</div>
-		</section>
+			</section>
+		</div>
 	</div>
 </AppCanvasShell>

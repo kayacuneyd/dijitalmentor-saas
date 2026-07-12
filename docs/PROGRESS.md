@@ -2220,3 +2220,28 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   newest bubble, transcript ≤55% of viewport, inputs report 16px computed, coarse-pointer media
   matches, zero overflow/console errors on `/tr/new`, `/tr/login`, `/tr/beta`; desktop chrome dots
   and question cards unchanged; `svelte-check` 0 errors, 441/441 tests, production build OK.
+
+### 2026-07-12 — Mobile roadmap Phase 4: editor mobile layout (pane toggle)
+
+- **Below `lg` the editor is now a full-screen two-pane toggle** (`Düzenle | Önizleme` segmented
+  control + status pill above the split). Both panes stay mounted — hiding is CSS-only
+  (`hidden lg:flex`), never `{#if}`, because unmounting the preview iframe reloads it and drops the
+  `saaskaya:draft` postMessage bridge. Sidebar is full-width on phones (`w-full lg:w-[19.5rem]`,
+  the old `max-w-[88vw]` cap that crushed the preview is gone).
+- **Pinned chat input:** the sidebar tab area is a non-scrolling flex column; checklist/quality
+  `<details>` are `shrink-0` and default-collapsed below `lg` (`MediaQuery('(min-width:1024px)')`
+  from `svelte/reactivity` — they used to shove the chat below the fold); the Chat tab wrapper is
+  `overflow-hidden` so ChatTab's internal transcript scrolls and the form pins to the pane bottom.
+  ChatTab gained transcript autoscroll, `text-base sm:text-sm` + `enterkeyhint="send"` on the
+  input, and a mobile-only hint bubble after an applied AI edit pointing at the Önizleme toggle.
+- **Toolbar diet below `lg`:** viewport-preset buttons hidden (desktop feature; the phone pane is
+  naturally narrow), "Saved preview" label icon-only below `sm`, and the right cluster wraps
+  (`flex-wrap`) — the Republish button used to clip past the viewport. Editor shell height is
+  `h-[calc(100dvh-1rem)] sm:h-[calc(100svh-2.5rem)]` so the pinned input rides the phone URL
+  bar/keyboard.
+- Verification (playwright, 375 touch + 1280): signed-in via `AUTH_DEV_ECHO_LINK=1` magic-link
+  echo; pane toggle switches; `window.__marker` planted in the iframe **survives** an edit +
+  toggle while the headline change renders (bridge intact, no reload); checklist collapsed on
+  mobile / open on desktop; chat input 16px and pinned on-screen; publish button fully inside the
+  viewport; zero overflow/console errors; desktop two-column layout unchanged (sidebar 312px,
+  presets visible). `svelte-check` 0 errors, 445/445 tests, production build OK.

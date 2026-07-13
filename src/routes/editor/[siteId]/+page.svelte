@@ -19,7 +19,8 @@
 	import { siteQualityCheck } from '$lib/quality/siteQuality';
 	import { checkCircleIcon, emptyCircleIcon, tabIcons, viewportIcons } from '$lib/editor/icons';
 	import { flagSvgs } from '$lib/ui/flags';
-	import { previewSitePath } from '$lib/siteUrls';
+	import { previewSitePath, publicSitePath } from '$lib/siteUrls';
+	import { needsCustomPublicHandle, validatePublicHandle } from '$lib/publicHandle';
 	import { uiIcons } from '$lib/ui/icons';
 
 	let { data } = $props();
@@ -66,6 +67,8 @@
 	// editing session; later changes come from our own publish() call, not the server.
 	// svelte-ignore state_referenced_locally
 	let publishedVersion = $state(data.publishedVersion);
+	// svelte-ignore state_referenced_locally
+	let publicHandle = $state(data.publicHandle);
 	let publishing = $state(false);
 	let publishNotice = $state<{
 		tone: 'success' | 'error';
@@ -73,10 +76,46 @@
 		message: string;
 		version?: number;
 	} | null>(null);
-	const checklist = $derived(buildCompletionChecklist(store.site, { publishedVersion }));
+	let saveNotice = $state<{ tone: 'success' | 'error'; message: string } | null>(null);
+	const liveUrl = $derived(
+		`${data.appOrigin}${publicHandle}.${data.appHost}${publicSitePath(
+			store.site,
+			store.site.defaultLocale,
+			store.site.pages[0].slug
+		)}`
+	);
+	const checklist = $derived(buildCompletionChecklist(store.site, { publishedVersion, publicHandle }));
 	const nextAction = $derived(nextChecklistItem(checklist));
 	const quality = $derived(siteQualityCheck(store.site));
+	const publishIdentityMissing = $derived(
+		needsCustomPublicHandle({ siteId: store.site.id, publicHandle, publishedVersion })
+	);
+	const publicHandleValidation = $derived(validatePublicHandle(publicHandle ?? ''));
+	const publishBlockers = $derived([
+		...quality.blockers,
+		...(publishIdentityMissing
+			? [
+					{
+						severity: 'blocker' as const,
+						code: 'public_handle_missing',
+						path: 'publicHandle',
+						message: publicHandleValidation.ok
+							? 'İlk yayından önce okunabilir bir public subdomain seç.'
+							: publicHandleValidation.message
+					}
+				]
+			: [])
+	]);
+	const canPublish = $derived(quality.canPublish && !publishIdentityMissing);
 	const hasUnpublishedChanges = $derived(store.status !== 'saved');
+
+	async function saveNow() {
+		saveNotice = null;
+		const ok = await store.save();
+		saveNotice = ok
+			? { tone: 'success', message: 'Taslak kaydedildi.' }
+			: { tone: 'error', message: store.lastSaveError ?? 'Taslak kaydedilemedi.' };
+	}
 
 	/** Draft → immutable published snapshot. Flushes every pending edit first — a plain
 	 *  `save()` can resolve while a newer edit is still unsent, which is exactly how
@@ -91,7 +130,19 @@
 				publishNotice = {
 					tone: 'error',
 					title: 'Yayın iptal edildi',
-					message: 'Son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+					message:
+						store.lastSaveError ?? 'Son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+				};
+				return;
+			}
+			if (!canPublish) {
+				if (publishIdentityMissing) activeTab = 'Settings';
+				publishNotice = {
+					tone: 'error',
+					title: 'Yayın için eksik var',
+					message:
+						publishBlockers[0]?.message ??
+						'Yayınlamadan önce kalite kontrolündeki engelleri tamamla.'
 				};
 				return;
 			}
@@ -236,8 +287,8 @@
 				<button
 					class="sk-btn sk-btn-primary sk-btn-sm"
 					onclick={publish}
-					disabled={publishing || !quality.canPublish}
-					title={quality.canPublish ? 'Publish' : 'Fix quality blockers before publishing'}
+					disabled={publishing || !canPublish}
+					title={canPublish ? 'Publish' : 'Fix publish blockers before publishing'}
 				>
 					{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
 					{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
@@ -259,7 +310,7 @@
 						<button
 							type="button"
 							class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
-							onclick={() => store.save()}
+							onclick={saveNow}
 						>
 							Save now
 						</button>
@@ -350,8 +401,8 @@
 							<div>
 								<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Kalite kontrol</div>
 								<h2 class="mt-1 text-sm font-semibold">
-									{quality.blockers.length
-										? `${quality.blockers.length} yayın engeli var`
+									{publishBlockers.length
+										? `${publishBlockers.length} yayın engeli var`
 										: quality.warnings.length
 											? `${quality.warnings.length} uyarı var`
 											: 'Yayın için kritik engel yok'}
@@ -361,16 +412,16 @@
 								</p>
 							</div>
 							<span
-								class="rounded-full px-2 py-1 text-[10px] font-semibold {quality.canPublish
+								class="rounded-full px-2 py-1 text-[10px] font-semibold {canPublish
 									? 'bg-emerald-100 text-emerald-800'
 									: 'bg-red-100 text-red-800'}"
 							>
-								{quality.canPublish ? 'Publish OK' : 'Blocked'}
+								{canPublish ? 'Publish OK' : 'Blocked'}
 							</span>
 						</summary>
-						{#if quality.issues.length}
+						{#if publishBlockers.length || quality.warnings.length}
 							<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
-								{#each quality.issues.slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
+								{#each [...publishBlockers, ...quality.warnings].slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
 									<div class="rounded-[10px] bg-[var(--sk-shell)] px-3 py-2 text-xs leading-5">
 										<div
 											class={issue.severity === 'blocker'
@@ -400,7 +451,14 @@
 						{:else if activeTab === 'Languages'}
 							<LanguagesTab {store} />
 						{:else}
-							<SettingsTab {store} />
+							<SettingsTab
+								{store}
+								{publicHandle}
+								onIdentitySaved={(handle) => {
+									publicHandle = handle;
+									publishNotice = null;
+								}}
+							/>
 						{/if}
 					</div>
 				</div>
@@ -422,7 +480,7 @@
 							{#if publishNotice.tone === 'success'}
 								<div class="flex flex-wrap items-start gap-2">
 									<a
-										href={`${data.liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
+										href={`${liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
 										target="_blank"
 										class="sk-btn sk-btn-secondary sk-btn-sm"
 									>
@@ -430,12 +488,22 @@
 									</a>
 									<ShareStoryButton
 										siteName={store.site.settings.siteName}
-										liveUrl={data.liveUrl}
+										{liveUrl}
 										locale={store.site.defaultLocale}
 									/>
 								</div>
 							{/if}
 						</div>
+					</div>
+				{/if}
+				{#if saveNotice || store.status === 'error'}
+					<div
+						class="border-b px-4 py-2 text-xs {saveNotice?.tone === 'success' &&
+						store.status !== 'error'
+							? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+							: 'border-red-200 bg-red-50 text-red-900'}"
+					>
+						{saveNotice?.message ?? store.lastSaveError ?? 'Taslak kaydedilemedi.'}
 					</div>
 				{/if}
 

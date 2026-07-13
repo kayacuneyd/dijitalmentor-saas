@@ -29,6 +29,9 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
 	return {
 		site,
 		publishedVersion: meta?.publishedVersion ?? null,
+		publicHandle: meta?.publicHandle ?? site.id,
+		appOrigin: `${url.protocol}//`,
+		appHost: url.host,
 		liveUrl: `${url.protocol}//${meta?.publicHandle ?? site.id}.${url.host}${publicSitePath(
 			site,
 			site.defaultLocale,

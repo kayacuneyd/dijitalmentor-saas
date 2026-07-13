@@ -1,7 +1,71 @@
 <script lang="ts">
+	import { normalizePublicHandle } from '$lib/publicHandle';
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 
-	let { store }: { store: DraftStore } = $props();
+	let {
+		store,
+		publicHandle = store.site.id,
+		onIdentitySaved
+	}: {
+		store: DraftStore;
+		publicHandle?: string;
+		onIdentitySaved?: (publicHandle: string) => void;
+	} = $props();
+
+	// svelte-ignore state_referenced_locally
+	let handleDraft = $state(publicHandle);
+	let savingIdentity = $state(false);
+	let identityMessage = $state<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+	$effect(() => {
+		handleDraft = publicHandle;
+	});
+
+	async function saveIdentity() {
+		savingIdentity = true;
+		identityMessage = null;
+		try {
+			const flushed = await store.flush();
+			if (!flushed) {
+				identityMessage = {
+					tone: 'error',
+					text: 'Önce son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+				};
+				return;
+			}
+			const res = await fetch(`/api/sites/${store.site.id}/identity`, {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({
+					siteName: store.site.settings.siteName,
+					publicHandle: handleDraft,
+					contactEmail: store.site.settings.contactEmail ?? ''
+				})
+			});
+			const body = await res.json();
+			if (!res.ok || !body.ok) {
+				identityMessage = {
+					tone: 'error',
+					text: body.message ?? 'Yayın adresi kaydedilemedi.'
+				};
+				return;
+			}
+			handleDraft = body.publicHandle;
+			onIdentitySaved?.(body.publicHandle);
+			if (body.site) store.replace(body.site);
+			identityMessage = {
+				tone: 'success',
+				text: body.message ?? 'Yayın adresi kaydedildi.'
+			};
+		} catch {
+			identityMessage = {
+				tone: 'error',
+				text: 'Yayın adresi kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+			};
+		} finally {
+			savingIdentity = false;
+		}
+	}
 </script>
 
 <div class="flex flex-col gap-4">
@@ -21,6 +85,27 @@
 	</label>
 
 	<label class="form-control">
+		<span class="label-text mb-1 block text-xs font-medium">Public subdomain</span>
+		<div class="join w-full">
+			<input
+				type="text"
+				class="input input-sm join-item min-w-0 flex-1 font-[var(--font-mono)]"
+				value={handleDraft}
+				oninput={(e) => {
+					handleDraft = normalizePublicHandle(e.currentTarget.value);
+				}}
+				placeholder="ogo-football"
+			/>
+			<span class="join-item border-base-300 bg-base-200 inline-flex items-center border px-2 text-xs">
+				.saaskaya.com
+			</span>
+		</div>
+		<p class="mt-1 text-xs text-[var(--sk-faint)]">
+			İlk yayından önce site id yerine okunabilir bir adres seç.
+		</p>
+	</label>
+
+	<label class="form-control">
 		<span class="label-text mb-1 block text-xs font-medium">Contact email</span>
 		<input
 			type="email"
@@ -35,6 +120,24 @@
 			}}
 		/>
 	</label>
+
+	<button
+		type="button"
+		class="sk-btn sk-btn-secondary sk-btn-sm w-fit"
+		onclick={saveIdentity}
+		disabled={savingIdentity}
+	>
+		{#if savingIdentity}<span class="loading loading-spinner loading-xs"></span>{/if}
+		Yayın bilgilerini kaydet
+	</button>
+
+	{#if identityMessage}
+		<div
+			class="sk-alert {identityMessage.tone === 'success' ? 'sk-alert-success' : 'sk-alert-error'} text-xs"
+		>
+			{identityMessage.text}
+		</div>
+	{/if}
 
 	<label class="flex items-center justify-between gap-2">
 		<span class="text-sm">"Powered by saaskaya" badge</span>

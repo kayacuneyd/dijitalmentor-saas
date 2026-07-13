@@ -12,6 +12,7 @@ describe('editor completion checklist', () => {
 			'services',
 			'languages',
 			'media',
+			'identity',
 			'publish'
 		]);
 	});
@@ -24,8 +25,22 @@ describe('editor completion checklist', () => {
 			'Content',
 			'Languages',
 			'Content',
+			'Settings',
 			'Settings'
 		]);
+	});
+
+	it('marks identity complete only after a custom public handle is selected', () => {
+		expect(
+			buildCompletionChecklist(lawSite, { publicHandle: lawSite.id }).find(
+				(item) => item.id === 'identity'
+			)?.complete
+		).toBe(false);
+		expect(
+			buildCompletionChecklist(lawSite, { publicHandle: 'aksoy-hukuk' }).find(
+				(item) => item.id === 'identity'
+			)?.complete
+		).toBe(true);
 	});
 
 	it('marks publish complete only when a published version exists', () => {

@@ -2709,3 +2709,22 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   `/tr`, `/en`, `/de` 375px + 1280px Playwright kontrolünde yatay taşma 0 ve problem bandı görünür.
   Fiyat kart href'leri `/tr/new`, `/tr/pricing`, `/tr/pricing`; `/admin/copy` auth yokken beklenen
   şekilde `/login` 303 döndürüyor.
+
+### 2026-07-13 — Editor publish identity blocker düzeltmesi
+
+- Incident: `site-32b1bc76` editörde `Publish OK` görünmesine rağmen publish `Complete the site name
+  and public subdomain before publishing.` hatasıyla duruyordu. Root cause: `siteQualityCheck()` public
+  subdomain şartını bilmiyordu; publish API ise ilk yayında `publicHandle === siteId` durumunu eksik
+  kurulum kabul ediyordu. Ayrıca editörde public subdomain alanı yoktu, sadece Dashboard'da düzenlenebiliyordu.
+- Public handle doğrulaması `src/lib/publicHandle.ts` içine taşındı ve server repo bu helper'ı re-export
+  ediyor. Completion checklist'e `identity` adımı eklendi; kalite kutusu artık public handle eksikliğini de
+  yayın engeli olarak gösteriyor. Publish butonu ve `Publish OK/Blocked` aynı `canPublish` kaynağını kullanıyor.
+- `/api/sites/[siteId]/identity` eklendi: owner-only, mevcut `setSiteIdentity` politikasını kullanır,
+  site adı + public subdomain + contact email kaydeder. Editor Settings tab'a `Public subdomain` alanı ve
+  "Yayın bilgilerini kaydet" aksiyonu eklendi; kayıttan önce draft `flush()` edilir, böylece stale DB draft'ı
+  ekrandaki son değişiklikleri ezmez.
+- Save UX iyileştirildi: `DraftStore` artık başarısız PUT cevabındaki mesajı `lastSaveError` olarak saklıyor;
+  `Save now` başarılı/başarısız banner gösteriyor, autosave error durumunda hata ekranda kalıyor.
+- Verification: `npm run check` 0 hata/uyarı, `npm run test` 508/508 geçti, `npm run build` başarılı.
+  Playwright smoke: `/tr` 200, unauth `/editor/site-32b1bc76` login'e yönleniyor, unauth
+  `PUT /api/sites/site-32b1bc76/identity` 401 döndürüyor.

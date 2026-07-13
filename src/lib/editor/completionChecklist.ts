@@ -1,4 +1,5 @@
 import type { Site } from '$lib/schema/site';
+import { needsCustomPublicHandle } from '$lib/publicHandle';
 
 export type EditorChecklistTab = 'Content' | 'Theme' | 'Languages' | 'Settings';
 
@@ -12,6 +13,7 @@ export type CompletionChecklistItem = {
 
 type Options = {
 	publishedVersion?: number | null;
+	publicHandle?: string | null;
 };
 
 const text = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
@@ -108,6 +110,17 @@ export function buildCompletionChecklist(
 			helper: 'Hazır görseller yerine kendi fotoğrafların güveni artırır.',
 			complete: mediaReady(site),
 			tab: 'Content'
+		},
+		{
+			id: 'identity',
+			label: 'Yayın adresini seç',
+			helper: 'Site id yerine okunabilir bir saaskaya.com alt alan adı belirle.',
+			complete: !needsCustomPublicHandle({
+				siteId: site.id,
+				publicHandle: options.publicHandle,
+				publishedVersion: options.publishedVersion
+			}),
+			tab: 'Settings'
 		},
 		{
 			id: 'publish',

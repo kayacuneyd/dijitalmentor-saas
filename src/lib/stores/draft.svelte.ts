@@ -22,6 +22,7 @@ const FLUSH_MAX_ATTEMPTS = 5;
 export class DraftStore {
 	site = $state<Site>()!;
 	status = $state<SaveStatus>('saved');
+	lastSaveError = $state<string | null>(null);
 	/** Locale whose content is being edited (not persisted). */
 	editLocale = $state<Locale>()!;
 	/** Page shown in the preview iframe and the Content tab (not persisted). */
@@ -46,6 +47,7 @@ export class DraftStore {
 	update(mutate: (site: Site) => void) {
 		mutate(this.site);
 		this.status = 'dirty';
+		this.lastSaveError = null;
 		this.#tracker.markEdited();
 		for (const listener of this.#listeners) listener(this.site);
 		clearTimeout(this.#saveTimer);
@@ -67,6 +69,7 @@ export class DraftStore {
 		}
 		this.#tracker.markReplaced();
 		this.status = 'saved'; // the server already saved it
+		this.lastSaveError = null;
 		for (const listener of this.#listeners) listener(this.site);
 	}
 
@@ -102,8 +105,10 @@ export class DraftStore {
 			});
 			if (!res.ok) {
 				this.status = 'error';
+				this.lastSaveError = await saveErrorMessage(res);
 				return false;
 			}
+			this.lastSaveError = null;
 			this.status = this.#tracker.completeSave(gen) === 'saved' ? 'saved' : 'dirty';
 			if (this.status === 'dirty') {
 				this.#saveTimer = setTimeout(() => void this.save(), AUTOSAVE_DEBOUNCE_MS);
@@ -111,6 +116,7 @@ export class DraftStore {
 			return true;
 		} catch {
 			this.status = 'error';
+			this.lastSaveError = 'Taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.';
 			return false;
 		}
 	}
@@ -125,5 +131,19 @@ export class DraftStore {
 			if (!ok) return false;
 		}
 		return this.#tracker.flushed;
+	}
+}
+
+async function saveErrorMessage(response: Response): Promise<string> {
+	try {
+		const body = await response.json();
+		const issue = Array.isArray(body.issues) ? body.issues[0] : null;
+		return issue?.message
+			? `Taslak kaydedilemedi: ${issue.message}`
+			: body.message
+				? `Taslak kaydedilemedi: ${body.message}`
+				: `Taslak kaydedilemedi (${response.status}).`;
+	} catch {
+		return `Taslak kaydedilemedi (${response.status}).`;
 	}
 }

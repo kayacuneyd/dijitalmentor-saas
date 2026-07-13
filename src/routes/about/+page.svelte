@@ -5,20 +5,21 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { mergeCopy } from '$lib/publicCopy';
 
 	let { data } = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
-				title: 'About saaskaya · AI-assisted websites for professionals',
+				title: 'About saaskaya · Simple multilingual websites for professionals',
 				description:
-					'saaskaya helps professionals and small businesses launch multilingual websites with safe AI, controlled components, and a real publishing workflow.',
+					'saaskaya helps professionals and small service businesses prepare, edit, and publish multilingual websites without juggling copywriting, translation, and technical setup.',
 				kicker: 'About',
-				h1: 'A safer way for professionals to launch a multilingual website.',
-				lead: 'saaskaya is built for people who need a clear, trustworthy online presence without becoming web designers or managing scattered tools.',
+				h1: 'Simple, multilingual websites for professionals.',
+				lead: 'saaskaya is built for people who need a clear online presence but do not want to spend weeks on copy, translation, domain setup, and scattered tools.',
 				primary: 'Start beta',
 				secondary: 'See pricing',
 				pills: ['Kornwestheim, Germany', 'TR · EN · DE', 'Closed beta'],
@@ -28,25 +29,25 @@
 						'Psychologists, lawyers, consultants, therapists, academics, and small service businesses that need a professional site clients can understand quickly.'
 					],
 					[
-						'What the platform does',
-						'You describe your practice, choose a controlled starting structure, review a live preview, edit by chat or direct text changes, and publish on a subdomain or custom domain.'
+						'What it helps with',
+						'You describe your work, review the first version, edit the text, and publish on a subdomain or your own domain when it is ready.'
 					],
 					[
-						'Why it is not just an AI wrapper',
-						'AI does not write arbitrary website code. saaskaya keeps output inside validated structured data, fixed components, preview, publishing, backups, and support workflows.'
+						'Why it stays predictable',
+						'The site is built from controlled sections. AI helps with content, but it does not get to rewrite the website code or break the structure.'
 					]
 				],
-				trustTitle: 'Built with operator accountability',
+				trustTitle: 'Built with clear responsibility',
 				trustBody:
-					'saaskaya is operated from Kornwestheim by Cüneyt Kaya. The product is intentionally narrow at launch: professionals, multilingual sites, controlled AI output, and practical support.'
+					'saaskaya is operated from Kornwestheim by Cüneyt Kaya. The launch focus is intentionally narrow: professional profiles, multilingual websites, predictable publishing, and practical support.'
 			},
 			tr: {
-				title: 'saaskaya hakkında · Uzmanlar için AI destekli web siteleri',
+				title: 'saaskaya hakkında · Uzmanlar için sade çok dilli web siteleri',
 				description:
-					'saaskaya uzmanlara ve küçük işletmelere güvenli AI, kontrollü bileşenler ve gerçek yayınlama akışıyla çok dilli web sitesi kurma imkanı verir.',
+					'saaskaya uzmanların metin, çeviri ve teknik kurulumla boğuşmadan çok dilli web sitesi hazırlamasına ve yayına almasına yardımcı olur.',
 				kicker: 'Hakkımızda',
-				h1: 'Uzmanların çok dilli web sitesini daha güvenli biçimde yayına alması için.',
-				lead: 'saaskaya, web tasarımcıya dönüşmeden veya dağınık araçları yönetmeden güvenilir bir online varlık isteyen kişiler için geliştirilir.',
+				h1: 'Uzmanlar için sade, çok dilli web siteleri.',
+				lead: 'saaskaya; metin, çeviri, domain ve teknik kurulumla haftalar kaybetmeden güven veren bir web sitesi hazırlamak isteyen uzmanlar için geliştirildi.',
 				primary: 'Betaya başla',
 				secondary: 'Fiyatı gör',
 				pills: ['Kornwestheim, Almanya', 'TR · EN · DE', 'Kapalı beta'],
@@ -56,25 +57,25 @@
 						'Psikologlar, avukatlar, danışmanlar, terapistler, akademisyenler ve müşterilerin hızlıca anlayabileceği profesyonel bir siteye ihtiyaç duyan küçük hizmet işletmeleri.'
 					],
 					[
-						'Platform ne yapar',
-						'Pratiğinizi anlatır, kontrollü bir başlangıç yapısı seçer, canlı önizlemeyi inceler, sohbetle veya doğrudan metin düzenleyerek yayına alırsınız.'
+						'Ne işe yarar',
+						'Mesleğini anlatırsın, ilk siteyi incelersin, metni düzenlersin ve hazır olduğunda alt alan adında ya da kendi domaininde yayına alırsın.'
 					],
 					[
-						'Neden sadece AI wrapper değil',
-						'AI serbest web kodu yazmaz. saaskaya çıktıyı doğrulanmış yapısal veri, sabit bileşenler, önizleme, yayınlama, yedek ve destek akışları içinde tutar.'
+						'Neden öngörülebilir kalır',
+						'Site kontrollü bölümlerden oluşur. AI içerik hazırlamaya yardım eder; site kodunu baştan yazıp yapıyı bozacak alana girmez.'
 					]
 				],
-				trustTitle: 'Operatör sorumluluğuyla inşa edildi',
+				trustTitle: 'Sorumluluğu belli bir ürün',
 				trustBody:
-					'saaskaya Kornwestheim merkezli olarak Cüneyt Kaya tarafından yürütülür. Ürün lansmanda bilinçli olarak dar tutulur: uzmanlar, çok dilli siteler, kontrollü AI çıktısı ve pratik destek.'
+					'saaskaya Kornwestheim merkezli olarak Cüneyt Kaya tarafından yürütülür. İlk odak bilinçli olarak dar tutulur: uzman profilleri, çok dilli web siteleri, öngörülebilir yayınlama ve pratik destek.'
 			},
 			de: {
-				title: 'Über saaskaya · AI-gestützte Websites für Fachleute',
+				title: 'Über saaskaya · Einfache mehrsprachige Websites für Fachleute',
 				description:
-					'saaskaya hilft Fachleuten und kleinen Unternehmen, mehrsprachige Websites mit sicherer AI, kontrollierten Komponenten und Publishing-Workflow zu starten.',
+					'saaskaya hilft Fachleuten, mehrsprachige Websites vorzubereiten, zu bearbeiten und zu veröffentlichen, ohne sich in Text, Übersetzung und Technik zu verlieren.',
 				kicker: 'Über uns',
-				h1: 'Ein sichererer Weg für Fachleute, eine mehrsprachige Website zu starten.',
-				lead: 'saaskaya ist für Menschen gebaut, die eine klare, vertrauenswürdige Online-Präsenz brauchen, ohne Webdesign lernen oder viele Tools verwalten zu müssen.',
+				h1: 'Einfache, mehrsprachige Websites für Fachleute.',
+				lead: 'saaskaya ist für Menschen gebaut, die eine klare Online-Präsenz brauchen, aber keine Wochen mit Texten, Übersetzungen, Domains und verstreuten Tools verbringen möchten.',
 				primary: 'Beta starten',
 				secondary: 'Preise ansehen',
 				pills: ['Kornwestheim, Deutschland', 'TR · EN · DE', 'Geschlossene Beta'],
@@ -84,20 +85,21 @@
 						'Psychologen, Anwälte, Berater, Therapeuten, Akademiker und kleine Dienstleister, die eine professionelle und schnell verständliche Website brauchen.'
 					],
 					[
-						'Was die Plattform macht',
-						'Du beschreibst deine Praxis, wählst eine kontrollierte Startstruktur, prüfst die Live-Vorschau, bearbeitest per Chat oder direkt und veröffentlichst auf Subdomain oder eigener Domain.'
+						'Wobei es hilft',
+						'Du beschreibst dein Angebot, prüfst die erste Version, bearbeitest die Texte und veröffentlichst auf Subdomain oder eigener Domain.'
 					],
 					[
-						'Warum es nicht nur ein AI-Wrapper ist',
-						'AI schreibt keinen beliebigen Website-Code. saaskaya hält Ausgaben in validierter Struktur, festen Komponenten, Vorschau, Publishing, Backups und Support-Workflows.'
+						'Warum es berechenbar bleibt',
+						'Die Website besteht aus kontrollierten Abschnitten. AI hilft bei Inhalten, schreibt aber nicht den Website-Code um.'
 					]
 				],
-				trustTitle: 'Mit operativer Verantwortung gebaut',
+				trustTitle: 'Mit klarer Verantwortung gebaut',
 				trustBody:
-					'saaskaya wird von Cüneyt Kaya aus Kornwestheim betrieben. Das Produkt ist zum Launch bewusst fokussiert: Fachleute, mehrsprachige Websites, kontrollierte AI-Ausgaben und praktische Unterstützung.'
+					'saaskaya wird von Cüneyt Kaya aus Kornwestheim betrieben. Der Start ist bewusst fokussiert: berufliche Profile, mehrsprachige Websites, berechenbares Publishing und praktische Unterstützung.'
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 </script>
 
 <SeoHead

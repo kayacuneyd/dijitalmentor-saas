@@ -4,46 +4,48 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
-				title: 'saaskaya Blog · AI-assisted website building',
+				title: 'saaskaya Blog · Notes for professional websites',
 				description:
-					'Plain-language articles about AI-assisted websites, multilingual launch, and safer web publishing for professionals.',
+					'Plain-language articles about multilingual websites, domain setup, trust, and publishing for professionals.',
 				kicker: 'Blog',
-				h1: 'Practical notes for launching a better professional website.',
-				lead: 'Short, non-technical articles for professionals evaluating multilingual websites and AI-assisted launch workflows.',
+				h1: 'Short notes that help you prepare a better professional website.',
+				lead: 'Plain articles on multilingual sites, domains, trust, and publishing without technical detours.',
 				read: 'Read article',
 				min: 'min read'
 			},
 			tr: {
-				title: 'saaskaya Blog · AI destekli web sitesi oluşturma',
+				title: 'saaskaya Blog · Profesyonel web siteleri için notlar',
 				description:
-					'Uzmanlar için AI destekli web siteleri, çok dilli lansman ve daha güvenli yayınlama hakkında sade yazılar.',
+					'Uzmanlar için çok dilli web sitesi, alan adı, güven ve yayına alma hakkında sade yazılar.',
 				kicker: 'Blog',
-				h1: 'Daha iyi bir profesyonel web sitesi yayına almak için pratik notlar.',
-				lead: 'Çok dilli web sitesi ve AI destekli lansman akışını değerlendiren uzmanlar için kısa, teknik olmayan yazılar.',
+				h1: 'Web sitesi hazırlarken işine yarayacak kısa notlar.',
+				lead: 'Çok dilli site, alan adı, güven ve yayına alma konularını teknik detaya boğmadan anlatıyoruz.',
 				read: 'Yazıyı oku',
 				min: 'dk okuma'
 			},
 			de: {
-				title: 'saaskaya Blog · AI-gestützter Website-Aufbau',
+				title: 'saaskaya Blog · Notizen für professionelle Websites',
 				description:
-					'Einfache Artikel über AI-gestützte Websites, mehrsprachigen Launch und sichereres Publishing für Fachleute.',
+					'Einfache Artikel über mehrsprachige Websites, Domains, Vertrauen und Veröffentlichung für Fachleute.',
 				kicker: 'Blog',
-				h1: 'Praktische Notizen für eine bessere professionelle Website.',
-				lead: 'Kurze, nicht-technische Artikel für Fachleute, die mehrsprachige Websites und AI-gestützte Launch-Workflows bewerten.',
+				h1: 'Kurze Notizen für eine bessere professionelle Website.',
+				lead: 'Mehrsprachige Websites, Domains, Vertrauen und Veröffentlichung ohne technische Umwege erklärt.',
 				read: 'Artikel lesen',
 				min: 'Min. Lesezeit'
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 </script>
 
 <SeoHead

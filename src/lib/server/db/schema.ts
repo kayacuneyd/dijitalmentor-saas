@@ -88,6 +88,21 @@ export const appSettings = sqliteTable('app_settings', {
 		.$defaultFn(() => new Date())
 });
 
+// Operator-editable public marketing copy. Stored as JSON overrides on top of
+// code defaults so public pages remain renderable even when an override is removed.
+export const marketingPageCopy = sqliteTable(
+	'marketing_page_copy',
+	{
+		page: text('page').notNull(),
+		locale: text('locale').notNull(),
+		value: text('value', { mode: 'json' }).notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [primaryKey({ columns: [table.page, table.locale] })]
+);
+
 // Contact-form submissions from published tenant sites (PLAN §7).
 export const contactSubmissions = sqliteTable('contact_submissions', {
 	id: text('id').primaryKey(),

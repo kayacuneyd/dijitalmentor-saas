@@ -5,13 +5,14 @@
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				title: 'Pricing · saaskaya',
@@ -30,8 +31,8 @@
 				domainNote:
 					'You are not buying only a domain. saaskaya manages the website, hosting, SSL security, DNS setup, domain renewal tracking, maintenance, contact forms, and professional email forwarding setup for your domain.',
 				faqLabel: 'Frequently asked questions',
-				ctaText: 'Not sure yet? Generate your first draft, then decide.',
-				cta: 'Describe your practice',
+				ctaText: 'Not sure yet? See your first website, then decide.',
+				cta: 'Create first site',
 				plans: [
 					[
 						'Free',
@@ -118,8 +119,8 @@
 					'saaskaya fiyatlandırması: Free, Aylık Pro ve standart .com alan adı dahil Yıllık Pro.',
 				login: 'Giriş',
 				pills: ['Fiyatlandırma', 'KDV hariç'],
-				h1: 'Profesyonel pratik için net fiyat',
-				lead: 'Ücretsiz dene, beğen. Aylık Pro + yönetilen .com alan adı yılda 219€ tutar; Yıllık Pro 200€/yıl ve standart .com alan adı dahildir.',
+				h1: 'Web siteni yayına almak için sade fiyat',
+				lead: 'Ücretsiz başla ve ilk siteyi gör. Aylık Pro + yönetilen .com alan adı yılda 219€ tutar; Yıllık Pro 200€/yıl ve standart .com alan adı dahildir.',
 				month: '/ay',
 				year: '/yıl',
 				recommended: 'Önerilen',
@@ -129,8 +130,8 @@
 				domainNote:
 					'Sadece domain almıyorsunuz. saaskaya web sitesini, hosting’i, SSL güvenliğini, DNS kurulumunu, domain yenileme takibini, bakım-onarımı, iletişim formlarını ve profesyonel e-posta yönlendirme kurulumunu sizin için yönetir.',
 				faqLabel: 'Sıkça sorulan sorular',
-				ctaText: 'Henüz emin değil misiniz? Önce siteni üret, sonra karar ver.',
-				cta: 'Pratiğini anlat',
+				ctaText: 'Henüz emin değil misiniz? Önce ilk web siteni gör, sonra karar ver.',
+				cta: 'İlk siteyi oluştur',
 				plans: [
 					[
 						'Free',
@@ -228,8 +229,8 @@
 				domainNote:
 					'Sie kaufen nicht nur eine Domain. saaskaya verwaltet Website, Hosting, SSL-Sicherheit, DNS-Einrichtung, Domain-Verlängerung, Wartung, Kontaktformulare und professionelle E-Mail-Weiterleitung.',
 				faqLabel: 'Häufige Fragen',
-				ctaText: 'Noch unsicher? Erstelle zuerst deinen Entwurf und entscheide dann.',
-				cta: 'Praxis beschreiben',
+				ctaText: 'Noch unsicher? Sieh dir zuerst deine Website an und entscheide dann.',
+				cta: 'Website starten',
 				plans: [
 					[
 						'Free',
@@ -312,6 +313,7 @@
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 
 	const plans = $derived(
 		copy.plans.map(([name, price, periodOrTagline, taglineOrFeatures, maybeFeatures]) => {

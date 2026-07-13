@@ -30,6 +30,7 @@
 		{ href: '/admin/customers', label: 'Customers', eyebrow: 'CRM', match: '/admin/customers' },
 		{ href: '/admin/inbox', label: 'Inbox', eyebrow: 'Public', match: '/admin/inbox' },
 		{ href: '/admin/blog', label: 'Blog', eyebrow: 'Content', match: '/admin/blog' },
+		{ href: '/admin/copy', label: 'Copy', eyebrow: 'Content', match: '/admin/copy' },
 		{ href: '/admin/share', label: 'Share', eyebrow: 'Growth', match: '/admin/share' },
 		{ href: '/admin/support', label: 'Support', eyebrow: 'Help', match: '/admin/support' },
 		{ href: '/admin/invites', label: 'Beta Invites', eyebrow: 'Access', match: '/admin/invites' },

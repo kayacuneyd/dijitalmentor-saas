@@ -7,6 +7,7 @@
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
@@ -20,7 +21,7 @@
 		dental: '#0e7490'
 	} as const;
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				title: 'saaskaya — AI website platform for psychologists, lawyers, and professionals',
@@ -29,15 +30,15 @@
 				login: 'Sign in',
 				beta: 'closed beta',
 				pills: ['For professionals', 'TR · EN · DE', 'Closed beta'],
-				h1: 'Turn your professional work into a multilingual website draft.',
-				lead: 'Skip the blank brief, copywriting, translation, domain, and setup maze. Describe what you do; saaskaya turns it into a safe, editable site draft you can review and publish.',
-				primary: 'Describe your work',
-				problemsLabel: 'The stuck points saaskaya removes',
+				h1: 'Describe your work. Get your website ready.',
+				lead: 'Skip the blank brief, copywriting, translation, domain, and setup maze. Start with a short description, review the first version, edit the text, and publish when ready.',
+				primary: 'Create first site',
+				problemsLabel: 'Skip the hard parts',
 				problemItems: [
-					'I do not know what to write',
-					'I need a multilingual site',
-					'I do not want technical setup',
-					'I do not want AI to break the site'
+					{ title: 'Writing the copy', body: 'You do not start from a blank page.' },
+					{ title: 'Translation', body: 'TR, EN and DE versions can be prepared together.' },
+					{ title: 'Technical setup', body: 'Domain, SSL and hosting steps become clear.' },
+					{ title: 'AI risk', body: 'AI does not write code; the site structure stays protected.' }
 				],
 				heroTrust: [
 					[
@@ -192,15 +193,15 @@
 				login: 'Giriş',
 				beta: 'kapalı beta',
 				pills: ['Uzman meslekler için', 'TR · EN · DE', 'Kapalı beta'],
-				h1: 'Mesleki profilini çok dilli site taslağına çevir.',
-				lead: 'Boş brief, metin yazma, çeviri, domain ve teknik kurulum yüküyle uğraşma. Ne yaptığını anlat; saaskaya bunu güvenli, düzenlenebilir ve yayınlanabilir bir site taslağına çevirir.',
-				primary: 'Mesleğini anlat',
-				problemsLabel: 'saaskaya’nın ortadan kaldırdığı takılma noktaları',
+				h1: 'Mesleğini anlat, web siten hazırlansın.',
+				lead: 'Ne yazacağım, nasıl çevireceğim, domaini nasıl bağlayacağım diye uğraşma. Kısa bir anlatımla ilk web siteni gör; metni düzenle, hazır olduğunda yayına al.',
+				primary: 'İlk siteyi oluştur',
+				problemsLabel: 'Bunlarla uğraşma',
 				problemItems: [
-					'Ne yazacağımı bilmiyorum',
-					'Çok dilli site istiyorum',
-					'Teknik kurulumla uğraşmak istemiyorum',
-					'AI siteyi bozmasın istiyorum'
+					{ title: 'Metin yazma', body: 'Boş sayfadan başlamazsın.' },
+					{ title: 'Çeviri', body: 'TR, EN ve DE sürümleri birlikte hazırlanır.' },
+					{ title: 'Teknik kurulum', body: 'Domain, SSL ve hosting yolu netleşir.' },
+					{ title: 'AI riski', body: 'AI kod yazmaz; site yapısı korunur.' }
 				],
 				heroTrust: [
 					['AI kod yazmaz', 'Her çıktı yayınlanmadan doğrulanır — sitenin bozulma riski yok.'],
@@ -351,15 +352,15 @@
 				login: 'Anmelden',
 				beta: 'geschlossene Beta',
 				pills: ['Für Expertenberufe', 'TR · EN · DE', 'Geschlossene Beta'],
-				h1: 'Aus deinem beruflichen Profil wird ein mehrsprachiger Website-Entwurf.',
-				lead: 'Kein leeres Briefing, keine Text- und Übersetzungsblockade, keine Domain- oder Technikliste. Beschreibe dein Angebot; saaskaya erstellt daraus einen sicheren, bearbeitbaren Website-Entwurf.',
-				primary: 'Profil beschreiben',
-				problemsLabel: 'Diese Blockaden nimmt saaskaya ab',
+				h1: 'Beschreibe dein Angebot. Deine Website entsteht.',
+				lead: 'Kein leeres Briefing, keine Text- und Übersetzungsblockade, keine Domain- oder Technikliste. Starte mit einer kurzen Beschreibung, prüfe die erste Version und veröffentliche, wenn sie passt.',
+				primary: 'Website starten',
+				problemsLabel: 'Diese Arbeit gibst du ab',
 				problemItems: [
-					'Ich weiß nicht, was ich schreiben soll',
-					'Ich brauche eine mehrsprachige Website',
-					'Ich will keine technische Einrichtung',
-					'AI soll die Website nicht beschädigen'
+					{ title: 'Texte schreiben', body: 'Du beginnst nicht mit einer leeren Seite.' },
+					{ title: 'Übersetzen', body: 'TR, EN und DE können gemeinsam vorbereitet werden.' },
+					{ title: 'Technik einrichten', body: 'Domain, SSL und Hosting werden greifbar.' },
+					{ title: 'AI-Risiko', body: 'AI schreibt keinen Code; die Struktur bleibt geschützt.' }
 				],
 				heroTrust: [
 					[
@@ -518,6 +519,7 @@
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 
 	const steps = $derived(
 		copy.steps.map(([title, desc], index) => ({ n: String(index + 1), title, desc }))
@@ -607,15 +609,18 @@
 
 	<!-- Problem band -->
 	<MarketingSection class="mt-8">
-		<div class="sk-soft p-4 sm:p-5">
-			<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.problemsLabel}</div>
-			<ul class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-				{#each problemItems as item (item)}
+		<div class="sk-soft p-4 sm:p-5 lg:p-6">
+			<div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.problemsLabel}</div>
+				<div class="hidden h-px flex-1 bg-[var(--sk-line)] sm:block"></div>
+			</div>
+			<ul class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+				{#each problemItems as item (item.title)}
 					<li
-						class="flex min-h-14 items-center gap-2 border-t border-[var(--sk-line)] pt-2 text-sm leading-5 text-[var(--sk-ink)]"
+						class="flex min-h-[6.25rem] gap-3 rounded-[10px] border border-[var(--sk-line)] bg-white/70 p-3.5"
 					>
 						<span
-							class="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[rgba(47,111,106,.12)] text-[var(--sk-ink)]"
+							class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(47,111,106,.12)] text-[var(--sk-ink)]"
 							aria-hidden="true"
 						>
 							<svg
@@ -631,7 +636,14 @@
 								<path d="M20 6 9 17l-5-5" />
 							</svg>
 						</span>
-						<span>{item}</span>
+						<span class="min-w-0">
+							<span class="block text-sm font-semibold leading-5 text-[var(--sk-ink)]">
+								{item.title}
+							</span>
+							<span class="mt-1 block text-xs leading-5 text-[var(--sk-muted)]">
+								{item.body}
+							</span>
+						</span>
 					</li>
 				{/each}
 			</ul>
@@ -778,7 +790,11 @@
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.priceLabel}</div>
 		<div class="mt-4 grid gap-4 sm:grid-cols-3">
-			<div class="sk-card p-4">
+			<a
+				href={l('/new')}
+				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label="Free plan"
+			>
 				<div class="text-sm font-semibold">Free</div>
 				<div class="mt-2 flex items-baseline gap-1.5">
 					<span class="sk-display text-3xl">0€</span>
@@ -791,8 +807,16 @@
 							? '3 Vorschau-Websites, 1 veröffentlichte Website, 10 AI-Bearbeitungen.'
 							: '3 preview sites, 1 published website, 10 AI edits.'}
 				</p>
-			</div>
-			<div class="sk-card p-4 border-[var(--sk-ink)] ring-1 ring-[var(--sk-ink)]">
+				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+					{copy.primary}
+					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+				</span>
+			</a>
+			<a
+				href={l('/pricing')}
+				class="sk-card group block border-[var(--sk-ink)] p-4 ring-1 ring-[var(--sk-ink)] transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label="Pro plan pricing"
+			>
 				<div class="flex items-center justify-between">
 					<div class="text-sm font-semibold">Pro</div>
 					<StatusPill tone="success">{copy.recommended}</StatusPill>
@@ -808,8 +832,16 @@
 							? 'Eigene Domain, 50 AI-Bearbeitungen, mehrsprachig.'
 							: 'Custom domain, 50 AI edits, multilingual.'}
 				</p>
-			</div>
-			<div class="sk-card p-4">
+				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+					{copy.pricing}
+					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+				</span>
+			</a>
+			<a
+				href={l('/pricing')}
+				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label="Premium plan details"
+			>
 				<div class="text-sm font-semibold">Premium</div>
 				<div class="mt-2 sk-display text-3xl">
 					{locale === 'tr' ? 'Sonra' : locale === 'de' ? 'Später' : 'Later'}
@@ -821,7 +853,11 @@
 							? 'Top-ups und Zusatzservices werden später entschieden.'
 							: 'Top-ups and extra services will be decided later.'}
 				</p>
-			</div>
+				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+					{copy.allFeatures}
+					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+				</span>
+			</a>
 		</div>
 		<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-sm mt-4"
 			>{copy.allFeatures}{@html uiIcons.arrowRight(14)}</a

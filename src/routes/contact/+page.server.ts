@@ -1,11 +1,13 @@
 import { fail } from '@sveltejs/kit';
 import { rateLimit } from '$lib/server/auth';
 import { createInquiry, notifyNewInquiry, validateInquiry } from '$lib/server/inquiries';
+import { getPublicCopyOverrides } from '$lib/server/publicCopy';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => ({
 	locale: locals.locale,
-	userEmail: locals.user?.email ?? ''
+	userEmail: locals.user?.email ?? '',
+	copyOverrides: getPublicCopyOverrides('contact')
 });
 
 export const actions: Actions = {

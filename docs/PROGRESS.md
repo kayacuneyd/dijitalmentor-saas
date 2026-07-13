@@ -2608,3 +2608,25 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: `npm run check` 0 hata/uyarı, `npm run test` 499/499 geçti, `npm run build`
   başarılı. Playwright ile local dev server üzerinde `/tr`, `/en`, `/de` 375px + 1280px kontrol edildi:
   HTTP 200, problem bandı ve yeni feature başlığı görünüyor, yatay taşma 0, konsol hatası 0.
+
+### 2026-07-13 — Public metin düzenleme ve daha doğrudan ana sayfa
+
+- Ana sayfa hero vaadi "site taslağına çevir" dilinden çıkarıldı: TR `Mesleğini anlat, web siten
+  hazırlansın.`, EN `Describe your work. Get your website ready.`, DE `Beschreibe dein Angebot.
+  Deine Website entsteht.` Problem bandı eşit kart gridiyle yeniden düzenlendi; çizgili/dağınık
+  görünüm yerine her problem için başlık + kısa açıklama kullanılıyor.
+- Ana sayfadaki fiyat özeti gerçek link kartlarına çevrildi: Free `/new`, Pro ve Premium
+  `/pricing` hedefli; hover/focus hali ve kart içi kısa aksiyon metni eklendi.
+- Hakkımızda, blog, templates, pricing, contact ve beta sayfalarında fazla yapay/teknik duran
+  "AI wrapper", "AI destekli lansman", "pratik" vb. ifadeler daha doğal problem/sonuç diliyle
+  değiştirildi.
+- Public copy override sistemi eklendi: migration v25 `marketing_page_copy` tablosu, `src/lib/publicCopy.ts`
+  field registry/merge helper, `src/lib/server/publicCopy.ts` DB helper'ları ve `/admin/copy`
+  ekranı. Public pazarlama sayfaları artık code default + page/locale override modeliyle çalışıyor;
+  boş bırakılan alanlar varsayılan metne düşüyor. Admin nav'ına "Copy" eklendi.
+- Verification: `npm run check` 0 hata/uyarı, `npm run test` 501/501 geçti, `npm run build`
+  başarılı. Local dev server üzerinde `/tr`, `/en`, `/de`, `/tr/pricing`, `/tr/about`,
+  `/tr/templates`, `/tr/blog`, `/tr/contact`, `/tr/beta` HTTP/title kontrolünden geçti;
+  `/tr`, `/en`, `/de` 375px + 1280px Playwright kontrolünde yatay taşma 0 ve problem bandı görünür.
+  Fiyat kart href'leri `/tr/new`, `/tr/pricing`, `/tr/pricing`; `/admin/copy` auth yokken beklenen
+  şekilde `/login` 303 döndürüyor.

@@ -1,6 +1,7 @@
 import { controlledKits } from '$lib/kits';
 import { siteQualityCheck } from '$lib/quality/siteQuality';
 import type { SectionType } from '$lib/schema/site';
+import { getPublicCopyOverrides } from '$lib/server/publicCopy';
 import type { PageServerLoad } from './$types';
 
 const sectionLabels: Record<SectionType, string> = {
@@ -59,5 +60,5 @@ export const load: PageServerLoad = () => {
 		};
 	});
 
-	return { kits };
+	return { kits, copyOverrides: getPublicCopyOverrides('templates') };
 };

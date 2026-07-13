@@ -5,6 +5,7 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { mergeCopy } from '$lib/publicCopy';
 
 	type ContactFormValues = {
 		name?: string;
@@ -20,7 +21,7 @@
 		(form && 'values' in form ? form.values : undefined) as ContactFormValues | undefined
 	);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				title: 'Contact saaskaya · Beta access and support',
@@ -28,13 +29,13 @@
 					'Contact saaskaya for beta access, support, partnerships, billing questions, or product feedback.',
 				kicker: 'Contact',
 				h1: 'Tell us what you need.',
-				lead: 'Use the form or message bubble for beta access, support, partnerships, billing questions, or product feedback. Your message is stored in the saaskaya inbox and we reply by email.',
+				lead: 'Use the form for beta access, support, partnerships, billing questions, or product feedback. Your message reaches us directly and we reply by email.',
 				email: 'Email support',
 				response: 'Typical response: by email during beta onboarding.',
 				location: 'Operated from Kornwestheim, Germany.',
 				categories: ['Beta access', 'Support', 'Partnership', 'Billing', 'Other'],
 				formTitle: 'Message categories',
-				formNote: 'Send a message; it will be stored in the saaskaya admin inbox.',
+				formNote: 'Send a message and we will reply by email.',
 				name: 'Name',
 				emailField: 'Email',
 				category: 'Category',
@@ -51,13 +52,13 @@
 					'Beta erişimi, destek, iş birliği, faturalama soruları veya ürün geri bildirimi için saaskaya ile iletişime geçin.',
 				kicker: 'İletişim',
 				h1: 'Neye ihtiyacınız olduğunu yazın.',
-				lead: 'Beta erişimi, destek, iş birliği, faturalama soruları veya ürün geri bildirimi için formu ya da mesaj balonunu kullanın. Mesajınız saaskaya inbox içine kaydedilir; e-posta ile yanıt veririz.',
+				lead: 'Beta erişimi, destek, iş birliği, faturalama soruları veya ürün geri bildirimi için yazın. Mesajınız bize ulaşır; e-posta ile döneriz.',
 				email: 'Destek e-postası',
-				response: 'Tipik yanıt: beta onboarding sırasında e-posta ile.',
+				response: 'Tipik yanıt: beta döneminde e-posta ile.',
 				location: 'Kornwestheim, Almanya merkezli yürütülür.',
 				categories: ['Beta erişimi', 'Destek', 'İş birliği', 'Faturalama', 'Diğer'],
 				formTitle: 'Mesaj kategorileri',
-				formNote: 'Mesaj gönderin; saaskaya admin inbox içine kaydedilecek.',
+				formNote: 'Mesajını gönder; e-posta ile yanıtlayalım.',
 				name: 'Ad Soyad',
 				emailField: 'E-posta',
 				category: 'Kategori',
@@ -74,13 +75,13 @@
 					'Kontaktiere saaskaya für Beta-Zugang, Support, Partnerschaften, Abrechnung oder Produktfeedback.',
 				kicker: 'Kontakt',
 				h1: 'Sag uns, was du brauchst.',
-				lead: 'Nutze das Formular oder die Nachrichten-Schaltfläche für Beta-Zugang, Support, Partnerschaften, Abrechnung oder Produktfeedback. Deine Nachricht wird in der saaskaya Inbox gespeichert; wir antworten per E-Mail.',
+				lead: 'Schreibe uns für Beta-Zugang, Support, Partnerschaften, Abrechnung oder Produktfeedback. Deine Nachricht erreicht uns direkt; wir antworten per E-Mail.',
 				email: 'Support per E-Mail',
 				response: 'Typische Antwort: per E-Mail während des Beta-Onboardings.',
 				location: 'Betrieben aus Kornwestheim, Deutschland.',
 				categories: ['Beta-Zugang', 'Support', 'Partnerschaft', 'Abrechnung', 'Sonstiges'],
 				formTitle: 'Nachrichtenkategorien',
-				formNote: 'Sende eine Nachricht; sie wird in der saaskaya Admin-Inbox gespeichert.',
+				formNote: 'Sende eine Nachricht und wir antworten per E-Mail.',
 				name: 'Name',
 				emailField: 'E-Mail',
 				category: 'Kategorie',
@@ -93,6 +94,7 @@
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 
 	const contactJsonLd = $derived({
 		'@context': 'https://schema.org',

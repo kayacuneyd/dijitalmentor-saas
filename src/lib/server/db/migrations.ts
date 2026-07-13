@@ -755,6 +755,19 @@ export const migrations: Migration[] = [
 				`CREATE INDEX IF NOT EXISTS share_assets_active_order_idx ON share_assets (active, sort_order)`
 			);
 		}
+	},
+	{
+		version: 25,
+		name: 'marketing-page-copy',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS marketing_page_copy (
+				page text NOT NULL,
+				locale text NOT NULL,
+				value text NOT NULL,
+				updated_at integer NOT NULL,
+				PRIMARY KEY (page, locale)
+			)`);
+		}
 	}
 ];
 

@@ -5,27 +5,28 @@
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				title: 'Profession website kits · saaskaya',
 				description:
-					'Controlled saaskaya website kits for professional groups, with feature kits and prompt recipes that steer AI generation without leaving the fixed block set.',
+					'Website starting points for professional groups such as psychologists, lawyers, dietitians, dentists, academics, and consultants.',
 				create: 'Create site',
 				pills: [
 					'Profession kits',
-					`${data.kits.length} controlled starts`,
-					'Feature + prompt recipes'
+					`${data.kits.length} starting points`,
+					'TR · EN · DE ready'
 				],
 				h1: 'Start from a profession-aware kit, not a blank page.',
-				lead: 'Each kit uses the existing fixed block set, passes the Zod schema, and gives AI a smaller, sharper brief. Feature kits and prompt recipes help customers add what they need with less token spend.',
-				primary: 'Describe your practice',
+				lead: 'Choose a starting point close to your work. saaskaya prepares the first site structure, text direction, and language setup so you can review and edit faster.',
+				primary: 'Describe your work',
 				pricing: 'Pricing',
 				profession: 'Profession',
 				audience: 'Best for',
@@ -39,27 +40,27 @@
 				blockers: 'blockers',
 				warnings: 'warnings',
 				startStyle: 'Start close to this style',
-				note: 'This catalog is not a free-form template marketplace. Kits are controlled product surfaces: they steer onboarding, AI generation and add-ons while staying inside the saaskaya schema.'
+				note: 'These kits are starting points, not rigid templates. You can edit the text, services, pages, languages, and publishing path after the first site appears.'
 			},
 			tr: {
 				title: 'Meslek site kitleri · saaskaya',
 				description:
-					'Meslek grupları için kontrollü saaskaya site kitleri; feature kitler ve hazır prompt tarifleriyle AI üretimini sabit blok setinde tutar.',
+					'Psikolog, avukat, diyetisyen, diş hekimi, akademisyen ve danışmanlar için mesleğe yakın web sitesi başlangıçları.',
 				create: 'Site oluştur',
 				pills: [
 					'Meslek kitleri',
-					`${data.kits.length} kontrollü başlangıç`,
-					'Feature + prompt tarifleri'
+					`${data.kits.length} başlangıç`,
+					'TR · EN · DE hazır'
 				],
 				h1: 'Boş sayfadan değil, mesleğe uygun bir kitten başla.',
-				lead: 'Her kit mevcut sabit blok setiyle hazırlanır, Zod şemasından geçer ve AI’ye daha küçük, daha net bir brief verir. Feature kitler ve hazır promptlar müşterinin istediği siteye daha az token harcayarak yaklaşmasını sağlar.',
-				primary: 'Pratiğini anlat',
+				lead: 'Psikolog, avukat, diyetisyen ve diğer uzmanlar için işine yakın bir başlangıç seç. saaskaya ilk site yapısını, metin yönünü ve dil hazırlığını çıkarır; sen hızlıca inceler ve düzenlersin.',
+				primary: 'Mesleğini anlat',
 				pricing: 'Fiyatlandırma',
 				profession: 'Meslek',
 				audience: 'Hedef kullanım',
 				outcome: 'Sonuç',
-				features: 'Feature kitler',
-				prompts: 'Prompt tarifi',
+				features: 'Hazır parçalar',
+				prompts: 'Yönlendirme',
 				structure: 'Yapı',
 				sections: 'bölüm',
 				languages: 'Diller',
@@ -67,21 +68,21 @@
 				blockers: 'engel',
 				warnings: 'uyarı',
 				startStyle: 'Bu stile yakın başla',
-				note: 'Bu katalog serbest template marketi değil. Kitler; onboarding, AI üretimi ve eklenecek özellikleri saaskaya şeması içinde tutan kontrollü ürün yüzeyleridir.'
+				note: 'Bu kitler kalıba sıkıştırmak için değil, boş sayfadan kurtarmak için var. İlk site göründükten sonra metni, hizmetleri, sayfaları, dilleri ve yayınlama yolunu düzenleyebilirsin.'
 			},
 			de: {
 				title: 'Berufs-Website-Kits · saaskaya',
 				description:
-					'Kontrollierte saaskaya Website-Kits für Berufsgruppen mit Feature- und Prompt-Rezepten.',
+					'Website-Startpunkte für Berufsgruppen wie Psychologie, Recht, Ernährung, Zahnmedizin, Wissenschaft und Beratung.',
 				create: 'Website erstellen',
 				pills: [
 					'Berufs-Kits',
-					`${data.kits.length} kontrollierte Starts`,
-					'Feature + Prompt-Rezepte'
+					`${data.kits.length} Startpunkte`,
+					'TR · EN · DE bereit'
 				],
 				h1: 'Starte mit einem berufsnahen Kit, nicht mit einer leeren Seite.',
-				lead: 'Jedes Kit nutzt das feste Block-Set, besteht die Zod-Struktur und gibt AI ein kleineres, schärferes Briefing. Feature- und Prompt-Kits reduzieren Aufwand und Token-Verbrauch.',
-				primary: 'Praxis beschreiben',
+				lead: 'Wähle einen Startpunkt, der zu deiner Arbeit passt. saaskaya bereitet Struktur, Textrichtung und Sprachen vor, damit du schneller prüfen und bearbeiten kannst.',
+				primary: 'Angebot beschreiben',
 				pricing: 'Preise',
 				profession: 'Beruf',
 				audience: 'Geeignet für',
@@ -95,10 +96,11 @@
 				blockers: 'Blocker',
 				warnings: 'Warnungen',
 				startStyle: 'Nah an diesem Stil starten',
-				note: 'Dieser Katalog ist kein freier Template-Marktplatz. Kits bleiben kontrollierte Produktflächen innerhalb des saaskaya-Schemas.'
+				note: 'Diese Kits sind Startpunkte, keine starren Vorlagen. Texte, Leistungen, Seiten, Sprachen und Veröffentlichung lassen sich danach anpassen.'
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 
 	const swatches = ['#2f6f6a', '#264f73', '#3f7d5a', '#315f72', '#7a5267', '#4d6864'];
 </script>

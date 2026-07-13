@@ -6,6 +6,7 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
@@ -13,12 +14,12 @@
 	const l = (path: string) => withLocale(locale, path);
 	let busy = $state(false);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				title: 'Join the saaskaya beta',
 				description:
-					'Request your secure magic link and create an AI-assisted website draft in the saaskaya beta.',
+					'Request your beta sign-in link and start preparing your first saaskaya website.',
 				home: 'Home',
 				badge: 'Invite-only beta',
 				h1: 'Create your beta access link.',
@@ -33,13 +34,11 @@
 					'This beta link needs a valid code. Please use the full invitation link you received.',
 				dev: 'Dev mode',
 				open: 'Open your sign-in link',
-				after:
-					'After sign-in: quick profile → guided website chat → preview → publish on subdomain.'
+				after: 'After sign-in: short profile → website setup → preview → publish.'
 			},
 			tr: {
 				title: "saaskaya Beta'ya Katıl",
-				description:
-					'saaskaya beta için güvenli magic link al ve AI destekli web sitesi taslağını oluştur.',
+				description: 'saaskaya beta için giriş linkini al ve ilk web siteni hazırlamaya başla.',
 				home: 'Anasayfa',
 				badge: 'Davetli beta',
 				h1: 'Beta giriş linkini oluştur.',
@@ -54,12 +53,12 @@
 					'Bu beta linki geçerli bir kod gerektiriyor. Lütfen sana gönderilen tam davet linkini kullan.',
 				dev: 'Dev modu',
 				open: 'Giriş linkini aç',
-				after: 'Girişten sonra: hızlı profil → rehberli website chat → preview → subdomain yayın.'
+				after: 'Girişten sonra: kısa profil → web sitesi hazırlığı → önizleme → yayın.'
 			},
 			de: {
 				title: 'Der saaskaya Beta beitreten',
 				description:
-					'Fordere deinen sicheren Magic Link an und erstelle einen AI-gestützten Website-Entwurf.',
+					'Fordere deinen Beta-Anmeldelink an und starte deine erste saaskaya Website.',
 				home: 'Startseite',
 				badge: 'Beta nur mit Einladung',
 				h1: 'Erstelle deinen Beta-Zugangslink.',
@@ -74,11 +73,11 @@
 					'Dieser Beta-Link benötigt einen gültigen Code. Bitte nutze den vollständigen Einladungslink.',
 				dev: 'Dev-Modus',
 				open: 'Anmeldelink öffnen',
-				after:
-					'Nach dem Login: Kurzprofil → geführter Website-Chat → Vorschau → Subdomain veröffentlichen.'
+				after: 'Nach dem Login: Kurzprofil → Website vorbereiten → Vorschau → veröffentlichen.'
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
 </script>
 
 <svelte:head>

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getSetting } from '$lib/server/config';
 import { createLoginToken, rateLimit, selfServeBetaInvite } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
+import { getPublicCopyOverrides } from '$lib/server/publicCopy';
 import { withLocale } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -21,7 +22,8 @@ export const load: PageServerLoad = ({ locals, url }) => {
 		locale: locals.locale,
 		code,
 		codeRequired: Boolean(configuredCode()),
-		codeAllowed: codeAllowed(code)
+		codeAllowed: codeAllowed(code),
+		copyOverrides: getPublicCopyOverrides('beta')
 	};
 };
 

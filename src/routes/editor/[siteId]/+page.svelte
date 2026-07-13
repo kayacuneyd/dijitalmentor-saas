@@ -7,6 +7,7 @@
 	import LanguagesTab from './LanguagesTab.svelte';
 	import SettingsTab from './SettingsTab.svelte';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
+	import EditorDock from '$lib/ui/EditorDock.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import {
@@ -14,7 +15,6 @@
 		nextChecklistItem,
 		type CompletionChecklistItem
 	} from '$lib/editor/completionChecklist';
-	import { MediaQuery } from 'svelte/reactivity';
 	import { siteQualityCheck } from '$lib/quality/siteQuality';
 	import { checkCircleIcon, emptyCircleIcon, tabIcons, viewportIcons } from '$lib/editor/icons';
 	import { flagSvgs } from '$lib/ui/flags';
@@ -48,11 +48,10 @@
 	] as const;
 	let viewport = $state<(typeof viewports)[number]>(viewports[2]);
 
-	/** Below lg the sidebar and preview become full-width panes behind this toggle.
-	 *  Both stay mounted (CSS hiding only) — unmounting the iframe would reload it
-	 *  and drop the postMessage live-draft session. */
-	let mobilePane = $state<'edit' | 'preview'>('edit');
-	const isDesktop = new MediaQuery('(min-width: 1024px)', false);
+	/** All editing controls (tabs, checklist, quality control, locale/status/publish,
+	 *  the "..." menu) live behind this FAB-triggered dock; the preview iframe below
+	 *  stays mounted and visible at all times regardless of dock state. */
+	let dockOpen = $state(false);
 
 	let iframeEl = $state<HTMLIFrameElement>();
 	const previewSrc = $derived(
@@ -205,10 +204,7 @@
 
 	function goToChecklistItem(item: CompletionChecklistItem) {
 		activeTab = item.tab;
-	}
-
-	function toggleMobilePane() {
-		mobilePane = mobilePane === 'edit' ? 'preview' : 'edit';
+		dockOpen = true;
 	}
 </script>
 
@@ -223,137 +219,123 @@
 	contentClass=""
 	flush
 >
-	{#snippet right()}
-		<div class="flex items-center gap-2">
-			<a href="/dashboard" class="flex size-8 items-center justify-center rounded-[9px] bg-[#171614] pb-0.5 font-[var(--font-display)] text-[22px] text-[#f3ecdd]" aria-label="saaskaya dashboard">s</a>
-			<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">Dashboard</a>
-		</div>
-	{/snippet}
-
 	<div
 		class="flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
 	>
-		<!-- Single toolbar row: pane toggle (mobile) / viewport switcher (desktop) on the
-		     left, locale + status + the one primary action + an overflow menu for
-		     everything else on the right. Always visible regardless of active pane, so
-		     Save/Publish are reachable while editing on mobile, not just in preview. -->
-		<div
-			class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-3 py-2"
-		>
-			<div class="flex items-center gap-2">
-				<div class="lg:hidden">
+		<!-- Top bar: only the viewport switcher stays permanently visible. Everything
+		     else (locale, status, publish, overflow menu, tabs, checklist, quality
+		     control) lives inside the FAB-triggered EditorDock below, so the preview
+		     stays clean by default at every viewport. -->
+		<div class="flex shrink-0 items-center gap-2 border-b border-[var(--sk-line)] px-3 py-2">
+			<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
+				{#each viewports as vp (vp.id)}
 					<button
-						type="button"
-						class="sk-btn sk-btn-primary sk-btn-sm min-w-36 justify-between"
-						aria-live="polite"
-						onclick={toggleMobilePane}
+						class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
+						onclick={() => (viewport = vp)}
+						aria-label={vp.label}
+						aria-pressed={viewport.id === vp.id}
+						title={vp.label}
 					>
-						{mobilePane === 'edit' ? 'Önizlemeye geç' : 'Düzenlemeye dön'}
-						{@html uiIcons.arrowRight(13)}
+						{@html viewportIcons[vp.id]}
 					</button>
-				</div>
-				<div class="hidden gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:flex">
-					{#each viewports as vp (vp.id)}
-						<button
-							class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
-							onclick={() => (viewport = vp)}
-							aria-label={vp.label}
-							aria-pressed={viewport.id === vp.id}
-							title={vp.label}
-						>
-							{@html viewportIcons[vp.id]}
-						</button>
-					{/each}
-				</div>
-			</div>
-			<div class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
-				<details class="relative">
-					<summary
-						class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden"
-						aria-label="Düzenleme dili"
-					>
-						{@html flagSvgs[store.editLocale]}
-						<span class="hidden sm:inline">{store.editLocale.toUpperCase()}</span>
-					</summary>
-					<div
-						class="absolute right-0 z-20 mt-1 flex w-40 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
-					>
-						{#each store.site.locales as locale (locale)}
-							<button
-								type="button"
-								class="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5 {store.editLocale ===
-								locale
-									? 'font-semibold text-[var(--sk-ink)]'
-									: 'text-[var(--sk-muted)]'}"
-								onclick={() => (store.editLocale = locale)}
-							>
-								{@html flagSvgs[locale]}
-								{localeLabels[locale]}
-							</button>
-						{/each}
-					</div>
-				</details>
-				<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
-					{statusBadge[store.status].label}
-				</StatusPill>
-				<button
-					class="sk-btn sk-btn-primary sk-btn-sm"
-					onclick={publish}
-					disabled={publishing || !canPublish}
-					title={canPublish ? 'Publish' : 'Fix publish blockers before publishing'}
-				>
-					{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
-					{#if !canPublish}
-						Yayına hazır değil
-					{:else if publishedVersion}
-						Republish
-					{:else}
-						Publish
-					{/if}
-				</button>
-				<details class="relative">
-					<summary
-						class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
-						aria-label="Diğer işlemler"
-					>
-						⋯
-					</summary>
-					<div
-						class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
-					>
-						<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
-							{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
-							{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
-						</div>
-						<button
-							type="button"
-							class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
-							onclick={saveNow}
-						>
-							Save now
-						</button>
-						<a
-							href={savedPreviewSrc}
-							target="_blank"
-							class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
-						>
-							Saved preview {@html uiIcons.external(13)}
-						</a>
-					</div>
-				</details>
+				{/each}
 			</div>
 		</div>
 
 		<div class="flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
-			<!-- Left sidebar -->
-			<aside
-				class="{mobilePane === 'preview'
-					? 'hidden lg:flex'
-					: 'flex'} min-h-0 w-full shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)] lg:w-[19.5rem]"
-			>
-				<header class="border-b border-[var(--sk-line)] px-4 py-4">
-					<div class="min-w-0">
-						<h1 class="mt-3 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
+			<EditorDock bind:open={dockOpen}>
+				<header
+					class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-4 py-3"
+				>
+					<div class="flex min-w-0 items-center gap-2">
+						<a href="/dashboard" class="sk-btn sk-btn-ghost sk-btn-sm" aria-label="saaskaya dashboard">
+							{@html uiIcons.arrowLeft(13)} Dashboard
+						</a>
+						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
+					</div>
+					<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+						<details class="relative">
+							<summary
+								class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden"
+								aria-label="Düzenleme dili"
+							>
+								{@html flagSvgs[store.editLocale]}
+								<span class="hidden sm:inline">{store.editLocale.toUpperCase()}</span>
+							</summary>
+							<div
+								class="absolute right-0 z-20 mt-1 flex w-40 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+							>
+								{#each store.site.locales as locale (locale)}
+									<button
+										type="button"
+										class="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5 {store.editLocale ===
+										locale
+											? 'font-semibold text-[var(--sk-ink)]'
+											: 'text-[var(--sk-muted)]'}"
+										onclick={() => (store.editLocale = locale)}
+									>
+										{@html flagSvgs[locale]}
+										{localeLabels[locale]}
+									</button>
+								{/each}
+							</div>
+						</details>
+						<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
+							{statusBadge[store.status].label}
+						</StatusPill>
+						<button
+							class="sk-btn sk-btn-primary sk-btn-sm"
+							onclick={publish}
+							disabled={publishing || !canPublish}
+							title={canPublish ? 'Publish' : 'Fix publish blockers before publishing'}
+						>
+							{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
+							{#if !canPublish}
+								Yayına hazır değil
+							{:else if publishedVersion}
+								Republish
+							{:else}
+								Publish
+							{/if}
+						</button>
+						<details class="relative">
+							<summary
+								class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
+								aria-label="Diğer işlemler"
+							>
+								⋯
+							</summary>
+							<div
+								class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+							>
+								<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
+									{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
+									{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
+								</div>
+								<button
+									type="button"
+									class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
+									onclick={saveNow}
+								>
+									Save now
+								</button>
+								<a
+									href={savedPreviewSrc}
+									target="_blank"
+									class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
+								>
+									Saved preview {@html uiIcons.external(13)}
+								</a>
+							</div>
+						</details>
+						<button
+							type="button"
+							class="sk-btn sk-btn-ghost sk-btn-sm"
+							aria-label="Paneli kapat"
+							onclick={() => (dockOpen = false)}
+						>
+							{@html uiIcons.x(13)}
+						</button>
 					</div>
 				</header>
 
@@ -400,8 +382,12 @@
 					</div>
 				</details>
 
-				<div class="flex flex-col px-4 pb-4 lg:min-h-0 lg:flex-1">
-					<details class="sk-card mb-3 shrink-0 p-3" open={isDesktop.current}>
+				<div
+					class="flex min-h-0 flex-1 flex-col px-4 pb-4 {activeTab === 'Chat'
+						? ''
+						: 'overflow-y-auto'}"
+				>
+					<details class="sk-card mb-3 shrink-0 p-3" open>
 						<summary
 							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
 						>
@@ -479,11 +465,7 @@
 						{/if}
 					</details>
 
-					<div
-						class="lg:min-h-0 lg:flex-1 {activeTab === 'Chat'
-							? 'overflow-visible lg:overflow-hidden'
-							: 'overflow-visible lg:overflow-y-auto'}"
-					>
+					<div class={activeTab === 'Chat' ? 'min-h-0 flex-1 overflow-hidden' : ''}>
 						{#if activeTab === 'Chat'}
 							<ChatTab {store} history={data.chatHistory} />
 						{:else if activeTab === 'Content'}
@@ -506,14 +488,10 @@
 						{/if}
 					</div>
 				</div>
-			</aside>
+			</EditorDock>
 
-			<!-- Right: preview -->
-			<section
-				class="{mobilePane === 'edit'
-					? 'hidden lg:flex'
-					: 'flex'} min-h-[calc(100dvh-8rem)] min-w-0 flex-1 flex-col lg:min-h-0"
-			>
+			<!-- Preview: always visible, at every viewport — the dock floats above it. -->
+			<section class="flex min-h-0 w-full min-w-0 flex-1 flex-col">
 				{#if publishNotice}
 					<div
 						class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'

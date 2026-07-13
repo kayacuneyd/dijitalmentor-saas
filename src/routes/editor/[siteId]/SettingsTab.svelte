@@ -17,6 +17,59 @@
 	let savingIdentity = $state(false);
 	let identityMessage = $state<{ tone: 'success' | 'error'; text: string } | null>(null);
 
+	// AI memory — owner-viewable, owner-editable.
+	let memoryContent = $state<string | null>(null);
+	let memoryVersion = $state(0);
+	let memoryLoading = $state(false);
+	let memorySaving = $state(false);
+	let memoryMessage = $state<{ tone: 'success' | 'error'; text: string } | null>(null);
+
+	async function loadMemory() {
+		memoryLoading = true;
+		try {
+			const res = await fetch(`/api/sites/${store.site.id}/memory`);
+			const body = await res.json();
+			if (body.ok && body.memory) {
+				memoryContent = body.memory.content;
+				memoryVersion = body.memory.version;
+			} else {
+				memoryContent = '';
+				memoryVersion = 0;
+			}
+		} catch {
+			memoryContent = '';
+			memoryVersion = 0;
+		} finally {
+			memoryLoading = false;
+		}
+	}
+
+	async function saveMemory() {
+		memorySaving = true;
+		memoryMessage = null;
+		try {
+			const res = await fetch(`/api/sites/${store.site.id}/memory`, {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ content: memoryContent ?? '' })
+			});
+			const body = await res.json();
+			if (!res.ok || !body.ok) {
+				memoryMessage = { tone: 'error', text: body.message ?? 'Kaydedilemedi.' };
+				return;
+			}
+			memoryMessage = { tone: 'success', text: 'Memory saved.' };
+		} catch {
+			memoryMessage = { tone: 'error', text: 'Bağlantı hatası.' };
+		} finally {
+			memorySaving = false;
+		}
+	}
+
+	$effect(() => {
+		loadMemory();
+	});
+
 	$effect(() => {
 		handleDraft = publicHandle;
 	});
@@ -159,5 +212,48 @@
 		<p class="text-base-content/50 mt-1 text-xs">
 			{store.site.domain ?? 'No domain yet — real domain registration arrives in M5.'}
 		</p>
+	</div>
+
+	<hr class="border-base-300 my-2" />
+
+	<div>
+		<div class="mb-2 flex items-center justify-between">
+			<span class="text-xs font-medium">AI Memory</span>
+			<span class="text-base-content/40 text-[10px]">v{memoryVersion}</span>
+		</div>
+		<p class="text-base-content/50 mb-2 text-[11px] leading-snug">
+			AI her sohbet mesajından önce bu notları okur. Yaptığın her değişiklik sonrası buraya kısa bir not düşülür — böylece AI bir sonraki oturumda önceki kararlarını hatırlar. 10 satırdan sonra otomatik özetlenir.
+		</p>
+		{#if memoryLoading}
+			<span class="loading loading-spinner loading-xs"></span>
+		{:else}
+			<textarea
+				class="textarea textarea-bordered textarea-xs h-40 w-full font-[var(--font-mono)] text-[11px] leading-snug"
+				value={memoryContent ?? ''}
+				oninput={(e) => {
+					memoryContent = e.currentTarget.value;
+					memoryMessage = null;
+				}}
+				placeholder="Henüz hafıza notu yok. AI ile ilk değişikliği yaptığında buraya otomatik not düşülecek."
+			></textarea>
+			<div class="mt-2 flex items-center justify-between gap-2">
+				<button
+					type="button"
+					class="sk-btn sk-btn-secondary sk-btn-xs"
+					onclick={saveMemory}
+					disabled={memorySaving}
+				>
+					{#if memorySaving}<span class="loading loading-spinner loading-xs"></span>{/if}
+					Save
+				</button>
+				{#if memoryMessage}
+					<span
+						class="text-[10px] {memoryMessage.tone === 'success' ? 'text-success' : 'text-error'}"
+					>
+						{memoryMessage.text}
+					</span>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>

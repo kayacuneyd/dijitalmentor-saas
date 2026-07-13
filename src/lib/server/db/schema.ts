@@ -596,6 +596,18 @@ export const inquiryMessages = sqliteTable(
 	(table) => [index('inquiry_messages_inquiry_idx').on(table.inquiryId, table.createdAt)]
 );
 
+// Per-site AI memory document. A single Markdown text the AI reads before every
+// chat turn and appends notes to after successful edits, so the AI maintains
+// consistency across sessions without re-sending the full site JSON every time.
+export const siteAiMemory = sqliteTable('site_ai_memory', {
+	siteId: text('site_id').primaryKey(),
+	content: text('content').notNull().default(''),
+	version: integer('version').notNull().default(0),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Editor AI chat transcript, per site. Seeded from the /new onboarding Q&A
 // (kind='onboarding_seed') so the conversation visibly continues once the site
 // lands in the editor; later turns are the live gatekeeper chat (kind matches the

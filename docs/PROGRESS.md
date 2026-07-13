@@ -5,6 +5,28 @@ done and _why_. This file is the antidote to forgetting completed steps.
 
 ## 2026-07-13
 
+**Per-site AI memory (site_ai_memory) — AI forgetfulness and consistency fix.**
+Every AI chat call now reads a per-site Markdown memory document before the full site JSON,
+so the AI remembers prior design decisions and user preferences across sessions. After every
+successful AI edit, a one-line note is appended; at 10+ lines the document is auto-compacted
+via the gatekeeper model. Memory is also seeded from onboarding Q&A answers at site creation
+so the first chat session already knows the user's niche/service/audience/tone decisions.
+
+The memory flows into both the Layer 1 gatekeeper (`gateMessage`) and the Layer 2 agent
+(`chatEdit`), each now accepting an optional `memory` string prepended to the user prompt.
+
+**Owner surface:** The editor's Settings tab shows an "AI Memory" panel: view, edit,
+save via `PUT /api/sites/[siteId]/memory` — gated by `canManageSite`.
+
+**Files:** migration v26, `src/lib/server/ai/memory.ts` (new), gatekeeper/patch `memory`
+injection, chat endpoint `appendToMemory`, `/api/sites/[siteId]/memory` route, SettingsTab
+"AI Memory" card, `siteDeletion.ts` cascade.
+
+Verification: `npm run check` 0 errors/warnings, `npm test` 81 files / 510 passed, `npm run
+build` clean. Decision: 10-line compact threshold per owner request; LLM compact call deferred
+(circular-dependency safe — `memory.ts` does not import `llm.ts`).
+
+
 **Beta bug fix 1/3: `otherProfession` onboarding question had zero EN/DE translation coverage.**
 Three beta users reported onboarding UX problems (screenshots): one saw a question mixing German
 chrome with a raw Turkish bubble, another got permanently stuck on a question with a broken
@@ -2777,3 +2799,44 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: `npm audit` artık `found 0 vulnerabilities`; `npm ls cookie esbuild @esbuild-kit/core-utils
   @esbuild-kit/esm-loader drizzle-kit @sveltejs/kit` override çözümlemesini doğruladı. `npm run check`
   0 hata/uyarı, `npm run test` 510/510 geçti, `npm run build` başarılı.
+
+### 2026-07-13 — Editor: Grok-tarzı FAB + açılır kontrol paneli
+
+- Editör ekranındaki her zaman görünür sol sidebar (toolbar + sekme şeridi + checklist + kalite
+  kontrol) kaldırıldı; yerine X/Grok'un asistan butonuna benzer, sol altta sabit bir FAB
+  (`.sk-editor-fab`, eski "S" logo görünümü) ve tıklanınca açılan bir kontrol paneli geldi
+  (`src/lib/ui/EditorDock.svelte`, native `<dialog class="sk-editor-dock">` — dar ekranda tam
+  ekran sheet, `sm:` ve üstünde FAB'ın üstünde duran sınırlı boyutlu kart). Varsayılan (panel
+  kapalı) durumda ekranda sadece viewport switcher (mobile/tablet/desktop) ve canlı önizleme
+  kalıyor; Content/Theme/Pages/Languages/Settings/Chat sekmeleri, checklist kartı, kalite kontrol
+  kartı, dil switcher, Saved/Publish rozeti ve "..." menüsü hepsi panelin içine taşındı. Bu
+  davranış hem mobil hem masaüstünde aynı (mobil/masaüstü ayrımı yapan eski `mobilePane` state'i
+  ve `lg:` breakpoint sidebar-vs-preview mantığı tamamen kaldırıldı).
+  Panel içeriği, dialog'un native `open` özniteliğiyle görünürlüğü kontrol edilecek şekilde DOM'da
+  her zaman mounted kalıyor (koşullu render değil) — böylece panel kapatılıp açıldığında Chat
+  sekmesindeki yazılmakta olan mesaj/onay kartı gibi geçici state kaybolmuyor; önizleme iframe'i de
+  panel açık/kapalıyken hiç yeniden yüklenmiyor (postMessage canlı taslak oturumu korunuyor).
+- Layout hatası ve düzeltmesi: ilk halde masaüstü panelinde `height: auto` + checklist/kalite
+  kontrol kartlarının `shrink-0` olması, bu iki kart açıkken Content sekmesinin (Hero/About/Services
+  akordiyonu) tamamen görünmez/tıklanamaz hale gelmesine yol açıyordu (flex `min-h-0` zinciri,
+  `auto` yükseklikli bir ata altında düzgün küçülüp scroll oluşturamıyor). Kök neden: checklist +
+  kalite kontrol + sekme içeriğini saran dış kapsayıcının kendisi scroll etmiyordu, sadece en
+  içteki sekme-içerik div'i `overflow-y-auto` idi — kartlar taştığında hiçbir ata bunu scroll
+  edilebilir kılmıyordu. Düzeltme: masaüstü panel yüksekliği `calc(100dvh - 7rem)` (definite,
+  `auto` değil) yapıldı; Chat sekmesi hariç tüm sekmelerde checklist+kalite-kontrol+sekme-içeriği
+  artık TEK bir `overflow-y-auto` bölgesi içinde birlikte akıyor (Chat kendi iç
+  transcript-scroll + pinned-input düzenini korumak için ayrık, `flex-1 min-h-0 overflow-hidden`
+  kalıyor).
+- Dokunulmayanlar: `ChatTab/ContentTab/ThemeTab/PagesTab/LanguagesTab/SettingsTab.svelte`,
+  `StatusPill`, `flags.ts`, `completionChecklist.ts`, `siteQuality.ts`, `icons.ts` — hepsi aynı
+  prop'larla, aynı mantıkla, sadece yeni bir kap (`EditorDock`) içinde render ediliyor.
+  `AppCanvasShell.svelte` da değiştirilmedi (8+ başka route paylaşıyor); editör artık sadece onun
+  `right` snippet'ini doldurmuyor.
+- Verification: `npm run check` 0 hata/uyarı. Playwright (playwright-core, headless chromium)
+  ile gerçek tarayıcı smoke: panel kapalıyken sadece viewport switcher + iframe + FAB görünür;
+  FAB tıklanınca panel açılıyor; Content sekmesinde bir alan düzenlenince canlı önizleme iframe'i
+  yeniden yüklenmeden güncelleniyor (`window.__marker` sentinel testiyle doğrulandı); checklist
+  "Aç" butonu doğru sekmeye atlıyor; panel ✕ butonu / Esc / backdrop tıklama ile kapanıyor ve her
+  seferinde önceki alan state'i korunuyor; 375px genişlikte tam ekran sheet, yatay taşma 0;
+  console'da hata/uyarı yok. `/login` (AppCanvasShell'i paylaşan başka bir route) ayrıca
+  regresyon olmadığını doğrulamak için ayrıca kontrol edildi.

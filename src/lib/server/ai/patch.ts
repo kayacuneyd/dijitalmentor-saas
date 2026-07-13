@@ -137,6 +137,8 @@ export async function chatEdit(
 		approvedPrompt?: string;
 		/** Risk-routed model override (low risk → AI_MODEL_LIGHT); default = AI_MODEL. */
 		model?: string;
+		/** Site AI memory — prior design decisions and user preferences. */
+		memory?: string;
 	},
 	deps: { run: RunToolCall } = { run: runToolCall }
 ): Promise<{ site: Site; reply: string; usage: TokenUsage }> {
@@ -146,6 +148,7 @@ export async function chatEdit(
 		inputSchema: toInputSchema(chatPatchSchema)
 	};
 	const userText = [
+		input.memory ? `Design memory (user preferences & prior decisions — ALWAYS respect these):\n${input.memory}` : '',
 		`Current site JSON:\n${JSON.stringify(input.site)}`,
 		`User message:\n${input.message}`,
 		// Distillation may lose nuance — the agent always sees the original wording too.

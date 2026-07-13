@@ -8,6 +8,7 @@ import { recordError } from '$lib/server/error-log';
 import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
 import { getPendingById, setGeneratedSiteId } from '$lib/server/onboarding/session';
 import { seedChatFromOnboarding } from '$lib/server/chatLog';
+import { seedMemoryFromOnboarding } from '$lib/server/ai/memory';
 import { assertCanCreateFreePreviewSite, SiteQuotaError } from '$lib/server/siteQuota';
 import { createFallbackSite } from '$lib/server/siteFallback';
 import type { RequestHandler } from './$types';
@@ -72,6 +73,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				if (pending) {
 					setGeneratedSiteId(onboardingPendingId, id);
 					seedChatFromOnboarding(id, pending.answers);
+					seedMemoryFromOnboarding(id, pending.answers, site);
 				}
 			} catch (seedErr) {
 				console.error('[onboarding] chat seed failed:', seedErr);

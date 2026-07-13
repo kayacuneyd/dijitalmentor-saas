@@ -5,6 +5,7 @@ import {
 	customDomains,
 	domainReservations,
 	mediaAssets,
+	siteAiMemory,
 	siteChatMessages,
 	sites,
 	siteVersions
@@ -55,6 +56,7 @@ export async function deleteSiteCascade(siteId: string): Promise<DeleteSiteResul
 		tx.delete(contactSubmissions).where(eq(contactSubmissions.siteId, siteId)).run();
 		tx.delete(mediaAssets).where(eq(mediaAssets.siteId, siteId)).run();
 		tx.delete(siteChatMessages).where(eq(siteChatMessages.siteId, siteId)).run();
+		tx.delete(siteAiMemory).where(eq(siteAiMemory.siteId, siteId)).run();
 		tx.delete(customDomains).where(eq(customDomains.siteId, siteId)).run();
 		tx.delete(sites).where(eq(sites.id, siteId)).run();
 	});

@@ -768,6 +768,18 @@ export const migrations: Migration[] = [
 				PRIMARY KEY (page, locale)
 			)`);
 		}
+	},
+	{
+		version: 26,
+		name: 'site-ai-memory',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS site_ai_memory (
+				site_id text PRIMARY KEY,
+				content text NOT NULL DEFAULT '',
+				version integer NOT NULL DEFAULT 0,
+				updated_at integer NOT NULL
+			)`);
+		}
 	}
 ];
 

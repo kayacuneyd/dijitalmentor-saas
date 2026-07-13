@@ -17,6 +17,7 @@ import { db } from '$lib/server/db';
 import { aiGateLog } from '$lib/server/db/schema';
 import { getOrSeedDraft, getSiteMeta, saveDraft } from '$lib/server/db/repo';
 import { appendChatMessage } from '$lib/server/chatLog';
+import { appendToMemory, getSiteMemory, memoryPrompt } from '$lib/server/ai/memory';
 import type { RequestHandler } from './$types';
 
 /**
@@ -98,6 +99,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const tenantId = site.tenantId;
 	const quotaOpts = { ownerUserId: meta?.ownerUserId, isAdmin: locals.user.isAdmin };
 	const base = { siteId: site.id, tenantId };
+	const memory = memoryPrompt(site.id);
 
 	// Persist the user's turn once per incoming message — a confirm/force resend
 	// carries the exact same `message` as its stage-1 send, so persisting those too
@@ -119,7 +121,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			site,
 			message: body.data.message,
 			approvedPrompt: opts.approvedPrompt,
-			model
+			model,
+			memory
 		});
 		recordUsage(tenantId, result.usage, 'edit');
 		saveDraft(result.site);
@@ -133,6 +136,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			model: model ?? heavyModel()
 		});
 		appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'applied', body: result.reply });
+		// Append a memory note so the AI remembers this decision across sessions.
+		appendToMemory(site.id, `${opts.decision === 'auto_applied' ? 'Auto-applied' : 'Applied'}: ${result.reply.slice(0, 200)}`).catch((e) => console.error('[memory] append failed:', e));
 		return json({ ok: true, kind: 'applied', reply: result.reply, site: result.site });
 	};
 
@@ -158,7 +163,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			({ gate, usage: gateUsage } = await gateMessage({
 				site,
 				message: body.data.message,
-				history: body.data.history
+				history: body.data.history,
+				memory
 			}));
 		} catch (err) {
 			if (err instanceof AIInvalidOutputError) {

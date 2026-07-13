@@ -25,13 +25,20 @@
 			en: {
 				title: 'saaskaya — AI website platform for psychologists, lawyers, and professionals',
 				description:
-					'AI website platform for psychologists, lawyers, consultants, and expert professionals: describe your practice, get a multilingual site, edit by chat, and publish on your own domain without code risk.',
+					'AI website platform for psychologists, lawyers, consultants, and expert professionals: describe your work, get a multilingual site draft, edit by chat, and publish without copywriting, translation, or technical setup overload.',
 				login: 'Sign in',
 				beta: 'closed beta',
 				pills: ['For professionals', 'TR · EN · DE', 'Closed beta'],
-				h1: 'Launch a multilingual website for your practice without code.',
-				lead: 'Describe your practice, get a multilingual site draft, edit it safely, and publish when ready. AI fills a validated structure; it never writes site code.',
-				primary: 'Describe your practice',
+				h1: 'Turn your professional work into a multilingual website draft.',
+				lead: 'Skip the blank brief, copywriting, translation, domain, and setup maze. Describe what you do; saaskaya turns it into a safe, editable site draft you can review and publish.',
+				primary: 'Describe your work',
+				problemsLabel: 'The stuck points saaskaya removes',
+				problemItems: [
+					'I do not know what to write',
+					'I need a multilingual site',
+					'I do not want technical setup',
+					'I do not want AI to break the site'
+				],
 				heroTrust: [
 					[
 						'AI writes no code',
@@ -78,13 +85,13 @@
 				stepLabel: 'Step',
 				midCtaTitle: 'Have a few minutes?',
 				midCtaBody:
-					'Start with your practice description and review the first safe draft before deciding.',
+					'Start with one clear description of your work and review the first safe draft before deciding.',
 				midCtaAction: 'Open beta start',
 				exampleSites: 'Example sites',
 				pages: 'pages',
 				preview: 'Preview',
 				edit: 'Edit',
-				features: 'Features',
+				features: 'What to use each part for',
 				priceLabel: 'Pricing',
 				perMonth: '/month',
 				recommended: 'Recommended',
@@ -93,7 +100,7 @@
 				trust: 'Trust',
 				finalTitle: 'Ready?',
 				finalBody:
-					'Describe your practice, see your site in minutes. Start free, upgrade to Pro when it fits.',
+					'Describe your work, review the first multilingual draft, then decide whether it is ready to publish.',
 				legal: {
 					privacy: 'Privacy',
 					terms: 'Terms',
@@ -105,31 +112,43 @@
 				steps: [
 					[
 						'Describe',
-						'Write a few lines about your practice, expertise, and style. No long forms.'
+						'Write a few lines about your work, services, audience, and tone. No long forms.'
 					],
-					['Generate', 'AI creates your multilingual site as validated structured data.'],
-					['Edit', 'Ask for warmer copy or new services by chat. Direct text edits stay free.'],
-					['Publish', 'Publish instantly on a subdomain. Move to your own domain with Pro.']
+					[
+						'Generate',
+						'AI turns that brief into a multilingual site draft inside the fixed safe structure.'
+					],
+					['Edit', 'Ask for clearer copy or new services by chat. Direct text edits stay free.'],
+					[
+						'Publish',
+						'Publish on a subdomain first. Move to your own domain with Pro when it fits.'
+					]
 				],
 				featureItems: [
 					[
-						'Chat-based editing',
-						'Not a form maze. Ask for a warmer about section and AI updates the draft.'
+						'Use chat editing to revise wording',
+						'Ask for a warmer about section, clearer services, or a shorter hero without hunting through forms.'
 					],
 					[
-						'Multilingual (TR · EN · DE)',
-						'One-click English/German versions for international clients, reviewed by you.'
-					],
-					['Safe AI', 'AI never writes HTML/CSS; it produces validated structured data.'],
-					[
-						'Your own domain',
-						'Use a custom domain with Pro. Registration, TLS, and setup are handled.'
+						'Use TR · EN · DE for international visitors',
+						'Create English or German versions for clients who do not read your main language, then review before publishing.'
 					],
 					[
-						'Contact & leads',
-						'Contact forms, email notifications, and a message panel for client inquiries.'
+						'Use safe AI when you do not trust generated code',
+						'AI never writes HTML/CSS; it fills validated structured data that must pass the schema first.'
 					],
-					['Your data', 'Delete anytime; full export support is included with Pro sites.']
+					[
+						'Use domain and hosting support to avoid setup work',
+						'Pro handles the custom domain path, TLS, DNS setup, hosting, and maintenance details.'
+					],
+					[
+						'Use contact forms to collect real inquiries',
+						'Visitors can send messages; you get email notifications and a message panel for follow-up.'
+					],
+					[
+						'Use export support to avoid lock-in',
+						'Delete anytime; Pro sites include full export support so your work is portable.'
+					]
 				],
 				faqs: [
 					[
@@ -169,13 +188,20 @@
 			tr: {
 				title: 'saaskaya — Psikolog, avukat ve uzman meslekler için AI web sitesi platformu',
 				description:
-					'Psikolog, avukat, danışman ve uzman meslekler için AI web sitesi platformu: pratiğini anlat, çok dilli siteni al, sohbetle düzenle, kendi domaininde yayınla. Kod öğrenmeden, risk almadan.',
+					'Psikolog, avukat, danışman ve uzman meslekler için AI web sitesi platformu: mesleğini anlat, çok dilli site taslağını gör, sohbetle düzenle ve teknik kurulum yükü olmadan yayınla.',
 				login: 'Giriş',
 				beta: 'kapalı beta',
 				pills: ['Uzman meslekler için', 'TR · EN · DE', 'Kapalı beta'],
-				h1: 'Pratiğin için çok dilli web siteni kod yazmadan yayına al.',
-				lead: 'Pratiğini anlat, çok dilli site taslağını gör, güvenle düzenle ve hazır olunca yayınla. AI yalnızca doğrulanmış yapıyı doldurur; site kodu yazmaz.',
-				primary: 'Pratiğini anlat',
+				h1: 'Mesleki profilini çok dilli site taslağına çevir.',
+				lead: 'Boş brief, metin yazma, çeviri, domain ve teknik kurulum yüküyle uğraşma. Ne yaptığını anlat; saaskaya bunu güvenli, düzenlenebilir ve yayınlanabilir bir site taslağına çevirir.',
+				primary: 'Mesleğini anlat',
+				problemsLabel: 'saaskaya’nın ortadan kaldırdığı takılma noktaları',
+				problemItems: [
+					'Ne yazacağımı bilmiyorum',
+					'Çok dilli site istiyorum',
+					'Teknik kurulumla uğraşmak istemiyorum',
+					'AI siteyi bozmasın istiyorum'
+				],
 				heroTrust: [
 					['AI kod yazmaz', 'Her çıktı yayınlanmadan doğrulanır — sitenin bozulma riski yok.'],
 					['Site senin', 'Pro sitelerde tam export desteği var. Kilit yok, emeğin kaybolmaz.']
@@ -218,13 +244,13 @@
 				],
 				stepLabel: 'Adım',
 				midCtaTitle: 'Birkaç dakikan var mı?',
-				midCtaBody: 'Önce pratiğini anlat, güvenli ilk taslağı gör, sonra karar ver.',
+				midCtaBody: 'Önce mesleğini ve hizmetlerini anlat, güvenli ilk taslağı gör, sonra karar ver.',
 				midCtaAction: 'Beta başlangıcını aç',
 				exampleSites: 'Örnek siteler',
 				pages: 'sayfa',
 				preview: 'Önizle',
 				edit: 'Düzenle',
-				features: 'Özellikler',
+				features: 'Hangi parçayı ne için kullanırsın?',
 				priceLabel: 'Fiyatlandırma',
 				perMonth: '/ay',
 				recommended: 'Önerilen',
@@ -233,7 +259,7 @@
 				trust: 'Güven',
 				finalTitle: 'Hazır mısın?',
 				finalBody:
-					"Pratiğini anlat, birkaç dakikada siteni gör. Ücretsiz başla, beğenince Pro'ya geç.",
+					'Mesleğini anlat, ilk çok dilli taslağı incele, yayına hazır olup olmadığına sonra karar ver.',
 				legal: {
 					privacy: 'Gizlilik',
 					terms: 'Şartlar',
@@ -243,36 +269,42 @@
 					disclaimer: 'Sorumluluk reddi'
 				},
 				steps: [
-					['Anlat', 'Pratiğini, uzmanlığını ve tarzını birkaç cümlede yaz. Form doldurma yok.'],
-					['Üret', 'AI, kontrolü altında, doğrulanmış yapısal veriyle çok dilli siteni oluşturur.'],
+					['Anlat', 'Uzmanlığını, hizmetlerini, hedef kitleni ve tonunu birkaç cümlede yaz.'],
+					[
+						'Üret',
+						'AI bu briefi sabit güvenli yapı içinde çok dilli site taslağına dönüştürür.'
+					],
 					[
 						'Düzenle',
-						'Sohbetle "daha sıcak olsun", "hizmet ekle" de. Doğrudan metin düzenleme ücretsiz.'
+						'Sohbetle "daha net olsun", "hizmet ekle" de. Doğrudan metin düzenleme ücretsiz.'
 					],
 					['Yayınla', 'Alt alan adında anında yayınla. Pro ile kendi domainine taşı.']
 				],
 				featureItems: [
 					[
-						'Sohbetle düzenleme',
-						'Form değil, sohbet. "Hakkımda bölümünü daha samimi yap" de, AI taslağı güncellesin.'
+						'Metni revize etmek için sohbet',
+						'Form aramak yerine "hakkımda bölümünü daha net yap" veya "hizmet ekle" de, taslak güncellensin.'
 					],
 					[
-						'Çok dilli (TR · EN · DE)',
-						'Yabancı danışanlar için tek tıkla İngilizce/Almanca sürüm. Çeviri AI ile, sen onayla.'
+						'Yabancı ziyaretçiler için TR · EN · DE',
+						'İngilizce veya Almanca sürümü AI hazırlasın; sen kontrol edip yayına al.'
 					],
 					[
-						'Güvenli AI',
-						'AI HTML/CSS yazmaz; doğrulanmış yapısal veri üretir. Hallüsinasyon yapısal olarak imkansız.'
+						'Site kodunu riske atmamak için güvenli AI',
+						'AI HTML/CSS yazmaz; yalnızca şemadan geçen doğrulanmış yapısal veri üretir.'
 					],
 					[
-						'Kendi domainin',
-						"Pro ile özel domain. Tescilden TLS'e kadar otomatik. Banka havalesi veya kart."
+						'Teknik yayına alma yükü için domain ve hosting',
+						"Pro ile özel domain, TLS, DNS kurulumu, hosting ve bakım süreci yönetilir."
 					],
 					[
-						'İletişim & lead',
-						'İletişim formu, e-posta bildirimi, mesaj paneli. Danışanların sana ulaşsın.'
+						'Gelen talepler için iletişim formu',
+						'Ziyaretçiler mesaj bırakır; e-posta bildirimi ve mesaj paneliyle takip edersin.'
 					],
-					['Veri senin', 'İstediğin an silebilirsin; tam export desteği Pro sitelerde bulunur.']
+					[
+						'Kilitlenme korkusu için export',
+						'İstediğin an silebilirsin; Pro sitelerde tam export desteği bulunur.'
+					]
 				],
 				faqs: [
 					[
@@ -315,13 +347,20 @@
 			de: {
 				title: 'saaskaya — AI-Website-Plattform für Psychologen, Anwälte und Experten',
 				description:
-					'AI-Website-Plattform für Psychologen, Anwälte, Berater und Expertenberufe: Praxis beschreiben, mehrsprachige Website erhalten, per Chat bearbeiten und auf eigener Domain veröffentlichen.',
+					'AI-Website-Plattform für Psychologen, Anwälte, Berater und Expertenberufe: berufliches Profil beschreiben, mehrsprachigen Website-Entwurf erhalten, per Chat bearbeiten und ohne technische Überlastung veröffentlichen.',
 				login: 'Anmelden',
 				beta: 'geschlossene Beta',
 				pills: ['Für Expertenberufe', 'TR · EN · DE', 'Geschlossene Beta'],
-				h1: 'Starte eine mehrsprachige Website für deine Praxis ohne Code.',
-				lead: 'Eine AI-gestützte Website-Plattform. Erhalte in Minuten eine professionelle Praxis-Website, ohne Webdesign zu lernen oder AI-Code zu vertrauen. Kein Code-Risiko: AI füllt nur eine validierte Struktur.',
-				primary: 'Praxis beschreiben',
+				h1: 'Aus deinem beruflichen Profil wird ein mehrsprachiger Website-Entwurf.',
+				lead: 'Kein leeres Briefing, keine Text- und Übersetzungsblockade, keine Domain- oder Technikliste. Beschreibe dein Angebot; saaskaya erstellt daraus einen sicheren, bearbeitbaren Website-Entwurf.',
+				primary: 'Profil beschreiben',
+				problemsLabel: 'Diese Blockaden nimmt saaskaya ab',
+				problemItems: [
+					'Ich weiß nicht, was ich schreiben soll',
+					'Ich brauche eine mehrsprachige Website',
+					'Ich will keine technische Einrichtung',
+					'AI soll die Website nicht beschädigen'
+				],
 				heroTrust: [
 					[
 						'AI schreibt keinen Code',
@@ -368,13 +407,13 @@
 				stepLabel: 'Schritt',
 				midCtaTitle: 'Hast du ein paar Minuten?',
 				midCtaBody:
-					'Beschreibe zuerst deine Praxis, prüfe den sicheren Entwurf und entscheide dann.',
+					'Beschreibe zuerst dein Angebot, prüfe den sicheren Entwurf und entscheide dann.',
 				midCtaAction: 'Beta-Start öffnen',
 				exampleSites: 'Beispielseiten',
 				pages: 'Seiten',
 				preview: 'Vorschau',
 				edit: 'Bearbeiten',
-				features: 'Funktionen',
+				features: 'Wofür du die Bausteine nutzt',
 				priceLabel: 'Preise',
 				perMonth: '/Monat',
 				recommended: 'Empfohlen',
@@ -383,7 +422,7 @@
 				trust: 'Vertrauen',
 				finalTitle: 'Bereit?',
 				finalBody:
-					'Beschreibe deine Praxis und sieh deine Website in Minuten. Kostenlos starten, später Pro wählen.',
+					'Beschreibe dein berufliches Profil, prüfe den ersten mehrsprachigen Entwurf und entscheide dann.',
 				legal: {
 					privacy: 'Datenschutz',
 					terms: 'Bedingungen',
@@ -393,11 +432,17 @@
 					disclaimer: 'Haftungsausschluss'
 				},
 				steps: [
-					['Beschreiben', 'Schreibe kurz über Praxis, Expertise und Stil. Keine langen Formulare.'],
-					['Generieren', 'AI erstellt deine mehrsprachige Website als validierte Struktur.'],
+					[
+						'Beschreiben',
+						'Schreibe kurz über Angebot, Expertise, Zielgruppe und Ton. Keine langen Formulare.'
+					],
+					[
+						'Generieren',
+						'AI wandelt das Briefing in einen mehrsprachigen Entwurf innerhalb der sicheren Struktur um.'
+					],
 					[
 						'Bearbeiten',
-						'Bitte per Chat um wärmere Texte oder neue Leistungen. Direkte Textänderungen bleiben kostenlos.'
+						'Bitte per Chat um klarere Texte oder neue Leistungen. Direkte Textänderungen bleiben kostenlos.'
 					],
 					[
 						'Veröffentlichen',
@@ -406,23 +451,29 @@
 				],
 				featureItems: [
 					[
-						'Bearbeitung per Chat',
-						'Kein Formular-Labyrinth. Bitte um einen wärmeren Über-uns-Text und AI aktualisiert den Entwurf.'
+						'Chat nutzen, um Texte zu überarbeiten',
+						'Bitte um klarere Leistungen, einen kürzeren Hero oder einen wärmeren Über-uns-Text.'
 					],
 					[
-						'Mehrsprachig (TR · EN · DE)',
-						'Englische/deutsche Versionen für internationale Klienten, von dir geprüft.'
-					],
-					['Sichere AI', 'AI schreibt kein HTML/CSS; sie erzeugt validierte strukturierte Daten.'],
-					[
-						'Eigene Domain',
-						'Nutze mit Pro eine eigene Domain. Registrierung, TLS und Einrichtung werden begleitet.'
+						'TR · EN · DE für internationale Besucher',
+						'Englische oder deutsche Versionen entstehen aus dem Entwurf und werden vor Veröffentlichung von dir geprüft.'
 					],
 					[
-						'Kontakt & Leads',
-						'Kontaktformulare, E-Mail-Benachrichtigungen und Nachrichtenübersicht.'
+						'Sichere AI nutzen, wenn du keinem AI-Code trauen willst',
+						'AI schreibt kein HTML/CSS; sie erzeugt validierte strukturierte Daten.'
 					],
-					['Deine Daten', 'Löschen jederzeit; vollständiger Export ist in Pro-Websites enthalten.']
+					[
+						'Domain und Hosting nutzen, um Technik abzugeben',
+						'Mit Pro werden eigene Domain, TLS, DNS, Hosting und Wartung begleitet.'
+					],
+					[
+						'Kontaktformular nutzen, um Anfragen zu sammeln',
+						'Besucher schreiben dir; E-Mail-Benachrichtigungen und Nachrichtenübersicht helfen beim Nachfassen.'
+					],
+					[
+						'Export nutzen, um Lock-in zu vermeiden',
+						'Löschen jederzeit; vollständiger Export ist in Pro-Websites enthalten.'
+					]
 				],
 				faqs: [
 					[
@@ -484,6 +535,7 @@
 	const faqs = $derived(copy.faqs.map(([q, a]) => ({ q, a })));
 	const trustCards = $derived(copy.trustCards.map(([title, desc]) => ({ title, desc })));
 	const heroTrust = $derived(copy.heroTrust.map(([title, desc]) => ({ title, desc })));
+	const problemItems = $derived(copy.problemItems);
 
 	// Anlat / Üret / Düzenle / Yayınla — one stroke icon per step (index-aligned).
 	const stepIconPaths = [
@@ -553,6 +605,39 @@
 		</div>
 	</MarketingSection>
 
+	<!-- Problem band -->
+	<MarketingSection class="mt-8">
+		<div class="sk-soft p-4 sm:p-5">
+			<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.problemsLabel}</div>
+			<ul class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+				{#each problemItems as item (item)}
+					<li
+						class="flex min-h-14 items-center gap-2 border-t border-[var(--sk-line)] pt-2 text-sm leading-5 text-[var(--sk-ink)]"
+					>
+						<span
+							class="inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[rgba(47,111,106,.12)] text-[var(--sk-ink)]"
+							aria-hidden="true"
+						>
+							<svg
+								viewBox="0 0 24 24"
+								width="13"
+								height="13"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M20 6 9 17l-5-5" />
+							</svg>
+						</span>
+						<span>{item}</span>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</MarketingSection>
+
 	<!-- Process -->
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.process}</div>
@@ -591,34 +676,6 @@
 				<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">{copy.midCtaBody}</p>
 			</div>
 			<a href={l('/beta')} class="sk-btn sk-btn-primary shrink-0">{copy.midCtaAction}</a>
-		</div>
-	</MarketingSection>
-
-	<!-- Profession-specific GTM hooks -->
-	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.segmentsLabel}</div>
-		<div class="mt-3 flex max-w-3xl flex-col gap-2">
-			<h2 class="sk-display text-2xl leading-tight sm:text-3xl">{copy.segmentsTitle}</h2>
-		</div>
-		<div class="mt-5 grid gap-4 lg:grid-cols-3">
-			{#each segmentCards as segment (segment.title)}
-				<a
-					href={l(segment.href)}
-					class="sk-card group flex min-h-56 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
-				>
-					<h3 class="text-base font-semibold text-[var(--sk-ink)]">{segment.title}</h3>
-					<p class="mt-2 text-sm leading-6 text-[var(--sk-muted)]">{segment.desc}</p>
-					<p
-						class="mt-4 border-t border-[var(--sk-line)] pt-3 text-xs leading-5 text-[var(--sk-faint)]"
-					>
-						{segment.details}
-					</p>
-					<span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold">
-						{segment.action}
-						<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
-					</span>
-				</a>
-			{/each}
 		</div>
 	</MarketingSection>
 
@@ -674,6 +731,34 @@
 				</li>
 			{/each}
 		</ul>
+	</MarketingSection>
+
+	<!-- Profession-specific GTM hooks -->
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
+		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.segmentsLabel}</div>
+		<div class="mt-3 flex max-w-3xl flex-col gap-2">
+			<h2 class="sk-display text-2xl leading-tight sm:text-3xl">{copy.segmentsTitle}</h2>
+		</div>
+		<div class="mt-5 grid gap-4 lg:grid-cols-3">
+			{#each segmentCards as segment (segment.title)}
+				<a
+					href={l(segment.href)}
+					class="sk-card group flex min-h-56 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+				>
+					<h3 class="text-base font-semibold text-[var(--sk-ink)]">{segment.title}</h3>
+					<p class="mt-2 text-sm leading-6 text-[var(--sk-muted)]">{segment.desc}</p>
+					<p
+						class="mt-4 border-t border-[var(--sk-line)] pt-3 text-xs leading-5 text-[var(--sk-faint)]"
+					>
+						{segment.details}
+					</p>
+					<span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold">
+						{segment.action}
+						<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+					</span>
+				</a>
+			{/each}
+		</div>
 	</MarketingSection>
 
 	<!-- Features -->

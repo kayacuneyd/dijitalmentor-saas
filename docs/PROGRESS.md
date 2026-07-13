@@ -2595,3 +2595,16 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Üretilen ilk çıktılar doğrulandı: ffprobe `h264 / 1080x1920 / yuv420p / 20.0s`; sahne-3 karesi
   gözle kontrol edildi (kompozisyon net, taşma yok). `svelte-check` 0 hata, build OK, prod'da
   `/dev/story-stage` 404 / `/en` 200.
+
+### 2026-07-13 — Landing problem-hikaye anlatısı
+
+- Ana sayfa "uzman meslekler" konumlandırmasını koruyarak problem-sonuç anlatısına çekildi:
+  hero metni brief/metin/çeviri/domain/teknik kurulum yükünü açıkça adlandırıyor; TR/EN/DE
+  kopyalarda "practice/praxis/pratik" dili daha doğal mesleki profil/iş/angebot ifadelerine taşındı.
+- Hero altına dört maddelik problem bandı eklendi ve ana akış `hero → problem bandı → süreç →
+  CTA → örnek siteler → meslek segmentleri → hangi parça ne için kullanılır → fiyat → FAQ/güven →
+  final CTA` sırasına alındı. Özellik kartları artık soyut feature listesi değil, her parçanın hangi
+  ziyaretçi/operatör problemini çözdüğünü anlatıyor.
+- Verification: `npm run check` 0 hata/uyarı, `npm run test` 499/499 geçti, `npm run build`
+  başarılı. Playwright ile local dev server üzerinde `/tr`, `/en`, `/de` 375px + 1280px kontrol edildi:
+  HTTP 200, problem bandı ve yeni feature başlığı görünüyor, yatay taşma 0, konsol hatası 0.

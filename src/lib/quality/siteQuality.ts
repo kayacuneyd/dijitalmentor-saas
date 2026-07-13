@@ -201,6 +201,48 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 				hasCtaPath = true;
 			}
 
+			if (section.type === 'hero') {
+				const heroContent = section.content[site.defaultLocale];
+				const headline = heroContent.headline.trim();
+				const subheadline = heroContent.subheadline?.trim() ?? '';
+				if (headline.length > 72) {
+					addIssue(
+						issues,
+						'warning',
+						'hero_headline_too_long',
+						`${sectionPath}.content.${site.defaultLocale}.headline`,
+						'Hero başlığı ilk ekranda çakışabilir; daha kısa ve net bir başlık seç.'
+					);
+				}
+				if (subheadline.length > 180) {
+					addIssue(
+						issues,
+						'warning',
+						'hero_subheadline_too_long',
+						`${sectionPath}.content.${site.defaultLocale}.subheadline`,
+						'Hero açıklaması mobilde çok uzayabilir; ilk ekranda daha kısa tut.'
+					);
+				}
+				if (section.props.background === 'image' && !section.props.imageUrl) {
+					addIssue(
+						issues,
+						'warning',
+						'hero_image_background_missing_image',
+						`${sectionPath}.props.imageUrl`,
+						'Hero görsel arka plan seçilmiş ama görsel yok; plain veya gradient arka plan kullan.'
+					);
+				}
+				if (section.props.background === 'image') {
+					addIssue(
+						issues,
+						'warning',
+						'hero_image_needs_review',
+						sectionPath,
+						'Görsel hero ilk ekranda okunabilirlik açısından kontrol edilmeli.'
+					);
+				}
+			}
+
 			if (section.type === 'testimonials') {
 				if (section.content[site.defaultLocale].items.length < 2) {
 					addIssue(

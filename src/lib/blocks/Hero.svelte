@@ -10,6 +10,7 @@
 				? 'bg-base-100'
 				: ''
 	);
+	const hasImageBackground = $derived(props.background === 'image' && Boolean(props.imageUrl));
 </script>
 
 {#if props.variant === 'split'}
@@ -18,11 +19,15 @@
 			class="mx-auto grid w-full max-w-6xl items-center gap-10 px-5 py-20 md:grid-cols-2 lg:py-24"
 		>
 			<div class="max-w-xl">
-				<h1 class="text-primary text-4xl leading-tight font-bold md:text-5xl">
+				<h1
+					class="text-primary text-[clamp(2rem,8vw,3.75rem)] leading-[1.05] font-bold text-balance break-words"
+				>
 					{content.headline}
 				</h1>
 				{#if content.subheadline}
-					<p class="text-base-content/75 mt-5 text-lg leading-8">{content.subheadline}</p>
+					<p class="text-base-content/75 mt-5 max-w-prose text-[clamp(1rem,3vw,1.125rem)] leading-8">
+						{content.subheadline}
+					</p>
 				{/if}
 				{#if content.ctaLabel && props.ctaHref}
 					<a href={props.ctaHref} class="btn btn-primary btn-lg mt-7 rounded-full px-7">
@@ -45,24 +50,32 @@
 	</section>
 {:else}
 	<section
-		class="hero min-h-[64vh] {centeredBg}"
+		class="hero relative min-h-[min(42rem,72svh)] overflow-hidden {centeredBg}"
 		style={props.background === 'image' && props.imageUrl
 			? `background-image: url(${props.imageUrl}); background-size: cover; background-position: center;`
 			: ''}
 	>
-		{#if props.background === 'image'}
-			<div class="hero-overlay"></div>
+		{#if hasImageBackground}
+			<div class="absolute inset-0 bg-black/55"></div>
 		{/if}
 		<div
-			class="hero-content px-5 py-20 text-center"
-			class:text-neutral-content={props.background === 'image'}
+			class="hero-content relative z-10 px-5 py-16 text-center sm:py-20"
+			class:text-neutral-content={hasImageBackground}
 		>
-			<div class="max-w-3xl">
-				<h1 class="text-primary text-4xl leading-tight font-bold md:text-6xl">
+			<div class="w-full max-w-3xl">
+				<h1
+					class="text-[clamp(2.25rem,10vw,4.75rem)] leading-[1.02] font-bold text-balance break-words {hasImageBackground
+						? 'text-neutral-content drop-shadow-sm'
+						: 'text-primary'}"
+				>
 					{content.headline}
 				</h1>
 				{#if content.subheadline}
-					<p class="text-base-content/75 mx-auto mt-5 max-w-2xl text-lg leading-8">
+					<p
+						class="mx-auto mt-5 max-w-2xl text-[clamp(1rem,3.5vw,1.125rem)] leading-8 {hasImageBackground
+							? 'text-neutral-content/85'
+							: 'text-base-content/75'}"
+					>
 						{content.subheadline}
 					</p>
 				{/if}

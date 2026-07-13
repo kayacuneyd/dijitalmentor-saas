@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { desc, eq, sql } from 'drizzle-orm';
+import sharp from 'sharp';
 import { getSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { mediaAssets } from '$lib/server/db/schema';
@@ -37,6 +38,7 @@ const IMAGE_TYPES = {
 } as const;
 
 type ImageMime = keyof typeof IMAGE_TYPES;
+type StoredImage = { bytes: Uint8Array; mimeType: ImageMime; extension: string };
 
 export function r2Config() {
 	const endpoint = getSetting('R2_ENDPOINT');
@@ -72,6 +74,18 @@ export function validateImage(bytes: Uint8Array, mimeType: string): ImageMime {
 
 export function imageExtension(mime: ImageMime): string {
 	return IMAGE_TYPES[mime].extension;
+}
+
+export async function prepareStoredImage(bytes: Uint8Array, mimeType: ImageMime): Promise<StoredImage> {
+	if (mimeType === 'image/gif') {
+		return { bytes, mimeType, extension: imageExtension(mimeType) };
+	}
+	const output = await sharp(bytes, { animated: false })
+		.rotate()
+		.resize({ width: 1920, height: 1920, fit: 'inside', withoutEnlargement: true })
+		.webp({ quality: 82, effort: 4 })
+		.toBuffer();
+	return { bytes: new Uint8Array(output), mimeType: 'image/webp', extension: 'webp' };
 }
 
 export function siteMediaUsage(siteId: string): number {
@@ -119,17 +133,18 @@ export async function uploadMedia(input: {
 	bytes: Uint8Array;
 }) {
 	const mimeType = validateImage(input.bytes, input.mimeType);
+	const stored = await prepareStoredImage(input.bytes, mimeType);
 	const config = r2Config();
 	const id = randomUUID();
-	const objectKey = `sites/${input.siteId}/${id}.${IMAGE_TYPES[mimeType].extension}`;
+	const objectKey = `sites/${input.siteId}/${id}.${stored.extension}`;
 	const url = `${config.publicBaseUrl.replace(/\/$/, '')}/${objectKey}`;
 
 	await r2Client(config).send(
 		new PutObjectCommand({
 			Bucket: config.bucket,
 			Key: objectKey,
-			Body: input.bytes,
-			ContentType: mimeType,
+			Body: stored.bytes,
+			ContentType: stored.mimeType,
 			CacheControl: 'public, max-age=31536000, immutable'
 		})
 	);
@@ -141,9 +156,9 @@ export async function uploadMedia(input: {
 			ownerUserId: input.ownerUserId,
 			objectKey,
 			url,
-			fileName: input.fileName.slice(0, 255) || `image.${IMAGE_TYPES[mimeType].extension}`,
-			mimeType,
-			sizeBytes: input.bytes.byteLength,
+			fileName: input.fileName.slice(0, 255) || `image.${stored.extension}`,
+			mimeType: stored.mimeType,
+			sizeBytes: stored.bytes.byteLength,
 			createdAt: new Date()
 		};
 		db.insert(mediaAssets).values(asset).run();

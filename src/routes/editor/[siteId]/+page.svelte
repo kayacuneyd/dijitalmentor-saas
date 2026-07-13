@@ -7,7 +7,6 @@
 	import LanguagesTab from './LanguagesTab.svelte';
 	import SettingsTab from './SettingsTab.svelte';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
-	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import {
@@ -32,6 +31,15 @@
 
 	const tabs = ['Chat', 'Content', 'Theme', 'Pages', 'Languages', 'Settings'] as const;
 	let activeTab = $state<(typeof tabs)[number]>('Content');
+	const tabLabels: Record<(typeof tabs)[number], string> = {
+		Chat: 'Chat',
+		Content: 'Content',
+		Theme: 'Theme',
+		Pages: 'Pages',
+		Languages: 'Languages',
+		Settings: 'Settings'
+	};
+	const localeLabels = { tr: 'Türkçe', en: 'English', de: 'Deutsch' } as const;
 
 	const viewports = [
 		{ id: 'mobile', label: 'Mobile', width: '375px' },
@@ -198,6 +206,10 @@
 	function goToChecklistItem(item: CompletionChecklistItem) {
 		activeTab = item.tab;
 	}
+
+	function toggleMobilePane() {
+		mobilePane = mobilePane === 'edit' ? 'preview' : 'edit';
+	}
 </script>
 
 <svelte:head>
@@ -212,11 +224,14 @@
 	flush
 >
 	{#snippet right()}
-		<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">Dashboard</a>
+		<div class="flex items-center gap-2">
+			<a href="/dashboard" class="flex size-8 items-center justify-center rounded-[9px] bg-[#171614] pb-0.5 font-[var(--font-display)] text-[22px] text-[#f3ecdd]" aria-label="saaskaya dashboard">s</a>
+			<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">Dashboard</a>
+		</div>
 	{/snippet}
 
 	<div
-		class="flex h-full min-h-0 flex-col overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]"
+		class="flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
 	>
 		<!-- Single toolbar row: pane toggle (mobile) / viewport switcher (desktop) on the
 		     left, locale + status + the one primary action + an overflow menu for
@@ -226,27 +241,15 @@
 			class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-3 py-2"
 		>
 			<div class="flex items-center gap-2">
-				<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:hidden" role="group">
+				<div class="lg:hidden">
 					<button
 						type="button"
-						class="min-h-9 rounded-[8px] px-3 text-sm font-medium transition {mobilePane === 'edit'
-							? 'bg-[#171614] text-[#f3ecdd]'
-							: 'text-[var(--sk-muted)]'}"
-						aria-pressed={mobilePane === 'edit'}
-						onclick={() => (mobilePane = 'edit')}
+						class="sk-btn sk-btn-primary sk-btn-sm min-w-36 justify-between"
+						aria-live="polite"
+						onclick={toggleMobilePane}
 					>
-						Düzenle
-					</button>
-					<button
-						type="button"
-						class="min-h-9 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
-						'preview'
-							? 'bg-[#171614] text-[#f3ecdd]'
-							: 'text-[var(--sk-muted)]'}"
-						aria-pressed={mobilePane === 'preview'}
-						onclick={() => (mobilePane = 'preview')}
-					>
-						Önizleme
+						{mobilePane === 'edit' ? 'Önizlemeye geç' : 'Düzenlemeye dön'}
+						{@html uiIcons.arrowRight(13)}
 					</button>
 				</div>
 				<div class="hidden gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:flex">
@@ -264,23 +267,32 @@
 				</div>
 			</div>
 			<div class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
-				<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
-					{#each store.site.locales as locale (locale)}
-						<button
-							type="button"
-							class="inline-flex items-center gap-1.5 rounded-[7px] px-2 py-1 text-[10.5px] font-medium transition {store.editLocale ===
-							locale
-								? 'bg-[#171614] text-[#f3ecdd]'
-								: 'text-[var(--sk-muted)] hover:bg-white/70'}"
-							onclick={() => (store.editLocale = locale)}
-							aria-pressed={store.editLocale === locale}
-							aria-label={`Düzenleme dili: ${locale.toUpperCase()}`}
-						>
-							{@html flagSvgs[locale]}
-							{locale.toUpperCase()}
-						</button>
-					{/each}
-				</div>
+				<details class="relative">
+					<summary
+						class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden"
+						aria-label="Düzenleme dili"
+					>
+						{@html flagSvgs[store.editLocale]}
+						<span class="hidden sm:inline">{store.editLocale.toUpperCase()}</span>
+					</summary>
+					<div
+						class="absolute right-0 z-20 mt-1 flex w-40 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+					>
+						{#each store.site.locales as locale (locale)}
+							<button
+								type="button"
+								class="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5 {store.editLocale ===
+								locale
+									? 'font-semibold text-[var(--sk-ink)]'
+									: 'text-[var(--sk-muted)]'}"
+								onclick={() => (store.editLocale = locale)}
+							>
+								{@html flagSvgs[locale]}
+								{localeLabels[locale]}
+							</button>
+						{/each}
+					</div>
+				</details>
 				<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
 					{statusBadge[store.status].label}
 				</StatusPill>
@@ -291,7 +303,13 @@
 					title={canPublish ? 'Publish' : 'Fix publish blockers before publishing'}
 				>
 					{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
-					{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
+					{#if !canPublish}
+						Yayına hazır değil
+					{:else if publishedVersion}
+						Republish
+					{:else}
+						Publish
+					{/if}
 				</button>
 				<details class="relative">
 					<summary
@@ -326,23 +344,22 @@
 			</div>
 		</div>
 
-		<div class="flex min-h-0 flex-1 overflow-hidden">
+		<div class="flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
 			<!-- Left sidebar -->
 			<aside
 				class="{mobilePane === 'preview'
 					? 'hidden lg:flex'
-					: 'flex'} w-full shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)] lg:w-[19.5rem]"
+					: 'flex'} min-h-0 w-full shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)] lg:w-[19.5rem]"
 			>
 				<header class="border-b border-[var(--sk-line)] px-4 py-4">
 					<div class="min-w-0">
-						<BrandMark compact />
 						<h1 class="mt-3 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
 				</header>
 
 				<div
 					role="tablist"
-					class="m-3 grid shrink-0 grid-cols-3 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1"
+					class="m-3 hidden shrink-0 grid-cols-3 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 sm:grid"
 				>
 					{#each tabs as tab (tab)}
 						<button
@@ -357,8 +374,33 @@
 						</button>
 					{/each}
 				</div>
+				<details class="relative mx-3 mt-3 sm:hidden">
+					<summary
+						class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-[10px] bg-[var(--sk-shell)] px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden"
+					>
+						<span class="flex items-center gap-2">
+							{@html tabIcons[activeTab]}
+							{tabLabels[activeTab]}
+						</span>
+						<span aria-hidden="true">⌄</span>
+					</summary>
+					<div
+						class="absolute left-0 right-0 z-20 mt-1 grid grid-cols-2 gap-1 rounded-[12px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+					>
+						{#each tabs as tab (tab)}
+							<button
+								type="button"
+								class="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm {tabClass(tab)}"
+								onclick={() => (activeTab = tab)}
+							>
+								{@html tabIcons[tab]}
+								{tabLabels[tab]}
+							</button>
+						{/each}
+					</div>
+				</details>
 
-				<div class="flex min-h-0 flex-1 flex-col px-4 pb-4">
+				<div class="flex flex-col px-4 pb-4 lg:min-h-0 lg:flex-1">
 					<details class="sk-card mb-3 shrink-0 p-3" open={isDesktop.current}>
 						<summary
 							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
@@ -394,12 +436,12 @@
 						</div>
 					</details>
 
-					<details class="sk-card mb-3 shrink-0 p-3">
+					<details class="mb-3 shrink-0 rounded-[14px] border border-red-200 bg-red-50/70 p-3 text-red-950">
 						<summary
 							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
 						>
 							<div>
-								<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Kalite kontrol</div>
+								<div class="sk-mono text-[10px] text-red-500/80">Kalite kontrol</div>
 								<h2 class="mt-1 text-sm font-semibold">
 									{publishBlockers.length
 										? `${publishBlockers.length} yayın engeli var`
@@ -407,7 +449,7 @@
 											? `${quality.warnings.length} uyarı var`
 											: 'Yayın için kritik engel yok'}
 								</h2>
-								<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+								<p class="mt-1 text-xs leading-5 text-red-900/70">
 									Engeller yayınlamayı durdurur; uyarılar yayınlanabilir ama gözden geçirilmelidir.
 								</p>
 							</div>
@@ -422,7 +464,7 @@
 						{#if publishBlockers.length || quality.warnings.length}
 							<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
 								{#each [...publishBlockers, ...quality.warnings].slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
-									<div class="rounded-[10px] bg-[var(--sk-shell)] px-3 py-2 text-xs leading-5">
+									<div class="rounded-[10px] bg-white/80 px-3 py-2 text-xs leading-5">
 										<div
 											class={issue.severity === 'blocker'
 												? 'font-semibold text-red-800'
@@ -430,7 +472,7 @@
 										>
 											{issue.severity === 'blocker' ? 'Engel' : 'Uyarı'} · {issue.code}
 										</div>
-										<div class="text-[var(--sk-muted)]">{issue.message}</div>
+										<div class="text-red-900/75">{issue.message}</div>
 									</div>
 								{/each}
 							</div>
@@ -438,7 +480,9 @@
 					</details>
 
 					<div
-						class="min-h-0 flex-1 {activeTab === 'Chat' ? 'overflow-hidden' : 'overflow-y-auto'}"
+						class="lg:min-h-0 lg:flex-1 {activeTab === 'Chat'
+							? 'overflow-visible lg:overflow-hidden'
+							: 'overflow-visible lg:overflow-y-auto'}"
 					>
 						{#if activeTab === 'Chat'}
 							<ChatTab {store} history={data.chatHistory} />
@@ -465,7 +509,11 @@
 			</aside>
 
 			<!-- Right: preview -->
-			<section class="{mobilePane === 'edit' ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col">
+			<section
+				class="{mobilePane === 'edit'
+					? 'hidden lg:flex'
+					: 'flex'} min-h-[calc(100dvh-8rem)] min-w-0 flex-1 flex-col lg:min-h-0"
+			>
 				{#if publishNotice}
 					<div
 						class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'

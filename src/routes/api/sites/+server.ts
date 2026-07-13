@@ -9,6 +9,7 @@ import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
 import { getPendingById, setGeneratedSiteId } from '$lib/server/onboarding/session';
 import { seedChatFromOnboarding } from '$lib/server/chatLog';
 import { assertCanCreateFreePreviewSite, SiteQuotaError } from '$lib/server/siteQuota';
+import { createFallbackSite } from '$lib/server/siteFallback';
 import type { RequestHandler } from './$types';
 
 const bodySchema = z.object({
@@ -144,10 +145,40 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					errorId
 				});
 			}
-			return json(
-				{ ok: false, message: `${error.message} Reference: ${errorId}`, errorId },
-				{ status: 422 }
-			);
+			const pending = onboardingPendingId ? getPendingById(onboardingPendingId) : undefined;
+			const site = createFallbackSite({
+				id,
+				tenantId,
+				answers: pending?.answers
+			});
+			saveDraft(site, { ownerUserId: locals.user.id });
+			if (onboardingPendingId) {
+				try {
+					if (pending) {
+						setGeneratedSiteId(onboardingPendingId, id);
+						seedChatFromOnboarding(id, pending.answers);
+					}
+				} catch (seedErr) {
+					console.error('[onboarding] fallback chat seed failed:', seedErr);
+				}
+				recordOnboardingEvent({
+					event: 'generation_succeeded',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt,
+					errorId
+				});
+			}
+			return json({
+				ok: true,
+				id,
+				fallback: true,
+				errorId,
+				message:
+					'AI taslağı doğrulanamadı; cevapların kaybolmasın diye güvenli bir başlangıç taslağı açıldı.'
+			});
 		}
 		if (error instanceof SiteQuotaError) {
 			if (onboardingPendingId) {

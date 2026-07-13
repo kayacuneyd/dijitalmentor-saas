@@ -56,6 +56,27 @@ function guardableText(value: unknown): string | null {
 	return null;
 }
 
+function validationError(issue: z.core.$ZodIssue | undefined) {
+	if (!issue) return { code: 'validation_invalid', message: 'Invalid answer.' };
+	if (issue.code === 'too_big') {
+		const maximum = 'maximum' in issue ? issue.maximum : undefined;
+		return {
+			code: 'validation_too_long',
+			message:
+				typeof maximum === 'number'
+					? `This answer can be at most ${maximum} characters.`
+					: 'This answer is too long.'
+		};
+	}
+	if (issue.code === 'too_small') {
+		return { code: 'validation_required', message: 'This answer is required.' };
+	}
+	if (issue.code === 'invalid_format') {
+		return { code: 'validation_format', message: issue.message || 'Invalid format.' };
+	}
+	return { code: 'validation_invalid', message: issue.message || 'Invalid answer.' };
+}
+
 /**
  * Guided onboarding Q&A (anonymous-reachable): validates one answer against its
  * question's own schema, runs the Groq on-topic guard for `guarded` questions, and
@@ -93,8 +114,9 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress,
 
 	const parsedValue = question.schema.safeParse(body.data.value);
 	if (!parsedValue.success) {
+		const err = validationError(parsedValue.error.issues[0]);
 		return json(
-			{ ok: false, message: parsedValue.error.issues[0]?.message ?? 'Invalid answer.' },
+			{ ok: false, code: err.code, message: err.message },
 			{ status: 400 }
 		);
 	}

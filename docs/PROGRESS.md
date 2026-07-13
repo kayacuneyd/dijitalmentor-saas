@@ -2728,3 +2728,52 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Verification: `npm run check` 0 hata/uyarı, `npm run test` 508/508 geçti, `npm run build` başarılı.
   Playwright smoke: `/tr` 200, unauth `/editor/site-32b1bc76` login'e yönleniyor, unauth
   `PUT /api/sites/site-32b1bc76/identity` 401 döndürüyor.
+
+### 2026-07-13 — Antigravity CLI profil izolasyonu
+
+- Antigravity CLI'nin bu sunucuda resmi installer ile zaten `/root/.local/bin/agy` olarak kurulu olduğu
+  doğrulandı; CLI self-update sonrası sürüm `1.1.1`.
+- İki ayrı hesap için izole profil dizinleri oluşturuldu: `/root/.antigravity-profiles/profile-kayacuneyd`
+  ve `/root/.antigravity-profiles/profile-thomas`. Token/config ayrımı `HOME` override ile yapılıyor;
+  repo `.env` dosyasına credential eklenmedi.
+- Kullanım komutları eklendi: `agy-kayacuneyd` / `profil-kayacuneyd` ve `agy-thomas` /
+  `profil-thomas`. Her iki profil de `--version` ile doğrulandı; `models` komutu iki profilde de
+  beklenen şekilde "Please sign in..." döndürüyor, yani OAuth girişleri kullanıcı tarafından ayrı ayrı
+  tamamlanmalı.
+
+### 2026-07-13 — Beta geri bildirimleri: üretim güvenliği, onboarding ve mobil editor
+
+- AI üretimi `AIInvalidOutputError` ile durduğunda kullanıcı artık boşta kalmaz: `/api/sites` hatayı
+  loglayıp onboarding cevaplarından kontrollü kit tabanlı, Zod-valid fallback site üretir ve editor'a
+  açar. Generator'ın tek repair kuralı korunur; fallback API katmanında devreye girer.
+- Hero render ve kalite kontrol güçlendirildi: mobil `clamp()` başlık ölçüleri, image hero için sabit
+  okunabilir overlay, uzun hero başlığı/açıklaması ve görsel hero review uyarıları eklendi.
+- Onboarding iyileştirmeleri: meslek seçimi mobilde horizontal snap carousel; skip metni locale'e göre
+  (`Skipped` / `Boş geçildi` / `Übersprungen`); Zod `too_big/required/format` mesajları kullanıcı dostu
+  hale getirildi; text/list sınırları client-side `maxlength` ve sayaçla gösteriliyor.
+- Media upload artık JPEG/PNG/WebP raster görselleri server-side `sharp` ile uzun kenar 1920px WebP
+  kalite 82 olarak saklar; GIF animasyon riski nedeniyle olduğu gibi bırakılır. Yeni bağımlılık: `sharp`.
+- Mobil editor kalabalığı azaltıldı: edit/preview tek toggle CTA, locale tek bayrak dropdown, mobile tab
+  grid yerine dropdown sheet, kalite kontrol hafif kırmızı açılır uyarı paneli, publish CTA daha açıklayıcı,
+  mobil overflow zinciri gevşetildi. Büyük sidebar marka bloğu kaldırıldı; kompakt logo üst chrome'da.
+- Error log: ilk `npm run check` `activeTextLimit` deklarasyon sırası nedeniyle fail etti; root cause
+  `$derived(active...)` ifadesinin `active` tanımından önce eklenmesiydi, deklarasyon taşındı. İlk media
+  unit test fixture'ı sharp/libpng tarafından okunmayan minimal PNG idi; root cause test fixture'ının
+  geçersizliği, fix test PNG'sini sharp ile üretmek.
+- Verification: `npm run check` 0 hata/uyarı; hedefli unit testler 43/43 geçti; tam `npm run test`
+  510/510 geçti; `npm run build` başarılı. Local dev smoke: `GET /tr` 200, `GET /de/new` 200,
+  authsuz `/editor/site-test` 303 `/login`; Playwright 375/1280 `/de/new` ve 375 `/tr` render
+  kontrolünde yatay taşma 0 ve console warning/error 0.
+
+### 2026-07-13 — npm audit güvenlik düzeltmesi
+
+- `npm audit` 7 vulnerability raporluyordu: `@sveltejs/kit` altında `cookie <0.7.0` low seviye
+  advisory ve `drizzle-kit -> @esbuild-kit/*` zincirinde eski `esbuild@0.18.x` moderate advisory.
+  `npm audit fix --force` önerisi SvelteKit/Drizzle paketlerini eski major sürümlere çektiği için
+  uygulanmadı.
+- `package.json` içine güvenli dependency override eklendi: `cookie@0.7.2` ve `esbuild@0.28.1`.
+  `npm install` sonrası lockfile bu çözümlemeyi sabitledi; `@sveltejs/kit` artık patched cookie ile,
+  `drizzle-kit` ve ilgili tooling patched esbuild ile çözülüyor.
+- Verification: `npm audit` artık `found 0 vulnerabilities`; `npm ls cookie esbuild @esbuild-kit/core-utils
+  @esbuild-kit/esm-loader drizzle-kit @sveltejs/kit` override çözümlemesini doğruladı. `npm run check`
+  0 hata/uyarı, `npm run test` 510/510 geçti, `npm run build` başarılı.

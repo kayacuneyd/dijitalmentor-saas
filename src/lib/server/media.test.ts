@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { validateImage } from './media';
+import sharp from 'sharp';
+import { prepareStoredImage, validateImage } from './media';
 
 describe('media image validation', () => {
 	it('accepts bytes matching the declared image type', () => {
@@ -16,5 +17,24 @@ describe('media image validation', () => {
 		expect(() => validateImage(Uint8Array.from([0xff, 0xd8]), 'image/svg+xml')).toThrow(
 			/valid JPEG/
 		);
+	});
+
+	it('stores raster uploads as WebP except GIF', async () => {
+		const png = Uint8Array.from(
+			await sharp({
+				create: { width: 1, height: 1, channels: 3, background: '#ffffff' }
+			})
+				.png()
+				.toBuffer()
+		);
+		const stored = await prepareStoredImage(png, 'image/png');
+		expect(stored.mimeType).toBe('image/webp');
+		expect(stored.extension).toBe('webp');
+		expect(stored.bytes.byteLength).toBeGreaterThan(0);
+
+		const gif = Uint8Array.from(Buffer.from('GIF89a'));
+		const storedGif = await prepareStoredImage(gif, 'image/gif');
+		expect(storedGif.mimeType).toBe('image/gif');
+		expect(storedGif.bytes).toBe(gif);
 	});
 });

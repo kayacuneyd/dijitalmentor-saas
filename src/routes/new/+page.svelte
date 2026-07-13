@@ -95,6 +95,7 @@
 				remove: 'Remove',
 				answerPlaceholder: 'Write your answer...',
 				skip: 'Skip',
+				skipped: 'Skipped',
 				createSite: 'Generate my site',
 				startFree: 'Start free',
 				generating: 'Generating your site...',
@@ -126,6 +127,9 @@
 				errors: {
 					generic: 'Something went wrong.',
 					network: 'Network error — please try again.',
+					validationRequired: 'Please answer this question before continuing.',
+					validationTooLong: 'This answer is too long. Please shorten it.',
+					validationFormat: 'Please check the format and try again.',
 					generation:
 						'The site draft could not be generated. Your answers are saved; you can try again shortly.',
 					generationNetwork:
@@ -203,6 +207,7 @@
 				remove: 'Kaldır',
 				answerPlaceholder: 'Yanıtını yaz…',
 				skip: 'Boş geç',
+				skipped: 'Boş geçildi',
 				createSite: 'Siteni oluştur',
 				startFree: 'Ücretsiz Başla',
 				generating: 'Siten oluşturuluyor…',
@@ -234,6 +239,9 @@
 				errors: {
 					generic: 'Bir şeyler ters gitti.',
 					network: 'Ağ hatası — lütfen tekrar dene.',
+					validationRequired: 'Devam etmeden önce bu soruyu yanıtla.',
+					validationTooLong: 'Bu cevap çok uzun. Lütfen biraz kısalt.',
+					validationFormat: 'Formatı kontrol edip tekrar dene.',
 					generation:
 						'Site taslağı oluşturulamadı. Cevapların duruyor; birazdan tekrar deneyebilirsin.',
 					generationNetwork:
@@ -312,6 +320,7 @@
 				remove: 'Entfernen',
 				answerPlaceholder: 'Antwort schreiben...',
 				skip: 'Überspringen',
+				skipped: 'Übersprungen',
 				createSite: 'Website generieren',
 				startFree: 'Kostenlos starten',
 				generating: 'Website wird generiert...',
@@ -343,6 +352,9 @@
 				errors: {
 					generic: 'Etwas ist schiefgelaufen.',
 					network: 'Netzwerkfehler — bitte erneut versuchen.',
+					validationRequired: 'Bitte beantworte diese Frage, bevor du fortfährst.',
+					validationTooLong: 'Diese Antwort ist zu lang. Bitte kürze sie.',
+					validationFormat: 'Bitte prüfe das Format und versuche es erneut.',
 					generation:
 						'Der Website-Entwurf konnte nicht generiert werden. Deine Antworten sind gespeichert; du kannst es erneut versuchen.',
 					generationNetwork:
@@ -371,6 +383,19 @@
 
 	let transcriptEl: HTMLDivElement | undefined = $state();
 
+	const textLimits: Record<string, number> = {
+		otherProfession: 80,
+		businessName: 120,
+		city: 80,
+		audience: 400,
+		differentiator: 400,
+		credentials: 400,
+		domainPreference: 120,
+		anythingElse: 600,
+		rawDescription: 4000
+	};
+	const listItemLimit = 80;
+
 	function keepInputVisible(event: FocusEvent) {
 		(event.currentTarget as HTMLElement | null)?.scrollIntoView({ block: 'center' });
 	}
@@ -397,6 +422,7 @@
 	let editingId = $state<string | null>(null);
 	const active = $derived(editingId ? questionById(editingId) : current);
 	const activeDisplay = $derived(active ? localizeQuestion(active, locale) : undefined);
+	const activeTextLimit = $derived(active ? textLimits[active.id] : undefined);
 	const answeredQuestions = $derived(ONBOARDING_QUESTIONS.filter((q) => q.id in answers));
 	const directions = $derived(
 		VISUAL_DIRECTIONS.map((direction) => localizeDirection(direction, locale))
@@ -486,7 +512,14 @@
 		if (q.kind === 'list_text')
 			return Array.isArray(value) ? value.join(', ') : String(value ?? '');
 		const text = String(value ?? '').trim();
-		return text || '(boş geçildi)';
+		return text || copy.skipped;
+	}
+
+	function apiErrorMessage(data: { code?: string; message?: string }) {
+		if (data.code === 'validation_required') return copy.errors.validationRequired;
+		if (data.code === 'validation_too_long') return copy.errors.validationTooLong;
+		if (data.code === 'validation_format') return copy.errors.validationFormat;
+		return data.message ?? copy.errors.generic;
 	}
 
 	async function submitAnswer(questionId: string, value: unknown) {
@@ -508,7 +541,7 @@
 				if (resData.kind === 'off_topic') {
 					offTopicMessage = resData.message;
 				} else {
-					errorMessage = resData.message ?? copy.errors.generic;
+					errorMessage = apiErrorMessage(resData);
 				}
 				return;
 			}
@@ -531,7 +564,8 @@
 
 	function addListItem() {
 		const value = listInput.trim();
-		if (!value || listItems.length >= 8 || listItems.includes(value)) return;
+		if (!value || value.length > listItemLimit || listItems.length >= 8 || listItems.includes(value))
+			return;
 		listItems = [...listItems, value];
 		listInput = '';
 	}
@@ -762,6 +796,7 @@
 							class="sk-textarea min-h-40 text-base sm:text-[14.5px]"
 							rows="7"
 							placeholder={copy.rawPlaceholder}
+							maxlength={textLimits.rawDescription}
 							bind:value={rawText}
 							onfocus={keepInputVisible}
 							disabled={busy}></textarea>
@@ -820,11 +855,13 @@
 					{/each}
 				</div>
 			{:else if active?.id === 'niche'}
-				<div class="grid gap-2 sm:grid-cols-3">
+				<div
+					class="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0"
+				>
 					{#each activeDisplay?.options ?? [] as option (option.value)}
 						<button
 							type="button"
-							class="sk-card flex h-full flex-col items-start gap-1.5 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+							class="sk-card flex h-full min-w-[78%] snap-start flex-col items-start gap-1.5 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] sm:min-w-0"
 							disabled={busy}
 							onclick={() => submitAnswer(active!.id, option.value)}
 						>
@@ -916,6 +953,7 @@
 							type="text"
 							class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.addService}
+							maxlength={listItemLimit}
 							bind:value={listInput}
 							onfocus={keepInputVisible}
 							disabled={busy || listItems.length >= 8}
@@ -923,11 +961,17 @@
 						<button
 							type="submit"
 							class="sk-btn sk-btn-secondary sk-btn-sm"
-							disabled={busy || !listInput.trim() || listItems.length >= 8}
+							disabled={busy ||
+								!listInput.trim() ||
+								listInput.trim().length > listItemLimit ||
+								listItems.length >= 8}
 						>
 							{copy.add}
 						</button>
 					</form>
+					<div class="text-[11px] text-[var(--sk-faint)]">
+						{listInput.trim().length} / {listItemLimit}
+					</div>
 					<button
 						type="button"
 						class="sk-btn sk-btn-primary sk-btn-sm w-fit"
@@ -949,6 +993,7 @@
 						<textarea
 							class="sk-textarea min-h-20 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.answerPlaceholder}
+							maxlength={activeTextLimit}
 							bind:value={textValue}
 							onfocus={keepInputVisible}
 							disabled={busy}></textarea>
@@ -957,6 +1002,7 @@
 							type="text"
 							class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.answerPlaceholder}
+							maxlength={activeTextLimit}
 							bind:value={textValue}
 							onfocus={keepInputVisible}
 							disabled={busy}
@@ -965,11 +1011,18 @@
 					<button
 						type="submit"
 						class="sk-btn sk-btn-primary sk-btn-sm"
-						disabled={busy || (active!.required && !textValue.trim())}
+						disabled={busy ||
+							(active!.required && !textValue.trim()) ||
+							(Boolean(activeTextLimit) && textValue.trim().length > Number(activeTextLimit))}
 					>
 						{copy.send}
 					</button>
 				</form>
+				{#if activeTextLimit}
+					<div class="text-[11px] text-[var(--sk-faint)]">
+						{textValue.trim().length} / {activeTextLimit}
+					</div>
+				{/if}
 				{#if !active!.required}
 					<button
 						type="button"

@@ -7,6 +7,7 @@ import {
 } from '$lib/onboarding/questions';
 import { visualDirectionById } from '$lib/onboarding/directions';
 import { kitBySlug } from '$lib/kits';
+import { UNSUPPORTED_NICHE } from '$lib/onboarding/support';
 
 /**
  * Composes the collected onboarding answers into a single flowing description
@@ -33,6 +34,8 @@ export function composeDescription(
 	if (raw) return raw;
 
 	const niche = labelOf(NICHE_OPTIONS, answers.niche);
+	const isOther = answers.niche === UNSUPPORTED_NICHE;
+	const otherProfession = asString(answers.otherProfession);
 	const businessName = asString(answers.businessName);
 	const city = asString(answers.city);
 	const audience = asString(answers.audience);
@@ -53,7 +56,9 @@ export function composeDescription(
 	const sentences: string[] = [];
 
 	sentences.push(
-		`${businessName}, ${city} bölgesinde hizmet veren bir ${niche.toLowerCase()} pratiği.`
+		isOther && otherProfession
+			? `${businessName}, ${city} bölgesinde hizmet veren bir ${otherProfession}.`
+			: `${businessName}, ${city} bölgesinde hizmet veren bir ${niche.toLowerCase()} pratiği.`
 	);
 	if (audience) sentences.push(`Hedef kitlesi: ${audience}.`);
 	if (differentiator) sentences.push(`Fark yaratan yönü: ${differentiator}.`);
@@ -64,23 +69,29 @@ export function composeDescription(
 		sentences.push(
 			`Görsel yön: ${visualDirection.label} — ${visualDirection.toneHint}; bölüm vurgusu: ${visualDirection.sectionEmphasis}.`
 		);
-		const kit = selectedKit ?? visualDirection.kit;
-		if (kit) {
-			sentences.push(
-				`Kit referansı: ${kit.label} (${kit.slug}) — ${kit.outcome} Meslek: ${'profession' in kit ? kit.profession : 'Psikolog / Terapist'}. Sabit blok setinin dışına çıkma.`
-			);
-			if ('featureKits' in kit && kit.featureKits.length) {
-				sentences.push(`Önerilen feature kitleri: ${kit.featureKits.join(', ')}.`);
+		if (!isOther) {
+			const kit = selectedKit ?? visualDirection.kit;
+			if (kit) {
+				sentences.push(
+					`Kit referansı: ${kit.label} (${kit.slug}) — ${kit.outcome} Meslek: ${'profession' in kit ? kit.profession : 'Psikolog / Terapist'}. Sabit blok setinin dışına çıkma.`
+				);
+				if ('featureKits' in kit && kit.featureKits.length) {
+					sentences.push(`Önerilen feature kitleri: ${kit.featureKits.join(', ')}.`);
+				}
 			}
 		}
 	}
 	if (booking) sentences.push(`Randevu süreci: ${booking.toLowerCase()}.`);
 
-	const contactBits: string[] = [];
-	if (contactEmail) contactBits.push(`e-posta (${contactEmail})`);
-	if (contactPhone) contactBits.push(`telefon (${contactPhone})`);
-	if (contactBits.length) {
-		sentences.push(`İletişim tercihi ${contactMethod.toLowerCase()}: ${contactBits.join(', ')}.`);
+	if (contactMethod) {
+		const contactBits: string[] = [];
+		const usesEmail = answers.contactMethod === 'email' || answers.contactMethod === 'both';
+		const usesPhone = answers.contactMethod === 'phone' || answers.contactMethod === 'both';
+		if (usesEmail && contactEmail) contactBits.push(`e-posta (${contactEmail})`);
+		if (usesPhone && contactPhone) contactBits.push(`telefon (${contactPhone})`);
+		if (contactBits.length) {
+			sentences.push(`İletişim tercihi ${contactMethod.toLowerCase()}: ${contactBits.join(', ')}.`);
+		}
 	}
 
 	sentences.push(

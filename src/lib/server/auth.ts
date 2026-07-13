@@ -220,6 +220,16 @@ export function updateBetaProfile(input: {
 		.run();
 }
 
+/** Yalnızca boşsa set eder — `/profile/start` formunu ezmez. */
+export function setUserProfessionIfEmpty(userId: string, profession: string): void {
+	const trimmed = profession.trim();
+	if (!trimmed) return;
+	db.update(users)
+		.set({ profession: trimmed })
+		.where(eq(users.id, userId))
+		.run();
+}
+
 // --- sessions ----------------------------------------------------------------
 
 export function createSession(userId: string): string {

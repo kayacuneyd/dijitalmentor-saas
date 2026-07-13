@@ -9,7 +9,6 @@ import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
 import { getPendingById, setGeneratedSiteId } from '$lib/server/onboarding/session';
 import { seedChatFromOnboarding } from '$lib/server/chatLog';
 import { assertCanCreateFreePreviewSite, SiteQuotaError } from '$lib/server/siteQuota';
-import { manualReviewMessage, needsManualReview } from '$lib/onboarding/support';
 import type { RequestHandler } from './$types';
 
 const bodySchema = z.object({
@@ -32,10 +31,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!body.success) {
 		return json({ ok: false, message: body.error.issues[0].message }, { status: 400 });
 	}
-	if (needsManualReview(body.data.description)) {
-		return json({ ok: false, message: manualReviewMessage }, { status: 409 });
-	}
-
 	const id = `site-${crypto.randomUUID().slice(0, 8)}`;
 	// Quota is per account, not per site — otherwise regenerating resets the budget.
 	const tenantId = tenantIdForUser(locals.user.id);

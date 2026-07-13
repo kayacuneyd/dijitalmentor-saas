@@ -175,19 +175,36 @@ describe('POST /api/onboarding/finish', () => {
 		);
 	});
 
-	it('sends unsupported niche selections to manual beta review instead of generation', async () => {
+	it('allows unsupported niche users to finish after answering all questions including otherProfession', async () => {
 		const ip = nextIp();
 		const cookies = makeCookieJar();
 		await answer('niche', 'unsupported', cookies, ip);
+		await answer('otherProfession', 'Terzi', cookies, ip);
+		await answer('businessName', 'İğne İplik Atölyesi', cookies, ip);
+		await answer('city', 'İstanbul', cookies, ip);
+		await answer('audience', 'Mahalle sakinleri', cookies, ip);
+		await answer('differentiator', 'Hızlı teslim', cookies, ip);
+		await answer('tone', 'warm', cookies, ip);
+		await answer('visualDirection', 'warm_trust', cookies, ip);
+		await answer('languages', ['tr'], cookies, ip);
+		await answer('contactMethod', 'email', cookies, ip);
+		await answer('contactEmail', 'terzi@example.com', cookies, ip);
+		await answer('booking', 'walk_in', cookies, ip);
+		await answer('services', ['Tadilat', 'Daraltma'], cookies, ip);
+		await answer('credentials', '', cookies, ip);
+		await answer('media', 'use_placeholders', cookies, ip);
+		await answer('domainPreference', '', cookies, ip);
+		await answer('anythingElse', '', cookies, ip);
 
 		const res = await finish(cookies, { user });
 		const data = await res.json();
 
-		expect(res.status).toBe(409);
-		expect(data.message).toContain('manuel beta incelemesine');
+		expect(res.status).toBe(200);
+		expect(data.ok).toBe(true);
+		expect(data.description).toContain('Terzi');
 	});
 
-	it('rejects raw unsupported professions before generation can map them to a preset', async () => {
+	it('accepts any raw description now that the profession gate is removed', async () => {
 		const ip = nextIp();
 		const cookies = makeCookieJar();
 		await answer(
@@ -200,8 +217,8 @@ describe('POST /api/onboarding/finish', () => {
 		const res = await finish(cookies, { user });
 		const data = await res.json();
 
-		expect(res.status).toBe(409);
-		expect(data.message).toContain('Law preset');
+		expect(res.status).toBe(200);
+		expect(data.ok).toBe(true);
 	});
 
 	it('rejects finishing a pending record already claimed by a different account', async () => {

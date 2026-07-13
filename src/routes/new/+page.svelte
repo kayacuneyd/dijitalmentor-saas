@@ -5,6 +5,7 @@
 	import {
 		ONBOARDING_QUESTIONS,
 		nextQuestion,
+		questionById,
 		visibleQuestions,
 		type OnboardingAnswers,
 		type Question
@@ -99,6 +100,11 @@
 				generating: 'Generating your site...',
 				redirecting: 'Redirecting...',
 				rawToggle: 'I want to describe it in my own words',
+				changeAnswer: 'Change',
+				cancel: 'Cancel',
+				editingPrompt: 'You are editing your answer to:',
+				anyChangeResets:
+					'Changing this answer may re-hide or require re-answering dependent questions.',
 				stepWord: 'Step',
 				stepsDone: 'All done',
 				nicheDescriptions: {
@@ -108,12 +114,8 @@
 					dietitian: 'A practical nutrition site for counseling and follow-up',
 					real_estate: 'A local-trust site for listings and buyer/seller leads',
 					beauty: 'A booking-focused site for services and appointment requests',
-					unsupported: 'Manual beta review instead of forcing the wrong preset'
+					unsupported: "Tell us your profession and we'll prepare your first draft."
 				} as Record<string, string>,
-				unsupportedTitle: 'This field needs manual beta review.',
-				unsupportedBody:
-					'We do not map unsupported professions to the lawyer preset. Send us your field and we will review whether it can join the beta.',
-				unsupportedAction: 'Email support',
 				footer:
 					'AI turns your answers into a validated site structure. Questions are free; only site generation uses your monthly AI budget.',
 				stages: {
@@ -206,6 +208,11 @@
 				generating: 'Siten oluşturuluyor…',
 				redirecting: 'Yönlendiriliyor…',
 				rawToggle: 'Kendi cümlelerimle anlatmak istiyorum',
+				changeAnswer: 'Değiştir',
+				cancel: 'İptal',
+				editingPrompt: 'Şu yanıtını düzenliyorsun:',
+				anyChangeResets:
+					'Bu yanıtı değiştirmek, bağlı soruların yeniden cevaplanmasını veya gizlenmesini gerektirebilir.',
 				stepWord: 'Adım',
 				stepsDone: 'Tamamlandı',
 				nicheDescriptions: {
@@ -215,12 +222,8 @@
 					dietitian: 'Beslenme danışmanlığı ve takip için uygulanabilir bir site',
 					real_estate: 'Portföy ve alıcı/satıcı talepleri için güven veren bir site',
 					beauty: 'Hizmetler ve randevu talepleri için net bir güzellik salonu sitesi',
-					unsupported: 'Yanlış preset’e düşürmek yerine manuel beta incelemesi'
+					unsupported: 'Mesleğini yaz, sana uygun ilk taslağı hazırlayalım.'
 				} as Record<string, string>,
-				unsupportedTitle: 'Bu alan manuel beta incelemesi gerektiriyor.',
-				unsupportedBody:
-					'Desteklenmeyen meslekleri avukat preset’ine eşlemiyoruz. Mesleğini bize gönder; beta kapsamına alınıp alınamayacağını inceleyelim.',
-				unsupportedAction: 'Desteğe e-posta gönder',
 				footer:
 					'AI, sorulara verdiğin yanıtları doğrulanmış bir site yapısına dönüştürür — asla kod yazmaz. Sorular ücretsizdir; yalnızca site oluşturma aylık AI bütçeni kullanır.',
 				stages: {
@@ -314,6 +317,11 @@
 				generating: 'Website wird generiert...',
 				redirecting: 'Weiterleitung...',
 				rawToggle: 'Ich möchte es in eigenen Worten beschreiben',
+				changeAnswer: 'Ändern',
+				cancel: 'Abbrechen',
+				editingPrompt: 'Du bearbeitest deine Antwort auf:',
+				anyChangeResets:
+					'Das Ändern dieser Antwort kann abhängige Fragen ausblenden oder eine erneute Beantwortung erfordern.',
 				stepWord: 'Schritt',
 				stepsDone: 'Abgeschlossen',
 				nicheDescriptions: {
@@ -323,12 +331,8 @@
 					dietitian: 'Eine praktische Website für Ernährungsberatung und Begleitung',
 					real_estate: 'Eine vertrauensbildende Website für Immobilienanfragen',
 					beauty: 'Eine terminorientierte Website für Beauty-Leistungen',
-					unsupported: 'Manuelle Beta-Prüfung statt falschem Preset'
+					unsupported: 'Schreib deinen Beruf — wir bereiten den ersten Entwurf vor.'
 				} as Record<string, string>,
-				unsupportedTitle: 'Dieses Feld benötigt eine manuelle Beta-Prüfung.',
-				unsupportedBody:
-					'Nicht unterstützte Berufe werden nicht auf das Anwalts-Preset abgebildet. Sende uns dein Feld, wir prüfen die Beta-Eignung.',
-				unsupportedAction: 'Support mailen',
 				footer:
 					'AI verwandelt deine Antworten in eine validierte Website-Struktur. Fragen sind kostenlos; nur die Website-Generierung nutzt dein monatliches AI-Budget.',
 				stages: {
@@ -350,8 +354,6 @@
 
 	let answers = $state<OnboardingAnswers>({});
 	$effect(() => {
-		// Resyncs from a fresh `load()` (e.g. the post-verify redirect back here) —
-		// local optimistic updates below don't touch `data`, so no feedback loop.
 		answers = data.pending?.answers ?? {};
 	});
 	let busy = $state(false);
@@ -362,7 +364,6 @@
 	let rawText = $state('');
 	let promptSeedApplied = $state(false);
 
-	// Per-question input buffers — reset whenever the active question changes.
 	let textValue = $state('');
 	let multiValue = $state<string[]>([]);
 	let listItems = $state<string[]>([]);
@@ -389,11 +390,13 @@
 		typeof answers.rawDescription === 'string' &&
 			(answers.rawDescription as string).trim().length >= 30
 	);
-	const unsupportedNiche = $derived(answers.niche === 'unsupported');
 	const current = $derived<Question | undefined>(
-		hasRaw || unsupportedNiche ? undefined : nextQuestion(answers)
+		hasRaw ? undefined : nextQuestion(answers)
 	);
 	const currentDisplay = $derived(current ? localizeQuestion(current, locale) : undefined);
+	let editingId = $state<string | null>(null);
+	const active = $derived(editingId ? questionById(editingId) : current);
+	const activeDisplay = $derived(active ? localizeQuestion(active, locale) : undefined);
 	const answeredQuestions = $derived(ONBOARDING_QUESTIONS.filter((q) => q.id in answers));
 	const directions = $derived(
 		VISUAL_DIRECTIONS.map((direction) => localizeDirection(direction, locale))
@@ -402,8 +405,6 @@
 		data.preselectedNiche ? copy.professionHooks[data.preselectedNiche] : null
 	);
 
-	// Keep the newest bubble in view — on phones the transcript is height-capped
-	// and new content would otherwise appear below the fold.
 	$effect(() => {
 		void answeredQuestions.length;
 		void busy;
@@ -417,17 +418,15 @@
 		});
 	});
 
-	// Progress: "Adım X / Y" + bar. Totals adapt as showWhen questions appear.
 	const visibleNow = $derived(visibleQuestions(answers));
 	const totalSteps = $derived(visibleNow.length);
 	const answeredCount = $derived(visibleNow.filter((q) => q.id in answers).length);
-	const flowComplete = $derived(!unsupportedNiche && (hasRaw || !current));
+	const flowComplete = $derived(hasRaw || !current);
 	const stepNumber = $derived(Math.min(answeredCount + 1, totalSteps));
 	const progressPct = $derived(
 		flowComplete ? 100 : Math.round((answeredCount / Math.max(totalSteps, 1)) * 100)
 	);
 
-	// Inline stroke icons (leaf / scales / tooth) — no emoji-font dependency.
 	const nicheIconPaths: Record<string, string> = {
 		psych: 'M5 21c0-9.5 4.5-14.5 14-16-.8 9.5-5.5 14.2-14 16ZM5 21c3.5-5.5 7.5-9 12-11',
 		law: 'M12 3v18M4 7h16M6.5 7l-3.5 6.5a3.8 3.8 0 0 0 7 0L6.5 7ZM17.5 7 14 13.5a3.8 3.8 0 0 0 7 0L17.5 7ZM8 21h8',
@@ -443,18 +442,24 @@
 	};
 
 	$effect(() => {
-		current;
+		active;
 		textValue = '';
 		multiValue = [];
 		listItems = [];
 		listInput = '';
 		offTopicMessage = '';
+		if (editingId && editingId in answers) {
+			const prev = answers[editingId];
+			if (typeof prev === 'string') textValue = prev;
+			else if (Array.isArray(prev)) {
+				if (active?.kind === 'multi_choice')
+					multiValue = prev.filter((v) => typeof v === 'string') as string[];
+				else if (active?.kind === 'list_text')
+					listItems = prev.filter((v) => typeof v === 'string') as string[];
+			}
+		}
 	});
 
-	// Chat-style pacing: the next question (or a rejection) waits for at least a
-	// natural "typing" delay after the answer is known, so the AI doesn't feel
-	// instantaneous. Real network errors (caught below) skip this — a broken
-	// connection isn't "the AI thinking," delaying that message only frustrates.
 	let reducedMotion = $state(false);
 	$effect(() => {
 		reducedMotion =
@@ -507,10 +512,8 @@
 				}
 				return;
 			}
-			// The answer bubble commits immediately (it's the user's own already-known
-			// text); the next question stays hidden behind the typing indicator
-			// (`{#if ... && !busy}` below) until pacedDelay clears.
 			answers = { ...answers, [questionId]: value };
+			editingId = null;
 			if (questionId === 'rawDescription') useRaw = false;
 			await pacedDelay(startedAt);
 		} catch {
@@ -675,7 +678,7 @@
 			<div class="flex flex-col gap-1.5">
 				<div class="flex items-center justify-between">
 					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
-						{flowComplete || unsupportedNiche
+						{flowComplete
 							? copy.stepsDone
 							: `${copy.stepWord} ${stepNumber} / ${totalSteps}`}
 					</span>
@@ -693,29 +696,39 @@
 				bind:this={transcriptEl}
 				class="flex max-h-[min(28rem,55dvh)] min-h-32 flex-1 flex-col gap-2 overflow-y-auto"
 			>
-				{#each answeredQuestions as q (q.id)}
+				{#each answeredQuestions.filter((q) => visibleNow.some((v) => v.id === q.id)) as q (q.id)}
 					{@const displayedQuestion = localizeQuestion(q, locale)}
 					<ChatBubble role="assistant">{displayedQuestion.prompt}</ChatBubble>
-					<ChatBubble role="user">{formatAnswer(displayedQuestion, answers[q.id])}</ChatBubble>
+					<div class="flex items-start gap-2">
+						<ChatBubble role="user">{formatAnswer(displayedQuestion, answers[q.id])}</ChatBubble>
+						<button
+							type="button"
+							class="sk-btn sk-btn-ghost sk-btn-sm mt-1 shrink-0 text-[11px]"
+							disabled={busy}
+							onclick={() => (editingId = q.id)}
+						>
+							{copy.changeAnswer}
+						</button>
+					</div>
 				{/each}
 
-				{#if currentDisplay && !useRaw && !busy}
+				{#if editingId && activeDisplay}
+					<ChatBubble role="assistant">
+						{copy.editingPrompt} "{activeDisplay.prompt}"
+						<div
+							class="mt-3 border-t border-[rgba(23,22,20,.08)] pt-3 text-xs leading-5 text-[var(--sk-muted)]"
+						>
+							{copy.anyChangeResets}
+						</div>
+					</ChatBubble>
+				{:else if currentDisplay && !useRaw && !busy}
 					<ChatBubble role="assistant">
 						{currentDisplay.prompt}
 						{#if currentDisplay.helper}
 							<div class="mt-1 text-xs text-[var(--sk-faint)]">{currentDisplay.helper}</div>
 						{/if}
 					</ChatBubble>
-				{:else if unsupportedNiche && !busy}
-					<ChatBubble role="assistant">
-						{copy.unsupportedTitle}
-						<div
-							class="mt-3 border-t border-[rgba(23,22,20,.08)] pt-3 text-xs leading-5 text-[var(--sk-muted)]"
-						>
-							{copy.unsupportedBody}
-						</div>
-					</ChatBubble>
-				{:else if !current && !busy}
+				{:else if !active && !current && !busy}
 					<ChatBubble role="assistant">
 						{copy.done}
 						{#if !data.user}{copy.doneSignedOut}{:else}{copy.doneSignedIn}{/if}
@@ -778,14 +791,14 @@
 						</button>
 					</div>
 				</div>
-			{:else if current?.id === 'visualDirection'}
+			{:else if active?.id === 'visualDirection'}
 				<div class="grid gap-2 sm:grid-cols-3">
 					{#each directions as direction (direction.id)}
 						<button
 							type="button"
 							class="sk-card flex h-full flex-col items-start gap-2 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
 							disabled={busy}
-							onclick={() => submitAnswer(current!.id, direction.id)}
+							onclick={() => submitAnswer(active!.id, direction.id)}
 						>
 							<span class="sk-mono text-[10px] text-[var(--sk-faint)]">{copy.visualDirection}</span>
 							<span class="text-sm font-semibold text-[var(--sk-ink)]">{direction.label}</span>
@@ -806,14 +819,14 @@
 						</button>
 					{/each}
 				</div>
-			{:else if current?.id === 'niche'}
+			{:else if active?.id === 'niche'}
 				<div class="grid gap-2 sm:grid-cols-3">
-					{#each currentDisplay?.options ?? [] as option (option.value)}
+					{#each activeDisplay?.options ?? [] as option (option.value)}
 						<button
 							type="button"
 							class="sk-card flex h-full flex-col items-start gap-1.5 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
 							disabled={busy}
-							onclick={() => submitAnswer(current!.id, option.value)}
+							onclick={() => submitAnswer(active!.id, option.value)}
 						>
 							<svg
 								class="size-6 text-[var(--sk-ink)]"
@@ -837,23 +850,23 @@
 						</button>
 					{/each}
 				</div>
-			{:else if current?.kind === 'choice'}
+			{:else if active?.kind === 'choice'}
 				<div class="flex flex-wrap gap-2">
-					{#each currentDisplay?.options ?? [] as option (option.value)}
+					{#each activeDisplay?.options ?? [] as option (option.value)}
 						<button
 							type="button"
 							class="sk-btn sk-btn-secondary sk-btn-sm"
 							disabled={busy}
-							onclick={() => submitAnswer(current!.id, option.value)}
+							onclick={() => submitAnswer(active!.id, option.value)}
 						>
 							{option.label}
 						</button>
 					{/each}
 				</div>
-			{:else if current?.kind === 'multi_choice'}
+			{:else if active?.kind === 'multi_choice'}
 				<div class="flex flex-col gap-2">
 					<div class="flex flex-wrap gap-2">
-						{#each currentDisplay?.options ?? [] as option (option.value)}
+						{#each activeDisplay?.options ?? [] as option (option.value)}
 							<button
 								type="button"
 								class="sk-btn sk-btn-sm {multiValue.includes(option.value)
@@ -870,12 +883,12 @@
 						type="button"
 						class="sk-btn sk-btn-primary sk-btn-sm w-fit"
 						disabled={busy || multiValue.length === 0}
-						onclick={() => submitAnswer(current!.id, multiValue)}
+						onclick={() => submitAnswer(active!.id, multiValue)}
 					>
 						{copy.continue}
 					</button>
 				</div>
-			{:else if current?.kind === 'list_text'}
+			{:else if active?.kind === 'list_text'}
 				<div class="flex flex-col gap-2">
 					{#if listItems.length > 0}
 						<div class="flex flex-wrap gap-2">
@@ -919,20 +932,20 @@
 						type="button"
 						class="sk-btn sk-btn-primary sk-btn-sm w-fit"
 						disabled={busy || listItems.length === 0}
-						onclick={() => submitAnswer(current!.id, listItems)}
+						onclick={() => submitAnswer(active!.id, listItems)}
 					>
 						{copy.continue}
 					</button>
 				</div>
-			{:else if current?.kind === 'short_text' || current?.kind === 'open_text'}
+			{:else if active?.kind === 'short_text' || active?.kind === 'open_text'}
 				<form
 					class="flex gap-2"
 					onsubmit={(e) => {
 						e.preventDefault();
-						submitAnswer(current!.id, textValue);
+						submitAnswer(active!.id, textValue);
 					}}
 				>
-					{#if current.kind === 'open_text'}
+					{#if active!.kind === 'open_text'}
 						<textarea
 							class="sk-textarea min-h-20 flex-1 py-1.5 text-base sm:text-sm"
 							placeholder={copy.answerPlaceholder}
@@ -952,26 +965,22 @@
 					<button
 						type="submit"
 						class="sk-btn sk-btn-primary sk-btn-sm"
-						disabled={busy || (current.required && !textValue.trim())}
+						disabled={busy || (active!.required && !textValue.trim())}
 					>
 						{copy.send}
 					</button>
 				</form>
-				{#if !current.required}
+				{#if !active!.required}
 					<button
 						type="button"
 						class="sk-btn sk-btn-ghost sk-btn-sm w-fit"
 						disabled={busy}
-						onclick={() => submitAnswer(current!.id, '')}
+						onclick={() => submitAnswer(active!.id, '')}
 					>
 						{copy.skip}
 					</button>
 				{/if}
-			{:else if unsupportedNiche}
-				<a href="mailto:support@saaskaya.com" class="sk-btn sk-btn-secondary sk-btn-lg w-full">
-					{copy.unsupportedAction}
-				</a>
-			{:else if !current}
+			{:else if !active}
 				<button
 					type="button"
 					class="sk-btn sk-btn-primary sk-btn-lg w-full"
@@ -989,7 +998,7 @@
 				</button>
 			{/if}
 
-			{#if !useRaw && current}
+			{#if !useRaw && current && !editingId}
 				<button
 					type="button"
 					class="sk-btn sk-btn-ghost sk-btn-sm w-fit"

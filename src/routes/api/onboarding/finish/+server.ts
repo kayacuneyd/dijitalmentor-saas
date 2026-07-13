@@ -2,11 +2,6 @@ import { json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { kitBySlug } from '$lib/kits';
 import { nextQuestion } from '$lib/onboarding/questions';
-import {
-	isUnsupportedNicheAnswer,
-	manualReviewMessage,
-	needsManualReview
-} from '$lib/onboarding/support';
 import { composeDescription } from '$lib/server/onboarding/compose';
 import {
 	PENDING_COOKIE,
@@ -15,6 +10,8 @@ import {
 	linkPendingToUser
 } from '$lib/server/onboarding/session';
 import { recordOnboardingEvent } from '$lib/server/onboarding/telemetry';
+import { setUserProfessionIfEmpty } from '$lib/server/auth';
+import { UNSUPPORTED_NICHE } from '$lib/onboarding/support';
 import type { RequestHandler } from './$types';
 
 const bodySchema = z
@@ -72,12 +69,6 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 
 	const rawDescription = pending.answers.rawDescription;
 	const hasRaw = typeof rawDescription === 'string' && rawDescription.trim().length >= 30;
-	if (isUnsupportedNicheAnswer(pending.answers)) {
-		return json({ ok: false, message: manualReviewMessage }, { status: 409 });
-	}
-	if (hasRaw && needsManualReview(rawDescription)) {
-		return json({ ok: false, message: manualReviewMessage }, { status: 409 });
-	}
 	if (!hasRaw && nextQuestion(pending.answers)) {
 		return json(
 			{ ok: false, message: 'Please finish answering the questions first.' },
@@ -91,6 +82,11 @@ export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 			{ ok: false, message: 'Please add a bit more detail before finishing.' },
 			{ status: 400 }
 		);
+	}
+
+	const answers = pending.answers;
+	if (answers.niche === UNSUPPORTED_NICHE && typeof answers.otherProfession === 'string') {
+		setUserProfessionIfEmpty(locals.user.id, answers.otherProfession);
 	}
 
 	consumePending(pending.id);

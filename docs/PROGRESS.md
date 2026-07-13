@@ -3,6 +3,44 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-13
+
+**Owner kararı 2026-07: "Diğer" meslekler manuel beta incelemesi yerine normal akışa dahil edildi.**
+"Başka bir alan" seçen kullanıcılar için onboarding tıkanması kaldırıldı — artık serbest metin meslek
+sorusu (`otherProfession`) soruluyor, süreç normal işliyor, meslek `users.profession`'a not düşülüyor.
+
+### Değişiklikler
+- **`src/lib/onboarding/support.ts`:** `manualReviewMessage`, `needsManualReview`, `unsupportedProfessionPatterns`,
+  `supportedProfessionPatterns` silindi; `SUPPORTED_NICHES`, `UNSUPPORTED_NICHE`, `isUnsupportedNicheAnswer` kaldı.
+- **`src/lib/onboarding/questions.ts`:** `niche` sonrası `otherProfession` sorusu eklendi (`showWhen: niche === 'unsupported'`,
+  guarded, short_text 80 char). `visibleQuestions()`'daki unsupported kesmesi kaldırıldı. Soru sayısı 17→18.
+- **`src/routes/api/onboarding/finish/+server.ts`:** İki 409 (manuel beta incelemesi) bloğu silindi.
+  `setUserProfessionIfEmpty` ile `otherProfession` cevabı `users.profession`'a yazılıyor (yalnızca boşsa).
+- **`src/routes/api/sites/+server.ts`:** `needsManualReview` kontrolü ve ilgili import silindi.
+- **`src/lib/server/onboarding/compose.ts`:** Unsupport nişte `otherProfession` metni açılış cümlesine yazılıyor;
+  kit cümlesi atlanıyor (fallback "Psikolog/Terapist" yanlış yönlendirmesini önlüyor).
+  Contact gating: `contactEmail`/`contactPhone` yalnızca ilgili `contactMethod` seçiliyken cümleye katılıyor.
+- **`src/lib/server/auth.ts`:** `setUserProfessionIfEmpty(userId, profession)` helper'ı eklendi.
+- **`src/routes/new/+page.svelte`:** Çıkmaz tamamen kaldırıldı: `unsupportedNiche` özel durumu, mailto butonu,
+  unsupported transcript blokları silindi. "Değiştir" butonu eklendi — kullanıcı transcript'ten herhangi bir
+  cevabı düzenleyebilir, buffer önceki değerle doldurulur, submit'te sunucu upsert'lenir.
+  `editingId` state + `active` derived değişkeni tüm input dallarını `current` yerine `active` üzerinden yönetiyor.
+  3 dilde (TR/EN/DE) `changeAnswer`, `cancel`, `editingPrompt`, `anyChangeResets` copy anahtarları eklendi.
+  `nicheDescriptions.unsupported` metni devam-dostu hale getirildi.
+- **Testler:** `questions.test.ts`'tekesme testi yeni akışa uyarlandı; `finish/server.test.ts`'teki iki 409 testi
+  unsupported+otherProfession tam akış ve serbest raw description 200 testlerine dönüştürüldü.
+  `npm run check`: 0 errors, `npm run test`: 77 files / 499 tests passed.
+
+### Karar gerekçesi
+Üretim hattı zaten niş-bağımsız — `generateSite()` sadece `description` string'i alır, Zod `siteSchema` +
+sabit blok seti kontratı her niş için aynen geçerli. `needsManualReview` bir güvenlik filtresi değil,
+sadece niş bekçisiydi. Güvenlik mevcut Groq topic guard ile sağlanıyor.
+
+### Sıkışmış mevcut kullanıcılar
+Pending kayıtları `{niche:'unsupported'}` + status `completed`; hiçbir yol status'a bakmıyor.
+Script değişince reload'da rehydration `otherProfession`'ı sıradaki soru yapar → kullanıcı kaldığı
+yerden devam eder. Migration gerekmez.
+
 ## 2026-07-11
 
 **Self-serve `deploy.sh` added.** User wants to trigger deploys themselves without going through an

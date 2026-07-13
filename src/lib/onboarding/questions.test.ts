@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { ONBOARDING_QUESTIONS, nextQuestion, questionById, visibleQuestions } from './questions';
 
 describe('onboarding question script', () => {
-	it('is a fixed, deterministic list — 15 top-level prompts plus 2 conditional contact steps', () => {
-		expect(ONBOARDING_QUESTIONS).toHaveLength(17);
+	it('is a fixed, deterministic list — 15 top-level prompts plus 3 conditional steps', () => {
+		expect(ONBOARDING_QUESTIONS).toHaveLength(18);
 		const conditional = ONBOARDING_QUESTIONS.filter((q) => q.showWhen);
-		expect(conditional.map((q) => q.id)).toEqual(['contactEmail', 'contactPhone']);
+		expect(conditional.map((q) => q.id)).toEqual([
+			'otherProfession',
+			'contactEmail',
+			'contactPhone'
+		]);
 	});
 
 	it('every id is unique', () => {
@@ -16,6 +20,7 @@ describe('onboarding question script', () => {
 	it('guards exactly the free-text fields agreed with the user (~8 questions)', () => {
 		const guarded = ONBOARDING_QUESTIONS.filter((q) => q.guarded).map((q) => q.id);
 		expect(guarded).toEqual([
+			'otherProfession',
 			'businessName',
 			'city',
 			'audience',
@@ -85,9 +90,19 @@ describe('onboarding question script', () => {
 			expect(nextQuestion(answered)).toBeUndefined();
 		});
 
-		it('stops the automated flow when the unsupported manual-review niche is selected', () => {
-			expect(visibleQuestions({ niche: 'unsupported' }).map((q) => q.id)).toEqual(['niche']);
-			expect(nextQuestion({ niche: 'unsupported' })).toBeUndefined();
+		it('asks for the profession when the unsupported niche is selected, then continues the full flow', () => {
+			expect(nextQuestion({ niche: 'unsupported' })!.id).toBe('otherProfession');
+			// otherProfession should be hidden for supported niches
+			expect(
+				visibleQuestions({ niche: 'psych' }).find((q) => q.id === 'otherProfession')
+			).toBeUndefined();
+			// Full flow completes
+			const allAnswered = Object.fromEntries(
+				visibleQuestions({ niche: 'unsupported', otherProfession: 'Terzi', contactMethod: 'both' }).map(
+					(q) => [q.id, 'x']
+				)
+			);
+			expect(nextQuestion(allAnswered)).toBeUndefined();
 		});
 	});
 

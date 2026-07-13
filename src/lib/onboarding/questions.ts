@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { VISUAL_DIRECTION_OPTIONS, visualDirectionSchema } from './directions';
-import { SUPPORTED_NICHES, UNSUPPORTED_NICHE, isUnsupportedNicheAnswer } from './support';
+import { SUPPORTED_NICHES, UNSUPPORTED_NICHE } from './support';
 
 /**
  * Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a fixed, deterministic
@@ -84,6 +84,16 @@ export const ONBOARDING_QUESTIONS: Question[] = [
 		guarded: false,
 		options: NICHE_OPTIONS,
 		schema: z.enum(NICHE_VALUES)
+	},
+	{
+		id: 'otherProfession',
+		kind: 'short_text',
+		prompt: 'Hangi alanda veya meslekte çalışıyorsun?',
+		helper: 'Kısaca yaz — örn. "Terzi", "Fotoğrafçı", "Oto tamircisi".',
+		required: true,
+		guarded: true,
+		schema: shortText(80),
+		showWhen: (answers) => answers.niche === UNSUPPORTED_NICHE
 	},
 	{
 		id: 'businessName',
@@ -239,7 +249,6 @@ export function questionById(id: string): Question | undefined {
 
 /** Questions visible given the answers collected so far, in order. */
 export function visibleQuestions(answers: OnboardingAnswers): Question[] {
-	if (isUnsupportedNicheAnswer(answers)) return ONBOARDING_QUESTIONS.slice(0, 1);
 	return ONBOARDING_QUESTIONS.filter((q) => !q.showWhen || q.showWhen(answers));
 }
 

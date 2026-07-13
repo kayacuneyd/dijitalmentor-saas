@@ -8,7 +8,10 @@ type QuestionCopy = {
 	options?: Record<string, string>;
 };
 
-const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
+/** Exported for test-only exhaustiveness checks (see `onboarding.test.ts`) — every
+ *  `ONBOARDING_QUESTIONS` id must have an `en`/`de` entry here, since `localizeQuestion`
+ *  silently falls back to the Turkish base prompt for any id/locale pair missing below. */
+export const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 	en: {
 		niche: {
 			prompt: 'What kind of practice are you building a site for?',
@@ -21,6 +24,10 @@ const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 				beauty: 'Beauty salon',
 				unsupported: 'Another field'
 			}
+		},
+		otherProfession: {
+			prompt: 'What field or profession do you work in?',
+			helper: 'Keep it short — e.g. "Tailor", "Photographer", "Car mechanic".'
 		},
 		businessName: { prompt: 'What is the name of your practice or business?' },
 		city: { prompt: 'Which city or district do you serve?' },
@@ -100,6 +107,10 @@ const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 				beauty: 'Beauty-Salon',
 				unsupported: 'Anderes Feld'
 			}
+		},
+		otherProfession: {
+			prompt: 'In welchem Bereich oder Beruf arbeitest du?',
+			helper: 'Kurz halten — z. B. "Schneider", "Fotograf", "Automechaniker".'
 		},
 		businessName: { prompt: 'Wie heißt deine Praxis oder dein Unternehmen?' },
 		city: { prompt: 'In welcher Stadt oder welchem Bezirk bist du tätig?' },

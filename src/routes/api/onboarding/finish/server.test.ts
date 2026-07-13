@@ -36,7 +36,8 @@ async function answer(
 			body: JSON.stringify({ questionId, value })
 		}),
 		cookies,
-		getClientAddress: () => ip
+		getClientAddress: () => ip,
+		locals: { locale: 'tr' }
 	} as unknown as Parameters<typeof answerPOST>[0]);
 }
 

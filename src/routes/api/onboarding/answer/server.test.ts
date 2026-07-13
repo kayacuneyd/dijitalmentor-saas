@@ -31,7 +31,11 @@ function nextIp() {
 
 async function call(
 	body: unknown,
-	opts: { cookies?: ReturnType<typeof makeCookieJar>; ip?: string } = {}
+	opts: {
+		cookies?: ReturnType<typeof makeCookieJar>;
+		ip?: string;
+		locale?: 'tr' | 'en' | 'de';
+	} = {}
 ) {
 	const cookies = opts.cookies ?? makeCookieJar();
 	const ip = opts.ip ?? nextIp();
@@ -42,7 +46,8 @@ async function call(
 			body: JSON.stringify(body)
 		}),
 		cookies,
-		getClientAddress: () => ip
+		getClientAddress: () => ip,
+		locals: { locale: opts.locale ?? 'tr' }
 	} as unknown as Parameters<typeof POST>[0]);
 	return { res, cookies };
 }
@@ -245,6 +250,38 @@ describe('POST /api/onboarding/answer', () => {
 		it('skips the guard entirely for an empty optional answer', async () => {
 			await call({ questionId: 'credentials', value: '' });
 			expect(guardMock).not.toHaveBeenCalled();
+		});
+
+		it('passes the request locale and the localized question prompt to the guard', async () => {
+			await call({ questionId: 'businessName', value: 'Ada Terapi' }, { locale: 'de' });
+			expect(guardMock).toHaveBeenCalledWith(
+				expect.objectContaining({
+					locale: 'de',
+					questionPrompt: 'Wie heißt deine Praxis oder dein Unternehmen?'
+				})
+			);
+		});
+
+		it('auto-accepts the answer once a question hits the rejection cap, so it can never loop forever', async () => {
+			const ip = nextIp();
+			let cookies = makeCookieJar();
+			guardMock.mockResolvedValue({
+				result: { onTopic: false, reply: 'Lütfen işletme adını yaz.' },
+				usage: { inputTokens: 5, outputTokens: 3 }
+			});
+			let last;
+			for (let i = 0; i < 2; i++) {
+				last = await call({ questionId: 'businessName', value: `answer ${i}` }, { ip, cookies });
+				cookies = last.cookies;
+				expect(last.res.status).toBe(400);
+			}
+			// Third consecutive rejection for the same question in the same session
+			// exceeds MAX_GUARD_REJECTIONS — the endpoint must fail open instead of
+			// showing the same off-topic message forever.
+			last = await call({ questionId: 'businessName', value: 'third try' }, { ip, cookies });
+			expect(last.res.status).toBe(200);
+			const pending = getPendingByToken(last.cookies.store[PENDING_COOKIE]);
+			expect(pending?.answers.businessName).toBe('third try');
 		});
 
 		it('throttles guard calls separately from the general answer-rate bucket', async () => {

@@ -167,37 +167,112 @@
 	<div
 		class="flex h-full min-h-0 flex-col overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]"
 	>
-		<!-- Mobile pane toggle -->
+		<!-- Single toolbar row: pane toggle (mobile) / viewport switcher (desktop) on the
+		     left, locale + status + the one primary action + an overflow menu for
+		     everything else on the right. Always visible regardless of active pane, so
+		     Save/Publish are reachable while editing on mobile, not just in preview. -->
 		<div
-			class="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--sk-line)] px-3 py-2 lg:hidden"
+			class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-3 py-2"
 		>
-			<div class="flex flex-1 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1" role="group">
-				<button
-					type="button"
-					class="min-h-10 flex-1 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
-					'edit'
-						? 'bg-[#171614] text-[#f3ecdd]'
-						: 'text-[var(--sk-muted)]'}"
-					aria-pressed={mobilePane === 'edit'}
-					onclick={() => (mobilePane = 'edit')}
-				>
-					Düzenle
-				</button>
-				<button
-					type="button"
-					class="min-h-10 flex-1 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
-					'preview'
-						? 'bg-[#171614] text-[#f3ecdd]'
-						: 'text-[var(--sk-muted)]'}"
-					aria-pressed={mobilePane === 'preview'}
-					onclick={() => (mobilePane = 'preview')}
-				>
-					Önizleme
-				</button>
+			<div class="flex items-center gap-2">
+				<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:hidden" role="group">
+					<button
+						type="button"
+						class="min-h-9 rounded-[8px] px-3 text-sm font-medium transition {mobilePane === 'edit'
+							? 'bg-[#171614] text-[#f3ecdd]'
+							: 'text-[var(--sk-muted)]'}"
+						aria-pressed={mobilePane === 'edit'}
+						onclick={() => (mobilePane = 'edit')}
+					>
+						Düzenle
+					</button>
+					<button
+						type="button"
+						class="min-h-9 rounded-[8px] px-3 text-sm font-medium transition {mobilePane ===
+						'preview'
+							? 'bg-[#171614] text-[#f3ecdd]'
+							: 'text-[var(--sk-muted)]'}"
+						aria-pressed={mobilePane === 'preview'}
+						onclick={() => (mobilePane = 'preview')}
+					>
+						Önizleme
+					</button>
+				</div>
+				<div class="hidden gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:flex">
+					{#each viewports as vp (vp.id)}
+						<button
+							class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
+							onclick={() => (viewport = vp)}
+							aria-label={vp.label}
+							aria-pressed={viewport.id === vp.id}
+							title={vp.label}
+						>
+							{@html viewportIcons[vp.id]}
+						</button>
+					{/each}
+				</div>
 			</div>
-			<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
-				{statusBadge[store.status].label}
-			</StatusPill>
+			<div class="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+				<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
+					{#each store.site.locales as locale (locale)}
+						<button
+							type="button"
+							class="inline-flex items-center gap-1.5 rounded-[7px] px-2 py-1 text-[10.5px] font-medium transition {store.editLocale ===
+							locale
+								? 'bg-[#171614] text-[#f3ecdd]'
+								: 'text-[var(--sk-muted)] hover:bg-white/70'}"
+							onclick={() => (store.editLocale = locale)}
+							aria-pressed={store.editLocale === locale}
+							aria-label={`Düzenleme dili: ${locale.toUpperCase()}`}
+						>
+							{@html flagSvgs[locale]}
+							{locale.toUpperCase()}
+						</button>
+					{/each}
+				</div>
+				<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
+					{statusBadge[store.status].label}
+				</StatusPill>
+				<button
+					class="sk-btn sk-btn-primary sk-btn-sm"
+					onclick={publish}
+					disabled={publishing || !quality.canPublish}
+					title={quality.canPublish ? 'Publish' : 'Fix quality blockers before publishing'}
+				>
+					{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
+					{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
+				</button>
+				<details class="relative">
+					<summary
+						class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
+						aria-label="Diğer işlemler"
+					>
+						⋯
+					</summary>
+					<div
+						class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+					>
+						<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
+							{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
+							{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
+						</div>
+						<button
+							type="button"
+							class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
+							onclick={() => store.save()}
+						>
+							Save now
+						</button>
+						<a
+							href={savedPreviewSrc}
+							target="_blank"
+							class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
+						>
+							Saved preview {@html uiIcons.external(13)}
+						</a>
+					</div>
+				</details>
+			</div>
 		</div>
 
 		<div class="flex min-h-0 flex-1 overflow-hidden">
@@ -207,16 +282,11 @@
 					? 'hidden lg:flex'
 					: 'flex'} w-full shrink-0 flex-col border-r border-[var(--sk-line)] bg-[var(--sk-card)] lg:w-[19.5rem]"
 			>
-				<header
-					class="flex items-start justify-between gap-3 border-b border-[var(--sk-line)] px-4 py-4"
-				>
+				<header class="border-b border-[var(--sk-line)] px-4 py-4">
 					<div class="min-w-0">
 						<BrandMark compact />
 						<h1 class="mt-3 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
-					<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
-						{statusBadge[store.status].label}
-					</StatusPill>
 				</header>
 
 				<div
@@ -336,72 +406,8 @@
 				</div>
 			</aside>
 
-			<!-- Right: toolbar + preview -->
+			<!-- Right: preview -->
 			<section class="{mobilePane === 'edit' ? 'hidden lg:flex' : 'flex'} min-w-0 flex-1 flex-col">
-				<div
-					class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--sk-line)] bg-[var(--sk-card)] px-4 py-3"
-				>
-					<div class="hidden gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 lg:flex">
-						{#each viewports as vp (vp.id)}
-							<button
-								class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
-								onclick={() => (viewport = vp)}
-								aria-label={vp.label}
-								aria-pressed={viewport.id === vp.id}
-								title={vp.label}
-							>
-								{@html viewportIcons[vp.id]}
-							</button>
-						{/each}
-					</div>
-					<div class="flex min-w-0 flex-wrap items-center gap-2">
-						<div
-							class="hidden items-center gap-2 rounded-full border border-[var(--sk-line)] px-3 py-1 text-[11px] text-[var(--sk-muted)] xl:flex"
-						>
-							<span>{publishedVersion ? `Published v${publishedVersion}` : 'Not published'}</span>
-							<span class="text-[var(--sk-faint)]">·</span>
-							<span>{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}</span>
-						</div>
-						<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
-							{#each store.site.locales as locale (locale)}
-								<button
-									type="button"
-									class="inline-flex items-center gap-1.5 rounded-[7px] px-2 py-1 text-[10.5px] font-medium transition {store.editLocale ===
-									locale
-										? 'bg-[#171614] text-[#f3ecdd]'
-										: 'text-[var(--sk-muted)] hover:bg-white/70'}"
-									onclick={() => (store.editLocale = locale)}
-									aria-pressed={store.editLocale === locale}
-									aria-label={`Düzenleme dili: ${locale.toUpperCase()}`}
-								>
-									{@html flagSvgs[locale]}
-									{locale.toUpperCase()}
-								</button>
-							{/each}
-						</div>
-						<button class="sk-btn sk-btn-secondary sk-btn-sm" onclick={() => store.save()}
-							>Save now</button
-						>
-						<a
-							href={savedPreviewSrc}
-							target="_blank"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
-							aria-label="Saved preview"
-							><span class="hidden sm:inline">Saved preview</span>
-							{@html uiIcons.external(13)}</a
-						>
-						<button
-							class="sk-btn sk-btn-primary sk-btn-sm"
-							onclick={publish}
-							disabled={publishing || !quality.canPublish}
-							title={quality.canPublish ? 'Publish' : 'Fix quality blockers before publishing'}
-						>
-							{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
-							{publishedVersion ? `Republish (v${publishedVersion} live)` : 'Publish'}
-						</button>
-					</div>
-				</div>
-
 				{#if publishNotice}
 					<div
 						class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'

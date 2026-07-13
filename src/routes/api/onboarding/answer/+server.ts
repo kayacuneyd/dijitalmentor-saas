@@ -4,7 +4,8 @@ import { classifyOnboardingAnswer } from '$lib/server/ai/onboardingGuard';
 import { AIInvalidOutputError, AIUnavailableError } from '$lib/server/ai/llm';
 import { rateLimit } from '$lib/server/auth';
 import { recordError } from '$lib/server/error-log';
-import { nextQuestion, questionById } from '$lib/onboarding/questions';
+import { localizeQuestion } from '$lib/i18n/onboarding';
+import { nextQuestion, questionById, type Question } from '$lib/onboarding/questions';
 import {
 	PENDING_COOKIE,
 	createOrGetPending,
@@ -35,6 +36,13 @@ const RAW_DESCRIPTION_QUESTION = {
 	schema: z.string().trim().min(30).max(4000)
 };
 
+/**
+ * A misclassifying guard must never trap a visitor on the same question forever: after
+ * this many consecutive rejections for one question in one session, stop calling the
+ * guard and accept the answer as-is — same fail-open philosophy as an unavailable guard.
+ */
+const MAX_GUARD_REJECTIONS = 3;
+
 /** Joins a validated answer value into guard-classifiable text, or null if there's nothing to guard. */
 function guardableText(value: unknown): string | null {
 	if (typeof value === 'string') return value.trim() || null;
@@ -55,7 +63,7 @@ function guardableText(value: unknown): string | null {
  * or unrepairable classifier never blocks this fixed, required step; rate limiting
  * is the abuse backstop instead.
  */
-export const POST: RequestHandler = async ({ request, cookies, getClientAddress }) => {
+export const POST: RequestHandler = async ({ request, cookies, getClientAddress, locals }) => {
 	const ip = getClientAddress();
 	if (!rateLimit(`onboarding-answer:${ip}`, 60, 60_000)) {
 		return json(
@@ -110,12 +118,27 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress 
 			);
 		}
 		try {
+			const localizedPrompt = localizeQuestion(question as Question, locals.locale).prompt;
 			const { result } = await classifyOnboardingAnswer({
-				questionPrompt: question.prompt,
-				answer: guardText
+				questionPrompt: localizedPrompt,
+				answer: guardText,
+				locale: locals.locale
 			});
 			if (!result.onTopic) {
-				return json({ ok: false, kind: 'off_topic', message: result.reply }, { status: 400 });
+				const sessionKey = cookies.get(PENDING_COOKIE) ?? ip;
+				const withinCap = rateLimit(
+					`onboarding-guard-reject:${sessionKey}:${question.id}`,
+					MAX_GUARD_REJECTIONS - 1,
+					30 * 60_000
+				);
+				if (withinCap) {
+					return json({ ok: false, kind: 'off_topic', message: result.reply }, { status: 400 });
+				}
+				recordError(new Error('Onboarding guard rejection cap exceeded — answer auto-accepted'), {
+					source: 'onboarding-guard',
+					route: '/api/onboarding/answer',
+					method: 'POST'
+				});
 			}
 		} catch (err) {
 			// Fail open: the fixed onboarding backbone must never depend on Groq

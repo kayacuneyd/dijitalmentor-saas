@@ -5,6 +5,85 @@ done and _why_. This file is the antidote to forgetting completed steps.
 
 ## 2026-07-13
 
+**Beta bug fix 1/3: `otherProfession` onboarding question had zero EN/DE translation coverage.**
+Three beta users reported onboarding UX problems (screenshots): one saw a question mixing German
+chrome with a raw Turkish bubble, another got permanently stuck on a question with a broken
+code-mixed AI reply, and a third called the editor screen cluttered. Root-caused all three via code
+exploration before touching anything (see the plan file this session used,
+`1-ekteki-foto-bir-beta-rippling-blanket.md`, for the full trace).
+
+This entry fixes the first bug. `src/lib/i18n/onboarding.ts`'s `questionCopy` table — the
+manually-maintained EN/DE overlay `localizeQuestion()` reads from — had **no entry at all** for
+`otherProfession` (the "which profession?" fallback question shown when a user picks "Anderes
+Feld"/"Another field"), so `localizeQuestion` silently fell back to the raw Turkish base prompt for
+that one bubble while every other question/chrome element rendered in the user's actual locale —
+exactly the reported mixed-language symptom. Added `otherProfession` EN/DE entries. Also exported
+`questionCopy` and added `src/lib/i18n/onboarding.test.ts`, a structural exhaustiveness test
+asserting every `ONBOARDING_QUESTIONS` id has both an `en` and `de` entry — turns "silently falls
+back to Turkish" into a hard CI failure the moment a future question ships without copy (no
+compile-time exhaustiveness is available given `questionCopy`'s loose `Record<string, ...>` typing).
+
+Verification: `npm run check` (0 errors), `npm run test` (79 files / 502 tests passed, up from
+77/499). Bugs 2 (AI guard locale-pin + stuck-loop escape valve) and 3 (editor toolbar consolidation)
+follow as separate diffs per the same plan.
+
+**Beta bug fix 2/3: AI onboarding guard produced a broken code-mixed reply and could loop a
+question forever.** Root cause: `src/routes/api/onboarding/answer/+server.ts` passed the guard
+(`classifyOnboardingAnswer`, `src/lib/server/ai/onboardingGuard.ts`) the raw **canonical Turkish**
+question prompt and no locale — even for a German/English-locale visitor — so the cheap gatekeeper
+model, told to "reply in the visitor's language" while seeing a Turkish question against a
+non-Turkish answer, produced exactly the reported broken, code-mixed reply. Worse, when it
+misclassified a legitimate answer as off-topic, the endpoint returned 400 before saving anything
+and the client re-showed the same question with no retry cap — a single misclassification could
+strand a visitor on that question indefinitely.
+
+Fixed both: `classifyOnboardingAnswer` now takes an explicit `locale: Locale` field, threaded into
+`GUARD_SYSTEM`'s prompt/few-shots as the authoritative source of what language to reply in
+(never inferred from the question/answer text); the answer route now passes
+`locals.locale` and `localizeQuestion(question, locals.locale).prompt` (reusing bug 1's
+`localizeQuestion`) instead of the raw Turkish prompt. Added a bounded escape valve: a per-session,
+per-question rejection counter (`onboarding-guard-reject:{cookie-or-ip}:{questionId}`, reusing the
+existing in-memory `rateLimit` helper — no DB migration needed) that, after `MAX_GUARD_REJECTIONS`
+(3) consecutive rejections on the same question, skips the guard and accepts the answer as-is
+(logged via `recordError` for visibility), the same fail-open philosophy already used when Groq
+itself is unavailable.
+
+Verification: `npm run check` (0 errors), `npm run test` (79 files / 505 tests passed) — added
+locale-threading coverage to `onboardingGuard.test.ts`, and new `answer/server.test.ts` tests for
+locale/localized-prompt pass-through and the rejection-cap auto-accept path. Bug 3 (editor toolbar
+consolidation) follows as a separate diff.
+
+**Beta bug fix 3/3: editor screen (`/editor/[siteId]`) had 3 stacked toolbar rows.** A third beta
+user called the editor's buttons/navbar/edit screen cluttered. Root cause was pure information
+architecture, not a missing design system: the mobile Düzenle/Önizleme pane toggle (added
+2026-07-12 "Mobile Roadmap Phase 4") was bolted on top of the pre-existing right-pane toolbar
+(viewport switcher, status badge, 3 locale tabs, Save now, Saved-preview link, Publish) instead of
+being consolidated with it — 3 separate bordered rows, ~11-14 controls, on mobile. Worse: because
+the whole toolbar lived inside the pane that's hidden while `mobilePane==='edit'`, Publish/Save
+were entirely unreachable while actually editing content on mobile, only visible after switching
+to the preview pane.
+
+Merged the mobile pane toggle and the right-pane toolbar into a single always-visible row
+(`src/routes/editor/[siteId]/+page.svelte`), applying the dashboard's already-proven action-hierarchy
+pattern (`src/routes/dashboard/+page.svelte`'s `<details>`/`<summary>` "⋯" overflow menu): Publish/
+Republish is now the one primary action, locale tabs + status pill stay visible, and Save now /
+Saved-preview link / published-version text move into the overflow menu. Removed the now-duplicate
+`StatusPill` from the sidebar header. Also switched the right-hand control group to `ml-auto` +
+`justify-end` so it (and its overflow menu) stays flush against the true right edge even when the
+row wraps to a second line on narrow viewports — an earlier version of this change clipped the
+overflow menu off the left edge of the screen when the row wrapped; caught and fixed during
+Playwright verification, not left for a future bug report.
+
+Verification: `npm run check` (0 errors), `npm run test` (79 files / 505 tests, unchanged —
+markup-only, no test file covers this `+page.svelte`). Real-browser Playwright pass (dev server +
+`AUTH_DEV_ECHO_LINK=1` session): 375px mobile — toolbar is now 1 consolidated row instead of 3,
+Publish is visible while in the edit pane (not just preview), the "⋯" overflow menu opens fully
+on-screen with Published-version/Save now/Saved preview, zero horizontal overflow, zero console
+errors; 1440px desktop — one clean unwrapped toolbar row. Also re-verified bug 1/2 end-to-end in
+the same browser session: `/de/new` → "Anderes Feld" → `otherProfession` now renders the German
+prompt (previously raw Turkish); submitting a German free-text answer advances normally with the
+guard failing open (no `GROQ_API_KEY` in dev, logged to `error_events` as expected, not a bug).
+
 **Owner kararı 2026-07: "Diğer" meslekler manuel beta incelemesi yerine normal akışa dahil edildi.**
 "Başka bir alan" seçen kullanıcılar için onboarding tıkanması kaldırıldı — artık serbest metin meslek
 sorusu (`otherProfession`) soruluyor, süreç normal işliyor, meslek `users.profession`'a not düşülüyor.

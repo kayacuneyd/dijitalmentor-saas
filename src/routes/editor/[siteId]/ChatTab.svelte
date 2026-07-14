@@ -33,6 +33,37 @@
 		high: 'Bu büyük bir değişiklik — uygulandıktan sonra preview’da mutlaka kontrol et.'
 	};
 
+	function changeSummary(before: Site, after: Site): string | null {
+		const beforeSlugs = new Set(before.pages.map((page) => page.slug));
+		const afterSlugs = new Set(after.pages.map((page) => page.slug));
+		const addedPages = after.pages.filter((page) => !beforeSlugs.has(page.slug));
+		const removedPages = before.pages.filter((page) => !afterSlugs.has(page.slug));
+		const navChanged = JSON.stringify(before.nav.items) !== JSON.stringify(after.nav.items);
+		const titleChanged = after.pages.filter((page) => {
+			const previous = before.pages.find((p) => p.slug === page.slug);
+			return previous && JSON.stringify(previous.title) !== JSON.stringify(page.title);
+		});
+		const pieces: string[] = [];
+		if (addedPages.length) {
+			pieces.push(
+				`${addedPages.length} sayfa eklendi: ${addedPages.map((p) => p.title[store.editLocale] ?? p.slug).join(', ')}`
+			);
+		}
+		if (removedPages.length) pieces.push(`${removedPages.length} sayfa kaldırıldı.`);
+		if (titleChanged.length) pieces.push(`${titleChanged.length} sayfa başlığı güncellendi.`);
+		if (navChanged) pieces.push('Menü güncellendi.');
+		if (!pieces.length && JSON.stringify(before.theme) !== JSON.stringify(after.theme)) {
+			pieces.push('Tema güncellendi.');
+		}
+		if (!pieces.length) return null;
+		return `Değişiklik özeti: ${pieces.join(' ')}`;
+	}
+
+	function firstAddedPageSlug(before: Site, after: Site): string | null {
+		const beforeSlugs = new Set(before.pages.map((page) => page.slug));
+		return after.pages.find((page) => !beforeSlugs.has(page.slug))?.slug ?? null;
+	}
+
 	// Keep the newest bubble/proposal in view inside the pinned-input layout.
 	$effect(() => {
 		void messages.length;
@@ -75,10 +106,15 @@
 			switch (data.kind) {
 				case 'applied': {
 					// snapshot BEFORE replacing → tek tık Geri Al
-					undoSite = $state.snapshot(store.site) as Site;
+					const before = $state.snapshot(store.site) as Site;
+					undoSite = before;
 					store.replace(data.site); // server-persisted draft → live preview
+					const focusSlug = firstAddedPageSlug(before, data.site as Site);
+					if (focusSlug) store.currentSlug = focusSlug;
 					proposal = null;
 					messages.push({ role: 'assistant', text: data.reply });
+					const summary = changeSummary(before, data.site as Site);
+					if (summary) messages.push({ role: 'assistant', text: summary });
 					// Below lg the preview is behind the pane toggle — point at it.
 					if (window.matchMedia('(max-width: 1023px)').matches) {
 						messages.push({
@@ -149,13 +185,13 @@
 <div class="flex h-full flex-col gap-3">
 	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 		{#if messages.length === 0}
-			<div class="sk-card max-w-[92%] p-3 text-sm leading-6">
-				<div class="sk-mono mb-2 text-[10px] text-[var(--sk-faint)]">Assistant</div>
-				<p>
+			<ChatBubble role="assistant">
+				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]">Assistant</span>
+				<span>
 					Merhaba! Siten hakkında konuşalım — ne değiştirmek istersin? Renk, metin, bölümler,
 					sayfalar… anlat yeter.
-				</p>
-			</div>
+				</span>
+			</ChatBubble>
 		{/if}
 		{#each messages as msg, i (i)}
 			<ChatBubble role={msg.role} animate={i >= history.length}>{msg.text}</ChatBubble>

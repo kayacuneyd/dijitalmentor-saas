@@ -14,20 +14,18 @@
 	} = $props();
 
 	const flyIn = $derived({ duration: animate ? 200 : 0, y: animate ? 8 : 0 });
+	const rowClass = $derived(role === 'user' ? 'chat chat-end' : 'chat chat-start');
+	const bubbleClass = $derived(
+		role === 'user'
+			? 'chat-bubble bg-[#171614] text-[#f3ecdd]'
+			: role === 'error'
+				? 'chat-bubble chat-bubble-error text-xs'
+				: 'chat-bubble bg-[var(--sk-card)] text-[var(--sk-ink)] shadow-sm'
+	);
 </script>
 
-{#if role === 'user'}
-	<div class="flex justify-end" in:fly={flyIn}>
-		<div class="max-w-[92%] rounded-[12px] bg-[#171614] px-3 py-2 text-sm leading-6 text-[#f3ecdd]">
-			{@render children()}
-		</div>
-	</div>
-{:else if role === 'assistant'}
-	<div class="sk-card max-w-[92%] p-3 text-sm leading-6" in:fly={flyIn}>
+<div class={rowClass} in:fly={flyIn}>
+	<div class="{bubbleClass} max-w-[92%] text-sm leading-6">
 		{@render children()}
 	</div>
-{:else}
-	<div class="sk-alert sk-alert-error px-3 py-2 text-xs" in:fly={flyIn}>
-		{@render children()}
-	</div>
-{/if}
+</div>

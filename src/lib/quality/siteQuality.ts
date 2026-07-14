@@ -451,6 +451,18 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 		}
 	}
 
+	// payment-link requires Pro plan — warn Free-tier users
+	const paymentEntry = integrations.find((i) => i.type === 'payment-link' && i.enabled);
+	if (paymentEntry) {
+		addIssue(
+			issues,
+			'warning',
+			'integration_payment_requires_pro',
+			'settings.integrations',
+			'Ödeme linki entegrasyonu Pro plan gerektirir. Free planda ödeme butonu görünmez.'
+		);
+	}
+
 	return finish(true, issues);
 }
 

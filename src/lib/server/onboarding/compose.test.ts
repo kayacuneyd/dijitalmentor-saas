@@ -9,6 +9,7 @@ const MINIMAL_REQUIRED = {
 	differentiator: 'Online ve yüz yüze seçenek',
 	tone: 'warm',
 	visualDirection: 'warm_trust',
+	siteStructure: 'three_page',
 	languages: ['tr'],
 	contactMethod: 'email',
 	contactEmail: 'ada@example.com',
@@ -84,6 +85,15 @@ describe('composeDescription', () => {
 		});
 		expect(description).toContain('Görsel yön: Modern klinik');
 		expect(description).toContain('bölüm vurgusu');
+	});
+
+	it('includes the selected page-count/sitemap direction as controlled steering text', () => {
+		const description = composeDescription({
+			...MINIMAL_REQUIRED,
+			siteStructure: 'five_page'
+		});
+		expect(description).toContain('Site yapısı tercihi: 5 sayfa');
+		expect(description).toContain('gereksiz sayfa üretme');
 	});
 
 	it('adds the psych kit reference for the warm-trust launch direction', () => {

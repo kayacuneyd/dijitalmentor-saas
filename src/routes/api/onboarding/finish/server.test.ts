@@ -67,6 +67,7 @@ const FULL_ANSWERS: [string, unknown][] = [
 	['differentiator', 'Online seçenek'],
 	['tone', 'warm'],
 	['visualDirection', 'warm_trust'],
+	['siteStructure', 'three_page'],
 	['languages', ['tr']],
 	['contactMethod', 'email'],
 	['contactEmail', 'ada@example.com'],
@@ -187,6 +188,7 @@ describe('POST /api/onboarding/finish', () => {
 		await answer('differentiator', 'Hızlı teslim', cookies, ip);
 		await answer('tone', 'warm', cookies, ip);
 		await answer('visualDirection', 'warm_trust', cookies, ip);
+		await answer('siteStructure', 'three_page', cookies, ip);
 		await answer('languages', ['tr'], cookies, ip);
 		await answer('contactMethod', 'email', cookies, ip);
 		await answer('contactEmail', 'terzi@example.com', cookies, ip);

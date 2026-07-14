@@ -105,6 +105,13 @@ Mentor" badge.
 > materially complete with legal-counsel caveat, and the next active implementation milestone is
 > `docs/specs/2026-07-09-phase2-closure-sprint.md`: close Guided First-Run Experience before Phase 3
 > kit/quality work.
+>
+> **2026-07-14 operator-approved editor value upgrade:** after beta editor testing, the next
+> chat/editor improvement bundle is captured in
+> `docs/specs/2026-07-14-editor-value-upgrade-plan.md`: add schema-safe chat page operations, compact
+> badge/tooltip guidance, daisyUI chat presentation, sitemap-oriented Pages tab, pre-generation page
+> count/site-structure approval, and later consistency audits. This does not change the constitution:
+> AI still fills Zod-valid `Site` data and never writes tenant raw HTML/CSS.
 
 ### Two-Layer AI Gatekeeper — conversational onboarding + cost control + monetization
 

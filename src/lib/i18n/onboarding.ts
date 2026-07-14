@@ -49,6 +49,17 @@ export const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 			helper:
 				'This does not create a free-form design; it steers the first draft inside safe blocks and theme hints.'
 		},
+		siteStructure: {
+			prompt: 'How many pages should the first site draft have?',
+			helper:
+				'This sets the sitemap direction before generation. You can add or remove pages later in the editor.',
+			options: {
+				one_page: 'One page — fast and simple',
+				three_page: '3 pages — Home, Services, Contact',
+				five_page: '5 pages — Home, About, Services, FAQ, Contact',
+				ai_recommend: 'Let AI recommend the structure'
+			}
+		},
 		languages: {
 			prompt: 'Which languages should the site be published in?',
 			helper: 'Choose at least one language.',
@@ -131,6 +142,17 @@ export const questionCopy: Record<Locale, Record<string, QuestionCopy>> = {
 			prompt: 'Wähle eine visuelle Richtung, bevor ein Generierungs-Credit verwendet wird.',
 			helper:
 				'Das erzeugt kein freies Design; es steuert den ersten Entwurf innerhalb sicherer Blöcke und Theme-Hinweise.'
+		},
+		siteStructure: {
+			prompt: 'Wie viele Seiten soll der erste Website-Entwurf haben?',
+			helper:
+				'Das legt die Sitemap-Richtung vor der Generierung fest. Im Editor kannst du später Seiten hinzufügen oder entfernen.',
+			options: {
+				one_page: 'Eine Seite — schnell und einfach',
+				three_page: '3 Seiten — Start, Leistungen, Kontakt',
+				five_page: '5 Seiten — Start, Über mich, Leistungen, FAQ, Kontakt',
+				ai_recommend: 'AI soll die Struktur empfehlen'
+			}
 		},
 		languages: {
 			prompt: 'In welchen Sprachen soll die Website veröffentlicht werden?',

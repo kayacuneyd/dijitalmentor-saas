@@ -16,9 +16,11 @@ Answer via the patch_site tool: a short "reply" in the user's language plus the 
 Rules:
 - Use operations ONLY for what the user asked. Questions get a reply and zero operations.
 - Never emit HTML/CSS. Copy edits use set_text with the exact content path; apply them to EVERY locale (tr, en, de) with properly translated values unless the user names one locale.
+- New pages (add_page) must include a unique kebab-case slug, localized titles for tr/en/de, and complete localized sections. Add them to nav unless the user asks otherwise or nav is full.
 - New sections (add_section) must include complete content for all three locales.
 - Keep ids, slugs and URLs stable unless the change requires new ones.
-- If a request is outside the fixed block set or otherwise impossible, say so in the reply and emit no operations.`;
+- If a request is outside the fixed block set or otherwise impossible, say so in the reply and emit no operations.
+- Do not say a change was completed unless the operations actually implement it.`;
 
 export class PatchApplyError extends Error {}
 
@@ -101,6 +103,17 @@ function applyOp(site: Site, op: PatchOp): void {
 			page.sections.splice(index, 0, op.section);
 			break;
 		}
+		case 'add_page': {
+			if (site.pages.length >= 10) throw new PatchApplyError('page limit reached (10)');
+			if (site.pages.some((p) => p.slug === op.page.slug)) {
+				throw new PatchApplyError(`page slug "${op.page.slug}" already exists`);
+			}
+			site.pages.push(op.page);
+			if (op.addToNav && site.nav.items.length < 8) {
+				site.nav.items.push({ pageSlug: op.page.slug, label: { ...op.page.title } });
+			}
+			break;
+		}
 		case 'remove_section': {
 			const page = findPage(site, op.pageSlug);
 			const index = page.sections.findIndex((s) => s.id === op.sectionId);
@@ -126,6 +139,17 @@ function applyOp(site: Site, op: PatchOp): void {
 export function applyPatch(site: Site, ops: PatchOp[]): Site {
 	const draft = structuredClone(site);
 	for (const op of ops) applyOp(draft, op);
+
+	// AI must never mutate integration url/phone — those fields are owner-managed
+	// (prompt-injection surface: an attacker could craft a chat message that changes
+	// the Calendly/payment/WhatsApp link to a phishing domain).  Restore the
+	// original integrations array after any AI mutations have been applied.
+	if (site.settings.integrations) {
+		draft.settings.integrations = structuredClone(site.settings.integrations);
+	} else {
+		delete draft.settings.integrations;
+	}
+
 	return siteSchema.parse(draft);
 }
 
@@ -148,7 +172,9 @@ export async function chatEdit(
 		inputSchema: toInputSchema(chatPatchSchema)
 	};
 	const userText = [
-		input.memory ? `Design memory (user preferences & prior decisions — ALWAYS respect these):\n${input.memory}` : '',
+		input.memory
+			? `Design memory (user preferences & prior decisions — ALWAYS respect these):\n${input.memory}`
+			: '',
 		`Current site JSON:\n${JSON.stringify(input.site)}`,
 		`User message:\n${input.message}`,
 		// Distillation may lose nuance — the agent always sees the original wording too.

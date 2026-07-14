@@ -3,6 +3,55 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-14
+
+**Constitution amendment: V2 interpretation + controlled component system.**
+Amended `docs/CONSTITUTION.md` to reflect the project's post-MVP reality. Principle §2
+("AI never writes HTML/CSS") → "AI never writes executable/rendered tenant code" — the safety
+property is identical (Zod gate), but wording now acknowledges provider-agnostic tool-use
+(Groq + DeepSeek, not just Claude) and that AI may produce structured data/tokens/patch ops.
+Principle §3 ("Fixed component set") → "Controlled component system" — block library can grow
+intentionally via the registry pattern; profession kits and integrations form a controlled
+vocabulary. Non-goals updated: removed outdated "3 presets at launch" and "single-niche GTM"
+guardrails; clarified the WordPress-clone line (no plugins/arbitrary-code, but WordPress-like
+ownership ease is acceptable); added explicit non-goals for per-tenant executable code and
+unmanaged domain registration. All original safety properties (Zod gate, no raw tenant code,
+no plugins, payment-before-domain) remain intact. Full amendment text and rationale in
+`docs/CONSTITUTION.md` §Amendments.
+
+**Roadmap evaluation reviewed with operator.** Confirmed that Phase 0 items flagged as open in
+`docs/ROADMAP_EVALUATION.md` (AI live smoke, magic-link delivery, payment webhook) are already
+resolved in production: Creem.io billing is live, Groq+DeepSeek gate-to-edit passes, and SMTP
+magic links have been delivered throughout beta. Next phases agreed: (1) GTM niche + pricing +
+legal finalization, (2) Feature Kit v1 integrations, (3) new blocks + siteQualityCheck gate.
+
+**Feature Kit v1 integrations completed — AI patch protection, plan gating, editor card.**
+The spec's missing pieces (`docs/specs/2026-07-12-yeni-ozellik-onerileri.md` §9, Faz 3–4)
+are now implemented, closing the Feature Kit v1 loop:
+
+- **AI patch protection** (`src/lib/server/ai/patch.ts`): `applyPatch()` now restores the
+  original `settings.integrations` array after all AI mutations are applied. An attacker
+  cannot craft a chat message that changes the Calendly/payment/WhatsApp link to a phishing
+  domain — `url`/`phone` fields are owner-managed only. The editor Settings card explicitly
+  tells users "AI bu alanlara dokunamaz."
+
+- **Plan gating** (`src/lib/quality/siteQuality.ts`): active `payment-link` integrations now
+  produce a warning (`integration_payment_requires_pro`) explaining that the payment button
+  requires a Pro plan. Free-tier users are guided toward the upgrade path from within the
+  quality panel, not caught by a surprise at publish time.
+
+- **Editor integrations card** (`src/routes/editor/[siteId]/SettingsTab.svelte`): a new
+  "Entegrasyonlar" section with per-type toggle + URL/phone input, domain allowlist hints,
+  and an optional custom button label override. All 6 integration types are covered;
+  WhatsApp uses E.164 phone (not URL) with a `wa.me` link produced by the renderer.
+
+Earlier phases (schema + `validateIntegrationTarget`, block-side `getSiteIntegration` reads
+in Booking/Cta/Contact/Pricing/Footer, `siteQualityCheck` integration-block warnings, and
+kit→site default injection via `createProfessionSite()`) were already live before this
+session. The Feature Kit v1 spec is now complete end-to-end.
+
+Verification: `npm run check` 0 errors/warnings, `npm test` 81 files / 514 tests passed.
+
 ## 2026-07-13
 
 **Per-site AI memory (site_ai_memory) — AI forgetfulness and consistency fix.**
@@ -25,7 +74,6 @@ injection, chat endpoint `appendToMemory`, `/api/sites/[siteId]/memory` route, S
 Verification: `npm run check` 0 errors/warnings, `npm test` 81 files / 510 passed, `npm run
 build` clean. Decision: 10-line compact threshold per owner request; LLM compact call deferred
 (circular-dependency safe — `memory.ts` does not import `llm.ts`).
-
 
 **Beta bug fix 1/3: `otherProfession` onboarding question had zero EN/DE translation coverage.**
 Three beta users reported onboarding UX problems (screenshots): one saw a question mixing German
@@ -111,6 +159,7 @@ guard failing open (no `GROQ_API_KEY` in dev, logged to `error_events` as expect
 sorusu (`otherProfession`) soruluyor, süreç normal işliyor, meslek `users.profession`'a not düşülüyor.
 
 ### Değişiklikler
+
 - **`src/lib/onboarding/support.ts`:** `manualReviewMessage`, `needsManualReview`, `unsupportedProfessionPatterns`,
   `supportedProfessionPatterns` silindi; `SUPPORTED_NICHES`, `UNSUPPORTED_NICHE`, `isUnsupportedNicheAnswer` kaldı.
 - **`src/lib/onboarding/questions.ts`:** `niche` sonrası `otherProfession` sorusu eklendi (`showWhen: niche === 'unsupported'`,
@@ -133,11 +182,13 @@ sorusu (`otherProfession`) soruluyor, süreç normal işliyor, meslek `users.pro
   `npm run check`: 0 errors, `npm run test`: 77 files / 499 tests passed.
 
 ### Karar gerekçesi
+
 Üretim hattı zaten niş-bağımsız — `generateSite()` sadece `description` string'i alır, Zod `siteSchema` +
 sabit blok seti kontratı her niş için aynen geçerli. `needsManualReview` bir güvenlik filtresi değil,
 sadece niş bekçisiydi. Güvenlik mevcut Groq topic guard ile sağlanıyor.
 
 ### Sıkışmış mevcut kullanıcılar
+
 Pending kayıtları `{niche:'unsupported'}` + status `completed`; hiçbir yol status'a bakmıyor.
 Script değişince reload'da rehydration `otherProfession`'ı sıradaki soru yapar → kullanıcı kaldığı
 yerden devam eder. Migration gerekmez.
@@ -2289,7 +2340,7 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   the widest overflowing elements, inputs under 16px (iOS focus-zoom triggers), and interactive
   elements with sub-44×40px hit areas; screenshots + `report.json` per run.
 - **Baseline (375/390px, dev):** zero document-level horizontal overflow and zero console errors on
-  all 13 audited routes — the `overflow-x: clip` guards hold. The real issues are *clipping inside*
+  all 13 audited routes — the `overflow-x: clip` guards hold. The real issues are _clipping inside_
   containers (FlowAnimation `grid-plane` measures 1388px inside a 375px stage; templates carousel is
   intentional scroll-snap), plus ~10 sub-44×40px tap targets per page (`sk-btn-sm` ≈30px tall) and
   sub-16px inputs on `/en`, `/en/contact`, `/en/beta`.
@@ -2329,10 +2380,10 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   static scene scales identically; `data-testid="flow-animation-stage"` stays on the outer element.
 - **Key finding: desktop was broken too, not just mobile.** The hero column is only ~574px wide at
   1280 (max-w-7xl grid), so scene 3's fixed-px devices (460px desktop mock + phone + tablet,
-  >700px intrinsic) overlapped each other and the publish card clipped — screenshots confirmed
-  garbled text overlap before the fix. After: all 5 scenes render as composed at 574px (scale 0.80)
-  and at 301px/375-viewport (scale 0.42); text is small on phones but legible for a decorative loop
-  (documented escape hatch: bump label fonts inside the stage via one media query if review wants).
+  > 700px intrinsic) overlapped each other and the publish card clipped — screenshots confirmed
+  > garbled text overlap before the fix. After: all 5 scenes render as composed at 574px (scale 0.80)
+  > and at 301px/375-viewport (scale 0.42); text is small on phones but legible for a decorative loop
+  > (documented escape hatch: bump label fonts inside the stage via one media query if review wants).
 - The `.grid-plane` background (intentional 3D bleed, clipped by the frame) still measures wider
   than the viewport in getBoundingClientRect terms but contributes no document overflow.
 - Verification: scenes 1/3/5 screenshot-reviewed at 1280 + 375; `svelte-check` 0 errors, 441/441
@@ -2398,7 +2449,7 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   iPhones. Applies to tenant pages too (plain flow content; spot-check landscape after deploy).
 - **Icons:** `scripts/generate-pwa-icons.mjs` rasterizes `static/favicon.svg` via the
   playwright-core chromium (no sharp dependency) → `static/icons/{icon-192,icon-512,
-  maskable-512,apple-touch-icon}.png`; maskable/apple variants are full-bleed `#171614` with the
+maskable-512,apple-touch-icon}.png`; maskable/apple variants are full-bleed `#171614` with the
   glyph in the safe zone. PNGs committed; script kept for regeneration.
 - **Service worker (`src/service-worker.ts`):** precaches hashed build assets + small static
   files + `/offline` into a `sk-${version}` cache; navigations are ALWAYS network-first with the
@@ -2449,6 +2500,7 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 - Backlog noted: tenant-site block tap targets (nav pills 32px, locale pills 23px, "Powered by"
   15px in `SiteRenderer`/blocks) — shared-block work, scoped separately per the constitution.
 - Verification: `svelte-check` 0 errors, 445/445 tests, production build OK.
+
 ### 2026-07-12 — Creem monthly/yearly/domain product integration
 
 - Split the Creem product integration into three operator-managed IDs: monthly Pro, yearly Pro,
@@ -2703,8 +2755,8 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   hero metni brief/metin/çeviri/domain/teknik kurulum yükünü açıkça adlandırıyor; TR/EN/DE
   kopyalarda "practice/praxis/pratik" dili daha doğal mesleki profil/iş/angebot ifadelerine taşındı.
 - Hero altına dört maddelik problem bandı eklendi ve ana akış `hero → problem bandı → süreç →
-  CTA → örnek siteler → meslek segmentleri → hangi parça ne için kullanılır → fiyat → FAQ/güven →
-  final CTA` sırasına alındı. Özellik kartları artık soyut feature listesi değil, her parçanın hangi
+CTA → örnek siteler → meslek segmentleri → hangi parça ne için kullanılır → fiyat → FAQ/güven →
+final CTA` sırasına alındı. Özellik kartları artık soyut feature listesi değil, her parçanın hangi
   ziyaretçi/operatör problemini çözdüğünü anlatıyor.
 - Verification: `npm run check` 0 hata/uyarı, `npm run test` 499/499 geçti, `npm run build`
   başarılı. Playwright ile local dev server üzerinde `/tr`, `/en`, `/de` 375px + 1280px kontrol edildi:
@@ -2713,8 +2765,8 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 ### 2026-07-13 — Public metin düzenleme ve daha doğrudan ana sayfa
 
 - Ana sayfa hero vaadi "site taslağına çevir" dilinden çıkarıldı: TR `Mesleğini anlat, web siten
-  hazırlansın.`, EN `Describe your work. Get your website ready.`, DE `Beschreibe dein Angebot.
-  Deine Website entsteht.` Problem bandı eşit kart gridiyle yeniden düzenlendi; çizgili/dağınık
+hazırlansın.`, EN `Describe your work. Get your website ready.`, DE `Beschreibe dein Angebot.
+Deine Website entsteht.` Problem bandı eşit kart gridiyle yeniden düzenlendi; çizgili/dağınık
   görünüm yerine her problem için başlık + kısa açıklama kullanılıyor.
 - Ana sayfadaki fiyat özeti gerçek link kartlarına çevrildi: Free `/new`, Pro ve Premium
   `/pricing` hedefli; hover/focus hali ve kart içi kısa aksiyon metni eklendi.
@@ -2735,7 +2787,7 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
 ### 2026-07-13 — Editor publish identity blocker düzeltmesi
 
 - Incident: `site-32b1bc76` editörde `Publish OK` görünmesine rağmen publish `Complete the site name
-  and public subdomain before publishing.` hatasıyla duruyordu. Root cause: `siteQualityCheck()` public
+and public subdomain before publishing.` hatasıyla duruyordu. Root cause: `siteQualityCheck()` public
   subdomain şartını bilmiyordu; publish API ise ilk yayında `publicHandle === siteId` durumunu eksik
   kurulum kabul ediyordu. Ayrıca editörde public subdomain alanı yoktu, sadece Dashboard'da düzenlenebiliyordu.
 - Public handle doğrulaması `src/lib/publicHandle.ts` içine taşındı ve server repo bu helper'ı re-export
@@ -2797,7 +2849,7 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   `npm install` sonrası lockfile bu çözümlemeyi sabitledi; `@sveltejs/kit` artık patched cookie ile,
   `drizzle-kit` ve ilgili tooling patched esbuild ile çözülüyor.
 - Verification: `npm audit` artık `found 0 vulnerabilities`; `npm ls cookie esbuild @esbuild-kit/core-utils
-  @esbuild-kit/esm-loader drizzle-kit @sveltejs/kit` override çözümlemesini doğruladı. `npm run check`
+@esbuild-kit/esm-loader drizzle-kit @sveltejs/kit` override çözümlemesini doğruladı. `npm run check`
   0 hata/uyarı, `npm run test` 510/510 geçti, `npm run build` başarılı.
 
 ### 2026-07-13 — Editor: Grok-tarzı FAB + açılır kontrol paneli
@@ -2847,6 +2899,7 @@ Kullanıcı yeni FAB+panel'i (yukarıdaki madde) gerçek kullanımda test edip 3
 checklist kartı her seferinde açık geliyor ve kapatılamıyor hissi veriyor, kapatma (✕) butonu
 çok silik, Chat sekmesinde input'a erişilemiyor. Hepsi `src/routes/editor/[siteId]/+page.svelte`
 içinde çözüldü:
+
 - **Checklist**: statik `open` yerine `let checklistOpen = $state(false)` + `bind:open` —
   varsayılan artık kapalı (kalite-kontrol kartıyla tutarlı) ve toggle durumu artık belirsiz bir
   static attribute'a değil gerçek state'e bağlı. "Aç" butonunun `<summary>` içine gömülü olması
@@ -2869,3 +2922,54 @@ içinde çözüldü:
   arkaplanla (rgb(251,250,247)) render oluyor; en kötü senaryoda (checklist manuel açık
   bırakılmış) bile chat input'a scroll ile ulaşılıp metin girilebildi, "Gönder" butonu aktif;
   console'da hata yok.
+
+### 2026-07-14 — Planning: editor value upgrade bundle approved
+
+- Captured the operator-approved follow-up plan in
+  `docs/specs/2026-07-14-editor-value-upgrade-plan.md`. The bundle covers the root cause behind
+  chat saying new pages were created while no pages appeared in preview: chat patch operations did
+  not yet include `add_page`, so the model could not make that structural mutation through the
+  constrained edit surface.
+- Added the agreed next workstreams: schema-safe `add_page` chat operations, preview focus/change
+  summary after AI edits, compact badge/tooltip guidance for warnings, daisyUI `chat` presentation,
+  sitemap-oriented Pages tab, pre-generation page-count/site-structure approval, multi-step
+  undo/revision checkpoints, page templates, compact publish checklist, and deterministic AI
+  next-best-actions.
+- Decision: use the official daisyUI skill as a development aid for SaaS/editor UI consistency when
+  available, especially badges, tooltips, chat, docks, tabs, steps, menus, and status indicators.
+  This is explicitly not a tenant raw-HTML escape hatch; tenant-facing changes still go through the
+  Zod `Site` schema, fixed blocks, renderer, tests, and preview verification.
+- Verification: documentation-only change; no runtime code changed.
+
+### 2026-07-14 — Editor value upgrade implementation: page ops, compact guidance, sitemap, onboarding structure
+
+- Implemented the first approved bundle from
+  `docs/specs/2026-07-14-editor-value-upgrade-plan.md`. The chat patch contract now supports
+  schema-safe `add_page` operations (`src/lib/server/ai/schemas.ts`) and the patch applier persists
+  them into `site.pages`, adding nav entries when requested and capacity allows
+  (`src/lib/server/ai/patch.ts`). The chat system prompt now explicitly forbids claiming success
+  when operations do not implement the requested change.
+- Updated editor chat behavior: applied AI edits now compute a lightweight change summary, and when
+  a new page is added the editor switches `store.currentSlug` to that page so the live preview shows
+  the result immediately (`src/routes/editor/[siteId]/ChatTab.svelte`). `ChatBubble.svelte` now uses
+  daisyUI `chat chat-start` / `chat chat-end` and `chat-bubble` classes while keeping the existing
+  gatekeeper, approval, undo, and `DraftStore.replace` semantics.
+- Converted the Pages tab into a sitemap-oriented view: each page shows section count, nav status,
+  contact/booking presence, and an ordered section list with compact badges. The manual add/remove
+  flow still uses the existing `pageOps` helpers and draft autosave path.
+- Reduced editor guidance density by turning the first-run checklist and quality state into compact
+  badge rows with expandable details. Blockers still remain visible and publish enforcement is
+  unchanged.
+- Added the pre-generation structure decision to onboarding: `siteStructure` asks for one-page,
+  3-page, 5-page, or AI-recommended structure before language/contact questions. The composer now
+  feeds that controlled sitemap/page-count preference into the generation description without
+  changing the Zod `Site` contract.
+- Verification: targeted tests passed (`patch`, onboarding questions/compose, onboarding answer +
+  finish: 64 tests); `npm run check` passed with 0 errors/warnings; touched files pass Prettier
+  check; full `npm run test` passed (81 files / 514 tests); `npm run build` passed. Local dev smoke:
+  `/tr/new` and `/tr` returned 200; onboarding API sequence confirmed `visualDirection ->
+siteStructure -> languages`. Local smoke logged expected onboarding-guard fail-open errors because
+  Groq is not configured in this environment; requests still returned 200 and preserved flow.
+- Known unrelated issue: repo-wide `npm run lint` still fails because 148 pre-existing files outside
+  this change set are not Prettier-formatted (notably `.agents/skills/hallmark/**` and older source
+  files). Touched files were checked independently and are formatted.

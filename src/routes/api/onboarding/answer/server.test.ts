@@ -127,6 +127,7 @@ describe('POST /api/onboarding/answer', () => {
 			['differentiator', 'Online seçenek'],
 			['tone', 'warm'],
 			['visualDirection', 'warm_trust'],
+			['siteStructure', 'three_page'],
 			['languages', ['tr']]
 		];
 		let last;
@@ -152,6 +153,7 @@ describe('POST /api/onboarding/answer', () => {
 			['differentiator', 'Online seçenek'],
 			['tone', 'warm'],
 			['visualDirection', 'warm_trust'],
+			['siteStructure', 'three_page'],
 			['languages', ['tr']],
 			['contactMethod', 'email'],
 			['contactEmail', 'ada@example.com'],

@@ -11,6 +11,31 @@
 	let addFormOpen = $state(false);
 	let confirmRemoveSlug = $state<string | null>(null);
 
+	const sectionLabels: Record<string, string> = {
+		hero: 'Hero',
+		about: 'Hakkında',
+		services: 'Hizmetler',
+		gallery: 'Galeri',
+		contact: 'İletişim',
+		cta: 'CTA',
+		faq: 'SSS',
+		testimonials: 'Yorumlar',
+		pricing: 'Paketler',
+		process: 'Süreç',
+		booking: 'Randevu',
+		credentials: 'Yetkinlikler',
+		team: 'Ekip',
+		footer: 'Footer'
+	};
+
+	const navSlugs = $derived(new Set(store.site.nav.items.map((item) => item.pageSlug)));
+
+	function pageHasContact(pageSlug: string) {
+		return store.site.pages
+			.find((page) => page.slug === pageSlug)
+			?.sections.some((section) => section.type === 'contact' || section.type === 'booking');
+	}
+
 	function submitAddPage() {
 		formError = '';
 		let result: ReturnType<typeof addPage> | undefined;
@@ -47,37 +72,61 @@
 		</span>
 	</div>
 
-	<ul class="flex flex-col gap-1">
+	<ul class="flex flex-col gap-2">
 		{#each store.site.pages as page (page.slug)}
-			<li class="flex items-center gap-1">
-				<button
-					type="button"
-					class="min-w-0 flex-1 rounded-[10px] px-2.5 py-2 text-left text-sm transition {page.slug ===
-					store.currentSlug
-						? 'bg-[#171614] text-[#f3ecdd]'
-						: 'hover:bg-[var(--sk-shell)]'}"
-					onclick={() => (store.currentSlug = page.slug)}
-				>
-					<span class="truncate">{page.title[store.editLocale]}</span>
-					<span
-						class="ml-1.5 font-[var(--font-mono)] text-[10px] {page.slug === store.currentSlug
-							? 'text-[#f3ecdd]/60'
-							: 'text-[var(--sk-faint)]'}"
-					>
-						/{page.slug}
-					</span>
-				</button>
-				{#if store.site.pages.length > 1}
+			<li class="rounded-[10px] border border-[var(--sk-line)] bg-white/70">
+				<div class="flex items-start gap-1 p-1.5">
 					<button
 						type="button"
-						class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
-						onclick={() => (confirmRemoveSlug = page.slug)}
-						aria-label={`"${page.title[store.editLocale]}" sayfasını sil`}
-						title="Sayfayı sil"
+						class="min-w-0 flex-1 rounded-[8px] px-2.5 py-2 text-left text-sm transition {page.slug ===
+						store.currentSlug
+							? 'bg-[#171614] text-[#f3ecdd]'
+							: 'hover:bg-[var(--sk-shell)]'}"
+						onclick={() => (store.currentSlug = page.slug)}
 					>
-						✕
+						<span class="block truncate font-semibold">{page.title[store.editLocale]}</span>
+						<span
+							class="font-[var(--font-mono)] text-[10px] {page.slug === store.currentSlug
+								? 'text-[#f3ecdd]/60'
+								: 'text-[var(--sk-faint)]'}"
+						>
+							/{page.slug}
+						</span>
 					</button>
-				{/if}
+					{#if store.site.pages.length > 1}
+						<button
+							type="button"
+							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
+							onclick={() => (confirmRemoveSlug = page.slug)}
+							aria-label={`"${page.title[store.editLocale]}" sayfasını sil`}
+							title="Sayfayı sil"
+						>
+							✕
+						</button>
+					{/if}
+				</div>
+				<div class="flex flex-wrap gap-1 px-3 pb-2">
+					<span class="badge badge-sm badge-secondary">{page.sections.length} bölüm</span>
+					{#if navSlugs.has(page.slug)}
+						<span class="badge badge-sm">Menüde</span>
+					{:else}
+						<span class="badge badge-sm badge-warning">Menü dışı</span>
+					{/if}
+					{#if pageHasContact(page.slug)}
+						<span class="badge badge-sm badge-success">İletişim var</span>
+					{/if}
+				</div>
+				<ol class="border-t border-[var(--sk-line)] px-3 py-2">
+					{#each page.sections as section, index (section.id)}
+						<li class="flex items-center gap-2 py-1 text-xs text-[var(--sk-muted)]">
+							<span class="sk-mono w-5 text-[10px] text-[var(--sk-faint)]">
+								{index + 1}
+							</span>
+							<span class="badge badge-sm">{sectionLabels[section.type] ?? section.type}</span>
+							<span class="min-w-0 truncate font-[var(--font-mono)] text-[10px]">{section.id}</span>
+						</li>
+					{/each}
+				</ol>
 			</li>
 			{#if confirmRemoveSlug === page.slug}
 				<li

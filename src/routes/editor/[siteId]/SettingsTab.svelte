@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { normalizePublicHandle } from '$lib/publicHandle';
 	import type { DraftStore } from '$lib/stores/draft.svelte';
+	import {
+		INTEGRATION_TYPES,
+		INTEGRATION_DEFAULT_LABELS,
+		INTEGRATION_DOMAIN_ALLOWLIST
+	} from '$lib/kits/integrations';
 
 	let {
 		store,
@@ -212,6 +217,118 @@
 		<p class="text-base-content/50 mt-1 text-xs">
 			{store.site.domain ?? 'No domain yet — real domain registration arrives in M5.'}
 		</p>
+	</div>
+
+	<hr class="border-base-300 my-2" />
+
+	<div>
+		<span class="text-xs font-medium">Entegrasyonlar</span>
+		<p class="text-base-content/50 mt-1 text-[11px] leading-snug">
+			Bu bağlantılar sitende ilgili bloklarda görünür. Sadece sen değiştirebilirsin — AI bu alanlara dokunamaz.
+		</p>
+		<div class="mt-3 flex flex-col gap-3">
+			{#each INTEGRATION_TYPES as type}
+				{@const entry = (store.site.settings.integrations ?? []).find((i) => i.type === type)}
+				{@const enabled = entry?.enabled ?? false}
+				{@const currentUrl = entry?.url ?? ''}
+				{@const currentPhone = entry?.phone ?? ''}
+				{@const allowlist = INTEGRATION_DOMAIN_ALLOWLIST[type]}
+				<div class="sk-card sk-card-sm flex flex-col gap-2 p-3">
+					<label class="flex items-center justify-between gap-2">
+						<span class="text-sm font-medium">{INTEGRATION_DEFAULT_LABELS[type]}</span>
+						<input
+							type="checkbox"
+							class="toggle toggle-primary toggle-sm"
+							checked={enabled}
+							onchange={(e) => {
+								const checked = e.currentTarget.checked;
+								store.update((site) => {
+									const list = site.settings.integrations ?? [];
+									const existing = list.find((i) => i.type === type);
+									if (checked && !existing) {
+										list.push({ type, enabled: true });
+									} else if (!checked && existing) {
+										site.settings.integrations = list.filter((i) => i.type !== type);
+									} else if (existing) {
+										existing.enabled = checked;
+									}
+									if (!site.settings.integrations?.length) {
+										delete site.settings.integrations;
+									}
+								});
+							}}
+						/>
+					</label>
+					{#if enabled}
+						{#if type === 'whatsapp-order'}
+							<label class="form-control">
+								<span class="label-text mb-1 block text-[11px]">Telefon (E.164, örn. +905551234567)</span>
+								<input
+									type="text"
+									class="input input-sm w-full font-[var(--font-mono)] text-xs"
+									value={currentPhone}
+									placeholder="+905551234567"
+									oninput={(e) => {
+										const next = e.currentTarget.value;
+										store.update((site) => {
+											const list = site.settings.integrations ?? [];
+											const item = list.find((i) => i.type === type);
+											if (item) item.phone = next;
+										});
+									}}
+								/>
+							</label>
+						{:else}
+							<label class="form-control">
+								<span class="label-text mb-1 block text-[11px]">
+									Link
+									{#if allowlist.length > 0}
+										<span class="text-base-content/40"> ({allowlist.join(', ')})</span>
+									{/if}
+								</span>
+								<input
+									type="url"
+									class="input input-sm w-full font-[var(--font-mono)] text-xs"
+									value={currentUrl}
+									placeholder="https://..."
+									oninput={(e) => {
+										const next = e.currentTarget.value;
+										store.update((site) => {
+											const list = site.settings.integrations ?? [];
+											const item = list.find((i) => i.type === type);
+											if (item) item.url = next;
+										});
+									}}
+								/>
+							</label>
+						{/if}
+						{#if entry?.label}
+							<label class="form-control">
+								<span class="label-text mb-1 block text-[11px]">Buton etiketi (varsayılan: {INTEGRATION_DEFAULT_LABELS[type]})</span>
+								<input
+									type="text"
+									class="input input-sm w-full text-xs"
+									value={entry.label?.tr ?? ''}
+									oninput={(e) => {
+										const next = e.currentTarget.value;
+										store.update((site) => {
+											const list = site.settings.integrations ?? [];
+											const item = list.find((i) => i.type === type);
+											if (item) {
+												if (!item.label) item.label = { tr: '', en: '', de: '' };
+												item.label.tr = next;
+												item.label.en = next;
+												item.label.de = next;
+											}
+										});
+									}}
+								/>
+							</label>
+						{/if}
+					{/if}
+				</div>
+			{/each}
+		</div>
 	</div>
 
 	<hr class="border-base-300 my-2" />

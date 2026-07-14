@@ -75,6 +75,13 @@ export const MEDIA_OPTIONS: ChoiceOption[] = [
 	{ value: 'use_placeholders', label: 'Şimdilik hazır görseller yeterli' }
 ];
 
+export const SITE_STRUCTURE_OPTIONS: ChoiceOption[] = [
+	{ value: 'one_page', label: 'Tek sayfa — hızlı ve sade' },
+	{ value: 'three_page', label: '3 sayfa — Ana sayfa, Hizmetler, İletişim' },
+	{ value: 'five_page', label: '5 sayfa — Ana sayfa, Hakkımda, Hizmetler, SSS, İletişim' },
+	{ value: 'ai_recommend', label: 'AI uygun yapıyı önersin' }
+];
+
 export const ONBOARDING_QUESTIONS: Question[] = [
 	{
 		id: 'niche',
@@ -146,6 +153,17 @@ export const ONBOARDING_QUESTIONS: Question[] = [
 		guarded: false,
 		options: VISUAL_DIRECTION_OPTIONS,
 		schema: visualDirectionSchema
+	},
+	{
+		id: 'siteStructure',
+		kind: 'choice',
+		prompt: 'Kaç sayfalık bir site istiyorsun?',
+		helper:
+			'Bu seçim, site üretilmeden önce sitemap yönünü belirler. Editörde sonra sayfa ekleyip çıkarabilirsin.',
+		required: true,
+		guarded: false,
+		options: SITE_STRUCTURE_OPTIONS,
+		schema: z.enum(['one_page', 'three_page', 'five_page', 'ai_recommend'])
 	},
 	{
 		id: 'languages',

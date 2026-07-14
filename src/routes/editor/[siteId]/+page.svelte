@@ -92,7 +92,9 @@
 			store.site.pages[0].slug
 		)}`
 	);
-	const checklist = $derived(buildCompletionChecklist(store.site, { publishedVersion, publicHandle }));
+	const checklist = $derived(
+		buildCompletionChecklist(store.site, { publishedVersion, publicHandle })
+	);
 	const nextAction = $derived(nextChecklistItem(checklist));
 	const quality = $derived(siteQualityCheck(store.site));
 	const publishIdentityMissing = $derived(
@@ -257,7 +259,11 @@
 					class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] py-3 pr-14 pl-4"
 				>
 					<div class="flex min-w-0 items-center gap-2">
-						<a href="/dashboard" class="sk-btn sk-btn-ghost sk-btn-sm" aria-label="saaskaya dashboard">
+						<a
+							href="/dashboard"
+							class="sk-btn sk-btn-ghost sk-btn-sm"
+							aria-label="saaskaya dashboard"
+						>
 							{@html uiIcons.arrowLeft(13)} Dashboard
 						</a>
 						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
@@ -373,7 +379,9 @@
 						{#each tabs as tab (tab)}
 							<button
 								type="button"
-								class="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm {tabClass(tab)}"
+								class="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm {tabClass(
+									tab
+								)}"
 								onclick={() => (activeTab = tab)}
 							>
 								{@html tabIcons[tab]}
@@ -384,14 +392,22 @@
 				</details>
 
 				<div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
-					<details class="sk-card mb-3 shrink-0 p-3" bind:open={checklistOpen}>
+					<details
+						class="mb-3 shrink-0 rounded-[12px] border border-[var(--sk-line)] bg-white/80 p-2"
+						bind:open={checklistOpen}
+					>
 						<summary
-							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+							class="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden"
 						>
-							<div>
-								<div class="sk-mono text-[10px] text-[var(--sk-faint)]">İlk yayın checklist</div>
-								<h2 class="mt-1 text-sm font-semibold">Sıradaki adım: {nextAction.label}</h2>
-								<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">{nextAction.helper}</p>
+							<div class="min-w-0">
+								<div class="flex flex-wrap items-center gap-1.5">
+									<span class="badge badge-sm badge-secondary">Checklist</span>
+									<span class="badge badge-sm">
+										{checklist.filter((item) => item.complete).length}/{checklist.length}
+									</span>
+									<span class="truncate text-xs font-semibold">{nextAction.label}</span>
+								</div>
+								<p class="mt-1 truncate text-xs text-[var(--sk-muted)]">{nextAction.helper}</p>
 							</div>
 							<button
 								type="button"
@@ -422,30 +438,36 @@
 						</div>
 					</details>
 
-					<details class="mb-3 shrink-0 rounded-[14px] border border-red-200 bg-red-50/70 p-3 text-red-950">
+					<details
+						class="mb-3 shrink-0 rounded-[12px] border p-2 {canPublish
+							? 'border-emerald-200 bg-emerald-50/70 text-emerald-950'
+							: 'border-red-200 bg-red-50/70 text-red-950'}"
+					>
 						<summary
-							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
+							class="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden"
 						>
-							<div>
-								<div class="sk-mono text-[10px] text-red-500/80">Kalite kontrol</div>
-								<h2 class="mt-1 text-sm font-semibold">
-									{publishBlockers.length
-										? `${publishBlockers.length} yayın engeli var`
-										: quality.warnings.length
-											? `${quality.warnings.length} uyarı var`
-											: 'Yayın için kritik engel yok'}
-								</h2>
-								<p class="mt-1 text-xs leading-5 text-red-900/70">
-									Engeller yayınlamayı durdurur; uyarılar yayınlanabilir ama gözden geçirilmelidir.
+							<div class="min-w-0">
+								<div class="flex flex-wrap items-center gap-1.5">
+									<span class="badge badge-sm {canPublish ? 'badge-success' : 'badge-error'}">
+										{canPublish ? 'Publish OK' : 'Blocked'}
+									</span>
+									{#if publishBlockers.length}
+										<span class="badge badge-sm badge-error">{publishBlockers.length} engel</span>
+									{/if}
+									{#if quality.warnings.length}
+										<span class="badge badge-sm badge-warning">{quality.warnings.length} uyarı</span
+										>
+									{/if}
+									<span class="truncate text-xs font-semibold">
+										{publishBlockers[0]?.message ??
+											quality.warnings[0]?.message ??
+											'Yayın için kritik engel yok'}
+									</span>
+								</div>
+								<p class="mt-1 truncate text-xs opacity-75">
+									Detayları görmek için aç; engeller publish'i durdurur.
 								</p>
 							</div>
-							<span
-								class="rounded-full px-2 py-1 text-[10px] font-semibold {canPublish
-									? 'bg-emerald-100 text-emerald-800'
-									: 'bg-red-100 text-red-800'}"
-							>
-								{canPublish ? 'Publish OK' : 'Blocked'}
-							</span>
 						</summary>
 						{#if publishBlockers.length || quality.warnings.length}
 							<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">

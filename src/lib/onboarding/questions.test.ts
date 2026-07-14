@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ONBOARDING_QUESTIONS, nextQuestion, questionById, visibleQuestions } from './questions';
 
 describe('onboarding question script', () => {
-	it('is a fixed, deterministic list — 15 top-level prompts plus 3 conditional steps', () => {
-		expect(ONBOARDING_QUESTIONS).toHaveLength(18);
+	it('is a fixed, deterministic list — 16 top-level prompts plus 3 conditional steps', () => {
+		expect(ONBOARDING_QUESTIONS).toHaveLength(19);
 		const conditional = ONBOARDING_QUESTIONS.filter((q) => q.showWhen);
 		expect(conditional.map((q) => q.id)).toEqual([
 			'otherProfession',
@@ -98,9 +98,11 @@ describe('onboarding question script', () => {
 			).toBeUndefined();
 			// Full flow completes
 			const allAnswered = Object.fromEntries(
-				visibleQuestions({ niche: 'unsupported', otherProfession: 'Terzi', contactMethod: 'both' }).map(
-					(q) => [q.id, 'x']
-				)
+				visibleQuestions({
+					niche: 'unsupported',
+					otherProfession: 'Terzi',
+					contactMethod: 'both'
+				}).map((q) => [q.id, 'x'])
 			);
 			expect(nextQuestion(allAnswered)).toBeUndefined();
 		});
@@ -127,6 +129,12 @@ describe('onboarding question script', () => {
 			const schema = questionById('visualDirection')!.schema;
 			expect(schema.safeParse('warm_trust').success).toBe(true);
 			expect(schema.safeParse('anything_goes').success).toBe(false);
+		});
+
+		it('siteStructure accepts only the controlled sitemap choices', () => {
+			const schema = questionById('siteStructure')!.schema;
+			expect(schema.safeParse('three_page').success).toBe(true);
+			expect(schema.safeParse('custom_html_pages').success).toBe(false);
 		});
 
 		it('services caps at 8 items', () => {

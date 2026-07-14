@@ -2,6 +2,7 @@ import {
 	BOOKING_OPTIONS,
 	CONTACT_METHOD_OPTIONS,
 	NICHE_OPTIONS,
+	SITE_STRUCTURE_OPTIONS,
 	TONE_OPTIONS,
 	type OnboardingAnswers
 } from '$lib/onboarding/questions';
@@ -42,6 +43,7 @@ export function composeDescription(
 	const differentiator = asString(answers.differentiator);
 	const tone = labelOf(TONE_OPTIONS, answers.tone);
 	const visualDirection = visualDirectionById(answers.visualDirection);
+	const siteStructure = labelOf(SITE_STRUCTURE_OPTIONS, answers.siteStructure);
 	const selectedKit = kitBySlug(options.kitSlug);
 	const contactMethod = labelOf(CONTACT_METHOD_OPTIONS, answers.contactMethod);
 	const contactEmail = asString(answers.contactEmail);
@@ -80,6 +82,11 @@ export function composeDescription(
 				}
 			}
 		}
+	}
+	if (siteStructure) {
+		sentences.push(
+			`Site yapısı tercihi: ${siteStructure}. Bu tercihe uygun sayfa sayısı ve menü yapısı öner; gereksiz sayfa üretme.`
+		);
 	}
 	if (booking) sentences.push(`Randevu süreci: ${booking.toLowerCase()}.`);
 

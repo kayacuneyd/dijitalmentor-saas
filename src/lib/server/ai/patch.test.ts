@@ -73,6 +73,84 @@ describe('applyPatch', () => {
 		expect(removed.pages[0].sections.some((s) => s.id === 'cta-new')).toBe(false);
 	});
 
+	it('adds pages and nav entries through the constrained operation surface', () => {
+		const next = applyPatch(site(), [
+			{
+				op: 'add_page',
+				addToNav: true,
+				page: {
+					slug: 'ucretler',
+					title: { tr: 'Ücretler', en: 'Fees', de: 'Honorare' },
+					sections: [
+						{
+							id: 'hero-ucretler',
+							type: 'hero',
+							props: { variant: 'centered', background: 'plain' },
+							content: {
+								tr: { headline: 'Ücretler' },
+								en: { headline: 'Fees' },
+								de: { headline: 'Honorare' }
+							}
+						}
+					]
+				}
+			},
+			{
+				op: 'add_page',
+				addToNav: true,
+				page: {
+					slug: 'sss',
+					title: { tr: 'Sık Sorulan Sorular', en: 'FAQ', de: 'FAQ' },
+					sections: [
+						{
+							id: 'hero-sss',
+							type: 'hero',
+							props: { variant: 'centered', background: 'plain' },
+							content: {
+								tr: { headline: 'Sık Sorulan Sorular' },
+								en: { headline: 'Frequently Asked Questions' },
+								de: { headline: 'Häufige Fragen' }
+							}
+						}
+					]
+				}
+			}
+		]);
+
+		expect(next.pages.map((p) => p.slug)).toContain('ucretler');
+		expect(next.pages.map((p) => p.slug)).toContain('sss');
+		expect(next.nav.items.map((item) => item.pageSlug)).toEqual(
+			expect.arrayContaining(['ucretler', 'sss'])
+		);
+	});
+
+	it('rejects duplicate page slugs', () => {
+		expect(() =>
+			applyPatch(site(), [
+				{
+					op: 'add_page',
+					addToNav: true,
+					page: {
+						slug: 'home',
+						title: { tr: 'Ana sayfa', en: 'Home', de: 'Startseite' },
+						sections: [
+							{
+								id: 'hero-home-copy',
+								type: 'hero',
+								props: { variant: 'centered', background: 'plain' },
+								content: {
+									tr: { headline: 'Ana sayfa' },
+									en: { headline: 'Home' },
+									de: { headline: 'Startseite' }
+								}
+							}
+						]
+					}
+				}
+			])
+		).toThrow(PatchApplyError);
+	});
+
 	it('never mutates the input site', () => {
 		const original = site();
 		applyPatch(original, [{ op: 'set_settings', settings: { siteName: 'Changed' } }]);

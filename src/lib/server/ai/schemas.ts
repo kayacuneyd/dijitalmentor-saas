@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
 	localeSchema,
+	pageSchema,
 	sectionSchema,
 	sectionShapes,
 	themeSchema,
@@ -204,6 +205,13 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 		pageSlug: slug,
 		index: z.number().int().min(0).optional(),
 		section: sectionSchema
+	}),
+	z.strictObject({
+		op: z.literal('add_page'),
+		page: pageSchema.describe(
+			'complete new page with localized title and valid localized sections'
+		),
+		addToNav: z.boolean().default(true).describe('whether to add the page to the main navigation')
 	}),
 	z.strictObject({ op: z.literal('remove_section'), ...target }),
 	z.strictObject({ op: z.literal('move_section'), ...target, toIndex: z.number().int().min(0) })

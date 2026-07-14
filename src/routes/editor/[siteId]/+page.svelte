@@ -471,7 +471,7 @@
 						</summary>
 						{#if publishBlockers.length || quality.warnings.length}
 							<div class="mt-3 flex max-h-40 flex-col gap-2 overflow-y-auto">
-								{#each [...publishBlockers, ...quality.warnings].slice(0, 6) as issue (`${issue.code}-${issue.path}`)}
+								{#each [...publishBlockers, ...quality.warnings].slice(0, 6) as issue, i (`${issue.code}-${issue.path}-${i}`)}
 									<div class="rounded-[10px] bg-white/80 px-3 py-2 text-xs leading-5">
 										<div
 											class={issue.severity === 'blocker'

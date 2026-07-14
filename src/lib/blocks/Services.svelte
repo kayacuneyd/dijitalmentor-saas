@@ -25,7 +25,7 @@
 
 		{#if props.variant === 'grid'}
 			<div class="mt-10 grid gap-6 sm:grid-cols-2 {gridCols[props.columns ?? 3]}">
-				{#each content.items as item (item.name)}
+				{#each content.items as item, i (`${item.name}-${i}`)}
 					<div class="border-base-300 bg-base-100 rounded-box border p-6 shadow-sm shadow-black/5">
 						<div class="bg-secondary/20 mb-5 size-10 rounded-xl"></div>
 						<div>
@@ -46,7 +46,7 @@
 			<ul
 				class="divide-base-300 border-base-300 bg-base-100 rounded-box mt-10 divide-y border shadow-sm"
 			>
-				{#each content.items as item (item.name)}
+				{#each content.items as item, i (`${item.name}-${i}`)}
 					<li class="flex flex-col gap-3 p-6 sm:flex-row sm:items-start sm:justify-between">
 						<div>
 							<h3 class="text-primary font-bold">{item.name}</h3>

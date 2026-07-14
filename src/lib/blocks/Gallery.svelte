@@ -15,7 +15,7 @@
 
 		{#if props.variant === 'carousel'}
 			<div class="carousel carousel-center rounded-box w-full gap-4">
-				{#each content.images as image (image.url + image.alt)}
+				{#each content.images as image, i (`${image.url}-${image.alt}-${i}`)}
 					<div class="carousel-item">
 						<img
 							src={image.url}
@@ -27,7 +27,7 @@
 			</div>
 		{:else}
 			<div class="grid grid-cols-2 gap-4 md:grid-cols-3">
-				{#each content.images as image (image.url + image.alt)}
+				{#each content.images as image, i (`${image.url}-${image.alt}-${i}`)}
 					<img
 						src={image.url}
 						alt={image.alt}

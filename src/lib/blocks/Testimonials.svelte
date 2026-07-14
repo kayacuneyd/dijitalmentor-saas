@@ -29,7 +29,7 @@
 
 		{#if variant === 'grid'}
 			<div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{#each items as item (item.name + item.quote)}
+				{#each items as item, i (`${item.name}-${item.quote}-${i}`)}
 					<div
 						class="border-base-300 bg-base-100 rounded-box flex flex-col gap-3 border p-5 shadow-sm shadow-black/5 transition-shadow hover:shadow-md"
 					>
@@ -69,7 +69,7 @@
 		{:else if variant === 'carousel'}
 			<div class="mt-10 overflow-x-auto pb-4">
 				<div class="inline-flex gap-6">
-					{#each items as item (item.name + item.quote)}
+					{#each items as item, i (`${item.name}-${item.quote}-${i}`)}
 						<div
 							class="border-base-300 bg-base-100 rounded-box flex w-[300px] shrink-0 flex-col gap-3 border p-5 shadow-sm shadow-black/5"
 						>

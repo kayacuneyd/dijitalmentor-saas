@@ -19,7 +19,7 @@
 		{/if}
 		{#if variant === 'vertical'}
 			<div class="mt-10 space-y-0">
-				{#each steps as step, i (step.label)}
+				{#each steps as step, i (`${step.label}-${i}`)}
 					<div class="relative flex gap-4 pb-8">
 						<div class="flex flex-col items-center">
 							<div
@@ -40,7 +40,7 @@
 			</div>
 		{:else}
 			<div class="mt-10 flex gap-6 overflow-x-auto pb-4">
-				{#each steps as step, i (step.label)}
+				{#each steps as step, i (`${step.label}-${i}`)}
 					<div class="w-[220px] shrink-0 text-center">
 						<div
 							class="bg-primary text-primary-content mx-auto flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"

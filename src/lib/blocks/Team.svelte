@@ -15,7 +15,7 @@
 
 		{#if props.variant === 'cards'}
 			<div class="flex flex-wrap justify-center gap-6">
-				{#each content.members as member (member.name)}
+				{#each content.members as member, i (`${member.name}-${i}`)}
 					<div
 						class="border-base-300 bg-base-100 rounded-box w-full max-w-sm overflow-hidden border shadow-sm"
 					>
@@ -36,7 +36,7 @@
 			</div>
 		{:else}
 			<div class="flex flex-wrap justify-center gap-10">
-				{#each content.members as member (member.name)}
+				{#each content.members as member, i (`${member.name}-${i}`)}
 					<div class="flex w-40 flex-col items-center text-center">
 						{#if member.photoUrl}
 							<div class="avatar">

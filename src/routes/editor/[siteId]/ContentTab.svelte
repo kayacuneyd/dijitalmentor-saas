@@ -15,7 +15,7 @@
 			value={store.currentSlug}
 			onchange={(e) => (store.currentSlug = e.currentTarget.value)}
 		>
-			{#each store.site.pages as page (page.slug)}
+			{#each store.site.pages as page, i (`${page.slug}-${i}`)}
 				<option value={page.slug}>{page.title[store.editLocale]} (/{page.slug})</option>
 			{/each}
 		</select>
@@ -26,7 +26,7 @@
 		copy — switch the locale in the toolbar. Edits go straight to the draft (no AI).
 	</p>
 
-	{#each store.currentPage.sections as section (section.id)}
+	{#each store.currentPage.sections as section, i (`${section.id}-${i}`)}
 		<details class="collapse-arrow bg-base-200 collapse">
 			<summary class="collapse-title min-h-0 py-3 text-sm font-semibold capitalize">
 				{section.type}

@@ -70,7 +70,7 @@
 	<SiteHeader {site} {locale} activeSlug={page.slug} {hrefFor} {localeHrefFor} />
 
 	<main>
-		{#each page.sections as section (section.id)}
+		{#each page.sections as section, i (`${section.id}-${i}`)}
 			{@const Block = blockFor(section)}
 			<Block
 				sectionId={section.id}

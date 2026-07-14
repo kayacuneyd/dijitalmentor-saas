@@ -28,7 +28,7 @@
 			{site.settings.siteName}
 		</a>
 		<nav class="flex flex-wrap items-center justify-end gap-1.5">
-			{#each site.nav.items as item (item.pageSlug)}
+			{#each site.nav.items as item, i (`${item.pageSlug}-${i}`)}
 				<a
 					href={hrefFor(item.pageSlug)}
 					class="rounded-full px-3 py-1.5 text-sm font-medium no-underline transition {navClass(

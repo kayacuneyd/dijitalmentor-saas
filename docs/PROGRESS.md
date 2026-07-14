@@ -2995,3 +2995,17 @@ siteStructure -> languages`. Local smoke logged expected onboarding-guard fail-o
 - Verification: targeted tests passed for assistant routing, `/new` auth target, AI schemas, LLM error
   typing, and `/api/sites` fallback (33 tests); `npm run check` passed with 0 errors/warnings; touched
   files pass Prettier check; full `npm run test` passed (82 files / 520 tests); `npm run build` passed.
+
+### 2026-07-14 — Editor duplicate keyed-each crash fix
+
+- Fixed the `https://svelte.dev/e/each_key_duplicate` crash that could prevent the bottom-left editor
+  bubble/dock from opening after a generated site contained repeated user/AI-facing values.
+- Root cause: several Svelte keyed `{#each}` blocks used content-derived keys such as section id,
+  page slug, FAQ question, service name, pricing feature text, or quality issue code/path. AI output can
+  legitimately repeat those labels/ids before a later cleanup pass, and duplicate keys abort Svelte
+  rendering.
+- Fix: renderer, editor page/content/pages surfaces, and repeated block components now key
+  user-generated lists with stable `value + index` keys. Fixed lists such as tabs/locales/viewports were
+  left unchanged.
+- Verification: `npm run check` passed with 0 errors/warnings; touched files pass Prettier check;
+  `npm run build` passed; full `npm run test` passed (82 files / 520 tests).

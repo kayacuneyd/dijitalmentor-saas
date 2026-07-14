@@ -73,7 +73,7 @@
 	</div>
 
 	<ul class="flex flex-col gap-2">
-		{#each store.site.pages as page (page.slug)}
+		{#each store.site.pages as page, pageIndex (`${page.slug}-${pageIndex}`)}
 			<li class="rounded-[10px] border border-[var(--sk-line)] bg-white/70">
 				<div class="flex items-start gap-1 p-1.5">
 					<button
@@ -117,7 +117,7 @@
 					{/if}
 				</div>
 				<ol class="border-t border-[var(--sk-line)] px-3 py-2">
-					{#each page.sections as section, index (section.id)}
+					{#each page.sections as section, index (`${section.id}-${index}`)}
 						<li class="flex items-center gap-2 py-1 text-xs text-[var(--sk-muted)]">
 							<span class="sk-mono w-5 text-[10px] text-[var(--sk-faint)]">
 								{index + 1}

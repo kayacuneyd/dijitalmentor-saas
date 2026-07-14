@@ -19,7 +19,7 @@
 		{/if}
 		{#if variant === 'grid'}
 			<div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each items as item (item.name)}
+				{#each items as item, i (`${item.name}-${i}`)}
 					<div
 						class="border-base-300 bg-base-100 rounded-box flex items-center gap-3 border p-4 shadow-sm shadow-black/5"
 					>
@@ -40,7 +40,7 @@
 			</div>
 		{:else}
 			<div class="divide-base-300 mt-10 divide-y">
-				{#each items as item (item.name)}
+				{#each items as item, i (`${item.name}-${i}`)}
 					<div class="flex items-center gap-3 py-3">
 						{#if item.iconUrl}
 							<img src={item.iconUrl} alt={item.name} class="h-8 w-8 rounded object-contain" />

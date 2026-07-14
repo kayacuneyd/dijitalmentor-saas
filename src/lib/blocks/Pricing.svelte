@@ -3,7 +3,12 @@
 	import { INTEGRATION_DEFAULT_LABELS } from '$lib/kits/integrations';
 	import type { BlockProps } from '$lib/blocks/registry';
 
-	let { sectionId, props, content, integrations }: BlockProps<'pricing'> & { integrations?: Integration[] } = $props();
+	let {
+		sectionId,
+		props,
+		content,
+		integrations
+	}: BlockProps<'pricing'> & { integrations?: Integration[] } = $props();
 
 	const variant = $derived(props.variant ?? 'cards');
 	const currency = $derived(props.currency ?? '₺');
@@ -25,7 +30,7 @@
 		{/if}
 		{#if variant === 'cards'}
 			<div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-				{#each items as item (item.name)}
+				{#each items as item, i (`${item.name}-${i}`)}
 					<div
 						class="border-base-300 bg-base-100 rounded-box flex flex-col gap-4 border p-6 shadow-sm shadow-black/5 {item.highlighted
 							? 'ring-primary -mt-2 pb-8 ring-2'
@@ -43,7 +48,7 @@
 						{/if}
 						{#if item.features}
 							<ul class="space-y-2 text-sm">
-								{#each item.features as f (f)}
+								{#each item.features as f, i (`${f}-${i}`)}
 									<li class="flex gap-2"><span class="text-accent">✓</span> {f}</li>
 								{/each}
 							</ul>
@@ -56,7 +61,7 @@
 				<table class="w-full border-collapse text-sm">
 					<thead>
 						<tr>
-							{#each items as item (item.name)}
+							{#each items as item, i (`${item.name}-${i}`)}
 								<th class="border-base-300 border-b p-3 text-center font-semibold">
 									{item.name}
 									<div class="text-primary mt-1 text-lg">
@@ -69,7 +74,7 @@
 					</thead>
 					<tbody>
 						<tr>
-							{#each items as item (item.name)}
+							{#each items as item, i (`${item.name}-${i}`)}
 								<td class="border-base-300 border-b p-3 text-center">{item.description ?? ''}</td>
 							{/each}
 						</tr>
@@ -77,9 +82,12 @@
 				</table>
 			</div>
 		{/if}
-	{#if payment?.url}
+		{#if payment?.url}
 			<div class="mt-8 text-center">
-				<a href={payment.url} target="_blank" rel="noopener nofollow"
+				<a
+					href={payment.url}
+					target="_blank"
+					rel="noopener nofollow"
 					class="btn btn-primary rounded-full px-8"
 				>
 					{paymentLabel}

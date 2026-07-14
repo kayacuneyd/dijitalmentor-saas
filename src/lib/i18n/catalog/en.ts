@@ -164,6 +164,14 @@ export const en = {
 			addHelp: 'New pages start with a hero section and are added to the menu.',
 			addFailed: 'Could not add the page.'
 		},
+		pageOps: {
+			slugInvalid: 'Slug must be kebab-case (a-z, 0-9, dashes).',
+			slugTaken: 'A page with slug "{slug}" already exists.',
+			pageLimitReached: 'Page limit reached ({max}).',
+			titleRequiredAllLocales: 'A title is required for every locale.',
+			atLeastOnePage: 'At least one page must remain.',
+			pageNotFound: 'Page not found: "{slug}".'
+		},
 		chat: {
 			assistantLabel: 'Assistant',
 			greeting:

@@ -165,6 +165,14 @@ export const de = {
 			addHelp: 'Neue Seiten beginnen mit einem Hero-Abschnitt und werden zum Menü hinzugefügt.',
 			addFailed: 'Die Seite konnte nicht hinzugefügt werden.'
 		},
+		pageOps: {
+			slugInvalid: 'Der Slug muss Kebab-Case sein (a-z, 0-9, Bindestriche).',
+			slugTaken: 'Eine Seite mit dem Slug „{slug}“ existiert bereits.',
+			pageLimitReached: 'Seitenlimit erreicht ({max}).',
+			titleRequiredAllLocales: 'Für jede Sprache ist ein Titel erforderlich.',
+			atLeastOnePage: 'Mindestens eine Seite muss bestehen bleiben.',
+			pageNotFound: 'Seite nicht gefunden: „{slug}“.'
+		},
 		chat: {
 			assistantLabel: 'Assistent',
 			greeting:

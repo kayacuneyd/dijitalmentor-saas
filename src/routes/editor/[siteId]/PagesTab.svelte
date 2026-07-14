@@ -1,11 +1,16 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import { LOCALES, type Locale } from '$lib/schema/site';
 	import { addPage, removePage, MAX_PAGES } from '$lib/editor/pageOps';
 	import { getTranslate } from '$lib/i18n/context';
+	import { DEFAULT_LOCALE, type Locale as AppLocale } from '$lib/i18n';
 	import type { CatalogKey } from '$lib/i18n/catalog';
 
 	const t = getTranslate();
+	const appLocale: AppLocale = $derived(
+		(page.data.locale as AppLocale | undefined) ?? DEFAULT_LOCALE
+	);
 
 	let { store }: { store: DraftStore } = $props();
 
@@ -29,7 +34,7 @@
 		formError = '';
 		let result: ReturnType<typeof addPage> | undefined;
 		store.update((site) => {
-			result = addPage(site, { slug, titles });
+			result = addPage(site, { slug, titles }, appLocale);
 		});
 		if (!result || !result.ok) {
 			formError = result?.error ?? t('editor.pages.addFailed');
@@ -44,7 +49,7 @@
 	function confirmRemove(pageSlug: string) {
 		let result: ReturnType<typeof removePage> | undefined;
 		store.update((site) => {
-			result = removePage(site, pageSlug);
+			result = removePage(site, pageSlug, appLocale);
 		});
 		if (result?.ok && store.currentSlug === pageSlug) {
 			store.currentSlug = result.nextSlug;

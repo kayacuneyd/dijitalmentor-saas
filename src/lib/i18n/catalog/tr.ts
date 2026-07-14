@@ -160,6 +160,14 @@ export const tr = {
 			addHelp: 'Yeni sayfalar bir hero bölümüyle başlar ve menüye eklenir.',
 			addFailed: 'Sayfa eklenemedi.'
 		},
+		pageOps: {
+			slugInvalid: 'Slug kebab-case olmalı (a-z, 0-9, tire).',
+			slugTaken: '"{slug}" slug\'lı bir sayfa zaten var.',
+			pageLimitReached: 'Sayfa limitine ulaşıldı ({max}).',
+			titleRequiredAllLocales: 'Her dil için bir başlık gerekli.',
+			atLeastOnePage: 'En az bir sayfa kalmalı.',
+			pageNotFound: 'Sayfa bulunamadı: "{slug}".'
+		},
 		chat: {
 			assistantLabel: 'Assistant',
 			greeting:

@@ -11,10 +11,14 @@ describe('addPage', () => {
 	it('adds a page with a seeded hero section and a nav entry, staying schema-valid', () => {
 		const site = freshSite();
 		const before = site.pages.length;
-		const result = addPage(site, {
-			slug: 'about-us',
-			titles: { tr: 'Hakkımızda', en: 'About us', de: 'Über uns' }
-		});
+		const result = addPage(
+			site,
+			{
+				slug: 'about-us',
+				titles: { tr: 'Hakkımızda', en: 'About us', de: 'Über uns' }
+			},
+			'en'
+		);
 		expect(result).toEqual({ ok: true, slug: 'about-us' });
 		expect(site.pages).toHaveLength(before + 1);
 		expect(site.nav.items.some((i) => i.pageSlug === 'about-us')).toBe(true);
@@ -23,20 +27,28 @@ describe('addPage', () => {
 
 	it('rejects a non-kebab-case slug', () => {
 		const site = freshSite();
-		const result = addPage(site, {
-			slug: 'About Us',
-			titles: { tr: 'a', en: 'a', de: 'a' }
-		});
+		const result = addPage(
+			site,
+			{
+				slug: 'About Us',
+				titles: { tr: 'a', en: 'a', de: 'a' }
+			},
+			'en'
+		);
 		expect(result.ok).toBe(false);
 	});
 
 	it('rejects a duplicate slug', () => {
 		const site = freshSite();
 		const existing = site.pages[0].slug;
-		const result = addPage(site, {
-			slug: existing,
-			titles: { tr: 'a', en: 'a', de: 'a' }
-		});
+		const result = addPage(
+			site,
+			{
+				slug: existing,
+				titles: { tr: 'a', en: 'a', de: 'a' }
+			},
+			'en'
+		);
 		expect(result).toEqual({ ok: false, error: `A page with slug "${existing}" already exists.` });
 	});
 
@@ -46,13 +58,17 @@ describe('addPage', () => {
 			...structuredClone(site.pages[0]),
 			slug: `page-${i}`
 		}));
-		const result = addPage(site, { slug: 'one-more', titles: { tr: 'a', en: 'a', de: 'a' } });
+		const result = addPage(site, { slug: 'one-more', titles: { tr: 'a', en: 'a', de: 'a' } }, 'en');
 		expect(result).toEqual({ ok: false, error: 'Page limit reached (10).' });
 	});
 
 	it('requires a title for every locale', () => {
 		const site = freshSite();
-		const result = addPage(site, { slug: 'partial', titles: { tr: 'Var', en: '', de: 'Da' } });
+		const result = addPage(
+			site,
+			{ slug: 'partial', titles: { tr: 'Var', en: '', de: 'Da' } },
+			'en'
+		);
 		expect(result.ok).toBe(false);
 	});
 
@@ -63,7 +79,7 @@ describe('addPage', () => {
 			label: { tr: `T${i}`, en: `T${i}`, de: `T${i}` }
 		}));
 		const before = site.nav.items.length;
-		addPage(site, { slug: 'no-nav-slot', titles: { tr: 'a', en: 'a', de: 'a' } });
+		addPage(site, { slug: 'no-nav-slot', titles: { tr: 'a', en: 'a', de: 'a' } }, 'en');
 		expect(site.nav.items).toHaveLength(before);
 	});
 });
@@ -71,10 +87,10 @@ describe('addPage', () => {
 describe('removePage', () => {
 	it('removes the page and its nav entries, staying schema-valid', () => {
 		const site = freshSite();
-		addPage(site, { slug: 'extra', titles: { tr: 'Ekstra', en: 'Extra', de: 'Extra' } });
+		addPage(site, { slug: 'extra', titles: { tr: 'Ekstra', en: 'Extra', de: 'Extra' } }, 'en');
 		const before = site.pages.length;
 
-		const result = removePage(site, 'extra');
+		const result = removePage(site, 'extra', 'en');
 		expect(result.ok).toBe(true);
 		expect(site.pages).toHaveLength(before - 1);
 		expect(site.pages.some((p) => p.slug === 'extra')).toBe(false);
@@ -87,15 +103,15 @@ describe('removePage', () => {
 		site.pages = [site.pages[0]];
 		site.nav.items = [{ pageSlug: site.pages[0].slug, label: site.pages[0].title }];
 
-		const result = removePage(site, site.pages[0].slug);
-		expect(result).toEqual({ ok: false, error: 'En az bir sayfa kalmalı.' });
+		const result = removePage(site, site.pages[0].slug, 'en');
+		expect(result).toEqual({ ok: false, error: 'At least one page must remain.' });
 		expect(site.pages).toHaveLength(1);
 	});
 
 	it('reports an error for an unknown slug', () => {
 		const site = freshSite();
-		const result = removePage(site, 'does-not-exist');
-		expect(result).toEqual({ ok: false, error: 'Sayfa bulunamadı: "does-not-exist".' });
+		const result = removePage(site, 'does-not-exist', 'en');
+		expect(result).toEqual({ ok: false, error: 'Page not found: "does-not-exist".' });
 	});
 
 	it('backfills nav with the new first page when removing the homepage empties nav', () => {
@@ -106,12 +122,33 @@ describe('removePage', () => {
 		// Only the homepage is in nav — removing it must leave nav non-empty.
 		site.nav.items = [{ pageSlug: homeSlug, label: site.pages[0].title }];
 
-		const result = removePage(site, homeSlug);
+		const result = removePage(site, homeSlug, 'en');
 		expect(result.ok).toBe(true);
 		if (!result.ok) throw new Error('unreachable');
 		expect(result.nextSlug).toBe('second');
 		expect(site.nav.items).toHaveLength(1);
 		expect(site.nav.items[0].pageSlug).toBe('second');
 		expect(() => siteSchema.parse(site)).not.toThrow();
+	});
+});
+
+describe('addPage and removePage locale consistency', () => {
+	// Regression test: addPage() used to always return English errors while
+	// removePage() always returned Turkish, regardless of any locale — the
+	// exact same-file inconsistency flagged during the i18n audit.
+	it('both respect the passed locale and never fall back to a hardcoded language', () => {
+		const site = freshSite();
+		const dup = addPage(
+			site,
+			{ slug: site.pages[0].slug, titles: { tr: 'a', en: 'a', de: 'a' } },
+			'tr'
+		);
+		if (dup.ok) throw new Error('expected a duplicate-slug error');
+		expect(dup.error).toContain('zaten var');
+
+		site.pages = [site.pages[0]];
+		const lastPage = removePage(site, site.pages[0].slug, 'tr');
+		if (lastPage.ok) throw new Error('expected an at-least-one-page error');
+		expect(lastPage.error).toBe('En az bir sayfa kalmalı.');
 	});
 });

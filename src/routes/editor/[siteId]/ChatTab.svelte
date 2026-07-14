@@ -5,6 +5,9 @@
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { getTranslate } from '$lib/i18n/context';
+
+	const t = getTranslate();
 
 	let { store, history = [] }: { store: DraftStore; history?: ChatMessageRow[] } = $props();
 
@@ -28,9 +31,9 @@
 	let undoSite = $state<Site | null>(null);
 
 	const riskCopy: Record<Proposal['riskLevel'], string> = {
-		low: 'Küçük bir metin değişikliği.',
-		medium: 'Bu değişiklik sitenin görünümünü değiştirecek.',
-		high: 'Bu büyük bir değişiklik — uygulandıktan sonra preview’da mutlaka kontrol et.'
+		low: t('editor.chat.riskLow'),
+		medium: t('editor.chat.riskMedium'),
+		high: t('editor.chat.riskHigh')
 	};
 
 	function changeSummary(before: Site, after: Site): string | null {
@@ -46,17 +49,24 @@
 		const pieces: string[] = [];
 		if (addedPages.length) {
 			pieces.push(
-				`${addedPages.length} sayfa eklendi: ${addedPages.map((p) => p.title[store.editLocale] ?? p.slug).join(', ')}`
+				t('editor.chat.pagesAdded', {
+					count: addedPages.length,
+					names: addedPages.map((p) => p.title[store.editLocale] ?? p.slug).join(', ')
+				})
 			);
 		}
-		if (removedPages.length) pieces.push(`${removedPages.length} sayfa kaldırıldı.`);
-		if (titleChanged.length) pieces.push(`${titleChanged.length} sayfa başlığı güncellendi.`);
-		if (navChanged) pieces.push('Menü güncellendi.');
+		if (removedPages.length) {
+			pieces.push(t('editor.chat.pagesRemoved', { count: removedPages.length }));
+		}
+		if (titleChanged.length) {
+			pieces.push(t('editor.chat.titlesUpdated', { count: titleChanged.length }));
+		}
+		if (navChanged) pieces.push(t('editor.chat.navUpdated'));
 		if (!pieces.length && JSON.stringify(before.theme) !== JSON.stringify(after.theme)) {
-			pieces.push('Tema güncellendi.');
+			pieces.push(t('editor.chat.themeUpdated'));
 		}
 		if (!pieces.length) return null;
-		return `Değişiklik özeti: ${pieces.join(' ')}`;
+		return `${t('editor.chat.changeSummaryPrefix')} ${pieces.join(' ')}`;
 	}
 
 	function firstAddedPageSlug(before: Site, after: Site): string | null {
@@ -100,7 +110,7 @@
 		try {
 			const { ok, data } = await post(body);
 			if (!ok || !data.ok) {
-				messages.push({ role: 'error', text: data.message ?? 'Bir şeyler ters gitti.' });
+				messages.push({ role: 'error', text: data.message ?? t('editor.chat.genericError') });
 				return;
 			}
 			switch (data.kind) {
@@ -119,7 +129,7 @@
 					if (window.matchMedia('(max-width: 1023px)').matches) {
 						messages.push({
 							role: 'assistant',
-							text: 'Değişikliği görmek için üstteki "Önizleme" sekmesine geç.'
+							text: t('editor.chat.viewPreviewHint')
 						});
 					}
 					break;
@@ -135,7 +145,7 @@
 					messages.push({ role: 'assistant', text: data.reply });
 			}
 		} catch {
-			messages.push({ role: 'error', text: 'Ağ hatası — lütfen tekrar dene.' });
+			messages.push({ role: 'error', text: t('editor.chat.networkError') });
 		} finally {
 			busy = false;
 		}
@@ -160,7 +170,7 @@
 
 	function cancel() {
 		proposal = null;
-		messages.push({ role: 'assistant', text: 'İptal edildi — hiçbir şey değişmedi.' });
+		messages.push({ role: 'assistant', text: t('editor.chat.cancelledNotice') });
 	}
 
 	function forceSend() {
@@ -175,7 +185,7 @@
 			store.replace(undoSite);
 			await store.save(); // replace() alone doesn't persist — the server had the AI version
 			undoSite = null;
-			messages.push({ role: 'assistant', text: 'Değişiklik geri alındı.' });
+			messages.push({ role: 'assistant', text: t('editor.chat.undoApplied') });
 		} finally {
 			busy = false;
 		}
@@ -186,10 +196,11 @@
 	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 		{#if messages.length === 0}
 			<ChatBubble role="assistant">
-				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]">Assistant</span>
+				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]"
+					>{t('editor.chat.assistantLabel')}</span
+				>
 				<span>
-					Merhaba! Siten hakkında konuşalım — ne değiştirmek istersin? Renk, metin, bölümler,
-					sayfalar… anlat yeter.
+					{t('editor.chat.greeting')}
 				</span>
 			</ChatBubble>
 		{/if}
@@ -199,24 +210,25 @@
 
 		{#if redirected && !busy}
 			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={forceSend}>
-				Sitenle ilgili olduğunu düşünüyorsan yine de gönder {@html uiIcons.arrowRight(14)}
+				{t('editor.chat.forceSendPrompt')}
+				{@html uiIcons.arrowRight(14)}
 			</button>
 		{/if}
 
 		{#if undoSite && !busy && !proposal}
 			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={undo}>
-				Geri Al
+				{t('editor.chat.undo')}
 			</button>
 		{/if}
 
 		{#if proposal}
 			<div class="sk-card bg-[var(--sk-shell)] p-4">
 				<div class="flex flex-col gap-2">
-					<p class="text-sm font-semibold">Anladığım kadarıyla:</p>
+					<p class="text-sm font-semibold">{t('editor.chat.understoodLabel')}</p>
 					<p class="text-sm whitespace-pre-line">{proposal.distilledPrompt}</p>
 					<p class="text-xs leading-5 text-[var(--sk-muted)]">
-						{riskCopy[proposal.riskLevel]} Değişiklik taslağına uygulanır — yayınlamadan önce preview&rsquo;da
-						kontrol edebilirsin.
+						{riskCopy[proposal.riskLevel]}
+						{t('editor.chat.previewNote')}
 					</p>
 					<div class="mt-1 flex flex-wrap gap-2">
 						<button
@@ -225,7 +237,7 @@
 							onclick={approve}
 							disabled={busy}
 						>
-							Uygula
+							{t('editor.chat.apply')}
 						</button>
 						<button
 							type="button"
@@ -233,7 +245,7 @@
 							onclick={cancel}
 							disabled={busy}
 						>
-							İptal
+							{t('editor.chat.cancelProposal')}
 						</button>
 					</div>
 				</div>
@@ -255,7 +267,7 @@
 		<input
 			type="text"
 			class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
-			placeholder="ör. Fiyatlandırma için bir SSS bölümü ekle…"
+			placeholder={t('editor.chat.inputPlaceholder')}
 			bind:value={input}
 			enterkeyhint="send"
 			onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
@@ -266,13 +278,11 @@
 			class="sk-btn sk-btn-primary sk-btn-sm"
 			disabled={busy || proposal !== null || !input.trim()}
 		>
-			Gönder
+			{t('editor.chat.send')}
 		</button>
 	</form>
 
 	<p class="text-xs leading-5 text-[var(--sk-faint)]">
-		Sorular ve konu dışı mesajlar bütçeni harcamaz; yalnızca uygulanan düzenlemeler aylık AI
-		düzenleme hakkından düşer. Metin/renk düzenlemeleri Content ve Theme sekmelerinde her zaman
-		ücretsizdir.
+		{t('editor.chat.freeEditsNote')}
 	</p>
 </div>

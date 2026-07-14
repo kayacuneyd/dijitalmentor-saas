@@ -6,6 +6,9 @@
 		INTEGRATION_DEFAULT_LABELS,
 		INTEGRATION_DOMAIN_ALLOWLIST
 	} from '$lib/kits/integrations';
+	import { getTranslate } from '$lib/i18n/context';
+
+	const t = getTranslate();
 
 	let {
 		store,
@@ -60,12 +63,15 @@
 			});
 			const body = await res.json();
 			if (!res.ok || !body.ok) {
-				memoryMessage = { tone: 'error', text: body.message ?? 'Kaydedilemedi.' };
+				memoryMessage = {
+					tone: 'error',
+					text: body.message ?? t('editor.settings.aiMemorySaveFailed')
+				};
 				return;
 			}
-			memoryMessage = { tone: 'success', text: 'Memory saved.' };
+			memoryMessage = { tone: 'success', text: t('editor.settings.aiMemorySaved') };
 		} catch {
-			memoryMessage = { tone: 'error', text: 'Bağlantı hatası.' };
+			memoryMessage = { tone: 'error', text: t('editor.settings.aiMemoryNetworkError') };
 		} finally {
 			memorySaving = false;
 		}
@@ -87,7 +93,7 @@
 			if (!flushed) {
 				identityMessage = {
 					tone: 'error',
-					text: 'Önce son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+					text: t('editor.settings.flushFailed')
 				};
 				return;
 			}
@@ -104,7 +110,7 @@
 			if (!res.ok || !body.ok) {
 				identityMessage = {
 					tone: 'error',
-					text: body.message ?? 'Yayın adresi kaydedilemedi.'
+					text: body.message ?? t('editor.settings.identitySaveFailed')
 				};
 				return;
 			}
@@ -113,12 +119,12 @@
 			if (body.site) store.replace(body.site);
 			identityMessage = {
 				tone: 'success',
-				text: body.message ?? 'Yayın adresi kaydedildi.'
+				text: body.message ?? t('editor.settings.identitySaved')
 			};
 		} catch {
 			identityMessage = {
 				tone: 'error',
-				text: 'Yayın adresi kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.'
+				text: t('editor.settings.identitySaveNetworkError')
 			};
 		} finally {
 			savingIdentity = false;
@@ -128,7 +134,9 @@
 
 <div class="flex flex-col gap-4">
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Site name</span>
+		<span class="label-text mb-1 block text-xs font-medium"
+			>{t('editor.settings.siteNameLabel')}</span
+		>
 		<input
 			type="text"
 			class="input input-sm w-full"
@@ -143,7 +151,9 @@
 	</label>
 
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Public subdomain</span>
+		<span class="label-text mb-1 block text-xs font-medium"
+			>{t('editor.settings.publicSubdomainLabel')}</span
+		>
 		<div class="join w-full">
 			<input
 				type="text"
@@ -154,17 +164,21 @@
 				}}
 				placeholder="ogo-football"
 			/>
-			<span class="join-item border-base-300 bg-base-200 inline-flex items-center border px-2 text-xs">
+			<span
+				class="join-item border-base-300 bg-base-200 inline-flex items-center border px-2 text-xs"
+			>
 				.saaskaya.com
 			</span>
 		</div>
 		<p class="mt-1 text-xs text-[var(--sk-faint)]">
-			İlk yayından önce site id yerine okunabilir bir adres seç.
+			{t('editor.settings.publicSubdomainHelp')}
 		</p>
 	</label>
 
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Contact email</span>
+		<span class="label-text mb-1 block text-xs font-medium"
+			>{t('editor.settings.contactEmailLabel')}</span
+		>
 		<input
 			type="email"
 			class="input input-sm w-full"
@@ -186,19 +200,21 @@
 		disabled={savingIdentity}
 	>
 		{#if savingIdentity}<span class="loading loading-spinner loading-xs"></span>{/if}
-		Yayın bilgilerini kaydet
+		{t('editor.settings.saveIdentity')}
 	</button>
 
 	{#if identityMessage}
 		<div
-			class="sk-alert {identityMessage.tone === 'success' ? 'sk-alert-success' : 'sk-alert-error'} text-xs"
+			class="sk-alert {identityMessage.tone === 'success'
+				? 'sk-alert-success'
+				: 'sk-alert-error'} text-xs"
 		>
 			{identityMessage.text}
 		</div>
 	{/if}
 
 	<label class="flex items-center justify-between gap-2">
-		<span class="text-sm">"Powered by saaskaya" badge</span>
+		<span class="text-sm">{t('editor.settings.poweredByBadgeLabel')}</span>
 		<input
 			type="checkbox"
 			class="toggle toggle-primary toggle-sm"
@@ -213,18 +229,18 @@
 	</label>
 
 	<div>
-		<span class="text-xs font-medium">Domain</span>
+		<span class="text-xs font-medium">{t('editor.settings.domainLabel')}</span>
 		<p class="text-base-content/50 mt-1 text-xs">
-			{store.site.domain ?? 'No domain yet — real domain registration arrives in M5.'}
+			{store.site.domain ?? t('editor.settings.domainNone')}
 		</p>
 	</div>
 
 	<hr class="border-base-300 my-2" />
 
 	<div>
-		<span class="text-xs font-medium">Entegrasyonlar</span>
+		<span class="text-xs font-medium">{t('editor.settings.integrationsLabel')}</span>
 		<p class="text-base-content/50 mt-1 text-[11px] leading-snug">
-			Bu bağlantılar sitende ilgili bloklarda görünür. Sadece sen değiştirebilirsin — AI bu alanlara dokunamaz.
+			{t('editor.settings.integrationsHelp')}
 		</p>
 		<div class="mt-3 flex flex-col gap-3">
 			{#each INTEGRATION_TYPES as type}
@@ -262,12 +278,16 @@
 					{#if enabled}
 						{#if type === 'whatsapp-order'}
 							<label class="form-control">
-								<span class="label-text mb-1 block text-[11px]">Telefon (E.164, örn. +905551234567)</span>
+								<span class="label-text mb-1 block text-[11px]"
+									>{t('editor.settings.phoneLabel', {
+										example: t('editor.settings.phoneExample')
+									})}</span
+								>
 								<input
 									type="text"
 									class="input input-sm w-full font-[var(--font-mono)] text-xs"
 									value={currentPhone}
-									placeholder="+905551234567"
+									placeholder={t('editor.settings.phoneExample')}
 									oninput={(e) => {
 										const next = e.currentTarget.value;
 										store.update((site) => {
@@ -281,7 +301,7 @@
 						{:else}
 							<label class="form-control">
 								<span class="label-text mb-1 block text-[11px]">
-									Link
+									{t('editor.settings.linkLabel')}
 									{#if allowlist.length > 0}
 										<span class="text-base-content/40"> ({allowlist.join(', ')})</span>
 									{/if}
@@ -304,7 +324,11 @@
 						{/if}
 						{#if entry?.label}
 							<label class="form-control">
-								<span class="label-text mb-1 block text-[11px]">Buton etiketi (varsayılan: {INTEGRATION_DEFAULT_LABELS[type]})</span>
+								<span class="label-text mb-1 block text-[11px]"
+									>{t('editor.settings.buttonLabelLabel', {
+										default: INTEGRATION_DEFAULT_LABELS[type]
+									})}</span
+								>
 								<input
 									type="text"
 									class="input input-sm w-full text-xs"
@@ -335,11 +359,11 @@
 
 	<div>
 		<div class="mb-2 flex items-center justify-between">
-			<span class="text-xs font-medium">AI Memory</span>
+			<span class="text-xs font-medium">{t('editor.settings.aiMemoryLabel')}</span>
 			<span class="text-base-content/40 text-[10px]">v{memoryVersion}</span>
 		</div>
 		<p class="text-base-content/50 mb-2 text-[11px] leading-snug">
-			AI her sohbet mesajından önce bu notları okur. Yaptığın her değişiklik sonrası buraya kısa bir not düşülür — böylece AI bir sonraki oturumda önceki kararlarını hatırlar. 10 satırdan sonra otomatik özetlenir.
+			{t('editor.settings.aiMemoryHelp')}
 		</p>
 		{#if memoryLoading}
 			<span class="loading loading-spinner loading-xs"></span>
@@ -351,8 +375,7 @@
 					memoryContent = e.currentTarget.value;
 					memoryMessage = null;
 				}}
-				placeholder="Henüz hafıza notu yok. AI ile ilk değişikliği yaptığında buraya otomatik not düşülecek."
-			></textarea>
+				placeholder={t('editor.settings.aiMemoryPlaceholder')}></textarea>
 			<div class="mt-2 flex items-center justify-between gap-2">
 				<button
 					type="button"
@@ -361,7 +384,7 @@
 					disabled={memorySaving}
 				>
 					{#if memorySaving}<span class="loading loading-spinner loading-xs"></span>{/if}
-					Save
+					{t('editor.settings.aiMemorySave')}
 				</button>
 				{#if memoryMessage}
 					<span

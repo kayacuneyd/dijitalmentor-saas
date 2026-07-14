@@ -93,6 +93,131 @@ export const tr = {
 			}
 		}
 	},
+	editor: {
+		blocks: {
+			hero: 'Hero',
+			about: 'Hakkında',
+			services: 'Hizmetler',
+			gallery: 'Galeri',
+			contact: 'İletişim',
+			cta: 'CTA',
+			faq: 'SSS',
+			testimonials: 'Yorumlar',
+			pricing: 'Paketler',
+			process: 'Süreç',
+			booking: 'Randevu',
+			credentials: 'Yetkinlikler',
+			team: 'Ekip',
+			footer: 'Footer'
+		},
+		settings: {
+			siteNameLabel: 'Site adı',
+			publicSubdomainLabel: 'Public subdomain',
+			publicSubdomainHelp: 'İlk yayından önce site id yerine okunabilir bir adres seç.',
+			contactEmailLabel: 'İletişim e-postası',
+			saveIdentity: 'Yayın bilgilerini kaydet',
+			flushFailed: 'Önce son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.',
+			identitySaveFailed: 'Yayın adresi kaydedilemedi.',
+			identitySaved: 'Yayın adresi kaydedildi.',
+			identitySaveNetworkError: 'Yayın adresi kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.',
+			poweredByBadgeLabel: '"Powered by saaskaya" rozeti',
+			domainLabel: 'Domain',
+			domainNone: 'Henüz bağlı bir domain yok.',
+			integrationsLabel: 'Entegrasyonlar',
+			integrationsHelp:
+				'Bu bağlantılar sitende ilgili bloklarda görünür. Sadece sen değiştirebilirsin — AI bu alanlara dokunamaz.',
+			phoneLabel: 'Telefon (E.164, örn. {example})',
+			phoneExample: '+905551234567',
+			linkLabel: 'Link',
+			buttonLabelLabel: 'Buton etiketi (varsayılan: {default})',
+			aiMemoryLabel: 'AI Memory',
+			aiMemoryHelp:
+				'AI her sohbet mesajından önce bu notları okur. Yaptığın her değişiklik sonrası buraya kısa bir not düşülür — böylece AI bir sonraki oturumda önceki kararlarını hatırlar. 10 satırdan sonra otomatik özetlenir.',
+			aiMemoryPlaceholder:
+				'Henüz hafıza notu yok. AI ile ilk değişikliği yaptığında buraya otomatik not düşülecek.',
+			aiMemorySave: 'Kaydet',
+			aiMemorySaved: 'Memory saved.',
+			aiMemorySaveFailed: 'Kaydedilemedi.',
+			aiMemoryNetworkError: 'Bağlantı hatası.'
+		},
+		pages: {
+			title: 'Sayfalar',
+			sectionsBadge: '{count} bölüm',
+			inMenu: 'Menüde',
+			notInMenu: 'Menü dışı',
+			hasContact: 'İletişim var',
+			deleteAria: '"{name}" sayfasını sil',
+			deleteTitle: 'Sayfayı sil',
+			confirmDeleteQuestion: '"{name}" sayfasını sil?',
+			confirmDeleteHomeWarning:
+				'Bu ana sayfa — silersen listedeki bir sonraki sayfa ana sayfa olur.',
+			confirmYes: 'Evet, sil',
+			confirmCancel: 'Vazgeç',
+			addNew: '+ Yeni sayfa',
+			slugLabel: 'Slug',
+			titleLabel: 'Başlık ({locale})',
+			addButton: 'Sayfa ekle',
+			addHelp: 'Yeni sayfalar bir hero bölümüyle başlar ve menüye eklenir.',
+			addFailed: 'Sayfa eklenemedi.'
+		},
+		chat: {
+			assistantLabel: 'Assistant',
+			greeting:
+				'Merhaba! Siten hakkında konuşalım — ne değiştirmek istersin? Renk, metin, bölümler, sayfalar… anlat yeter.',
+			riskLow: 'Küçük bir metin değişikliği.',
+			riskMedium: 'Bu değişiklik sitenin görünümünü değiştirecek.',
+			riskHigh: 'Bu büyük bir değişiklik — uygulandıktan sonra preview’da mutlaka kontrol et.',
+			forceSendPrompt: 'Sitenle ilgili olduğunu düşünüyorsan yine de gönder',
+			undo: 'Geri Al',
+			undoApplied: 'Değişiklik geri alındı.',
+			understoodLabel: 'Anladığım kadarıyla:',
+			previewNote:
+				'Değişiklik taslağına uygulanır — yayınlamadan önce preview’da kontrol edebilirsin.',
+			apply: 'Uygula',
+			cancelProposal: 'İptal',
+			cancelledNotice: 'İptal edildi — hiçbir şey değişmedi.',
+			inputPlaceholder: 'ör. Fiyatlandırma için bir SSS bölümü ekle…',
+			send: 'Gönder',
+			freeEditsNote:
+				'Sorular ve konu dışı mesajlar bütçeni harcamaz; yalnızca uygulanan düzenlemeler aylık AI düzenleme hakkından düşer. Metin/renk düzenlemeleri Content ve Theme sekmelerinde her zaman ücretsizdir.',
+			genericError: 'Bir şeyler ters gitti.',
+			networkError: 'Ağ hatası — lütfen tekrar dene.',
+			viewPreviewHint: 'Değişikliği görmek için üstteki "Önizleme" sekmesine geç.',
+			changeSummaryPrefix: 'Değişiklik özeti:',
+			pagesAdded: '{count} sayfa eklendi: {names}',
+			pagesRemoved: '{count} sayfa kaldırıldı.',
+			titlesUpdated: '{count} sayfa başlığı güncellendi.',
+			navUpdated: 'Menü güncellendi.',
+			themeUpdated: 'Tema güncellendi.'
+		},
+		theme: {
+			nichePreset: 'Niş şablonu',
+			brandColors: 'Marka renkleri',
+			fonts: 'Yazı tipleri',
+			cornerRadius: 'Köşe yuvarlaklığı'
+		},
+		imageUpload: {
+			uploading: 'Yükleniyor…',
+			replaceImage: 'Görseli değiştir',
+			uploadImage: 'Görsel yükle',
+			uploadFailed: 'Yükleme başarısız.',
+			urlAria: '{label} URL'
+		},
+		languages: {
+			editingLocaleLegend: 'Düzenlenen dil',
+			editingLocaleHelp: 'Content sekmesi ve önizleme bu dili takip eder.',
+			defaultLocaleLabel: 'Varsayılan dil',
+			enabledLocalesLabel: 'Etkin diller',
+			enabledLocalesHelp:
+				'Tüm siteler şu an TR/EN/DE içerikle yayına giriyor; site bazlı dil açma/kapama yol haritasında.'
+		},
+		content: {
+			pageLabel: 'Sayfa',
+			editingNote:
+				'{locale} içeriği düzenleniyor — dili araç çubuğundan değiştir. Değişiklikler doğrudan taslağa yazılır (AI kullanılmaz).',
+			sectionImageLabel: 'bölüm görseli'
+		}
+	},
 	dashboard: {
 		title: 'Sitelerin',
 		nav: {

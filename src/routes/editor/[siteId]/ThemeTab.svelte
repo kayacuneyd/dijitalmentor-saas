@@ -2,6 +2,9 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import type { Theme } from '$lib/schema/site';
 	import { themePresets } from '$lib/presets';
+	import { getTranslate } from '$lib/i18n/context';
+
+	const t = getTranslate();
 
 	let { store }: { store: DraftStore } = $props();
 
@@ -17,7 +20,7 @@
 
 <div class="flex flex-col gap-4">
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Niche preset</span>
+		<span class="label-text mb-1 block text-xs font-medium">{t('editor.theme.nichePreset')}</span>
 		<select
 			class="select select-sm w-full"
 			value={store.site.theme.preset}
@@ -30,7 +33,7 @@
 	</label>
 
 	<fieldset class="border-base-300 rounded-field border p-3">
-		<legend class="px-1 text-xs font-medium">Brand colors</legend>
+		<legend class="px-1 text-xs font-medium">{t('editor.theme.brandColors')}</legend>
 		<div class="flex flex-col gap-2">
 			{#each colorKeys as key (key)}
 				<label class="flex items-center justify-between gap-2">
@@ -55,7 +58,7 @@
 	</fieldset>
 
 	<fieldset class="border-base-300 rounded-field border p-3">
-		<legend class="px-1 text-xs font-medium">Fonts</legend>
+		<legend class="px-1 text-xs font-medium">{t('editor.theme.fonts')}</legend>
 		<div class="flex flex-col gap-2">
 			{#each ['heading', 'body'] as const as key (key)}
 				<label class="form-control">
@@ -77,7 +80,7 @@
 	</fieldset>
 
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Corner radius</span>
+		<span class="label-text mb-1 block text-xs font-medium">{t('editor.theme.cornerRadius')}</span>
 		<select
 			class="select select-sm w-full"
 			value={store.site.theme.radius}

@@ -95,6 +95,135 @@ export const de = {
 			}
 		}
 	},
+	editor: {
+		blocks: {
+			hero: 'Hero',
+			about: 'Über uns',
+			services: 'Leistungen',
+			gallery: 'Galerie',
+			contact: 'Kontakt',
+			cta: 'CTA',
+			faq: 'FAQ',
+			testimonials: 'Bewertungen',
+			pricing: 'Preise',
+			process: 'Ablauf',
+			booking: 'Terminbuchung',
+			credentials: 'Qualifikationen',
+			team: 'Team',
+			footer: 'Footer'
+		},
+		settings: {
+			siteNameLabel: 'Website-Name',
+			publicSubdomainLabel: 'Öffentliche Subdomain',
+			publicSubdomainHelp:
+				'Wähle vor deiner ersten Veröffentlichung eine lesbare Adresse statt der Website-ID.',
+			contactEmailLabel: 'Kontakt-E-Mail',
+			saveIdentity: 'Veröffentlichungsinfo speichern',
+			flushFailed:
+				'Der letzte Entwurf konnte nicht zuerst gespeichert werden. Prüfe deine Verbindung und versuche es erneut.',
+			identitySaveFailed: 'Die Veröffentlichungsadresse konnte nicht gespeichert werden.',
+			identitySaved: 'Veröffentlichungsadresse gespeichert.',
+			identitySaveNetworkError:
+				'Die Veröffentlichungsadresse konnte nicht gespeichert werden. Prüfe deine Verbindung und versuche es erneut.',
+			poweredByBadgeLabel: '"Powered by saaskaya"-Abzeichen',
+			domainLabel: 'Domain',
+			domainNone: 'Noch keine Domain verbunden.',
+			integrationsLabel: 'Integrationen',
+			integrationsHelp:
+				'Diese Links erscheinen in den passenden Blöcken auf deiner Website. Nur du kannst sie ändern — die KI berührt diesen Bereich nie.',
+			phoneLabel: 'Telefon (E.164, z. B. {example})',
+			phoneExample: '+491234567890',
+			linkLabel: 'Link',
+			buttonLabelLabel: 'Button-Beschriftung (Standard: {default})',
+			aiMemoryLabel: 'KI-Gedächtnis',
+			aiMemoryHelp:
+				'Die KI liest diese Notizen vor jeder Chat-Nachricht. Nach jeder Änderung, die du machst, wird hier automatisch eine kurze Notiz hinzugefügt — so erinnert sich die KI in der nächsten Sitzung an frühere Entscheidungen. Wird nach 10 Zeilen automatisch zusammengefasst.',
+			aiMemoryPlaceholder:
+				'Noch keine Gedächtnisnotizen. Deine erste KI-Bearbeitung fügt hier automatisch eine hinzu.',
+			aiMemorySave: 'Speichern',
+			aiMemorySaved: 'Gedächtnis gespeichert.',
+			aiMemorySaveFailed: 'Konnte nicht gespeichert werden.',
+			aiMemoryNetworkError: 'Verbindungsfehler.'
+		},
+		pages: {
+			title: 'Seiten',
+			sectionsBadge: '{count} Abschnitt(e)',
+			inMenu: 'Im Menü',
+			notInMenu: 'Nicht im Menü',
+			hasContact: 'Hat Kontakt',
+			deleteAria: '„{name}“ löschen',
+			deleteTitle: 'Seite löschen',
+			confirmDeleteQuestion: '„{name}“ löschen?',
+			confirmDeleteHomeWarning:
+				'Dies ist die Startseite — wenn du sie löschst, wird die nächste Seite in der Liste zur neuen Startseite.',
+			confirmYes: 'Ja, löschen',
+			confirmCancel: 'Abbrechen',
+			addNew: '+ Neue Seite',
+			slugLabel: 'Slug',
+			titleLabel: 'Titel ({locale})',
+			addButton: 'Seite hinzufügen',
+			addHelp: 'Neue Seiten beginnen mit einem Hero-Abschnitt und werden zum Menü hinzugefügt.',
+			addFailed: 'Die Seite konnte nicht hinzugefügt werden.'
+		},
+		chat: {
+			assistantLabel: 'Assistent',
+			greeting:
+				'Hallo! Lass uns über deine Website sprechen — was möchtest du ändern? Farbe, Text, Abschnitte, Seiten … erzähl es mir einfach.',
+			riskLow: 'Eine kleine Textänderung.',
+			riskMedium: 'Diese Änderung wirkt sich auf das Erscheinungsbild deiner Website aus.',
+			riskHigh:
+				'Das ist eine große Änderung — prüfe unbedingt die Vorschau, nachdem sie angewendet wurde.',
+			forceSendPrompt: 'Wenn du denkst, dass es um deine Website geht, sende es trotzdem',
+			undo: 'Rückgängig',
+			undoApplied: 'Änderung rückgängig gemacht.',
+			understoodLabel: 'So habe ich es verstanden:',
+			previewNote:
+				'Das wird auf deinen Entwurf angewendet — du kannst es vor der Veröffentlichung in der Vorschau prüfen.',
+			apply: 'Anwenden',
+			cancelProposal: 'Abbrechen',
+			cancelledNotice: 'Abgebrochen — nichts wurde geändert.',
+			inputPlaceholder: 'z. B. Füge einen FAQ-Abschnitt für die Preise hinzu…',
+			send: 'Senden',
+			freeEditsNote:
+				'Fragen und themenfremde Nachrichten kosten dich nie dein Budget — nur angewendete Bearbeitungen zählen zu deinem monatlichen KI-Bearbeitungslimit. Text-/Farbänderungen in den Tabs Content und Theme sind immer kostenlos.',
+			genericError: 'Etwas ist schiefgelaufen.',
+			networkError: 'Netzwerkfehler — bitte versuche es erneut.',
+			viewPreviewHint: 'Wechsle oben zum Tab „Vorschau“, um die Änderung zu sehen.',
+			changeSummaryPrefix: 'Änderungszusammenfassung:',
+			pagesAdded: '{count} Seite(n) hinzugefügt: {names}',
+			pagesRemoved: '{count} Seite(n) entfernt.',
+			titlesUpdated: '{count} Seitentitel aktualisiert.',
+			navUpdated: 'Menü aktualisiert.',
+			themeUpdated: 'Theme aktualisiert.'
+		},
+		theme: {
+			nichePreset: 'Branchen-Vorlage',
+			brandColors: 'Markenfarben',
+			fonts: 'Schriftarten',
+			cornerRadius: 'Eckenradius'
+		},
+		imageUpload: {
+			uploading: 'Wird hochgeladen…',
+			replaceImage: 'Bild ersetzen',
+			uploadImage: 'Bild hochladen',
+			uploadFailed: 'Upload fehlgeschlagen.',
+			urlAria: '{label}-URL'
+		},
+		languages: {
+			editingLocaleLegend: 'Bearbeitungssprache',
+			editingLocaleHelp: 'Der Content-Tab und die Vorschau folgen dieser Sprache.',
+			defaultLocaleLabel: 'Standardsprache',
+			enabledLocalesLabel: 'Aktivierte Sprachen',
+			enabledLocalesHelp:
+				'Alle Websites werden derzeit mit TR/EN/DE-Inhalten ausgeliefert; Sprach-Umschalter pro Website sind für später geplant.'
+		},
+		content: {
+			pageLabel: 'Seite',
+			editingNote:
+				'{locale}-Inhalt wird bearbeitet — wechsle die Sprache in der Werkzeugleiste. Änderungen gehen direkt in den Entwurf (keine KI).',
+			sectionImageLabel: 'Abschnittsbild'
+		}
+	},
 	dashboard: {
 		title: 'Deine Websites',
 		nav: {

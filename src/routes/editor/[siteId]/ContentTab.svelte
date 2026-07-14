@@ -3,13 +3,18 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import ContentFields from './ContentFields.svelte';
 	import ImageUploadField from './ImageUploadField.svelte';
+	import { getTranslate } from '$lib/i18n/context';
+	import type { CatalogKey } from '$lib/i18n/catalog';
+
+	const t = getTranslate();
+	const sectionLabel = (type: string) => t(`editor.blocks.${type}` as CatalogKey);
 
 	let { store }: { store: DraftStore } = $props();
 </script>
 
 <div class="flex flex-col gap-4">
 	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">Page</span>
+		<span class="label-text mb-1 block text-xs font-medium">{t('editor.content.pageLabel')}</span>
 		<select
 			class="select select-sm w-full"
 			value={store.currentSlug}
@@ -22,14 +27,13 @@
 	</label>
 
 	<p class="text-base-content/60 text-xs">
-		Editing <span class="badge badge-primary badge-xs">{store.editLocale.toUpperCase()}</span>
-		copy — switch the locale in the toolbar. Edits go straight to the draft (no AI).
+		{t('editor.content.editingNote', { locale: store.editLocale.toUpperCase() })}
 	</p>
 
 	{#each store.currentPage.sections as section, i (`${section.id}-${i}`)}
 		<details class="collapse-arrow bg-base-200 collapse">
-			<summary class="collapse-title min-h-0 py-3 text-sm font-semibold capitalize">
-				{section.type}
+			<summary class="collapse-title min-h-0 py-3 text-sm font-semibold">
+				{sectionLabel(section.type)}
 				<span class="text-base-content/40 ml-1 text-xs font-normal">#{section.id}</span>
 			</summary>
 			<div class="collapse-content">
@@ -37,7 +41,7 @@
 					<div class="mb-4">
 						<ImageUploadField
 							siteId={store.site.id}
-							label="section image"
+							label={t('editor.content.sectionImageLabel')}
 							value={section.props.imageUrl ?? ''}
 							onchange={(url) =>
 								store.update(() => {

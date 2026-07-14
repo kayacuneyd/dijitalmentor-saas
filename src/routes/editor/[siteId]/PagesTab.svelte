@@ -2,6 +2,10 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import { LOCALES, type Locale } from '$lib/schema/site';
 	import { addPage, removePage, MAX_PAGES } from '$lib/editor/pageOps';
+	import { getTranslate } from '$lib/i18n/context';
+	import type { CatalogKey } from '$lib/i18n/catalog';
+
+	const t = getTranslate();
 
 	let { store }: { store: DraftStore } = $props();
 
@@ -11,22 +15,7 @@
 	let addFormOpen = $state(false);
 	let confirmRemoveSlug = $state<string | null>(null);
 
-	const sectionLabels: Record<string, string> = {
-		hero: 'Hero',
-		about: 'Hakkında',
-		services: 'Hizmetler',
-		gallery: 'Galeri',
-		contact: 'İletişim',
-		cta: 'CTA',
-		faq: 'SSS',
-		testimonials: 'Yorumlar',
-		pricing: 'Paketler',
-		process: 'Süreç',
-		booking: 'Randevu',
-		credentials: 'Yetkinlikler',
-		team: 'Ekip',
-		footer: 'Footer'
-	};
+	const sectionLabel = (type: string) => t(`editor.blocks.${type}` as CatalogKey);
 
 	const navSlugs = $derived(new Set(store.site.nav.items.map((item) => item.pageSlug)));
 
@@ -43,7 +32,7 @@
 			result = addPage(site, { slug, titles });
 		});
 		if (!result || !result.ok) {
-			formError = result?.error ?? 'Sayfa eklenemedi.';
+			formError = result?.error ?? t('editor.pages.addFailed');
 			return;
 		}
 		store.currentSlug = result.slug;
@@ -66,7 +55,7 @@
 
 <div class="flex flex-col gap-3">
 	<div class="flex items-center justify-between">
-		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">Sayfalar</span>
+		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">{t('editor.pages.title')}</span>
 		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">
 			{store.site.pages.length}/{MAX_PAGES}
 		</span>
@@ -98,22 +87,24 @@
 							type="button"
 							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
 							onclick={() => (confirmRemoveSlug = page.slug)}
-							aria-label={`"${page.title[store.editLocale]}" sayfasını sil`}
-							title="Sayfayı sil"
+							aria-label={t('editor.pages.deleteAria', { name: page.title[store.editLocale] })}
+							title={t('editor.pages.deleteTitle')}
 						>
 							✕
 						</button>
 					{/if}
 				</div>
 				<div class="flex flex-wrap gap-1 px-3 pb-2">
-					<span class="badge badge-sm badge-secondary">{page.sections.length} bölüm</span>
+					<span class="badge badge-sm badge-secondary"
+						>{t('editor.pages.sectionsBadge', { count: page.sections.length })}</span
+					>
 					{#if navSlugs.has(page.slug)}
-						<span class="badge badge-sm">Menüde</span>
+						<span class="badge badge-sm">{t('editor.pages.inMenu')}</span>
 					{:else}
-						<span class="badge badge-sm badge-warning">Menü dışı</span>
+						<span class="badge badge-sm badge-warning">{t('editor.pages.notInMenu')}</span>
 					{/if}
 					{#if pageHasContact(page.slug)}
-						<span class="badge badge-sm badge-success">İletişim var</span>
+						<span class="badge badge-sm badge-success">{t('editor.pages.hasContact')}</span>
 					{/if}
 				</div>
 				<ol class="border-t border-[var(--sk-line)] px-3 py-2">
@@ -122,7 +113,7 @@
 							<span class="sk-mono w-5 text-[10px] text-[var(--sk-faint)]">
 								{index + 1}
 							</span>
-							<span class="badge badge-sm">{sectionLabels[section.type] ?? section.type}</span>
+							<span class="badge badge-sm">{sectionLabel(section.type)}</span>
 							<span class="min-w-0 truncate font-[var(--font-mono)] text-[10px]">{section.id}</span>
 						</li>
 					{/each}
@@ -133,9 +124,9 @@
 					class="flex flex-col gap-2 rounded-[10px] border border-[#b8532f]/40 bg-[#b8532f]/5 p-3"
 				>
 					<p class="text-xs text-[#b8532f]">
-						"{page.title[store.editLocale]}" sayfasını sil?
+						{t('editor.pages.confirmDeleteQuestion', { name: page.title[store.editLocale] })}
 						{#if page.slug === store.site.pages[0].slug}
-							Bu ana sayfa — silersen listedeki bir sonraki sayfa ana sayfa olur.
+							{t('editor.pages.confirmDeleteHomeWarning')}
 						{/if}
 					</p>
 					<div class="flex gap-2">
@@ -144,14 +135,14 @@
 							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
 							onclick={() => confirmRemove(page.slug)}
 						>
-							Evet, sil
+							{t('editor.pages.confirmYes')}
 						</button>
 						<button
 							type="button"
 							class="sk-btn sk-btn-ghost sk-btn-sm"
 							onclick={() => (confirmRemoveSlug = null)}
 						>
-							Vazgeç
+							{t('editor.pages.confirmCancel')}
 						</button>
 					</div>
 				</li>
@@ -163,11 +154,11 @@
 		<summary
 			class="cursor-pointer list-none px-3 py-2 text-sm font-medium select-none [&::-webkit-details-marker]:hidden"
 		>
-			+ Yeni sayfa
+			{t('editor.pages.addNew')}
 		</summary>
 		<div class="flex flex-col gap-2 border-t border-[var(--sk-line)] p-3">
 			<label class="flex flex-col gap-1">
-				<span class="text-xs text-[var(--sk-faint)]">Slug</span>
+				<span class="text-xs text-[var(--sk-faint)]">{t('editor.pages.slugLabel')}</span>
 				<input
 					type="text"
 					class="sk-input min-h-8 py-1.5 text-sm"
@@ -177,7 +168,9 @@
 			</label>
 			{#each LOCALES as locale (locale)}
 				<label class="flex flex-col gap-1">
-					<span class="text-xs text-[var(--sk-faint)]">Başlık ({locale.toUpperCase()})</span>
+					<span class="text-xs text-[var(--sk-faint)]"
+						>{t('editor.pages.titleLabel', { locale: locale.toUpperCase() })}</span
+					>
 					<input type="text" class="sk-input min-h-8 py-1.5 text-sm" bind:value={titles[locale]} />
 				</label>
 			{/each}
@@ -190,10 +183,10 @@
 				onclick={submitAddPage}
 				disabled={store.site.pages.length >= MAX_PAGES}
 			>
-				Sayfa ekle
+				{t('editor.pages.addButton')}
 			</button>
 			<p class="text-xs text-[var(--sk-faint)]">
-				Yeni sayfalar bir hero bölümüyle başlar ve menüye eklenir.
+				{t('editor.pages.addHelp')}
 			</p>
 		</div>
 	</details>

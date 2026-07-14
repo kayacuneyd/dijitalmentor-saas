@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { getTranslate } from '$lib/i18n/context';
+
+	const t = getTranslate();
+
 	let {
 		siteId,
 		label,
@@ -25,10 +29,11 @@
 			form.set('file', file);
 			const response = await fetch(`/api/sites/${siteId}/media`, { method: 'POST', body: form });
 			const body = await response.json();
-			if (!response.ok || !body.ok) throw new Error(body.message || 'Upload failed.');
+			if (!response.ok || !body.ok)
+				throw new Error(body.message || t('editor.imageUpload.uploadFailed'));
 			onchange(body.asset.url);
 		} catch (cause) {
-			uploadError = cause instanceof Error ? cause.message : 'Upload failed.';
+			uploadError = cause instanceof Error ? cause.message : t('editor.imageUpload.uploadFailed');
 		} finally {
 			uploading = false;
 			input.value = '';
@@ -45,7 +50,11 @@
 	{/if}
 	<div class="flex items-center gap-2">
 		<label class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer">
-			{uploading ? 'Uploading…' : value ? 'Replace image' : 'Upload image'}
+			{uploading
+				? t('editor.imageUpload.uploading')
+				: value
+					? t('editor.imageUpload.replaceImage')
+					: t('editor.imageUpload.uploadImage')}
 			<input
 				type="file"
 				accept="image/jpeg,image/png,image/gif,image/webp"
@@ -60,7 +69,7 @@
 				class="sk-input min-h-8 min-w-0 flex-1 py-1.5 text-xs"
 				{value}
 				oninput={(event) => onchange(event.currentTarget.value)}
-				aria-label={`${label} URL`}
+				aria-label={t('editor.imageUpload.urlAria', { label })}
 			/>
 		{/if}
 	</div>

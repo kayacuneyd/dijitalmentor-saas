@@ -95,6 +95,133 @@ export const en = {
 			}
 		}
 	},
+	editor: {
+		blocks: {
+			hero: 'Hero',
+			about: 'About',
+			services: 'Services',
+			gallery: 'Gallery',
+			contact: 'Contact',
+			cta: 'CTA',
+			faq: 'FAQ',
+			testimonials: 'Testimonials',
+			pricing: 'Pricing',
+			process: 'Process',
+			booking: 'Booking',
+			credentials: 'Credentials',
+			team: 'Team',
+			footer: 'Footer'
+		},
+		settings: {
+			siteNameLabel: 'Site name',
+			publicSubdomainLabel: 'Public subdomain',
+			publicSubdomainHelp:
+				'Choose a readable address instead of the site id before your first publish.',
+			contactEmailLabel: 'Contact email',
+			saveIdentity: 'Save publish info',
+			flushFailed: 'Could not save the latest draft first. Check your connection and try again.',
+			identitySaveFailed: 'Could not save the publish address.',
+			identitySaved: 'Publish address saved.',
+			identitySaveNetworkError:
+				'Could not save the publish address. Check your connection and try again.',
+			poweredByBadgeLabel: '"Powered by saaskaya" badge',
+			domainLabel: 'Domain',
+			domainNone: 'No domain connected yet.',
+			integrationsLabel: 'Integrations',
+			integrationsHelp:
+				'These links appear in the matching blocks on your site. Only you can change them — the AI never touches this section.',
+			phoneLabel: 'Phone (E.164, e.g. {example})',
+			phoneExample: '+15551234567',
+			linkLabel: 'Link',
+			buttonLabelLabel: 'Button label (default: {default})',
+			aiMemoryLabel: 'AI Memory',
+			aiMemoryHelp:
+				'The AI reads these notes before every chat message. A short note is added here after every change you make, so the AI remembers earlier decisions in the next session. Auto-summarized after 10 lines.',
+			aiMemoryPlaceholder:
+				'No memory notes yet. Your first AI edit will add one here automatically.',
+			aiMemorySave: 'Save',
+			aiMemorySaved: 'Memory saved.',
+			aiMemorySaveFailed: 'Could not save.',
+			aiMemoryNetworkError: 'Connection error.'
+		},
+		pages: {
+			title: 'Pages',
+			sectionsBadge: '{count} section(s)',
+			inMenu: 'In menu',
+			notInMenu: 'Not in menu',
+			hasContact: 'Has contact',
+			deleteAria: 'Delete "{name}"',
+			deleteTitle: 'Delete page',
+			confirmDeleteQuestion: 'Delete "{name}"?',
+			confirmDeleteHomeWarning:
+				'This is the home page — deleting it makes the next page in the list the new home page.',
+			confirmYes: 'Yes, delete',
+			confirmCancel: 'Cancel',
+			addNew: '+ New page',
+			slugLabel: 'Slug',
+			titleLabel: 'Title ({locale})',
+			addButton: 'Add page',
+			addHelp: 'New pages start with a hero section and are added to the menu.',
+			addFailed: 'Could not add the page.'
+		},
+		chat: {
+			assistantLabel: 'Assistant',
+			greeting:
+				"Hi! Let's talk about your site — what would you like to change? Color, text, sections, pages… just tell me.",
+			riskLow: 'A small text change.',
+			riskMedium: 'This change will affect how your site looks.',
+			riskHigh: 'This is a big change — make sure to check the preview after it applies.',
+			forceSendPrompt: 'If you think this is about your site, send it anyway',
+			undo: 'Undo',
+			undoApplied: 'Change undone.',
+			understoodLabel: 'Here is what I understood:',
+			previewNote:
+				'This applies to your draft — you can check it in the preview before publishing.',
+			apply: 'Apply',
+			cancelProposal: 'Cancel',
+			cancelledNotice: 'Cancelled — nothing changed.',
+			inputPlaceholder: 'e.g. Add an FAQ section for pricing…',
+			send: 'Send',
+			freeEditsNote:
+				'Questions and off-topic messages never spend your budget — only applied edits count against your monthly AI edit limit. Text/color edits in the Content and Theme tabs are always free.',
+			genericError: 'Something went wrong.',
+			networkError: 'Network error — please try again.',
+			viewPreviewHint: 'Switch to the "Preview" tab above to see the change.',
+			changeSummaryPrefix: 'Change summary:',
+			pagesAdded: '{count} page(s) added: {names}',
+			pagesRemoved: '{count} page(s) removed.',
+			titlesUpdated: '{count} page title(s) updated.',
+			navUpdated: 'Menu updated.',
+			themeUpdated: 'Theme updated.'
+		},
+		theme: {
+			nichePreset: 'Niche preset',
+			brandColors: 'Brand colors',
+			fonts: 'Fonts',
+			cornerRadius: 'Corner radius'
+		},
+		imageUpload: {
+			uploading: 'Uploading…',
+			replaceImage: 'Replace image',
+			uploadImage: 'Upload image',
+			uploadFailed: 'Upload failed.',
+			urlAria: '{label} URL'
+		},
+		languages: {
+			editingLocaleLegend: 'Editing locale',
+			editingLocaleHelp: 'The Content tab and the preview follow this locale.',
+			defaultLocaleLabel: 'Default locale',
+			enabledLocalesLabel: 'Enabled locales',
+			enabledLocalesHelp:
+				'All sites currently ship with TR/EN/DE content; per-site language toggles are on the roadmap.'
+		},
+		content: {
+			pageLabel: 'Page',
+			editingNote:
+				'Editing {locale} copy — switch the locale in the toolbar. Edits go straight to the draft (no AI).',
+			sectionImageLabel: 'section image'
+		}
+	},
 	dashboard: {
 		title: 'Your sites',
 		nav: {

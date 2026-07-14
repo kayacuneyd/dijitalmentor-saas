@@ -52,6 +52,7 @@
 	 *  the "..." menu) live behind this FAB-triggered dock; the preview iframe below
 	 *  stays mounted and visible at all times regardless of dock state. */
 	let dockOpen = $state(false);
+	let checklistOpen = $state(false);
 
 	let iframeEl = $state<HTMLIFrameElement>();
 	const previewSrc = $derived(
@@ -244,8 +245,16 @@
 
 		<div class="flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
 			<EditorDock bind:open={dockOpen}>
+				<button
+					type="button"
+					class="absolute right-3 top-3 z-20 inline-flex size-9 items-center justify-center rounded-full border border-[var(--sk-line-strong)] bg-[var(--sk-card)] text-[var(--sk-ink)] shadow-md transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(23_22_20/.24)]"
+					aria-label="Paneli kapat"
+					onclick={() => (dockOpen = false)}
+				>
+					{@html uiIcons.x(16)}
+				</button>
 				<header
-					class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-4 py-3"
+					class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] py-3 pr-14 pl-4"
 				>
 					<div class="flex min-w-0 items-center gap-2">
 						<a href="/dashboard" class="sk-btn sk-btn-ghost sk-btn-sm" aria-label="saaskaya dashboard">
@@ -328,14 +337,6 @@
 								</a>
 							</div>
 						</details>
-						<button
-							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
-							aria-label="Paneli kapat"
-							onclick={() => (dockOpen = false)}
-						>
-							{@html uiIcons.x(13)}
-						</button>
 					</div>
 				</header>
 
@@ -382,12 +383,8 @@
 					</div>
 				</details>
 
-				<div
-					class="flex min-h-0 flex-1 flex-col px-4 pb-4 {activeTab === 'Chat'
-						? ''
-						: 'overflow-y-auto'}"
-				>
-					<details class="sk-card mb-3 shrink-0 p-3" open>
+				<div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
+					<details class="sk-card mb-3 shrink-0 p-3" bind:open={checklistOpen}>
 						<summary
 							class="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden"
 						>
@@ -399,7 +396,10 @@
 							<button
 								type="button"
 								class="sk-btn sk-btn-secondary sk-btn-sm shrink-0"
-								onclick={() => goToChecklistItem(nextAction)}
+								onclick={(e) => {
+									e.stopPropagation();
+									goToChecklistItem(nextAction);
+								}}
 							>
 								Aç
 							</button>
@@ -465,7 +465,7 @@
 						{/if}
 					</details>
 
-					<div class={activeTab === 'Chat' ? 'min-h-0 flex-1 overflow-hidden' : ''}>
+					<div class={activeTab === 'Chat' ? 'min-h-[22rem] flex-1 overflow-hidden' : ''}>
 						{#if activeTab === 'Chat'}
 							<ChatTab {store} history={data.chatHistory} />
 						{:else if activeTab === 'Content'}

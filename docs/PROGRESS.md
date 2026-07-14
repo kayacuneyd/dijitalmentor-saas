@@ -2840,3 +2840,32 @@ tests`), and `npm run check` completed with 0 Svelte/TypeScript errors or warnin
   seferinde önceki alan state'i korunuyor; 375px genişlikte tam ekran sheet, yatay taşma 0;
   console'da hata/uyarı yok. `/login` (AppCanvasShell'i paylaşan başka bir route) ayrıca
   regresyon olmadığını doğrulamak için ayrıca kontrol edildi.
+
+### 2026-07-13 — Editor dock: 3 UI polishing düzeltmesi
+
+Kullanıcı yeni FAB+panel'i (yukarıdaki madde) gerçek kullanımda test edip 3 sorun bildirdi:
+checklist kartı her seferinde açık geliyor ve kapatılamıyor hissi veriyor, kapatma (✕) butonu
+çok silik, Chat sekmesinde input'a erişilemiyor. Hepsi `src/routes/editor/[siteId]/+page.svelte`
+içinde çözüldü:
+- **Checklist**: statik `open` yerine `let checklistOpen = $state(false)` + `bind:open` —
+  varsayılan artık kapalı (kalite-kontrol kartıyla tutarlı) ve toggle durumu artık belirsiz bir
+  static attribute'a değil gerçek state'e bağlı. "Aç" butonunun `<summary>` içine gömülü olması
+  native click-bubbling ile detay'ı da istemeden toggle'lıyordu; `event.stopPropagation()`
+  eklendi.
+- **Kapatma butonu**: header'ın kalabalık buton sırasından çıkarılıp dialog'a göre
+  `absolute right-3 top-3` konumlandırılan, dolgun arkaplan + border + shadow'lu (ghost değil)
+  belirgin dairesel bir butona dönüştürüldü — `ScrollToTop.svelte`'deki FAB stiliyle tutarlı.
+- **Chat erişilebilirliği**: kök neden, checklist+kalite-kontrol kartları `shrink-0` olduğu için
+  Chat'in sarmalayıcısının (kendi iç pinned-input scroll'unu koruması için dış scroll'dan hariç
+  tutulmuştu) sıkışıp neredeyse 0 yüksekliğe inebilmesiydi. İki parçalı düzeltme: dış sarmalayıcı
+  artık Chat dahil her sekmede koşulsuz `overflow-y-auto`; Chat'in kendi sarmalayıcısına
+  `min-h-[22rem]` eklendi (flex item'da explicit min-height flex-shrink'i durdurur) — checklist
+  ne kadar açık/büyük olursa olsun Chat artık ya doğrudan görünüyor ya da dış scroll ile
+  erişilebiliyor, `ChatTab.svelte`'in kendi transcript-scroll + pinned-input mimarisi
+  dokunulmadan.
+- Verification: `npm run check` 0 hata. Playwright (playwright-core, 414×869 ve 1400×900
+  viewport) ile gerçek tarayıcı smoke: checklist varsayılan kapalı; "Aç" tıklaması checklist'i
+  istemeden açmıyor; manuel toggle iki yönde de çalışıyor; kapatma butonu artık sağ üstte katı
+  arkaplanla (rgb(251,250,247)) render oluyor; en kötü senaryoda (checklist manuel açık
+  bırakılmış) bile chat input'a scroll ile ulaşılıp metin girilebildi, "Gönder" butonu aktif;
+  console'da hata yok.

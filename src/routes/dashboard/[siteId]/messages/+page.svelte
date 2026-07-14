@@ -1,25 +1,28 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data } = $props();
+
+	const t = getTranslate();
 </script>
 
 <svelte:head>
-	<title>Messages · {data.siteName} · saaskaya</title>
+	<title>{t('dashboard.messages.title')} · {data.siteName} · saaskaya</title>
 </svelte:head>
 
 <PageShell
 	backHref="/dashboard"
 	backLabel="dashboard"
-	title="Messages"
-	description={`Contact-form submissions for ${data.siteName}`}
+	title={t('dashboard.messages.title')}
+	description={t('dashboard.messages.description', { name: data.siteName })}
 	max="max-w-5xl"
 	canvasLabel="saaskaya.app / messages"
 >
 	{#if data.submissions.length === 0}
 		<AppCard>
-			<p class="text-center text-[var(--sk-muted)]">No messages yet.</p>
+			<p class="text-center text-[var(--sk-muted)]">{t('dashboard.messages.empty')}</p>
 		</AppCard>
 	{:else}
 		<ul class="flex flex-col gap-3">

@@ -1,5 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { isLocale, type Locale } from '$lib/i18n';
+import { t, type CatalogKey } from '$lib/i18n/catalog';
 import { isCatalogKey, listCatalogEntries, type CatalogEntry } from '$lib/i18n/catalog/registry';
 import { db } from '$lib/server/db';
 import { messageOverrides } from '$lib/server/db/schema';
@@ -10,6 +11,16 @@ import { messageOverrides } from '$lib/server/db/schema';
 export function getMessageOverrides(locale: Locale): Record<string, string> {
 	const rows = db.select().from(messageOverrides).where(eq(messageOverrides.locale, locale)).all();
 	return Object.fromEntries(rows.map((row) => [row.key, row.value]));
+}
+
+/** Bound `t()` for server load/action handlers, which run outside any Svelte
+ *  component tree and so can't use `$lib/i18n/context`'s `getTranslate()`.
+ *  Fetches overrides once so a handler can call the returned function for
+ *  every string it needs without repeating the query. */
+export function serverTranslator(locale: Locale) {
+	const overrides = getMessageOverrides(locale);
+	return (key: CatalogKey, vars?: Record<string, string | number>) =>
+		t(key, locale, vars, overrides);
 }
 
 export type CatalogAdminEntry = CatalogEntry & {

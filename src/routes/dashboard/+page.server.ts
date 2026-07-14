@@ -51,6 +51,7 @@ import {
 } from '$lib/server/reservations';
 import { getSetting } from '$lib/server/config';
 import { assertCanPublishFreeSite, SiteQuotaError } from '$lib/server/siteQuota';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals, url }) => {
@@ -90,27 +91,36 @@ export const load: PageServerLoad = ({ locals, url }) => {
 	};
 };
 
-function requireManageableSite(user: App.Locals['user'], siteId: string) {
+function requireManageableSite(
+	user: App.Locals['user'],
+	siteId: string,
+	t: ReturnType<typeof serverTranslator>
+) {
 	const meta = getSiteMeta(siteId);
-	if (!meta) error(404, `Unknown site "${siteId}"`);
+	if (!meta) error(404, t('dashboard.actions.siteNotFound'));
 	if (!canManageSite(user, meta.ownerUserId)) {
-		error(403, 'This site belongs to another account.');
+		error(403, t('dashboard.actions.siteBelongsToAnotherAccount'));
 	}
 	return meta;
 }
 
 /** Custom domains are a paid feature (constitution §5: only ever after payment). */
-function requirePaidDomainAccess(user: NonNullable<App.Locals['user']>, siteId: string) {
+function requirePaidDomainAccess(
+	user: NonNullable<App.Locals['user']>,
+	siteId: string,
+	t: ReturnType<typeof serverTranslator>
+) {
 	if (!hasActiveSiteSubscription(siteId, user.id) && !user.isAdmin) {
-		error(402, 'Custom domains need an active Pro subscription for this site.');
+		error(402, t('dashboard.actions.domainNeedsProSubscription'));
 	}
 }
 
 export const actions: Actions = {
 	publish: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const siteId = String((await request.formData()).get('siteId') ?? '');
-		const meta = requireManageableSite(locals.user, siteId);
+		const meta = requireManageableSite(locals.user, siteId, t);
 		try {
 			assertCanPublishFreeSite(locals.user, meta);
 		} catch (err) {
@@ -121,36 +131,36 @@ export const actions: Actions = {
 		}
 		if (!meta.publishedVersion) {
 			return fail(400, {
-				message:
-					'İlk yayın yalnızca editörden yapılır. Böylece son taslak kaydedilip aynı gövdeyle yayınlanır.',
+				message: t('dashboard.actions.firstPublishOnlyFromEditor'),
 				siteId
 			});
 		}
 		const handle = validatePublicHandle(meta.publicHandle ?? '');
 		if (!handle.ok) {
 			return fail(400, {
-				message: 'Yayına almadan önce site adı ve public subdomain adımını tamamla.',
+				message: t('dashboard.actions.completeIdentityFirst'),
 				siteId
 			});
 		}
 		const draft = getDraft(siteId);
-		if (!draft) return fail(404, { message: 'Site not found.', siteId });
+		if (!draft) return fail(404, { message: t('dashboard.actions.siteNotFound'), siteId });
 		const quality = siteQualityCheck(draft);
 		if (!quality.canPublish) {
 			return fail(422, {
-				message: quality.blockers[0]?.message ?? 'Yayın için kalite engelleri var.',
+				message: quality.blockers[0]?.message ?? t('dashboard.actions.qualityBlockers'),
 				siteId
 			});
 		}
 		const version = publishDraft(siteId);
-		if (version === null) return fail(404, { message: 'Site not found.' });
+		if (version === null) return fail(404, { message: t('dashboard.actions.siteNotFound') });
 		return { published: siteId, version };
 	},
 	updateIdentity: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
-		requireManageableSite(locals.user, siteId);
+		requireManageableSite(locals.user, siteId, t);
 		const result = setSiteIdentity({
 			siteId,
 			siteName: String(form.get('siteName') ?? ''),
@@ -165,34 +175,38 @@ export const actions: Actions = {
 		}
 		return {
 			identitySaved: siteId,
-			identityMessage: `${result.site.settings.siteName} için subdomain kaydedildi: ${result.publicHandle}.saaskaya.com`
+			identityMessage: t('dashboard.actions.identitySaved', {
+				name: result.site.settings.siteName,
+				handle: result.publicHandle
+			})
 		};
 	},
 	// --- domain reservation + hybrid payment (beta-launch spec) ---------------
 	reserveDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
 		const requestedMethod = String(form.get('paymentMethod') ?? 'bank_transfer') as PaymentMethod;
-		requireManageableSite(locals.user, siteId);
+		requireManageableSite(locals.user, siteId, t);
 		const credit = unusedDomainCreditForSite(locals.user.id, siteId);
 		if (paymentMode() === 'disabled' && !credit) {
 			return fail(503, {
-				domainMessage: 'Yeni domain satın alma kapalı beta süresince kullanılamıyor.',
+				domainMessage: t('dashboard.actions.domainPurchaseClosed'),
 				siteId
 			});
 		}
 		if (!validateDomain(domain)) {
 			return fail(400, {
-				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				domainMessage: t('dashboard.actions.invalidDomain'),
 				siteId
 			});
 		}
 		const gate = await customerDomainGate(domain);
 		if (gate.status === 'unavailable') {
 			return fail(409, {
-				domainMessage: 'Bu domain uygun değil. Başka bir ad dene.',
+				domainMessage: t('dashboard.actions.domainUnavailable'),
 				siteId
 			});
 		}
@@ -218,8 +232,8 @@ export const actions: Actions = {
 		if (!result.ok) {
 			const msg =
 				result.reason === 'domain-taken'
-					? 'Bu domain zaten rezerve edilmiş.'
-					: 'Domain rezerve edilemedi — adı kontrol edip tekrar dene.';
+					? t('dashboard.actions.domainAlreadyReserved')
+					: t('dashboard.actions.domainReserveFailed');
 			return fail(result.reason === 'domain-taken' ? 409 : 400, { domainMessage: msg, siteId });
 		}
 		if (method === 'included' && credit) {
@@ -232,7 +246,7 @@ export const actions: Actions = {
 			});
 			if (!consumed) {
 				return fail(409, {
-					domainMessage: 'Domain hakkı kullanılamadı. Sayfayı yenileyip tekrar dene.',
+					domainMessage: t('dashboard.actions.domainCreditFailed'),
 					siteId
 				});
 			}
@@ -242,10 +256,10 @@ export const actions: Actions = {
 			siteId,
 			domainMessage:
 				gate.status === 'manual_review'
-					? 'Bu domain manuel inceleme gerektiriyor. Sizinle iletişime geçeceğiz.'
+					? t('dashboard.actions.manualReviewMessage')
 					: method === 'included'
-						? 'Domain hakkın kullanıldı. Alan adın kurulum kuyruğuna alındı.'
-						: 'Bu domain uygun. Bu site için Pro adımına devam edebilirsin.'
+						? t('dashboard.actions.domainCreditUsedMessage')
+						: t('dashboard.actions.domainAvailableMessage')
 		};
 	},
 	reportTransfer: async ({ request, locals }) => {
@@ -262,10 +276,11 @@ export const actions: Actions = {
 	},
 	payDomainStripe: async ({ request, locals, url }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const reservationId = String((await request.formData()).get('reservationId') ?? '');
 		const reservation = getReservation(reservationId);
 		if (!reservation || reservation.userId !== locals.user.id) {
-			return fail(404, { message: 'Reservation not found.' });
+			return fail(404, { message: t('dashboard.actions.reservationNotFound') });
 		}
 		let checkoutUrl: string;
 		try {
@@ -283,61 +298,64 @@ export const actions: Actions = {
 	},
 	unpublish: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const siteId = String((await request.formData()).get('siteId') ?? '');
-		requireManageableSite(locals.user, siteId);
+		requireManageableSite(locals.user, siteId, t);
 		unpublishSite(siteId);
 		return { unpublished: siteId };
 	},
 	deleteSite: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const confirmName = String(form.get('confirmName') ?? '');
-		requireManageableSite(locals.user, siteId);
+		requireManageableSite(locals.user, siteId, t);
 		const draft = getDraft(siteId);
 		const expectedName = draft?.settings.siteName ?? '';
 		if (!expectedName || confirmName !== expectedName) {
-			return fail(400, { deleteMessage: 'Site adı eşleşmedi — silme iptal edildi.', siteId });
+			return fail(400, { deleteMessage: t('dashboard.actions.deleteNameMismatch'), siteId });
 		}
 		const result = await deleteSiteCascade(siteId);
 		if (!result.ok) {
 			const message =
 				result.reason === 'reservation-in-progress'
-					? 'Bu sitede devam eden bir domain rezervasyonu/kaydı var — önce onu çöz.'
-					: 'Site bulunamadı.';
+					? t('dashboard.actions.deleteReservationInProgress')
+					: t('dashboard.actions.siteNotFound');
 			return fail(409, { deleteMessage: message, siteId });
 		}
 		return { deleted: expectedName };
 	},
 	attachDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
-		const meta = requireManageableSite(locals.user, siteId);
-		requirePaidDomainAccess(locals.user, siteId);
+		const meta = requireManageableSite(locals.user, siteId, t);
+		requirePaidDomainAccess(locals.user, siteId, t);
 		if (!validateDomain(domain)) {
 			return fail(400, {
-				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				domainMessage: t('dashboard.actions.invalidDomain'),
 				siteId
 			});
 		}
 		const dns = await dnsPointsHere(domain);
 		if (!dns.ok) {
 			return fail(400, {
-				domainMessage:
-					'Domainin henüz bize yönlenmemiş. Domain sağlayıcının panelinden A kaydını sunucu IP adresimize yönlendirip tekrar dene.',
+				domainMessage: t('dashboard.actions.dnsNotPointed'),
 				siteId
 			});
 		}
 		const attached = attachSiteDomain(siteId, domain, meta.ownerUserId);
 		if (!attached.ok && attached.reason === 'domain-taken') {
 			return fail(409, {
-				domainMessage: 'Bu domain zaten başka bir siteye bağlı.',
+				domainMessage: t('dashboard.actions.domainAlreadyAttached'),
 				siteId
 			});
 		}
-		if (!attached.ok) return fail(404, { domainMessage: 'Site bulunamadı.', siteId });
+		if (!attached.ok)
+			return fail(404, { domainMessage: t('dashboard.actions.siteNotFound'), siteId });
 		const provision = await provisionDomain(domain);
 		if (provision.ran && !provision.ok) {
 			console.error(`[domains] provisioning failed for ${domain}: ${provision.output}`);
@@ -347,28 +365,30 @@ export const actions: Actions = {
 			siteId,
 			provision: provision.ran
 				? provision.ok
-					? 'Güvenlik sertifikası hazırlandı — siten birkaç dakika içinde bu adreste açılır.'
-					: 'Domain kaydedildi ancak kurulum tamamlanamadı — ekibimiz durumu inceliyor, bir işlem yapman gerekmiyor.'
-				: 'Domain kaydedildi — kurulum ekibimiz tarafından tamamlanacak.'
+					? t('dashboard.actions.attachSslReady')
+					: t('dashboard.actions.attachPendingReview')
+				: t('dashboard.actions.attachQueued')
 		};
 	},
 	detachDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const siteId = String((await request.formData()).get('siteId') ?? '');
-		requireManageableSite(locals.user, siteId);
+		requireManageableSite(locals.user, siteId, t);
 		detachSiteDomain(siteId);
 		return { domainDetached: siteId };
 	},
 	registerDomain: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const siteId = String(form.get('siteId') ?? '');
 		const domain = normalizeDomain(String(form.get('domain') ?? ''));
-		const meta = requireManageableSite(locals.user, siteId);
-		requirePaidDomainAccess(locals.user, siteId);
+		const meta = requireManageableSite(locals.user, siteId, t);
+		requirePaidDomainAccess(locals.user, siteId, t);
 		if (!validateDomain(domain)) {
 			return fail(400, {
-				domainMessage: 'Bu geçerli bir domain adresine benzemiyor — örn. kendisiteniz.com',
+				domainMessage: t('dashboard.actions.invalidDomain'),
 				siteId
 			});
 		}
@@ -376,7 +396,7 @@ export const actions: Actions = {
 			const availability = await checkDomainAvailability(domain);
 			if (!availability.available) {
 				return fail(409, {
-					domainMessage: 'Bu domain uygun değil. Başka bir ad dene.',
+					domainMessage: t('dashboard.actions.domainUnavailable'),
 					siteId
 				});
 			}
@@ -387,19 +407,19 @@ export const actions: Actions = {
 		} catch (err) {
 			console.error(`[domains] direct registration failed for ${domain}:`, err);
 			return fail(502, {
-				domainMessage:
-					'Domain kontrolü sırasında manuel inceleme gerektiren bir durum oluştu. Sizinle iletişime geçeceğiz.',
+				domainMessage: t('dashboard.actions.registerManualReview'),
 				siteId
 			});
 		}
 		const attached = attachSiteDomain(siteId, domain, meta.ownerUserId);
 		if (!attached.ok && attached.reason === 'domain-taken') {
 			return fail(409, {
-				domainMessage: 'Bu domain zaten başka bir siteye bağlı.',
+				domainMessage: t('dashboard.actions.domainAlreadyAttached'),
 				siteId
 			});
 		}
-		if (!attached.ok) return fail(404, { domainMessage: 'Site bulunamadı.', siteId });
+		if (!attached.ok)
+			return fail(404, { domainMessage: t('dashboard.actions.siteNotFound'), siteId });
 		const provision = await provisionDomain(domain);
 		if (provision.ran && !provision.ok) {
 			console.error(`[domains] provisioning failed for ${domain}: ${provision.output}`);
@@ -409,9 +429,9 @@ export const actions: Actions = {
 			siteId,
 			provision: provision.ran
 				? provision.ok
-					? 'Domain tescil edildi ve siten bağlandı — birkaç dakika içinde bu adreste açılır.'
-					: 'Domain tescil edildi ancak kurulum tamamlanamadı — ekibimiz durumu inceliyor, bir işlem yapman gerekmiyor.'
-				: 'Domain tescil edildi — kurulum ekibimiz tarafından tamamlanacak.'
+					? t('dashboard.actions.registerSslReady')
+					: t('dashboard.actions.registerPendingReview')
+				: t('dashboard.actions.registerQueued')
 		};
 	}
 };

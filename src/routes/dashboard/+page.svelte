@@ -1,19 +1,31 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import SitePreviewThumb from '$lib/ui/SitePreviewThumb.svelte';
 	import { uiIcons } from '$lib/ui/icons';
+	import { getTranslate } from '$lib/i18n/context';
+	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
 
-	// Alerts reference sites by id internally; the UI always shows the name.
-	const siteName = (id: unknown) => data.sites.find((s) => s.id === id)?.siteName ?? 'Siten';
+	const t = getTranslate();
+	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 
-	const dateTr = (d: string | Date) =>
-		new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+	// Alerts reference sites by id internally; the UI always shows the name.
+	const siteName = (id: unknown) =>
+		data.sites.find((s) => s.id === id)?.siteName ?? t('dashboard.card.fallbackName');
+
+	const dateLocales: Record<Locale, string> = { en: 'en-US', tr: 'tr-TR', de: 'de-DE' };
+	const formatDate = (d: string | Date) =>
+		new Date(d).toLocaleDateString(dateLocales[locale], {
+			day: 'numeric',
+			month: 'long',
+			year: 'numeric'
+		});
 
 	// Only one site's delete-confirm panel is open at a time.
 	let deleteConfirmSiteId = $state<string | null>(null);
@@ -30,12 +42,12 @@
 </script>
 
 <svelte:head>
-	<title>Sitelerin · saaskaya</title>
+	<title>{t('dashboard.title')} · saaskaya</title>
 </svelte:head>
 
 <PageShell
 	backHref="/"
-	title="Sitelerin"
+	title={t('dashboard.title')}
 	description={data.user.email}
 	max="max-w-7xl"
 	canvasMax="max-w-[92rem]"
@@ -43,13 +55,15 @@
 >
 	{#snippet actions()}
 		<div class="flex flex-wrap gap-2">
-			<a href="/new" class="sk-btn sk-btn-primary">{@html uiIcons.plus(16)}Yeni site</a>
-			<a href="/account" class="sk-btn sk-btn-secondary">Hesap</a>
+			<a href="/new" class="sk-btn sk-btn-primary"
+				>{@html uiIcons.plus(16)}{t('dashboard.nav.newSite')}</a
+			>
+			<a href="/account" class="sk-btn sk-btn-secondary">{t('dashboard.nav.account')}</a>
 			{#if data.user.isAdmin}
-				<a href="/admin" class="sk-btn sk-btn-secondary">Admin</a>
+				<a href="/admin" class="sk-btn sk-btn-secondary">{t('dashboard.nav.admin')}</a>
 			{/if}
 			<form method="POST" action="/logout">
-				<button type="submit" class="sk-btn sk-btn-ghost">Çıkış yap</button>
+				<button type="submit" class="sk-btn sk-btn-ghost">{t('dashboard.nav.signOut')}</button>
 			</form>
 		</div>
 	{/snippet}
@@ -57,57 +71,65 @@
 	<AppCard class="p-4 sm:p-5">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
-				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Plan</div>
+				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('dashboard.plan.label')}</div>
 				<div class="mt-2 flex flex-wrap items-center gap-2">
-					<span class="font-semibold">Pro site bazlıdır</span>
-					<StatusPill>{data.proSitePriceEur}€/ay / yayınlanan site</StatusPill>
+					<span class="font-semibold">{t('dashboard.plan.name')}</span>
+					<StatusPill>{t('dashboard.plan.priceSuffix', { price: data.proSitePriceEur })}</StatusPill
+					>
 				</div>
 				<p class="mt-1 text-xs text-[var(--sk-muted)]">
-					Her web sitesi kendi Pro durumuna sahiptir. Kendi domaini ve tam export sadece ilgili Pro
-					site için açılır.
+					{t('dashboard.plan.description')}
 				</p>
 			</div>
-			<span class="text-xs text-[var(--sk-faint)]">Ödeme ilgili site kartından başlatılır.</span>
+			<span class="text-xs text-[var(--sk-faint)]">{t('dashboard.plan.billingNote')}</span>
 		</div>
 	</AppCard>
 
 	{#if form?.published}
 		<div class="sk-alert sk-alert-success">
-			<strong>{siteName(form.published)}</strong> yayında — tebrikler!
+			{t('dashboard.alerts.published', { name: siteName(form.published) })}
 		</div>
 	{:else if form?.unpublished}
-		<div class="sk-alert"><strong>{siteName(form.unpublished)}</strong> yayından kaldırıldı.</div>
+		<div class="sk-alert">
+			{t('dashboard.alerts.unpublished', { name: siteName(form.unpublished) })}
+		</div>
 	{:else if form?.message}
 		<div class="sk-alert"><strong>{siteName(form.siteId)}</strong>: {form.message}</div>
 	{:else if form?.domainAttached}
 		<div class="sk-alert sk-alert-success">
-			<span><strong>{form.domainAttached}</strong> bağlandı. {form.provision}</span>
+			<span
+				><strong>{form.domainAttached}</strong>
+				{t('dashboard.alerts.domainConnectedSuffix')}
+				{form.provision}</span
+			>
 		</div>
 	{:else if form?.domainDetached}
-		<div class="sk-alert">Domain siteden kaldırıldı.</div>
+		<div class="sk-alert">{t('dashboard.alerts.domainDetached')}</div>
 	{:else if form?.reserved}
 		<div class="sk-alert sk-alert-success">
-			<strong>{form.reserved}</strong> kontrol edildi. {form.domainMessage}
+			<strong>{form.reserved}</strong>
+			{t('dashboard.alerts.domainCheckedSuffix')}
+			{form.domainMessage}
 		</div>
 	{:else if form?.identitySaved}
 		<div class="sk-alert sk-alert-success">{form.identityMessage}</div>
 	{:else if form?.transferReported}
 		<div class="sk-alert sk-alert-success">
-			Havale bildirimin alındı — operatör onayladıktan sonra domainin kurulur.
+			{t('dashboard.alerts.transferReported')}
 		</div>
 	{:else if form?.reservationCancelled}
-		<div class="sk-alert">Rezervasyon iptal edildi.</div>
+		<div class="sk-alert">{t('dashboard.alerts.reservationCancelled')}</div>
 	{:else if form?.deleted}
-		<div class="sk-alert"><strong>{form.deleted}</strong> kalıcı olarak silindi.</div>
+		<div class="sk-alert">{t('dashboard.alerts.deleted', { name: form.deleted })}</div>
 	{/if}
 
 	{#if data.sites.length === 0}
 		<AppCard>
 			<div class="flex flex-col items-center gap-3 text-center">
 				<p class="text-[var(--sk-muted)]">
-					Henüz siten yok. Kendini birkaç cümleyle anlat, ilk siteni AI hazırlasın.
+					{t('dashboard.empty.message')}
 				</p>
-				<a href="/new" class="sk-btn sk-btn-primary">İlk siteni oluştur</a>
+				<a href="/new" class="sk-btn sk-btn-primary">{t('dashboard.empty.cta')}</a>
 			</div>
 		</AppCard>
 	{:else}
@@ -118,7 +140,7 @@
 						<a
 							href="/editor/{site.id}"
 							class="block shrink-0 sm:w-56"
-							aria-label={`${site.siteName} — düzenleyicide aç`}
+							aria-label={t('dashboard.card.editorAria', { name: site.siteName })}
 						>
 							<SitePreviewThumb siteId={site.id} title={site.siteName} />
 						</a>
@@ -130,27 +152,27 @@
 										<h2 class="truncate font-semibold">{site.siteName}</h2>
 									</div>
 									<p class="mt-1 text-xs text-[var(--sk-muted)]">
-										Son güncelleme: {dateTr(site.updatedAt)}
+										{t('dashboard.card.lastUpdated', { date: formatDate(site.updatedAt) })}
 									</p>
 								</div>
 								{#if site.publishedVersion}
 									<div class="flex flex-wrap gap-2">
-										<StatusPill tone="success">Yayında</StatusPill>
+										<StatusPill tone="success">{t('dashboard.card.statusPublished')}</StatusPill>
 										{#if site.plan.state === 'active'}
-											<StatusPill tone="success">Pro site</StatusPill>
+											<StatusPill tone="success">{t('dashboard.card.planActive')}</StatusPill>
 										{:else if site.plan.state === 'grace'}
-											<StatusPill tone="warning">Pro ek süre</StatusPill>
+											<StatusPill tone="warning">{t('dashboard.card.planGrace')}</StatusPill>
 										{:else}
-											<StatusPill>Free site</StatusPill>
+											<StatusPill>{t('dashboard.card.planFree')}</StatusPill>
 										{/if}
 									</div>
 								{:else}
 									<div class="flex flex-wrap gap-2">
-										<StatusPill>Taslak</StatusPill>
+										<StatusPill>{t('dashboard.card.statusDraft')}</StatusPill>
 										{#if site.plan.state === 'active'}
-											<StatusPill tone="success">Pro site</StatusPill>
+											<StatusPill tone="success">{t('dashboard.card.planActive')}</StatusPill>
 										{:else}
-											<StatusPill>Free site</StatusPill>
+											<StatusPill>{t('dashboard.card.planFree')}</StatusPill>
 										{/if}
 									</div>
 								{/if}
@@ -165,7 +187,7 @@
 								>
 									<input type="hidden" name="siteId" value={site.id} />
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
-										Site adı
+										{t('dashboard.identity.siteName')}
 										<input
 											name="siteName"
 											value={site.siteName}
@@ -173,7 +195,7 @@
 										/>
 									</label>
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
-										Subdomain
+										{t('dashboard.identity.subdomain')}
 										<input
 											name="publicHandle"
 											value={site.publicHandle ?? site.id}
@@ -181,7 +203,7 @@
 										/>
 									</label>
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
-										İletişim e-postası
+										{t('dashboard.identity.contactEmail')}
 										<input
 											name="contactEmail"
 											value={site.contactEmail ?? ''}
@@ -189,15 +211,25 @@
 										/>
 									</label>
 									<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm self-end">
-										Kaydet
+										{t('dashboard.identity.save')}
 									</button>
 								</form>
 								<div
 									class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10.5px] text-[var(--sk-faint)]"
 								>
-									<span>Public URL: {site.publicHandle ?? site.id}.saaskaya.com</span>
-									<span>Diller: {site.locales.join(' · ').toUpperCase()}</span>
-									<span>Varsayılan: {site.defaultLocale.toUpperCase()}</span>
+									<span
+										>{t('dashboard.meta.publicUrl', { handle: site.publicHandle ?? site.id })}</span
+									>
+									<span
+										>{t('dashboard.meta.languages', {
+											list: site.locales.join(' · ').toUpperCase()
+										})}</span
+									>
+									<span
+										>{t('dashboard.meta.defaultLocale', {
+											locale: site.defaultLocale.toUpperCase()
+										})}</span
+									>
 								</div>
 								{#if form?.identityMessage && form?.siteId === site.id}
 									<p class="mt-2 text-xs text-[#b8532f]">{form.identityMessage}</p>
@@ -210,16 +242,18 @@
 								<div>
 									<p class="font-semibold">
 										{#if site.plan.state === 'active'}
-											Bu site Pro aktif.
+											{t('dashboard.billing.proActiveLine')}
 										{:else if site.plan.state === 'grace'}
-											Bu site Pro ek sürede.
+											{t('dashboard.billing.proGraceLine')}
 										{:else}
-											Bu site Free.
+											{t('dashboard.billing.proFreeLine')}
 										{/if}
 									</p>
 									<p class="mt-1 text-xs text-[var(--sk-muted)]">
-										Pro: {data.proSitePriceEur}€/ay veya {data.proSiteYearlyPriceEur}€/yıl. Yıllık
-										Pro'ya standart .com alan adı, SSL ve teknik kurulum dahildir.
+										{t('dashboard.billing.priceLine', {
+											monthly: data.proSitePriceEur,
+											yearly: data.proSiteYearlyPriceEur
+										})}
 									</p>
 								</div>
 								{#if site.plan.state === 'free'}
@@ -229,29 +263,31 @@
 												<input type="hidden" name="siteId" value={site.id} />
 												<input type="hidden" name="planInterval" value="monthly" />
 												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
-													Aylık Pro + domain seç
+													{t('dashboard.billing.monthlyButton')}
 												</button>
 											</form>
 											<form method="POST" action="/api/billing/checkout">
 												<input type="hidden" name="siteId" value={site.id} />
 												<input type="hidden" name="planInterval" value="yearly" />
 												<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-													Yıllık Pro (.com dahil)
+													{t('dashboard.billing.yearlyButton')}
 												</button>
 											</form>
 										</div>
 									{:else}
 										<span class="text-xs text-[var(--sk-faint)]">
-											Pro ödemesi hazır olduğunda burada açılacak.
+											{t('dashboard.billing.comingSoon')}
 										</span>
 									{/if}
 								{/if}
 							</div>
 
 							<div class="flex flex-wrap items-center gap-2">
-								<a href="/editor/{site.id}" class="sk-btn sk-btn-primary sk-btn-sm">Düzenle</a>
+								<a href="/editor/{site.id}" class="sk-btn sk-btn-primary sk-btn-sm"
+									>{t('dashboard.actionsRow.edit')}</a
+								>
 								<a href={site.previewUrl} target="_blank" class="sk-btn sk-btn-secondary sk-btn-sm">
-									Önizle
+									{t('dashboard.actionsRow.preview')}
 								</a>
 								{#if site.publishedVersion}
 									<a
@@ -259,23 +295,24 @@
 										target="_blank"
 										class="sk-btn sk-btn-secondary sk-btn-sm"
 									>
-										Canlı siteyi aç {@html uiIcons.external(13)}
+										{t('dashboard.actionsRow.openLive')}
+										{@html uiIcons.external(13)}
 									</a>
 									<form method="POST" action="?/unpublish" use:enhance>
 										<input type="hidden" name="siteId" value={site.id} />
 										<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
-											Yayından kaldır
+											{t('dashboard.actionsRow.unpublish')}
 										</button>
 									</form>
 								{:else}
 									<a href="/editor/{site.id}" class="sk-btn sk-btn-secondary sk-btn-sm"
-										>Yayına hazırla</a
+										>{t('dashboard.actionsRow.prepareForLaunch')}</a
 									>
 								{/if}
 								<details class="relative">
 									<summary
 										class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
-										aria-label="Diğer işlemler"
+										aria-label={t('dashboard.actionsRow.moreActionsAria')}
 									>
 										⋯
 									</summary>
@@ -286,7 +323,7 @@
 											href="/dashboard/{site.id}/messages"
 											class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
 										>
-											Gelen mesajlar
+											{t('dashboard.actionsRow.inbox')}
 											{#if site.messageCount > 0}
 												<span
 													class="rounded-full bg-[#b8532f] px-1.5 py-0.5 text-[10px] text-white"
@@ -297,10 +334,10 @@
 										</a>
 										{#if site.publishedVersion}
 											<div class="px-2 py-1.5">
-										<ShareStoryButton
-											siteName={site.siteName}
-											liveUrl={site.liveUrl}
-											locale={site.defaultLocale as 'tr' | 'en' | 'de'}
+												<ShareStoryButton
+													siteName={site.siteName}
+													liveUrl={site.liveUrl}
+													locale={site.defaultLocale as 'tr' | 'en' | 'de'}
 													class="w-full rounded px-0 py-0 text-left text-sm hover:underline"
 												/>
 											</div>
@@ -309,9 +346,9 @@
 												<button
 													type="submit"
 													class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
-													title="Kaydedilmiş son taslak yeni canlı sürüm olarak yayınlanır."
+													title={t('dashboard.overflow.publishNowTitle')}
 												>
-													Son değişiklikleri yayına al
+													{t('dashboard.overflow.publishNowLabel')}
 												</button>
 											</form>
 										{/if}
@@ -321,11 +358,11 @@
 												download
 												class="rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
 											>
-												Tam site export
+												{t('dashboard.overflow.fullExport')}
 											</a>
 										{:else}
 											<span class="rounded px-2 py-1.5 text-sm text-[var(--sk-faint)]">
-												Tam export Pro site ile
+												{t('dashboard.overflow.fullExportProOnly')}
 											</span>
 										{/if}
 										<button
@@ -333,7 +370,7 @@
 											onclick={() => openDeleteConfirm(site.id)}
 											class="w-full rounded px-2 py-1.5 text-left text-sm text-[#b8532f] hover:bg-[#b8532f]/10"
 										>
-											Siteyi sil
+											{t('dashboard.overflow.deleteSite')}
 										</button>
 									</div>
 								</details>
@@ -345,13 +382,10 @@
 								>
 									<div>
 										<p class="text-sm font-semibold text-[#b8532f]">
-											Bu site kalıcı olarak silinecek
+											{t('dashboard.deleteConfirm.title')}
 										</p>
 										<p class="mt-1 text-xs text-[var(--sk-muted)]">
-											Site yayından kalkar, bağlı domain ayrılır ve tüm sürümler/medya dosyaları
-											silinir. Bu işlem geri alınamaz. Tam export sadece Pro site veya operatör
-											desteğiyle alınabilir. Onaylamak için site adını ({site.siteName}) aşağıya
-											yaz.
+											{t('dashboard.deleteConfirm.body', { name: site.siteName })}
 										</p>
 									</div>
 									{#if form?.deleteMessage && form?.siteId === site.id}
@@ -382,14 +416,14 @@
 											disabled={deleteConfirmText !== site.siteName}
 											class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
 										>
-											Kalıcı olarak sil
+											{t('dashboard.deleteConfirm.confirmButton')}
 										</button>
 										<button
 											type="button"
 											onclick={closeDeleteConfirm}
 											class="sk-btn sk-btn-ghost sk-btn-sm"
 										>
-											Vazgeç
+											{t('dashboard.deleteConfirm.cancel')}
 										</button>
 									</form>
 								</div>
@@ -398,7 +432,7 @@
 							<div class="flex flex-col gap-2 border-t border-[var(--sk-line)] pt-4">
 								{#if site.domain}
 									<div class="flex flex-wrap items-center gap-2 text-sm">
-										<span class="text-[var(--sk-muted)]">Domain:</span>
+										<span class="text-[var(--sk-muted)]">{t('dashboard.domain.label')}</span>
 										<a
 											href="https://{site.domain}"
 											target="_blank"
@@ -406,20 +440,25 @@
 										>
 											{site.domain}
 										</a>
-										<StatusPill tone="success">{site.domainSetupLabel ?? 'Aktif'}</StatusPill>
+										<StatusPill tone="success"
+											>{site.domainSetupLabel ?? t('dashboard.domain.active')}</StatusPill
+										>
 										<form method="POST" action="?/detachDomain" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
 											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
-												Kaldır
+												{t('dashboard.domain.remove')}
 											</button>
 										</form>
 									</div>
 									{#if site.reservation?.emailLocalPart && site.reservation?.emailDestination}
 										<p class="text-xs text-[var(--sk-muted)]">
-											{site.reservation.emailLocalPart}@{site.domain} → {site.reservation
-												.emailDestination}
+											{t('dashboard.domain.forwardTo', {
+												local: site.reservation.emailLocalPart,
+												domain: site.domain,
+												dest: site.reservation.emailDestination
+											})}
 											{site.reservation.emailRoutingStatus === 'pending_verification'
-												? ' · e-posta doğrulaması bekleniyor'
+												? t('dashboard.domain.forwardPendingVerification')
 												: ''}
 										</p>
 									{/if}
@@ -427,7 +466,7 @@
 									{@const res = site.reservation}
 									<div class="flex flex-col gap-2 text-sm">
 										<div class="flex flex-wrap items-center gap-2">
-											<span class="text-[var(--sk-muted)]">Domain rezervasyonu:</span>
+											<span class="text-[var(--sk-muted)]">{t('dashboard.reservation.label')}</span>
 											<span class="font-[var(--font-mono)]">{res.domain}</span>
 											<StatusPill
 												tone={res.status === 'failed'
@@ -437,24 +476,24 @@
 														: 'neutral'}
 											>
 												{res.status === 'pending'
-													? 'ödeme bekleniyor'
+													? t('dashboard.reservation.statusPending')
 													: res.status === 'manual_review'
-														? 'manuel inceleme'
+														? t('dashboard.reservation.statusManualReview')
 														: res.status === 'paid'
-															? 'alan adı hazırlanıyor'
+															? t('dashboard.reservation.statusPaid')
 															: res.status === 'registering'
-																? 'alan adı hazırlanıyor'
+																? t('dashboard.reservation.statusRegistering')
 																: res.status === 'failed'
-																	? 'kurulum inceleniyor'
+																	? t('dashboard.reservation.statusFailed')
 																	: res.status}
 											</StatusPill>
 										</div>
 
 										{#if res.status === 'pending' && site.plan.state === 'free' && !data.user.isAdmin}
 											<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
-												<p class="font-semibold">Domain uygun. Önce bu siteyi Pro yap.</p>
+												<p class="font-semibold">{t('dashboard.reservation.eligibleTitle')}</p>
 												<p class="mt-1 text-[var(--sk-muted)]">
-													Domain tescili ödeme ve iç uygunluk onayından sonra yürütülür.
+													{t('dashboard.reservation.eligibleBody')}
 												</p>
 											</div>
 											{#if data.billingConfigured}
@@ -463,44 +502,47 @@
 														<input type="hidden" name="siteId" value={site.id} />
 														<input type="hidden" name="planInterval" value="monthly" />
 														<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
-															Aylık Pro + domain seç
+															{t('dashboard.billing.monthlyButton')}
 														</button>
 													</form>
 													<form method="POST" action="/api/billing/checkout">
 														<input type="hidden" name="siteId" value={site.id} />
 														<input type="hidden" name="planInterval" value="yearly" />
 														<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-															Yıllık Pro (.com dahil)
+															{t('dashboard.billing.yearlyButton')}
 														</button>
 													</form>
 												</div>
 											{/if}
 										{:else if res.status === 'pending' && res.paymentMethod === 'bank_transfer'}
 											<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
-												<p class="text-[var(--sk-muted)]">Banka havalesi ile öde:</p>
+												<p class="text-[var(--sk-muted)]">{t('dashboard.reservation.bankLabel')}</p>
 												{#if data.payment.iban}
 													<p class="mt-1 font-[var(--font-mono)]">{data.payment.iban}</p>
 													{#if data.payment.accountHolder}
 														<p class="text-[var(--sk-faint)]">{data.payment.accountHolder}</p>
 													{/if}
 												{:else}
-													<p class="text-[var(--sk-faint)]">IBAN operatör tarafından eklenecek.</p>
+													<p class="text-[var(--sk-faint)]">
+														{t('dashboard.reservation.ibanPending')}
+													</p>
 												{/if}
 												<p class="mt-1">
-													Açıklama: <span class="font-[var(--font-mono)]">{res.domain}</span>
+													{t('dashboard.reservation.descriptionLabel')}
+													<span class="font-[var(--font-mono)]">{res.domain}</span>
 												</p>
 											</div>
 											<div class="flex flex-wrap gap-2">
 												<form method="POST" action="?/reportTransfer" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
 													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-														✓ Havale yaptım, bildir
+														{t('dashboard.reservation.reportTransfer')}
 													</button>
 												</form>
 												<form method="POST" action="?/cancelReservation" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
 													<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
-														İptal et
+														{t('dashboard.reservation.cancel')}
 													</button>
 												</form>
 											</div>
@@ -509,39 +551,41 @@
 												<form method="POST" action="?/payDomainStripe">
 													<input type="hidden" name="reservationId" value={res.id} />
 													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-														Kartla devam et
+														{t('dashboard.reservation.cardContinue')}
 													</button>
 												</form>
 												<form method="POST" action="?/cancelReservation" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
 													<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
-														İptal et
+														{t('dashboard.reservation.cancel')}
 													</button>
 												</form>
 											</div>
 										{:else if res.status === 'failed'}
 											<p class="text-xs text-[var(--sk-muted)]">
-												Kurulum sırasında bir sorun oldu; operatör inceliyor. Bir işlem yapman
-												gerekmiyor.
+												{t('dashboard.reservation.failedNote')}
 											</p>
 										{:else if res.status === 'manual_review'}
 											<p class="text-xs text-[var(--sk-muted)]">
-												Bu domain manuel incelemede. Uygunluk netleşince seninle iletişime
-												geçeceğiz.
+												{t('dashboard.reservation.manualReviewNote')}
 											</p>
 										{:else}
 											<div class="rounded-md bg-[#171614]/5 p-3 text-xs text-[var(--sk-muted)]">
-												<p>Alan adı hazırlanıyor.</p>
-												<p>SSL hazırlanıyor.</p>
+												<p>{t('dashboard.reservation.preparingDomain')}</p>
+												<p>{t('dashboard.reservation.preparingSsl')}</p>
 												{#if res.emailLocalPart && res.emailDestination}
 													<p>
-														{res.emailLocalPart}@{res.domain} → {res.emailDestination}
+														{t('dashboard.domain.forwardTo', {
+															local: res.emailLocalPart,
+															domain: res.domain,
+															dest: res.emailDestination
+														})}
 														{res.emailRoutingStatus === 'pending_verification'
-															? ' · e-posta yönlendirme doğrulaması bekleniyor'
+															? t('dashboard.reservation.emailForwardPendingVerification')
 															: ''}
 													</p>
 												{:else}
-													<p>E-posta yönlendirme hazırlanıyor.</p>
+													<p>{t('dashboard.reservation.emailPreparing')}</p>
 												{/if}
 											</div>
 										{/if}
@@ -557,7 +601,7 @@
 										<input
 											type="text"
 											name="domain"
-											placeholder="kendisiteniz.com"
+											placeholder={t('dashboard.attach.placeholder')}
 											class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
 										/>
 										<button
@@ -565,22 +609,21 @@
 											class="sk-btn sk-btn-secondary sk-btn-sm"
 											disabled={site.plan.state === 'free' && !data.user.isAdmin}
 										>
-											Domainimi bağla
+											{t('dashboard.attach.button')}
 										</button>
 									</form>
 									<p class="text-[10.5px] text-[var(--sk-faint)]">
-										Kendi domainin varsa yukarıdan bağla (domainin bize yönlenmiş olmalı).
+										{t('dashboard.attach.note')}
 									</p>
 									{#if data.payment.mode === 'disabled' && !site.hasDomainCredit}
 										<p class="text-xs text-[var(--sk-muted)]">
-											Yeni domain satın alma kapalı beta sonrasında açılacak.
+											{t('dashboard.attach.purchaseClosed')}
 										</p>
 									{:else if site.hasDomainCredit}
 										<div class="rounded-md bg-[#eef7ee] p-3 text-xs text-[#285c2a]">
-											<p class="font-semibold">Yıllık Pro alan adı hakkın hazır.</p>
+											<p class="font-semibold">{t('dashboard.attach.creditReadyTitle')}</p>
 											<p class="mt-1">
-												Bir standart .com alan adı, SSL güvenliği, DNS kurulumu ve hosting
-												bağlantısı pakete dahil.
+												{t('dashboard.attach.creditReadyBody')}
 											</p>
 										</div>
 										<form
@@ -593,19 +636,18 @@
 											<input
 												type="text"
 												name="domain"
-												placeholder="istedigindomain.com"
+												placeholder={t('dashboard.attach.domainPlaceholder')}
 												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
 											/>
 											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-												Dahil .com alan adımı seç
+												{t('dashboard.attach.includedButton')}
 											</button>
 										</form>
 									{:else if site.planDetails.planInterval === 'monthly' && site.plan.state !== 'free' && (data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only' || data.payment.mode === 'hybrid')}
 										<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
-											<p class="font-semibold">Sıradaki adım: .com alan adını seç.</p>
+											<p class="font-semibold">{t('dashboard.attach.nextStepTitle')}</p>
 											<p class="mt-1 text-[var(--sk-muted)]">
-												Aylık Pro siten yayında kalır; kendi .com adresin için yıllık alan adı
-												hizmeti 15€'dur. SSL, DNS kurulumu ve siteye bağlama tarafımızdan yönetilir.
+												{t('dashboard.attach.nextStepBody')}
 											</p>
 										</div>
 										<form
@@ -619,11 +661,11 @@
 											<input
 												type="text"
 												name="domain"
-												placeholder="istedigindomain.com"
+												placeholder={t('dashboard.attach.domainPlaceholder')}
 												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
 											/>
 											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-												.com alan adımı seç
+												{t('dashboard.attach.yearlyButton')}
 											</button>
 										</form>
 									{:else if data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only'}
@@ -638,11 +680,11 @@
 											<input
 												type="text"
 												name="domain"
-												placeholder="istedigindomain.com"
+												placeholder={t('dashboard.attach.domainPlaceholder')}
 												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
 											/>
 											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-												Domain uygunluğunu kontrol et
+												{t('dashboard.attach.checkAvailability')}
 											</button>
 										</form>
 									{:else}
@@ -656,19 +698,19 @@
 											<input
 												type="text"
 												name="domain"
-												placeholder="istedigindomain.com"
+												placeholder={t('dashboard.attach.domainPlaceholder')}
 												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
 											/>
 											{#if data.payment.mode === 'hybrid'}
 												<select name="paymentMethod" class="sk-input min-h-8 py-1.5 text-xs">
-													<option value="bank_transfer">🏦 Banka havalesi</option>
-													<option value="stripe">💳 Kredi kartı</option>
+													<option value="bank_transfer">{t('dashboard.attach.bankOption')}</option>
+													<option value="stripe">{t('dashboard.attach.cardOption')}</option>
 												</select>
 											{:else}
 												<input type="hidden" name="paymentMethod" value="bank_transfer" />
 											{/if}
 											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
-												Domain uygunluğunu kontrol et
+												{t('dashboard.attach.checkAvailability')}
 											</button>
 										</form>
 									{/if}

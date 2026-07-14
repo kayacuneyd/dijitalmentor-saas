@@ -11,7 +11,12 @@ import {
 	SiteQuotaError
 } from './siteQuota';
 
-const user = { id: 'quota-free-user', email: 'quota-free@example.com', isAdmin: false };
+const user = {
+	id: 'quota-free-user',
+	email: 'quota-free@example.com',
+	isAdmin: false,
+	locale: null
+};
 
 function saveSite(id: string) {
 	const site = structuredClone(seedSites.psych);

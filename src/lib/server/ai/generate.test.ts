@@ -107,7 +107,7 @@ describe('generateSite (mocked LLM)', () => {
 
 		expect(run).toHaveBeenCalledTimes(2);
 		expect(site.id).toBe('site-t');
-		expect(site.locales).toEqual(['tr', 'en', 'de']);
+		expect(site.locales).toEqual(['en', 'tr', 'de']);
 		expect(usage).toEqual({ inputTokens: 200, outputTokens: 400 });
 		// the translate call must not include the create_site tool
 		expect(run.mock.calls[1][0].tool.name).toBe('translate_site');

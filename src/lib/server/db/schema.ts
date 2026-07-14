@@ -66,6 +66,10 @@ export const users = sqliteTable(
 		profession: text('profession'),
 		city: text('city'),
 		betaProfileCompletedAt: integer('beta_profile_completed_at', { mode: 'timestamp' }),
+		// Saved app-UI language preference (project-wide i18n). NULL until the user
+		// explicitly switches via the authenticated-chrome LanguageSwitcher — falls
+		// back to the sk_locale cookie/detectLocale chain until then.
+		locale: text('locale'),
 		// Billing (M5/M6): filled by the Stripe webhook.
 		stripeCustomerId: text('stripe_customer_id'),
 		subscriptionStatus: text('subscription_status'),
@@ -101,6 +105,23 @@ export const marketingPageCopy = sqliteTable(
 			.$defaultFn(() => new Date())
 	},
 	(table) => [primaryKey({ columns: [table.page, table.locale] })]
+);
+
+// Operator-editable overrides for any string in the app-wide message catalog
+// (src/lib/i18n/catalog) — dashboard/editor/admin/account/email text, not just
+// marketing pages. One row per (key, locale); unlisted keys silently keep the
+// code default, same fallback behavior as marketingPageCopy above.
+export const messageOverrides = sqliteTable(
+	'message_overrides',
+	{
+		key: text('key').notNull(),
+		locale: text('locale').notNull(),
+		value: text('value').notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [primaryKey({ columns: [table.key, table.locale] })]
 );
 
 // Contact-form submissions from published tenant sites (PLAN §7).

@@ -157,7 +157,7 @@ export function destroyOwnerSession(token: string | undefined): void {
 
 export function getOwnerSessionUser(
 	token: string | undefined
-): { id: string; email: string } | null {
+): { id: string; email: string; locale: null } | null {
 	if (!token) return null;
 	const now = new Date();
 	const row = db
@@ -167,7 +167,9 @@ export function getOwnerSessionUser(
 		.get();
 	if (!row || row.expiresAt.getTime() < Date.now()) return null;
 	db.delete(ownerSessions).where(lt(ownerSessions.expiresAt, now)).run();
-	return { id: `owner-${sha256(row.email).slice(0, 10)}`, email: row.email };
+	// Owner sessions have no `users` row to persist a locale preference on — the
+	// hooks.server.ts precedence rule naturally falls through to cookie/detect.
+	return { id: `owner-${sha256(row.email).slice(0, 10)}`, email: row.email, locale: null };
 }
 
 function createOwnerSession(

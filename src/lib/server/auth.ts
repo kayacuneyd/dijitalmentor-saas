@@ -3,6 +3,7 @@ import { desc, eq, lt } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
 import type { Cookies } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
+import { isLocale, type Locale } from '$lib/i18n';
 import { db } from '$lib/server/db';
 import { betaInvites, loginTokens, sessions, users } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
@@ -21,7 +22,7 @@ export const SESSION_COOKIE = 'sk_session';
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 const newToken = () => randomBytes(32).toString('base64url');
 
-export type SessionUser = { id: string; email: string };
+export type SessionUser = { id: string; email: string; locale: Locale | null };
 export type UserProfile = {
 	id: string;
 	email: string;
@@ -173,12 +174,25 @@ export function getOrCreateUser(email: string): SessionUser {
 	recordInviteJoin(email);
 	const normalized = normalizeEmail(email);
 	const existing = db.select().from(users).where(eq(users.email, normalized)).get();
-	if (existing) return { id: existing.id, email: existing.email };
+	if (existing) {
+		return {
+			id: existing.id,
+			email: existing.email,
+			locale: isLocale(existing.locale) ? existing.locale : null
+		};
+	}
 	const user = { id: `user-${randomUUID().slice(0, 8)}`, email: normalized };
 	db.insert(users)
 		.values({ ...user, createdAt: new Date() })
 		.run();
-	return user;
+	return { ...user, locale: null };
+}
+
+/** Written only by the dedicated authenticated-chrome switcher (`POST /api/locale`) —
+ *  visiting a locale-prefixed marketing link while logged in must never silently
+ *  overwrite this durable preference. */
+export function setUserLocale(userId: string, locale: Locale): void {
+	db.update(users).set({ locale }).where(eq(users.id, userId)).run();
 }
 
 export function getUserProfile(userId: string): UserProfile | null {
@@ -224,10 +238,7 @@ export function updateBetaProfile(input: {
 export function setUserProfessionIfEmpty(userId: string, profession: string): void {
 	const trimmed = profession.trim();
 	if (!trimmed) return;
-	db.update(users)
-		.set({ profession: trimmed })
-		.where(eq(users.id, userId))
-		.run();
+	db.update(users).set({ profession: trimmed }).where(eq(users.id, userId)).run();
 }
 
 // --- sessions ----------------------------------------------------------------
@@ -250,7 +261,9 @@ export function getSessionUser(token: string | undefined): SessionUser | null {
 		.get();
 	if (!session || session.expiresAt.getTime() < Date.now()) return null;
 	const user = db.select().from(users).where(eq(users.id, session.userId)).get();
-	return user ? { id: user.id, email: user.email } : null;
+	return user
+		? { id: user.id, email: user.email, locale: isLocale(user.locale) ? user.locale : null }
+		: null;
 }
 
 export function destroySession(token: string | undefined): void {

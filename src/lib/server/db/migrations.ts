@@ -780,6 +780,28 @@ export const migrations: Migration[] = [
 				updated_at integer NOT NULL
 			)`);
 		}
+	},
+	{
+		version: 27,
+		name: 'message-overrides',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS message_overrides (
+				key text NOT NULL,
+				locale text NOT NULL,
+				value text NOT NULL,
+				updated_at integer NOT NULL,
+				PRIMARY KEY (key, locale)
+			)`);
+		}
+	},
+	{
+		version: 28,
+		name: 'users-locale',
+		up(client) {
+			// Nullable, no backfill: NULL means "no stored preference yet" and falls
+			// back to the sk_locale cookie/detectLocale chain — exactly today's behavior.
+			ensureColumn(client, 'users', 'locale', 'text');
+		}
 	}
 ];
 

@@ -2,6 +2,7 @@
 	import './layout.css';
 	import { dev } from '$app/environment';
 	import favicon from '$lib/assets/favicon.svg';
+	import { setTranslateContext } from '$lib/i18n/context';
 
 	// Self-hosted (no Google Fonts CDN request from a SaaS page — no third-party
 	// tracking beacon, no render-blocking cross-origin fetch). Tenant-theme fonts
@@ -15,6 +16,11 @@
 	import '@fontsource/ibm-plex-mono/latin-ext.css';
 
 	let { data, children } = $props();
+
+	setTranslateContext(
+		() => data.locale,
+		() => data.messageOverrides
+	);
 
 	// PWA is SaaS-app-only: tenant origins (*.saaskaya.com, custom domains) share
 	// this layout via Host rerouting and must never install the saaskaya app —

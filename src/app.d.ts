@@ -7,7 +7,12 @@ declare global {
 			errorId?: string;
 		}
 		interface Locals {
-			user: { id: string; email: string; isAdmin: boolean } | null;
+			user: {
+				id: string;
+				email: string;
+				isAdmin: boolean;
+				locale: import('$lib/i18n').Locale | null;
+			} | null;
 			locale: import('$lib/i18n').Locale;
 			unprefixedPath: string;
 			/** True when the request's Host is a tenant site (subdomain/custom domain),

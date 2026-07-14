@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import { INTEGRATION_TYPES, type IntegrationType, validateIntegrationTarget } from '$lib/kits/integrations';
+import { LOCALES } from '$lib/i18n';
 
-export const LOCALES = ['tr', 'en', 'de'] as const;
+// Tenant-published-site languages currently mirror the app's own UI languages
+// (`$lib/i18n`'s LOCALES) — re-exported here rather than redeclared so the two
+// never drift when a new language is added. If tenant-site languages ever need
+// to diverge from the app's UI languages, give them their own SITE_LOCALES here
+// instead of re-widening this re-export.
+export { LOCALES };
 export const localeSchema = z.enum(LOCALES);
 export type Locale = z.infer<typeof localeSchema>;
 

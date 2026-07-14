@@ -40,8 +40,8 @@ describe('users + sessions', () => {
 });
 
 describe('canManageSite', () => {
-	const user = { id: 'user-1', email: 'a@b.co' };
-	const admin = { id: 'admin-1', email: 'admin@saaskaya.com', isAdmin: true };
+	const user = { id: 'user-1', email: 'a@b.co', locale: null };
+	const admin = { id: 'admin-1', email: 'admin@saaskaya.com', locale: null, isAdmin: true };
 	it('ownerless (seed) sites are open; owned sites are owner/admin only', () => {
 		expect(canManageSite(null, null)).toBe(true);
 		expect(canManageSite(user, null)).toBe(true);

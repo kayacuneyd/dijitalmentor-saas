@@ -42,8 +42,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const user = owner ?? getSessionUser(event.cookies.get(SESSION_COOKIE));
 	event.locals.user = user ? { ...user, isAdmin: owner ? true : isAdminEmail(user.email) } : null;
 	const pathLocale = localeFromPath(event.url.pathname);
+	// Precedence: an explicit locale-prefixed URL always wins, then a saved account
+	// preference (only ever written by the authenticated-chrome switcher — visiting
+	// a stray locale-prefixed marketing link while logged in must not silently
+	// change it), then the existing cookie/header/default chain.
 	const locale =
 		pathLocale ??
+		event.locals.user?.locale ??
 		detectLocale(
 			event.request.headers.get('accept-language'),
 			event.cookies.get(LOCALE_COOKIE),

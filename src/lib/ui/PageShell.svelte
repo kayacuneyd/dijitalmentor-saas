@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
 	import AppCanvasShell from './AppCanvasShell.svelte';
+	import LanguageSwitcher from './LanguageSwitcher.svelte';
 	import { uiIcons } from './icons';
 
 	let {
@@ -25,9 +28,15 @@
 		canvasLabel?: string;
 		actions?: import('svelte').Snippet;
 	}>();
+
+	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 </script>
 
-<AppCanvasShell label={canvasLabel} max={canvasMax}>
+{#snippet localeSwitcher()}
+	<LanguageSwitcher {locale} variant="cookie" />
+{/snippet}
+
+<AppCanvasShell label={canvasLabel} max={canvasMax} right={localeSwitcher}>
 	<div class="mx-auto flex w-full {max} flex-col gap-6">
 		<header class="flex flex-wrap items-start justify-between gap-4">
 			<div class="min-w-0">

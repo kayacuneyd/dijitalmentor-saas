@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
 	import AppCanvasShell from './AppCanvasShell.svelte';
+	import LanguageSwitcher from './LanguageSwitcher.svelte';
 
 	type AdminNavItem = {
 		href: string;
@@ -31,6 +34,7 @@
 		{ href: '/admin/inbox', label: 'Inbox', eyebrow: 'Public', match: '/admin/inbox' },
 		{ href: '/admin/blog', label: 'Blog', eyebrow: 'Content', match: '/admin/blog' },
 		{ href: '/admin/copy', label: 'Copy', eyebrow: 'Content', match: '/admin/copy' },
+		{ href: '/admin/messages', label: 'Messages', eyebrow: 'i18n', match: '/admin/messages' },
 		{ href: '/admin/share', label: 'Share', eyebrow: 'Growth', match: '/admin/share' },
 		{ href: '/admin/support', label: 'Support', eyebrow: 'Help', match: '/admin/support' },
 		{ href: '/admin/invites', label: 'Beta Invites', eyebrow: 'Access', match: '/admin/invites' },
@@ -41,9 +45,15 @@
 		if (item.href === '/admin') return active === '/admin';
 		return active === item.href || active.startsWith(`${item.match}/`);
 	}
+
+	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 </script>
 
-<AppCanvasShell label="saaskaya.app / admin" max="max-w-[92rem]">
+{#snippet localeSwitcher()}
+	<LanguageSwitcher {locale} variant="cookie" />
+{/snippet}
+
+<AppCanvasShell label="saaskaya.app / admin" max="max-w-[92rem]" right={localeSwitcher}>
 	<div
 		class="grid min-h-[calc(100svh-7rem)] gap-0 overflow-hidden rounded-[var(--sk-radius)] border border-[var(--sk-line)] bg-[var(--sk-card)] lg:grid-cols-[232px_1fr]"
 	>

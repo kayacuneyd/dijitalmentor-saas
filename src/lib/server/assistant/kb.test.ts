@@ -71,12 +71,12 @@ describe('assistant knowledge base', () => {
 		expect(routed.prefill).toBeUndefined();
 	});
 
-	it('still treats long keyword-free briefs as onboarding with prefill', () => {
+	it('still treats long keyword-free briefs as onboarding without forcing raw prefill', () => {
 		const message = 'Kadıköy’de beslenme koçuyum, randevu almak isteyen danışanlarım var';
 		const routed = classify(message, 'tr', false);
 		expect(routed.intent).toBe('start_onboarding');
 		expect(routed.href).toBe('/new');
-		expect(routed.prefill).toBe(message);
+		expect(routed.prefill).toBeUndefined();
 	});
 
 	it('no longer routes bare mail/email mentions to domain info', () => {
@@ -88,6 +88,11 @@ describe('assistant knowledge base', () => {
 		const signedOut = classify('Sitemdeki hakkımda yazısını düzenle', 'tr', false);
 		expect(signedOut.action).toBe('login_required');
 		expect(signedOut.href).toBe('/login');
+		const betaSignedOut = classify('Sitemdeki hakkımda yazısını düzenle', 'tr', false, {
+			authHref: '/beta'
+		});
+		expect(betaSignedOut.action).toBe('login_required');
+		expect(betaSignedOut.href).toBe('/beta');
 		const signedIn = classify('Sitemdeki hakkımda yazısını düzenle', 'tr', true);
 		expect(signedIn.action).toBe('open_dashboard');
 		expect(signedIn.href).toBe('/dashboard');

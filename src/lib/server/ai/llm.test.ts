@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { clearSetting, setSetting } from '$lib/server/config';
 import {
+	AIProviderRejectedRequestError,
+	AIUnavailableError,
 	configuredAgentProvider,
 	configuredGatekeeperProvider,
 	configuredModel,
@@ -23,6 +25,12 @@ afterEach(() => {
 });
 
 describe('LLM provider routing', () => {
+	it('marks provider structured-request rejection as an unavailable subtype', () => {
+		const error = new AIProviderRejectedRequestError('rejected');
+		expect(error).toBeInstanceOf(AIProviderRejectedRequestError);
+		expect(error).toBeInstanceOf(AIUnavailableError);
+	});
+
 	it('uses the low-cost beta providers and models by default', () => {
 		expect(configuredGatekeeperProvider()).toBe('groq');
 		expect(configuredAgentProvider()).toBe('deepseek');

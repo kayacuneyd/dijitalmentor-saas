@@ -201,13 +201,6 @@
 				contactMessage = message;
 				return;
 			}
-			if (data.action === 'start_onboarding') {
-				try {
-					localStorage.setItem('saaskaya.promptSeed', data.prefill || message);
-				} catch {
-					// Non-critical convenience handoff.
-				}
-			}
 			if (data.href) {
 				setTimeout(() => void goto(routeHref(data.href as string)), 450);
 			}

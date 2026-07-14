@@ -27,6 +27,10 @@ export type AssistantReply = {
 	prefill?: string;
 };
 
+export type AssistantClassifyOptions = {
+	authHref?: string;
+};
+
 // Ordered — first match wins. Informational intents must stay above the greedy
 // start_onboarding entry (which also catches any message of 28+ characters).
 export const KB: KbEntry[] = [
@@ -266,8 +270,14 @@ function matchesAny(variants: string[], words: string[]): boolean {
 	return words.some((word) => variants.some((text) => text.includes(word)));
 }
 
-export function classify(message: string, locale: Locale, signedIn: boolean): AssistantReply {
+export function classify(
+	message: string,
+	locale: Locale,
+	signedIn: boolean,
+	options: AssistantClassifyOptions = {}
+): AssistantReply {
 	const variants = [message.toLocaleLowerCase('tr-TR'), message.toLowerCase()];
+	const authHref = options.authHref || LOGIN_REQUIRED.href;
 	for (const entry of KB) {
 		if (!matchesAny(variants, entryKeywords(entry))) continue;
 		if (entry.intent === 'edit_site' && !signedIn) {
@@ -275,15 +285,14 @@ export function classify(message: string, locale: Locale, signedIn: boolean): As
 				intent: entry.intent,
 				action: 'login_required',
 				reply: LOGIN_REQUIRED.reply[locale],
-				href: LOGIN_REQUIRED.href
+				href: authHref
 			};
 		}
 		return {
 			intent: entry.intent,
 			action: entry.action,
 			reply: entry.reply[locale],
-			href: entry.href,
-			prefill: entry.action === 'start_onboarding' ? message : undefined
+			href: entry.intent === 'account_login' && !signedIn ? authHref : entry.href
 		};
 	}
 	const onboarding = KB.find((entry) => entry.intent === 'start_onboarding');
@@ -292,8 +301,7 @@ export function classify(message: string, locale: Locale, signedIn: boolean): As
 			intent: onboarding.intent,
 			action: onboarding.action,
 			reply: onboarding.reply[locale],
-			href: onboarding.href,
-			prefill: message
+			href: onboarding.href
 		};
 	}
 	return { intent: 'fallback', action: 'fallback', reply: FALLBACK.reply[locale] };

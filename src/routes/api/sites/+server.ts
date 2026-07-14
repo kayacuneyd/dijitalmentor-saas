@@ -1,7 +1,12 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { generateSite } from '$lib/server/ai/generate';
-import { AIInvalidOutputError, AIUnavailableError, QuotaExceededError } from '$lib/server/ai/llm';
+import {
+	AIInvalidOutputError,
+	AIProviderRejectedRequestError,
+	AIUnavailableError,
+	QuotaExceededError
+} from '$lib/server/ai/llm';
 import { assertWithinQuota, recordUsage, tenantIdForUser } from '$lib/server/ai/usage';
 import { saveDraft } from '$lib/server/db/repo';
 import { recordError } from '$lib/server/error-log';
@@ -101,6 +106,61 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				});
 			}
 			return json({ ok: false, message: error.message }, { status: 429 });
+		}
+		if (error instanceof AIProviderRejectedRequestError) {
+			const errorId = recordError(error, {
+				source: 'site-generation',
+				route: '/api/sites',
+				method: 'POST',
+				status: 422,
+				userId: locals.user.id,
+				siteId: id
+			});
+			if (onboardingPendingId) {
+				recordOnboardingEvent({
+					event: 'generation_failed',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt,
+					errorId
+				});
+			}
+			const pending = onboardingPendingId ? getPendingById(onboardingPendingId) : undefined;
+			const site = createFallbackSite({
+				id,
+				tenantId,
+				answers: pending?.answers
+			});
+			saveDraft(site, { ownerUserId: locals.user.id });
+			if (onboardingPendingId) {
+				try {
+					if (pending) {
+						setGeneratedSiteId(onboardingPendingId, id);
+						seedChatFromOnboarding(id, pending.answers);
+					}
+				} catch (seedErr) {
+					console.error('[onboarding] provider-rejection fallback chat seed failed:', seedErr);
+				}
+				recordOnboardingEvent({
+					event: 'generation_succeeded',
+					pendingId: onboardingPendingId,
+					userId: locals.user.id,
+					siteId: id,
+					route: '/api/sites',
+					durationMs: Date.now() - startedAt,
+					errorId
+				});
+			}
+			return json({
+				ok: true,
+				id,
+				fallback: true,
+				errorId,
+				message:
+					'AI sağlayıcısı yapılandırılmış isteği reddetti; cevapların kaybolmasın diye güvenli bir başlangıç taslağı açıldı.'
+			});
 		}
 		if (error instanceof AIUnavailableError) {
 			const errorId = recordError(error, {

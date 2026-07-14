@@ -2973,3 +2973,25 @@ siteStructure -> languages`. Local smoke logged expected onboarding-guard fail-o
 - Known unrelated issue: repo-wide `npm run lint` still fails because 148 pre-existing files outside
   this change set are not Prettier-formatted (notably `.agents/skills/hallmark/**` and older source
   files). Touched files were checked independently and are formatted.
+
+### 2026-07-14 — Create website routing, beta auth target, and structured-request fallback
+
+- Fixed the root cause behind "create website" from the public assistant opening the free-text brief
+  path instead of the classic Q&A: `SiteAssistantDock` no longer writes `saaskaya.promptSeed`, and
+  `/new` clears any legacy seed without switching to raw mode. Assistant onboarding intents now route
+  to the guided flow by default; the raw textarea remains available only through the explicit UI toggle.
+- Added beta-aware auth routing for this flow. `/new` now exposes `authHref` (`/beta` when
+  `BETA_MODE=1` and the visitor is anonymous, otherwise `/login`), and the assistant route uses the
+  same target for signed-out login/edit intents. `/beta` magic links now carry the pending onboarding
+  token (`p=`) just like `/login`, so a visitor who answered the Q&A before beta sign-in resumes the
+  same pending record after verification.
+- Removed the generation mismatch introduced by the new page-count question: `generatedSiteSchema`
+  now allows 5 pages, and the create-site system prompt explicitly honors one-page, 3-page, and
+  5-page structure preferences instead of steering mostly toward one/two pages.
+- Split provider 400/422 structured request failures into `AIProviderRejectedRequestError`. `/api/sites`
+  now logs that case as a structured-request failure and opens the safe fallback draft instead of
+  returning a blocking 503; real outages, auth failures, balance, rate-limit, and 5xx provider errors
+  still return the controlled 503 path.
+- Verification: targeted tests passed for assistant routing, `/new` auth target, AI schemas, LLM error
+  typing, and `/api/sites` fallback (33 tests); `npm run check` passed with 0 errors/warnings; touched
+  files pass Prettier check; full `npm run test` passed (82 files / 520 tests); `npm run build` passed.

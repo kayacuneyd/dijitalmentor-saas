@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { classify } from '$lib/server/assistant/kb';
-import { rateLimit } from '$lib/server/auth';
+import { betaModeOn, rateLimit } from '$lib/server/auth';
 import type { RequestHandler } from './$types';
 
 const bodySchema = z.object({
@@ -29,7 +29,8 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		return json({ ok: false, message: body.error.issues[0].message }, { status: 400 });
 	}
 
-	const routed = classify(body.data.message, body.data.locale, Boolean(locals.user));
+	const authHref = betaModeOn() && !locals.user ? '/beta' : '/login';
+	const routed = classify(body.data.message, body.data.locale, Boolean(locals.user), { authHref });
 	return json({
 		ok: true,
 		action: routed.action,

@@ -402,11 +402,8 @@
 
 	$effect(() => {
 		if (promptSeedApplied || typeof window === 'undefined') return;
-		if (Object.keys(answers).length > 0) return;
 		const seed = window.localStorage.getItem('saaskaya.promptSeed')?.trim();
 		if (!seed) return;
-		rawText = seed;
-		useRaw = true;
 		promptSeedApplied = true;
 		window.localStorage.removeItem('saaskaya.promptSeed');
 	});
@@ -415,9 +412,7 @@
 		typeof answers.rawDescription === 'string' &&
 			(answers.rawDescription as string).trim().length >= 30
 	);
-	const current = $derived<Question | undefined>(
-		hasRaw ? undefined : nextQuestion(answers)
-	);
+	const current = $derived<Question | undefined>(hasRaw ? undefined : nextQuestion(answers));
 	const currentDisplay = $derived(current ? localizeQuestion(current, locale) : undefined);
 	let editingId = $state<string | null>(null);
 	const active = $derived(editingId ? questionById(editingId) : current);
@@ -564,7 +559,12 @@
 
 	function addListItem() {
 		const value = listInput.trim();
-		if (!value || value.length > listItemLimit || listItems.length >= 8 || listItems.includes(value))
+		if (
+			!value ||
+			value.length > listItemLimit ||
+			listItems.length >= 8 ||
+			listItems.includes(value)
+		)
 			return;
 		listItems = [...listItems, value];
 		listInput = '';
@@ -592,7 +592,7 @@
 
 	async function completeFlow() {
 		if (!data.user) {
-			await goto(l('/login'));
+			await goto(l(data.authHref ?? '/login'));
 			return;
 		}
 		busy = true;
@@ -712,9 +712,7 @@
 			<div class="flex flex-col gap-1.5">
 				<div class="flex items-center justify-between">
 					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
-						{flowComplete
-							? copy.stepsDone
-							: `${copy.stepWord} ${stepNumber} / ${totalSteps}`}
+						{flowComplete ? copy.stepsDone : `${copy.stepWord} ${stepNumber} / ${totalSteps}`}
 					</span>
 					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{progressPct}%</span>
 				</div>

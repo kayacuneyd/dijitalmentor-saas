@@ -74,7 +74,7 @@ export const generatedSiteSchema = z.strictObject({
 		.array(z.strictObject({ pageSlug: slug, label: nonEmpty }))
 		.min(1)
 		.max(8),
-	pages: z.array(genPageSchema).min(1).max(4),
+	pages: z.array(genPageSchema).min(1).max(5),
 	settings: z.strictObject({
 		siteName: nonEmpty,
 		contactEmail: z.email().optional(),

@@ -1,6 +1,7 @@
 import { PENDING_COOKIE, getPendingByToken } from '$lib/server/onboarding/session';
 import { kitBySlug } from '$lib/kits';
 import { SUPPORTED_NICHES } from '$lib/onboarding/support';
+import { betaModeOn } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 const supportedNiches = new Set<string>(SUPPORTED_NICHES);
@@ -29,6 +30,7 @@ export const load: PageServerLoad = ({ locals, cookies, url }) => {
 	const preselectedNiche = supportedNiches.has(profession) ? profession : null;
 	return {
 		user: locals.user,
+		authHref: betaModeOn() && !locals.user ? '/beta' : '/login',
 		pending,
 		preselectedNiche,
 		campaignSource: campaignSource(url),

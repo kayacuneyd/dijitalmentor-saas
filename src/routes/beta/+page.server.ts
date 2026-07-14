@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getSetting } from '$lib/server/config';
 import { createLoginToken, rateLimit, selfServeBetaInvite } from '$lib/server/auth';
 import { sendMagicLink } from '$lib/server/email';
+import { PENDING_COOKIE } from '$lib/server/onboarding/session';
 import { getPublicCopyOverrides } from '$lib/server/publicCopy';
 import { withLocale } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
@@ -28,7 +29,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, url, locals, getClientAddress }) => {
+	default: async ({ request, url, locals, cookies, getClientAddress }) => {
 		if (!rateLimit(`beta:${getClientAddress()}`, 8, 60_000)) {
 			return fail(429, { message: 'Too many attempts — wait a minute and try again.' });
 		}
@@ -48,10 +49,11 @@ export const actions: Actions = {
 		selfServeBetaInvite(email.data);
 		const token = createLoginToken(email.data);
 		const verifyPath = withLocale(locals.locale, '/login/verify');
-		const { devEchoLink } = await sendMagicLink(
-			email.data,
-			`${url.origin}${verifyPath}?token=${token}`
-		);
+		const pendingToken = cookies.get(PENDING_COOKIE);
+		const link = pendingToken
+			? `${url.origin}${verifyPath}?token=${token}&p=${encodeURIComponent(pendingToken)}`
+			: `${url.origin}${verifyPath}?token=${token}`;
+		const { devEchoLink } = await sendMagicLink(email.data, link);
 		return { sent: true, email: email.data, devEchoLink };
 	}
 };

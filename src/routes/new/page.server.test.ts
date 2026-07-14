@@ -1,9 +1,35 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { clearSetting, setSetting } from '$lib/server/config';
 import { load } from './+page.server';
 
 const cookies = { get: () => undefined };
 
+afterEach(() => {
+	clearSetting('BETA_MODE');
+});
+
 describe('GET /new (load)', () => {
+	it('returns the normal auth target when beta mode is off', () => {
+		const result = load({
+			locals: { user: null },
+			cookies,
+			url: new URL('http://localhost/new')
+		} as never) as { authHref: string };
+
+		expect(result.authHref).toBe('/login');
+	});
+
+	it('returns the beta auth target for anonymous visitors when beta mode is on', () => {
+		setSetting('BETA_MODE', '1');
+		const result = load({
+			locals: { user: null },
+			cookies,
+			url: new URL('http://localhost/new')
+		} as never) as { authHref: string };
+
+		expect(result.authHref).toBe('/beta');
+	});
+
 	it('returns selected kit metadata for a valid kit query parameter', () => {
 		const result = load({
 			locals: { user: null },

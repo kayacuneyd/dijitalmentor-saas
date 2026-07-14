@@ -11,6 +11,7 @@ export type AIProvider = 'anthropic' | 'deepseek' | 'groq';
 export type ModelTier = 'light' | 'heavy';
 
 export class AIUnavailableError extends Error {}
+export class AIProviderRejectedRequestError extends AIUnavailableError {}
 export class AIInvalidOutputError extends Error {
 	constructor(
 		message: string,
@@ -178,7 +179,7 @@ async function runAnthropicCompatible(
 				});
 			}
 			if (error.status === 400 || error.status === 422) {
-				throw new AIUnavailableError(
+				throw new AIProviderRejectedRequestError(
 					'The AI provider rejected the structured request — check provider/model settings.',
 					{ cause: error }
 				);

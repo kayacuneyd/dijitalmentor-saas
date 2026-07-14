@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { clearSetting, setSetting } from '$lib/server/config';
 import { POST } from './+server';
+
+afterEach(() => {
+	clearSetting('BETA_MODE');
+});
 
 function request(message: string, user: { id: string; email: string } | null = null) {
 	return POST({
@@ -14,14 +19,14 @@ function request(message: string, user: { id: string; email: string } | null = n
 }
 
 describe('assistant route endpoint', () => {
-	it('routes profession briefs to onboarding with prefill', async () => {
+	it('routes profession briefs to guided onboarding without raw prefill', async () => {
 		const res = await request('Ben diyetisyenim, online danışmanlık için site istiyorum');
 		const data = await res.json();
 
 		expect(res.status).toBe(200);
 		expect(data.action).toBe('start_onboarding');
 		expect(data.href).toBe('/new');
-		expect(data.prefill).toContain('diyetisyen');
+		expect(data.prefill).toBeUndefined();
 	});
 
 	it('routes pricing and domain questions to pricing/domain replies', async () => {
@@ -59,5 +64,13 @@ describe('assistant route endpoint', () => {
 		expect(signedOut.href).toBe('/login');
 		expect(signedIn.action).toBe('open_dashboard');
 		expect(signedIn.href).toBe('/dashboard');
+	});
+
+	it('uses beta access as the auth target while closed beta is enabled', async () => {
+		setSetting('BETA_MODE', '1');
+		const signedOut = await (await request('Sitemdeki hakkımda yazısını düzenle')).json();
+
+		expect(signedOut.action).toBe('login_required');
+		expect(signedOut.href).toBe('/beta');
 	});
 });

@@ -11,7 +11,7 @@
 
 <svelte:head>
 	<title>{data.page.title[data.locale]} · {data.site.settings.siteName}</title>
-	{#if data.site.settings.seo}
+	{#if data.site.settings.seo?.description}
 		<meta name="description" content={data.site.settings.seo.description[data.locale]} />
 	{/if}
 </svelte:head>

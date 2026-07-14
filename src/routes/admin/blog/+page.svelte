@@ -3,8 +3,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	const tone = (status: string) =>
 		status === 'published' ? 'success' : status === 'archived' ? 'error' : 'neutral';
@@ -12,17 +14,19 @@
 </script>
 
 <svelte:head>
-	<title>Blog · saaskaya admin</title>
+	<title>{t('admin.blog.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Blog"
-	description="Manage multilingual platform articles, SEO summaries, cover images, and publication state."
+	title={t('admin.blog.title')}
+	description={t('admin.blog.description')}
 	active="/admin/blog"
 >
 	{#snippet actions()}
 		<form method="POST" action="?/create" use:enhance>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">New post</button>
+			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
+				>{t('admin.blog.newPost')}</button
+			>
 		</form>
 	{/snippet}
 
@@ -31,7 +35,7 @@
 			Imported <code>{form.imported}</code>{form.updatedExisting
 				? ' by updating the existing post.'
 				: '.'}
-			<a href={`/admin/blog/${form.importedPostId}`} class="sk-link">Open editor</a>
+			<a href={`/admin/blog/${form.importedPostId}`} class="sk-link">{t('admin.blog.edit')}</a>
 		</div>
 	{:else if form?.importError}
 		<div class="sk-alert sk-alert-error">
@@ -57,13 +61,14 @@
 			class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"
 		>
 			<div class="min-w-0">
-				<h2 class="text-base font-semibold">Import multilingual JSON</h2>
+				<h2 class="text-base font-semibold">{t('admin.blog.importTitle')}</h2>
 				<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">
-					Upload one structured JSON file with complete EN/TR/DE translations. Published imports are
-					blocked if any language is incomplete.
+					{t('admin.blog.importHelp')}
 				</p>
 				<label class="mt-3 block">
-					<span class="mb-1 block text-xs font-medium text-[var(--sk-faint)]">JSON file</span>
+					<span class="mb-1 block text-xs font-medium text-[var(--sk-faint)]"
+						>{t('admin.blog.jsonFile')}</span
+					>
 					<input
 						type="file"
 						name="blogJson"
@@ -73,22 +78,22 @@
 				</label>
 				<label class="mt-2 inline-flex items-center gap-2 text-sm text-[var(--sk-muted)]">
 					<input type="checkbox" name="updateExisting" class="size-4" />
-					Update existing post when slug matches
+					{t('admin.blog.updateExisting')}
 				</label>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-secondary">Import JSON</button>
+			<button type="submit" class="sk-btn sk-btn-secondary">{t('admin.blog.importJson')}</button>
 		</form>
 	</AppCard>
 
 	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-wrap items-center justify-between gap-3">
-				<h2 class="text-lg font-semibold">{data.posts.length} post(s)</h2>
-				<a href="/blog" class="sk-btn sk-btn-secondary sk-btn-sm">View public blog</a>
+				<h2 class="text-lg font-semibold">{t('admin.blog.posts', { count: data.posts.length })}</h2>
+				<a href="/blog" class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.blog.publicBlog')}</a>
 			</div>
 
 			{#if data.posts.length === 0}
-				<p class="text-sm text-[var(--sk-muted)]">No posts yet.</p>
+				<p class="text-sm text-[var(--sk-muted)]">{t('admin.blog.empty')}</p>
 			{:else}
 				<ul class="divide-y divide-[var(--sk-line)]">
 					{#each data.posts as post (post.id)}
@@ -111,8 +116,12 @@
 								<p class="mt-1 text-xs text-[var(--sk-faint)]">/{post.slug}</p>
 							</div>
 							<div class="flex shrink-0 gap-2">
-								<a href={`/blog/${post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm">Open</a>
-								<a href={`/admin/blog/${post.id}`} class="sk-btn sk-btn-primary sk-btn-sm">Edit</a>
+								<a href={`/blog/${post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm"
+									>{t('admin.blog.open')}</a
+								>
+								<a href={`/admin/blog/${post.id}`} class="sk-btn sk-btn-primary sk-btn-sm"
+									>{t('admin.blog.edit')}</a
+								>
 							</div>
 						</li>
 					{/each}

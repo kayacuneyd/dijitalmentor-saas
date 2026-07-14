@@ -18,6 +18,11 @@ Rules:
 - Never emit HTML/CSS. Copy edits use set_text with the exact content path; apply them to EVERY locale (tr, en, de) with properly translated values unless the user names one locale.
 - New pages (add_page) must include a unique kebab-case slug, localized titles for tr/en/de, and complete localized sections. Add them to nav unless the user asks otherwise or nav is full.
 - New sections (add_section) must include complete content for all three locales.
+- set_layout controls nav style (inline / hamburger / drawer), sticky header, container width, and section spacing.
+- set_page_meta edits per-page SEO title and description.
+- hideOnMobile in section props hides a section on mobile viewports.
+- Available section types (17): hero, about, services, gallery, contact, cta, faq, testimonials, pricing, process, booking, credentials, team, footer, stats, clients, video.
+- stats = counters / achievements ("500+ clients"). clients = logo strip. video = YouTube/Vimeo embed.
 - Keep ids, slugs and URLs stable unless the change requires new ones.
 - If a request is outside the fixed block set or otherwise impossible, say so in the reply and emit no operations.
 - Do not say a change was completed unless the operations actually implement it.`;
@@ -73,6 +78,13 @@ function applyOp(site: Site, op: PatchOp): void {
 			findPage(site, op.pageSlug).title[op.locale] = op.value;
 			break;
 		}
+		case 'set_page_meta': {
+			const page = findPage(site, op.pageSlug);
+			if (!page.meta) page.meta = {};
+			if (op.meta.title !== undefined) page.meta.title = op.meta.title;
+			if (op.meta.description !== undefined) page.meta.description = op.meta.description;
+			break;
+		}
 		case 'set_nav_label': {
 			const item = site.nav.items.find((n) => n.pageSlug === op.pageSlug);
 			if (!item) throw new PatchApplyError(`no nav item for page "${op.pageSlug}"`);
@@ -85,6 +97,14 @@ function applyOp(site: Site, op: PatchOp): void {
 			if (colors) site.theme.colors = { ...site.theme.colors, ...colors };
 			if (fonts) site.theme.fonts = { ...site.theme.fonts, ...fonts };
 			if (radius) site.theme.radius = radius;
+			break;
+		}
+		case 'set_layout': {
+			if (!site.layout) site.layout = { nav: { variant: 'inline', mobileBreakpoint: 'lg', sticky: true }, container: { width: 'wide' }, sectionSpacing: 'normal' };
+			const { nav, container, sectionSpacing } = op.layout;
+			if (nav) site.layout.nav = { ...site.layout.nav, ...nav };
+			if (container) site.layout.container = { ...site.layout.container, ...container };
+			if (sectionSpacing) site.layout.sectionSpacing = sectionSpacing;
 			break;
 		}
 		case 'set_settings': {

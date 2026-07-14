@@ -35,7 +35,7 @@ const genSection = <
 		content: shape.content
 	});
 
-/** All 14 section types the AI can generate. Must stay in sync with SECTION_TYPES. */
+/** All 17 section types the AI can generate. Must stay in sync with SECTION_TYPES. */
 export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('hero', sectionShapes.hero),
 	genSection('about', sectionShapes.about),
@@ -50,7 +50,10 @@ export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('booking', sectionShapes.booking),
 	genSection('credentials', sectionShapes.credentials),
 	genSection('team', sectionShapes.team),
-	genSection('footer', sectionShapes.footer)
+	genSection('footer', sectionShapes.footer),
+	genSection('stats', sectionShapes.stats),
+	genSection('clients', sectionShapes.clients),
+	genSection('video', sectionShapes.video)
 ]);
 
 // Drift guard: the generated schema MUST have exactly the same count as SECTION_TYPES.
@@ -87,7 +90,7 @@ export type GeneratedSite = z.infer<typeof generatedSiteSchema>;
 // Translation — the localizable slice of a generated site, re-emitted per target locale.
 // ---------------------------------------------------------------------------
 
-/** All 14 content shapes — must stay in sync with SECTION_TYPES. */
+/** All 17 content shapes — must stay in sync with SECTION_TYPES. */
 const translatableContentShapes = z.union([
 	sectionShapes.hero.content,
 	sectionShapes.about.content,
@@ -102,7 +105,10 @@ const translatableContentShapes = z.union([
 	sectionShapes.booking.content,
 	sectionShapes.credentials.content,
 	sectionShapes.team.content,
-	sectionShapes.footer.content
+	sectionShapes.footer.content,
+	sectionShapes.stats.content,
+	sectionShapes.clients.content,
+	sectionShapes.video.content
 ]);
 
 export const translatablePayloadSchema = z.strictObject({
@@ -153,6 +159,22 @@ export function translationSchemaFor(targets: Locale[]) {
 
 const target = { pageSlug: slug, sectionId: nonEmpty };
 
+const layoutPatchShape = {
+	nav: z
+		.strictObject({
+			variant: z.enum(['inline', 'hamburger', 'drawer']).optional(),
+			mobileBreakpoint: z.enum(['sm', 'md', 'lg']).optional(),
+			sticky: z.boolean().optional()
+		})
+		.optional(),
+	container: z
+		.strictObject({
+			width: z.enum(['narrow', 'wide', 'full']).optional()
+		})
+		.optional(),
+	sectionSpacing: z.enum(['tight', 'normal', 'loose']).optional()
+};
+
 export const patchOpSchema = z.discriminatedUnion('op', [
 	z.strictObject({
 		op: z.literal('set_text'),
@@ -178,6 +200,14 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 		value: nonEmpty
 	}),
 	z.strictObject({
+		op: z.literal('set_page_meta'),
+		pageSlug: slug,
+		meta: z.strictObject({
+			title: nonEmpty.max(70).optional(),
+			description: nonEmpty.max(200).optional()
+		})
+	}),
+	z.strictObject({
 		op: z.literal('set_nav_label'),
 		pageSlug: slug,
 		locale: localeSchema,
@@ -191,6 +221,10 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 			fonts: themeSchema.shape.fonts.partial().optional(),
 			radius: themeSchema.shape.radius.optional()
 		})
+	}),
+	z.strictObject({
+		op: z.literal('set_layout'),
+		layout: z.strictObject(layoutPatchShape)
 	}),
 	z.strictObject({
 		op: z.literal('set_settings'),

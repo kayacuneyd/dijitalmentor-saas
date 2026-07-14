@@ -234,7 +234,9 @@ export function localizeOption(
 	);
 }
 
-const directionCopy: Record<
+/** Exported for test-only exhaustiveness checks (see `onboarding.test.ts`) — mirrors
+ *  `questionCopy`'s reasoning above. */
+export const directionCopy: Record<
 	Locale,
 	Record<string, { label: string; promise: string; preview: string; kitPrefix: string }>
 > = {

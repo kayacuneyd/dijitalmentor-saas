@@ -3,8 +3,10 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	const statuses = ['open', 'pending', 'resolved', 'closed'] as const;
 	const statusTone = (status: string) =>
@@ -21,7 +23,9 @@
 	active="/admin/inbox"
 >
 	{#snippet actions()}
-		<a href="/admin/inbox" class="sk-btn sk-btn-secondary sk-btn-sm">Back to inbox</a>
+		<a href="/admin/inbox" class="sk-btn sk-btn-secondary sk-btn-sm"
+			>{t('admin.detail.backInbox')}</a
+		>
 		<StatusPill tone={statusTone(data.inquiry.status)}>{data.inquiry.status}</StatusPill>
 	{/snippet}
 
@@ -29,12 +33,12 @@
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
 	{#if form?.replied}
-		<div class="sk-alert sk-alert-success">Reply stored and email delivery attempted.</div>
+		<div class="sk-alert sk-alert-success">{t('admin.detail.replyStored')}</div>
 	{/if}
 
 	<AppCard class="p-4">
 		<div class="flex flex-wrap items-center gap-2">
-			<span class="text-xs text-[var(--sk-faint)]">Set status:</span>
+			<span class="text-xs text-[var(--sk-faint)]">{t('admin.detail.setStatus')}</span>
 			{#each statuses as status (status)}
 				<form method="POST" action="?/setStatus" use:enhance>
 					<input type="hidden" name="status" value={status} />
@@ -58,7 +62,7 @@
 				<li class="flex flex-col gap-1">
 					<div class="flex flex-wrap items-center gap-2">
 						<span class="text-xs font-semibold">
-							{message.authorKind === 'admin' ? 'You (admin)' : data.inquiry.email}
+							{message.authorKind === 'admin' ? t('admin.detail.youAdmin') : data.inquiry.email}
 						</span>
 						<span class="text-xs text-[var(--sk-faint)]">
 							{new Date(message.createdAt).toLocaleString()}
@@ -79,11 +83,13 @@
 					maxlength="4000"
 					rows="4"
 					class="sk-textarea text-sm"
-					placeholder="Reply by email…"></textarea>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start">Reply</button>
+					placeholder={t('admin.detail.replyEmail')}></textarea>
+				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
+					>{t('admin.detail.reply')}</button
+				>
 			</form>
 		</AppCard>
 	{:else}
-		<p class="text-sm text-[var(--sk-muted)]">This inquiry is closed.</p>
+		<p class="text-sm text-[var(--sk-muted)]">{t('admin.detail.inquiryClosed')}</p>
 	{/if}
 </AdminShell>

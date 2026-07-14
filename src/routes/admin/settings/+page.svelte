@@ -3,8 +3,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	const groups = [
 		'AI',
@@ -55,12 +57,12 @@
 </script>
 
 <svelte:head>
-	<title>Settings · saaskaya admin</title>
+	<title>{t('admin.settings.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Settings"
-	description="Credentials, runtime settings and diagnostics. Saved values override .env."
+	title={t('admin.settings.title')}
+	description={t('admin.settings.description')}
 	active="/admin/settings"
 >
 	{#if form?.saved}

@@ -802,6 +802,41 @@ export const migrations: Migration[] = [
 			// back to the sk_locale cookie/detectLocale chain — exactly today's behavior.
 			ensureColumn(client, 'users', 'locale', 'text');
 		}
+	},
+	{
+		version: 29,
+		name: 'flatten-marketing-copy-overrides',
+		up(client) {
+			const rows = client
+				.prepare('SELECT page, locale, value, updated_at FROM marketing_page_copy')
+				.all() as { page: string; locale: string; value: string; updated_at: number }[];
+			const insert = client.prepare(
+				`INSERT INTO message_overrides (key, locale, value, updated_at) VALUES (?, ?, ?, ?)
+				 ON CONFLICT(key, locale) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`
+			);
+			for (const row of rows) {
+				const flatten = (value: unknown, path: string[]): void => {
+					if (typeof value === 'string') {
+						if (value.trim())
+							insert.run(
+								`marketing.${row.page}.${path.join('.')}`,
+								row.locale,
+								value,
+								row.updated_at
+							);
+						return;
+					}
+					if (!value || typeof value !== 'object') return;
+					for (const [key, child] of Object.entries(value)) flatten(child, [...path, key]);
+				};
+				try {
+					flatten(JSON.parse(row.value), []);
+				} catch {
+					// Invalid legacy JSON was never renderable as an override; do not let it
+					// block the database migration for otherwise valid rows.
+				}
+			}
+		}
 	}
 ];
 

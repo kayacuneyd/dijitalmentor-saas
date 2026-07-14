@@ -4,8 +4,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { LOCALES } from '$lib/i18n';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	let uploading = $state(false);
 
@@ -16,22 +18,20 @@
 </script>
 
 <svelte:head>
-	<title>Share assets · saaskaya admin</title>
+	<title>{t('admin.share.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Story share assets"
-	description="Curate the 1080×1920 images and MP4 videos offered on the public /share page."
+	title={t('admin.share.title')}
+	description={t('admin.share.description')}
 	active="/admin/share"
 >
 	<AppCard class="p-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div>
-				<p class="text-sm font-medium">Public share page</p>
+				<p class="text-sm font-medium">{t('admin.share.page')}</p>
 				<p class="mt-1 text-xs text-[var(--sk-muted)]">
-					{data.sharePageEnabled
-						? '/share is live — visitors can post the assets below to their story.'
-						: '/share currently returns 404. Enable it when at least one asset is active.'}
+					{data.sharePageEnabled ? t('admin.share.live') : t('admin.share.disabled')}
 				</p>
 			</div>
 			<form method="POST" action="?/togglePage" use:enhance>
@@ -42,7 +42,7 @@
 						? 'sk-btn sk-btn-secondary sk-btn-sm'
 						: 'sk-btn sk-btn-primary sk-btn-sm'}
 				>
-					{data.sharePageEnabled ? 'Disable /share' : 'Enable /share'}
+					{data.sharePageEnabled ? t('admin.share.disable') : t('admin.share.enable')}
 				</button>
 			</form>
 		</div>
@@ -51,19 +51,21 @@
 	{#if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{:else if form?.uploaded}
-		<div class="sk-alert sk-alert-success">Uploaded <strong>{form.uploaded}</strong>.</div>
+		<div class="sk-alert sk-alert-success">
+			{t('admin.share.uploaded', { name: form.uploaded })}
+		</div>
 	{:else if form?.deleted}
-		<div class="sk-alert">Asset deleted.</div>
+		<div class="sk-alert">{t('admin.share.assetDeleted')}</div>
 	{:else if form?.captionSaved}
-		<div class="sk-alert sk-alert-success">Caption saved.</div>
+		<div class="sk-alert sk-alert-success">{t('admin.share.captionSaved')}</div>
 	{:else if form?.pageEnabled === true}
-		<div class="sk-alert sk-alert-success">/share enabled.</div>
+		<div class="sk-alert sk-alert-success">{t('admin.share.pageEnabled')}</div>
 	{:else if form?.pageEnabled === false}
-		<div class="sk-alert">/share disabled.</div>
+		<div class="sk-alert">{t('admin.share.pageDisabled')}</div>
 	{/if}
 
 	<AppCard class="p-4">
-		<h2 class="text-sm font-semibold">Upload a new asset</h2>
+		<h2 class="text-sm font-semibold">{t('admin.share.uploadTitle')}</h2>
 		<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
 			Story format: 1080×1920 (9:16). Images up to 8 MB (JPEG/PNG/WebP/GIF), videos up to 60 MB (MP4
 			· H.264 — keep story videos around 15–20 MB for in-app browsers). Captions are shown under the
@@ -105,17 +107,17 @@
 				{/each}
 			</div>
 			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm w-fit" disabled={uploading}>
-				{#if uploading}<span class="loading loading-spinner loading-xs"
-					></span>Uploading…{:else}Upload{/if}
+				{#if uploading}<span class="loading loading-spinner loading-xs"></span>{t(
+						'admin.share.uploading'
+					)}{:else}{t('admin.share.upload')}{/if}
 			</button>
 		</form>
 	</AppCard>
 
 	{#if data.assets.length === 0}
 		<AppCard class="p-6 text-sm text-[var(--sk-muted)]">
-			No share assets yet. Upload a story image or MP4 above — the first video can be generated with <code
-				class="sk-mono text-xs">node scripts/generate-share-video.mjs</code
-			>.
+			{t('admin.share.empty')} Upload a story image or MP4 above — the first video can be generated with
+			<code class="sk-mono text-xs">node scripts/generate-share-video.mjs</code>.
 		</AppCard>
 	{:else}
 		<div class="flex flex-col gap-3">
@@ -140,7 +142,7 @@
 						<div class="flex flex-wrap items-center gap-2">
 							<span class="truncate text-sm font-semibold">{asset.fileName}</span>
 							<StatusPill tone={asset.active ? 'success' : 'neutral'}>
-								{asset.active ? 'Active' : 'Hidden'}
+								{asset.active ? t('admin.share.active') : t('admin.share.hidden')}
 							</StatusPill>
 							<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
 								{asset.kind} · {sizeLabel(asset.sizeBytes)}
@@ -162,7 +164,7 @@
 								{/each}
 							</div>
 							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm w-fit"
-								>Save captions</button
+								>{t('admin.share.saveCaptions')}</button
 							>
 						</form>
 					</div>
@@ -172,7 +174,7 @@
 							<input type="hidden" name="id" value={asset.id} />
 							<input type="hidden" name="active" value={asset.active ? '0' : '1'} />
 							<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
-								{asset.active ? 'Hide' : 'Activate'}
+								{asset.active ? t('admin.share.hide') : t('admin.share.activate')}
 							</button>
 						</form>
 						<div class="flex gap-1.5">
@@ -182,7 +184,7 @@
 									type="submit"
 									class="sk-btn sk-btn-ghost sk-btn-sm"
 									disabled={index === 0}
-									aria-label="Move up">↑</button
+									aria-label={t('admin.share.moveUp')}>↑</button
 								>
 							</form>
 							<form method="POST" action="?/moveDown" use:enhance>
@@ -191,7 +193,7 @@
 									type="submit"
 									class="sk-btn sk-btn-ghost sk-btn-sm"
 									disabled={index === data.assets.length - 1}
-									aria-label="Move down">↓</button
+									aria-label={t('admin.share.moveDown')}>↓</button
 								>
 							</form>
 						</div>
@@ -199,12 +201,12 @@
 							method="POST"
 							action="?/delete"
 							use:enhance={({ cancel }) => {
-								if (!confirm('Delete this asset? The file is removed from storage too.')) cancel();
+								if (!confirm(t('admin.share.confirmDelete'))) cancel();
 							}}
 						>
 							<input type="hidden" name="id" value={asset.id} />
 							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm sk-btn-danger"
-								>Delete</button
+								>{t('admin.share.delete')}</button
 							>
 						</form>
 					</div>

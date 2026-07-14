@@ -6,6 +6,7 @@
 	import { getTranslate } from '$lib/i18n/context';
 	import { DEFAULT_LOCALE, type Locale as AppLocale } from '$lib/i18n';
 	import type { CatalogKey } from '$lib/i18n/catalog';
+	import { siteQualityCheck } from '$lib/quality/siteQuality';
 
 	const t = getTranslate();
 	const appLocale: AppLocale = $derived(
@@ -56,6 +57,65 @@
 		}
 		confirmRemoveSlug = null;
 	}
+
+	// Quality-driven sitemap suggestions — AI next-best-actions for site structure
+	const quality = $derived(siteQualityCheck(store.site));
+	const suggestions = $derived.by(() => {
+		const items: Array<{ severity: 'warning' | 'info'; message: string; action: string }> = [];
+		const hasFaq = store.site.pages.some((p) => p.sections.some((s) => s.type === 'faq'));
+		const hasContact = store.site.pages.some(
+			(p) => p.sections.some((s) => s.type === 'contact')
+		);
+		const hasCredentials = store.site.pages.some(
+			(p) => p.sections.some((s) => s.type === 'credentials')
+		);
+		const hasTestimonials = store.site.pages.some(
+			(p) => p.sections.some((s) => s.type === 'testimonials')
+		);
+		if (!hasContact) {
+			items.push({ severity: 'warning', message: 'İletişim section ekle — ziyaretçiler sana ulaşamaz.', action: 'contact-block' });
+		}
+		if (!hasFaq && store.site.pages.length < MAX_PAGES) {
+			items.push({ severity: 'info', message: 'SSS sayfası ekle — güveni artırır.', action: 'add-faq-page' });
+		}
+		if (!hasCredentials) {
+			items.push({ severity: 'info', message: 'Sertifika/yetkinlik section\'ı ekle — profesyonel güven.', action: 'credentials-section' });
+		}
+		if (!hasTestimonials) {
+			items.push({ severity: 'info', message: 'Referans section\'ı ekle — sosyal kanıt sağlar.', action: 'testimonials-section' });
+		}
+		if (quality.warnings.find((w) => w.code === 'missing_contact_path')) {
+			items.push({ severity: 'warning', message: 'İletişim yolun zayıf — contact veya booking section ekle.', action: 'contact-page' });
+		}
+		return items;
+	});
+
+	const pageStatuses = $derived.by(() => {
+		return store.site.pages.map((page) => {
+			const issues: Array<{ kind: 'warning' | 'info'; label: string }> = [];
+			const hasContact = page.sections.some(
+				(s) => s.type === 'contact' || s.type === 'booking'
+			);
+			const hasMissingLocale = LOCALES.some(
+				(loc) => !page.title[loc] || page.title[loc].trim() === ''
+			);
+			const isInNav = navSlugs.has(page.slug);
+			if (!hasContact && page.slug === store.site.pages.at(-1)?.slug) {
+				issues.push({ kind: 'warning', label: 'İletişim yok' });
+			}
+			if (hasMissingLocale) {
+				issues.push({ kind: 'warning', label: 'Eksik çeviri' });
+			}
+			if (!isInNav) {
+				issues.push({ kind: 'info', label: 'Menüde gizli' });
+			}
+			return { slug: page.slug, issues };
+		});
+	});
+
+	function pageStatus(pageSlug: string) {
+		return pageStatuses.find((p) => p.slug === pageSlug)?.issues ?? [];
+	}
 </script>
 
 <div class="flex flex-col gap-3">
@@ -67,32 +127,33 @@
 	</div>
 
 	<ul class="flex flex-col gap-2">
-		{#each store.site.pages as page, pageIndex (`${page.slug}-${pageIndex}`)}
+		{#each store.site.pages as pageItem, pageIndex (`${pageItem.slug}-${pageIndex}`)}
+			{@const statuses = pageStatus(pageItem.slug)}
 			<li class="rounded-[10px] border border-[var(--sk-line)] bg-white/70">
 				<div class="flex items-start gap-1 p-1.5">
 					<button
 						type="button"
-						class="min-w-0 flex-1 rounded-[8px] px-2.5 py-2 text-left text-sm transition {page.slug ===
+						class="min-w-0 flex-1 rounded-[8px] px-2.5 py-2 text-left text-sm transition {pageItem.slug ===
 						store.currentSlug
 							? 'bg-[#171614] text-[#f3ecdd]'
 							: 'hover:bg-[var(--sk-shell)]'}"
-						onclick={() => (store.currentSlug = page.slug)}
+						onclick={() => (store.currentSlug = pageItem.slug)}
 					>
-						<span class="block truncate font-semibold">{page.title[store.editLocale]}</span>
+						<span class="block truncate font-semibold">{pageItem.title[store.editLocale]}</span>
 						<span
-							class="font-[var(--font-mono)] text-[10px] {page.slug === store.currentSlug
+							class="font-[var(--font-mono)] text-[10px] {pageItem.slug === store.currentSlug
 								? 'text-[#f3ecdd]/60'
 								: 'text-[var(--sk-faint)]'}"
 						>
-							/{page.slug}
+							/{pageItem.slug}
 						</span>
 					</button>
 					{#if store.site.pages.length > 1}
 						<button
 							type="button"
 							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
-							onclick={() => (confirmRemoveSlug = page.slug)}
-							aria-label={t('editor.pages.deleteAria', { name: page.title[store.editLocale] })}
+							onclick={() => (confirmRemoveSlug = pageItem.slug)}
+							aria-label={t('editor.pages.deleteAria', { name: pageItem.title[store.editLocale] })}
 							title={t('editor.pages.deleteTitle')}
 						>
 							✕
@@ -101,19 +162,27 @@
 				</div>
 				<div class="flex flex-wrap gap-1 px-3 pb-2">
 					<span class="badge badge-sm badge-secondary"
-						>{t('editor.pages.sectionsBadge', { count: page.sections.length })}</span
+						>{t('editor.pages.sectionsBadge', { count: pageItem.sections.length })}</span
 					>
-					{#if navSlugs.has(page.slug)}
+					{#if navSlugs.has(pageItem.slug)}
 						<span class="badge badge-sm">{t('editor.pages.inMenu')}</span>
 					{:else}
 						<span class="badge badge-sm badge-warning">{t('editor.pages.notInMenu')}</span>
 					{/if}
-					{#if pageHasContact(page.slug)}
+					{#if pageHasContact(pageItem.slug)}
 						<span class="badge badge-sm badge-success">{t('editor.pages.hasContact')}</span>
 					{/if}
+					{#each statuses as status (status.label)}
+						<span
+							class="badge badge-sm {status.kind === 'warning' ? 'badge-warning' : 'badge-ghost'}"
+							title={status.label}
+						>
+							{status.label}
+						</span>
+					{/each}
 				</div>
 				<ol class="border-t border-[var(--sk-line)] px-3 py-2">
-					{#each page.sections as section, index (`${section.id}-${index}`)}
+					{#each pageItem.sections as section, index (`${section.id}-${index}`)}
 						<li class="flex items-center gap-2 py-1 text-xs text-[var(--sk-muted)]">
 							<span class="sk-mono w-5 text-[10px] text-[var(--sk-faint)]">
 								{index + 1}
@@ -124,13 +193,13 @@
 					{/each}
 				</ol>
 			</li>
-			{#if confirmRemoveSlug === page.slug}
+			{#if confirmRemoveSlug === pageItem.slug}
 				<li
 					class="flex flex-col gap-2 rounded-[10px] border border-[#b8532f]/40 bg-[#b8532f]/5 p-3"
 				>
 					<p class="text-xs text-[#b8532f]">
-						{t('editor.pages.confirmDeleteQuestion', { name: page.title[store.editLocale] })}
-						{#if page.slug === store.site.pages[0].slug}
+						{t('editor.pages.confirmDeleteQuestion', { name: pageItem.title[store.editLocale] })}
+						{#if pageItem.slug === store.site.pages[0].slug}
 							{t('editor.pages.confirmDeleteHomeWarning')}
 						{/if}
 					</p>
@@ -138,7 +207,7 @@
 						<button
 							type="button"
 							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
-							onclick={() => confirmRemove(page.slug)}
+							onclick={() => confirmRemove(pageItem.slug)}
 						>
 							{t('editor.pages.confirmYes')}
 						</button>
@@ -195,4 +264,20 @@
 			</p>
 		</div>
 	</details>
+
+	{#if suggestions.length}
+		<div class="rounded-[12px] border border-blue-200 bg-blue-50/70 p-3">
+			<div class="mb-2 text-[10px] font-semibold text-blue-800">AI Önerileri</div>
+			<div class="flex flex-col gap-1.5">
+				{#each suggestions as sug (`${sug.action}`)}
+					<div
+						class="flex items-start gap-2 rounded-[8px] bg-white/80 px-2.5 py-2 text-xs {sug.severity === 'warning' ? 'text-amber-800' : 'text-blue-800'}"
+					>
+						<span class="mt-0.5 shrink-0">{sug.severity === 'warning' ? '⚠' : '💡'}</span>
+						<span class="leading-5">{sug.message}</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>

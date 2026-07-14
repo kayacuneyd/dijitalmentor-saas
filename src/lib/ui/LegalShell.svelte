@@ -1,15 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { stripLocale, withLocale, type Locale } from '$lib/i18n';
+	import { getTranslate } from '$lib/i18n/context';
 	import MarketingSection from './MarketingSection.svelte';
 	import PublicBreadcrumb from './PublicBreadcrumb.svelte';
 	import PublicShell from './PublicShell.svelte';
 
+	/** All six legal documents were last substantively edited on this date —
+	 *  update when the underlying Turkish text changes. Rendered per-locale via
+	 *  Intl so it doesn't need a hardcoded translated string per language. */
+	const LEGAL_LAST_UPDATED = '2026-07-09';
+
 	let {
 		children,
 		title,
-		kicker = 'Yasal',
-		updated = '9 Temmuz 2026'
+		kicker,
+		updated
 	}: {
 		children: import('svelte').Snippet;
 		title: string;
@@ -17,7 +23,17 @@
 		updated?: string;
 	} = $props();
 
+	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? 'tr');
+	const dateLocales: Record<Locale, string> = { en: 'en-US', tr: 'tr-TR', de: 'de-DE' };
+	const resolvedUpdated = $derived(
+		updated ??
+			new Date(LEGAL_LAST_UPDATED).toLocaleDateString(dateLocales[locale], {
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric'
+			})
+	);
 	const l = (path: string) => withLocale(locale, path);
 	const currentPath = $derived(stripLocale(page.url.pathname));
 	const labels = $derived(
@@ -87,11 +103,17 @@
 						{ label: title }
 					]}
 				/>
-				<div class="sk-mono mt-6 text-[10.5px] text-[var(--sk-faint)]">{kicker}</div>
+				<div class="sk-mono mt-6 text-[10.5px] text-[var(--sk-faint)]">{kicker ?? labels.legal}</div>
 				<h1 class="sk-display mt-2 text-4xl leading-tight sm:text-[44px]">{title}</h1>
 				<p class="mt-3 text-sm leading-6 text-[var(--sk-muted)]">
-					{labels.updated}: {updated}
+					{labels.updated}: {resolvedUpdated}
 				</p>
+				{#if locale !== 'tr'}
+					<div class="sk-callout mt-6" role="note">
+						<strong>{t('legal.aiDisclaimer.title')}:</strong>
+						{t('legal.aiDisclaimer.body')}
+					</div>
+				{/if}
 				<div class="sk-legal mt-9">
 					{@render children()}
 				</div>

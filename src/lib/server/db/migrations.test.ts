@@ -331,6 +331,34 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 		]);
 	});
 
+	it('flattens legacy marketing copy into message overrides', () => {
+		const client = new Database(':memory:');
+		runMigrations(client, migrations.slice(0, 28));
+		client
+			.prepare(
+				`INSERT INTO marketing_page_copy (page, locale, value, updated_at) VALUES (?, ?, ?, ?)`
+			)
+			.run(
+				'home',
+				'de',
+				JSON.stringify({ h1: 'Neue Website', problemItems: [{ title: 'Klar' }] }),
+				1234
+			);
+
+		runMigrations(client);
+
+		expect(
+			client
+				.prepare(
+					`SELECT key, locale, value, updated_at FROM message_overrides WHERE key LIKE 'marketing.home.%' ORDER BY key`
+				)
+				.all()
+		).toEqual([
+			{ key: 'marketing.home.h1', locale: 'de', value: 'Neue Website', updated_at: 1234 },
+			{ key: 'marketing.home.problemItems.0.title', locale: 'de', value: 'Klar', updated_at: 1234 }
+		]);
+	});
+
 	it('a failing migration rolls back atomically and can be retried', () => {
 		const client = new Database(':memory:');
 		const bad: Migration[] = [

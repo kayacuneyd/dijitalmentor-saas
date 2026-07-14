@@ -3,30 +3,30 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	const tone = (status: string) =>
 		status === 'joined' ? 'success' : status === 'revoked' ? 'error' : 'neutral';
 </script>
 
 <svelte:head>
-	<title>Beta invites · saaskaya admin</title>
+	<title>{t('admin.invites.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Beta invites"
-	description="Invite customers by email and control access to the closed beta."
+	title={t('admin.invites.title')}
+	description={t('admin.invites.description')}
 	active="/admin/invites"
 >
 	<AppCard class="p-4">
 		<div class="flex flex-wrap items-center justify-between gap-3">
 			<div>
-				<p class="text-sm font-medium">Closed beta access</p>
+				<p class="text-sm font-medium">{t('admin.invites.access')}</p>
 				<p class="mt-1 text-xs text-[var(--sk-muted)]">
-					{data.betaMode
-						? 'Only active invitees can sign in.'
-						: 'Sign-in is currently open to everyone.'}
+					{data.betaMode ? t('admin.invites.enabled') : t('admin.invites.disabled')}
 				</p>
 			</div>
 			<form method="POST" action="?/toggleBeta" use:enhance>
@@ -37,7 +37,7 @@
 						? 'sk-btn sk-btn-secondary sk-btn-sm'
 						: 'sk-btn sk-btn-primary sk-btn-sm'}
 				>
-					{data.betaMode ? 'Disable closed beta' : 'Enable closed beta'}
+					{data.betaMode ? t('admin.invites.disable') : t('admin.invites.enable')}
 				</button>
 			</form>
 		</div>
@@ -67,7 +67,7 @@
 	<AppCard class="p-4">
 		<form method="POST" action="?/send" use:enhance class="flex flex-wrap items-end gap-2">
 			<div class="flex flex-1 flex-col gap-1">
-				<label for="email" class="text-xs text-[var(--sk-faint)]">Email</label>
+				<label for="email" class="text-xs text-[var(--sk-faint)]">{t('admin.invites.email')}</label>
 				<input
 					id="email"
 					name="email"
@@ -78,7 +78,9 @@
 				/>
 			</div>
 			<div class="flex w-32 flex-col gap-1">
-				<label for="profession" class="text-xs text-[var(--sk-faint)]">Profession</label>
+				<label for="profession" class="text-xs text-[var(--sk-faint)]"
+					>{t('admin.invites.profession')}</label
+				>
 				<input
 					id="profession"
 					name="profession"
@@ -87,14 +89,18 @@
 				/>
 			</div>
 			<div class="flex w-24 flex-col gap-1">
-				<label for="locale" class="text-xs text-[var(--sk-faint)]">Language</label>
+				<label for="locale" class="text-xs text-[var(--sk-faint)]"
+					>{t('admin.invites.language')}</label
+				>
 				<select id="locale" name="locale" class="sk-input min-h-8 py-1.5 text-sm">
 					<option value="en">EN</option>
 					<option value="tr">TR</option>
 					<option value="de">DE</option>
 				</select>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Send invite</button>
+			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
+				>{t('admin.invites.send')}</button
+			>
 		</form>
 	</AppCard>
 
@@ -102,7 +108,7 @@
 		<div class="flex flex-col gap-3">
 			<h2 class="sk-display text-2xl leading-none">{data.invites.length} invite(s)</h2>
 			{#if data.invites.length === 0}
-				<p class="text-sm text-[var(--sk-muted)]">No invites yet.</p>
+				<p class="text-sm text-[var(--sk-muted)]">{t('admin.invites.empty')}</p>
 			{:else}
 				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
 					{#each data.invites as invite (invite.email)}
@@ -124,13 +130,15 @@
 							{#if invite.status === 'revoked'}
 								<form method="POST" action="?/reactivate" use:enhance>
 									<input type="hidden" name="email" value={invite.email} />
-									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Reactivate</button>
+									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm"
+										>{t('admin.invites.reactivate')}</button
+									>
 								</form>
 							{:else}
 								<form method="POST" action="?/revoke" use:enhance>
 									<input type="hidden" name="email" value={invite.email} />
 									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
-										Revoke
+										{t('admin.invites.revoke')}
 									</button>
 								</form>
 							{/if}

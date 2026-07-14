@@ -3,8 +3,10 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	const statusTone = (status: string) =>
 		status === 'resolved' ? 'success' : status === 'closed' ? 'neutral' : 'warning';
@@ -22,7 +24,9 @@
 	active="/admin/support"
 >
 	{#snippet actions()}
-		<a href="/admin/support" class="sk-btn sk-btn-secondary sk-btn-sm">Back to support</a>
+		<a href="/admin/support" class="sk-btn sk-btn-secondary sk-btn-sm"
+			>{t('admin.detail.backSupport')}</a
+		>
 		<StatusPill tone={statusTone(data.ticket.status)}>{data.ticket.status}</StatusPill>
 	{/snippet}
 
@@ -32,7 +36,7 @@
 
 	<AppCard class="p-4">
 		<div class="flex flex-wrap items-center gap-2">
-			<span class="text-xs text-[var(--sk-faint)]">Set status:</span>
+			<span class="text-xs text-[var(--sk-faint)]">{t('admin.detail.setStatus')}</span>
 			{#each statuses as s (s)}
 				<form method="POST" action="?/setStatus" use:enhance>
 					<input type="hidden" name="status" value={s} />
@@ -56,7 +60,7 @@
 				<li class="flex flex-col gap-1">
 					<div class="flex items-center gap-2">
 						<span class="text-xs font-semibold">
-							{message.authorKind === 'admin' ? 'You (support)' : data.customerEmail}
+							{message.authorKind === 'admin' ? t('admin.detail.youSupport') : data.customerEmail}
 						</span>
 						<span class="text-xs text-[var(--sk-faint)]">
 							{new Date(message.createdAt).toLocaleString()}
@@ -76,11 +80,13 @@
 					required
 					rows="4"
 					class="sk-input py-1.5 text-sm"
-					placeholder="Reply to the customer…"></textarea>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start">Reply</button>
+					placeholder={t('admin.detail.replyCustomer')}></textarea>
+				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
+					>{t('admin.detail.reply')}</button
+				>
 			</form>
 		</AppCard>
 	{:else}
-		<p class="text-sm text-[var(--sk-muted)]">This ticket is closed.</p>
+		<p class="text-sm text-[var(--sk-muted)]">{t('admin.detail.ticketClosed')}</p>
 	{/if}
 </AdminShell>

@@ -2,8 +2,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data } = $props();
+	const t = getTranslate();
 
 	const pct = (value: number | null) => (value === null ? '—' : `${value.toFixed(1)}%`);
 	const categoryTone = (category: string) =>
@@ -18,32 +20,28 @@
 	<title>GTM · saaskaya admin</title>
 </svelte:head>
 
-<AdminShell
-	title="GTM"
-	description="Kampanya linkleri, onboarding funnel ve lead triage görünümü."
-	active="/admin/gtm"
->
+<AdminShell title="GTM" description={t('admin.gtm.description')} active="/admin/gtm">
 	<section class="grid gap-3 md:grid-cols-4">
 		<AppCard class="p-4">
-			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Q&A start</span>
+			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('admin.gtm.starts')}</span>
 			<strong class="sk-display mt-1 block text-4xl leading-none">{data.funnel.starts}</strong>
-			<span class="mt-1 block text-xs text-[var(--sk-faint)]">son 7 gün</span>
+			<span class="mt-1 block text-xs text-[var(--sk-faint)]">{t('admin.gtm.last7Days')}</span>
 		</AppCard>
 		<AppCard class="p-4">
-			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Q&A complete</span>
+			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('admin.gtm.completed')}</span>
 			<strong class="sk-display mt-1 block text-4xl leading-none">{data.funnel.completed}</strong>
 			<span class="mt-1 block text-xs text-[var(--sk-faint)]">{pct(data.funnel.completionPct)}</span
 			>
 		</AppCard>
 		<AppCard class="p-4">
-			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Preview generated</span>
+			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('admin.gtm.preview')}</span>
 			<strong class="sk-display mt-1 block text-4xl leading-none">{data.funnel.generated}</strong>
 			<span class="mt-1 block text-xs text-[var(--sk-faint)]"
 				>{pct(data.funnel.previewReachPct)}</span
 			>
 		</AppCard>
 		<AppCard class="p-4">
-			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">Editor opened</span>
+			<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('admin.gtm.editor')}</span>
 			<strong class="sk-display mt-1 block text-4xl leading-none">{data.funnel.editorOpened}</strong
 			>
 			<span class="mt-1 block text-xs text-[var(--sk-faint)]">{pct(data.funnel.editorOpenPct)}</span
@@ -56,28 +54,28 @@
 			<div class="flex flex-col gap-3">
 				<div class="flex flex-wrap items-center justify-between gap-3">
 					<div>
-						<h2 class="text-base font-semibold">Campaign sources</h2>
+						<h2 class="text-base font-semibold">{t('admin.gtm.sources')}</h2>
 						<p class="mt-1 text-xs text-[var(--sk-muted)]">
 							Use links like <code
 								>/new?profession=psych&utm_source=linkedin&utm_campaign=gtm-30</code
 							>.
 						</p>
 					</div>
-					<StatusPill>{data.sourceRows.length} sources</StatusPill>
+					<StatusPill>{t('admin.gtm.sourceCount', { count: data.sourceRows.length })}</StatusPill>
 				</div>
 
 				{#if data.sourceRows.length === 0}
-					<p class="text-sm text-[var(--sk-muted)]">Henüz kampanya kaynaklı event yok.</p>
+					<p class="text-sm text-[var(--sk-muted)]">{t('admin.gtm.noSources')}</p>
 				{:else}
 					<div class="overflow-x-auto">
 						<table class="w-full min-w-[680px] text-left text-sm">
 							<thead class="border-b border-[var(--sk-line)] text-xs text-[var(--sk-faint)]">
 								<tr>
-									<th class="py-2 pr-3 font-medium">Source</th>
-									<th class="px-3 py-2 font-medium">Start</th>
-									<th class="px-3 py-2 font-medium">Complete</th>
-									<th class="px-3 py-2 font-medium">Preview</th>
-									<th class="px-3 py-2 font-medium">Editor</th>
+									<th class="py-2 pr-3 font-medium">{t('admin.gtm.source')}</th>
+									<th class="px-3 py-2 font-medium">{t('admin.gtm.start')}</th>
+									<th class="px-3 py-2 font-medium">{t('admin.gtm.complete')}</th>
+									<th class="px-3 py-2 font-medium">{t('admin.gtm.preview')}</th>
+									<th class="px-3 py-2 font-medium">{t('admin.gtm.editor')}</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-[var(--sk-line)]">
@@ -111,28 +109,28 @@
 		<AppCard class="p-4">
 			<div class="flex flex-col gap-3">
 				<div>
-					<h2 class="text-base font-semibold">Lead triage</h2>
+					<h2 class="text-base font-semibold">{t('admin.gtm.leadTriage')}</h2>
 					<p class="mt-1 text-xs text-[var(--sk-muted)]">
-						Hot lead, beta adayı ve compliance mesajları.
+						{t('admin.gtm.triageHelp')}
 					</p>
 				</div>
 				<div class="grid grid-cols-3 gap-2 text-sm">
 					<div class="rounded-[8px] border border-[var(--sk-line)] p-3">
-						<span class="block text-xs text-[var(--sk-faint)]">Hot</span>
+						<span class="block text-xs text-[var(--sk-faint)]">{t('admin.gtm.hot')}</span>
 						<strong class="text-xl">{data.categoryCounts.hot_lead ?? 0}</strong>
 					</div>
 					<div class="rounded-[8px] border border-[var(--sk-line)] p-3">
-						<span class="block text-xs text-[var(--sk-faint)]">Beta</span>
+						<span class="block text-xs text-[var(--sk-faint)]">{t('admin.gtm.beta')}</span>
 						<strong class="text-xl">{data.categoryCounts.beta_candidate ?? 0}</strong>
 					</div>
 					<div class="rounded-[8px] border border-[var(--sk-line)] p-3">
-						<span class="block text-xs text-[var(--sk-faint)]">Review</span>
+						<span class="block text-xs text-[var(--sk-faint)]">{t('admin.gtm.review')}</span>
 						<strong class="text-xl">{data.categoryCounts.compliance_sensitive ?? 0}</strong>
 					</div>
 				</div>
 
 				{#if data.triaged.length === 0}
-					<p class="text-sm text-[var(--sk-muted)]">Henüz triage edilecek lead yok.</p>
+					<p class="text-sm text-[var(--sk-muted)]">{t('admin.gtm.noLeads')}</p>
 				{:else}
 					<ul class="max-h-[520px] divide-y divide-[var(--sk-line)] overflow-auto">
 						{#each data.triaged as item (item.inquiry.id)}

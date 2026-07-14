@@ -15,6 +15,9 @@ import Booking from './Booking.svelte';
 import Credentials from './Credentials.svelte';
 import Team from './Team.svelte';
 import Footer from './Footer.svelte';
+import Stats from './Stats.svelte';
+import Clients from './Clients.svelte';
+import Video from './Video.svelte';
 
 export type BlockProps<T extends SectionType> = {
 	sectionId: string;
@@ -38,7 +41,10 @@ export const registry: { [T in SectionType]: Component<BlockProps<T>> } = {
 	booking: Booking,
 	credentials: Credentials,
 	team: Team,
-	footer: Footer
+	footer: Footer,
+	stats: Stats,
+	clients: Clients,
+	video: Video
 };
 
 export function blockFor(section: Section): Component<BlockProps<SectionType>> {

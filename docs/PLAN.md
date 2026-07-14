@@ -95,6 +95,23 @@ Mentor" badge.
 
 ## Backlog (post-M6, v2 era)
 
+### Admin i18n closure and marketing override consolidation (approved 2026-07-14)
+
+Complete the deferred project-wide i18n work in small, independently verifiable route groups.
+
+1. Inventory every user-visible admin string and form-action message; add route-scoped `admin.*`
+   catalog keys with EN/TR/DE parity and use `serverTranslator(locals.locale)` for server responses.
+2. Localize `share` and `settings`, including upload/storage, reservation, and settings validation
+   responses.
+3. Localize customer and conversation detail routes, then GTM and blog surfaces.
+4. Localize `/admin/copy` and `/admin/messages`; preserve owner-editable behavior through the
+   `message_overrides` table.
+5. Migration v29 flattens legacy `marketing_page_copy` JSON values into
+   `marketing.<page>.<field>` keys. Verify legacy values survive migration and all new edits write
+   through `message_overrides`.
+6. After each route group, run focused tests and `npm run check`; before closure run the full test
+   suite, build, and EN/TR/DE route-render checks. Record each completed group in `PROGRESS.md`.
+
 > **Güncel:** Aşağıdaki iki backlog item'ı da implemented (see `docs/PROGRESS.md` 2026-07-08 rows).
 > Tüm M0–M6 + V2.0 + V2.2 Phase 1 + Beta launch (3 phases) done. Sonraki önceliklendirme ve risk
 > değerlendirmesi için `docs/ROADMAP_EVALUATION.md`'yi oku — orada Faz 0 (canlı smoke) → Faz 1

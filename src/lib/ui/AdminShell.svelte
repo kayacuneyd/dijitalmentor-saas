@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
+	import { getTranslate } from '$lib/i18n/context';
 	import AppCanvasShell from './AppCanvasShell.svelte';
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
 
@@ -27,18 +28,44 @@
 		max?: string;
 	}>();
 
+	const t = getTranslate();
 	const nav: AdminNavItem[] = [
-		{ href: '/admin', label: 'Overview', eyebrow: 'Ops', match: '/admin' },
-		{ href: '/admin/gtm', label: 'GTM', eyebrow: 'Growth', match: '/admin/gtm' },
-		{ href: '/admin/customers', label: 'Customers', eyebrow: 'CRM', match: '/admin/customers' },
-		{ href: '/admin/inbox', label: 'Inbox', eyebrow: 'Public', match: '/admin/inbox' },
-		{ href: '/admin/blog', label: 'Blog', eyebrow: 'Content', match: '/admin/blog' },
-		{ href: '/admin/copy', label: 'Copy', eyebrow: 'Content', match: '/admin/copy' },
-		{ href: '/admin/messages', label: 'Messages', eyebrow: 'i18n', match: '/admin/messages' },
-		{ href: '/admin/share', label: 'Share', eyebrow: 'Growth', match: '/admin/share' },
-		{ href: '/admin/support', label: 'Support', eyebrow: 'Help', match: '/admin/support' },
-		{ href: '/admin/invites', label: 'Beta Invites', eyebrow: 'Access', match: '/admin/invites' },
-		{ href: '/admin/settings', label: 'Settings', eyebrow: 'System', match: '/admin/settings' }
+		{ href: '/admin', label: t('admin.nav.overview'), eyebrow: 'Ops', match: '/admin' },
+		{ href: '/admin/gtm', label: t('admin.nav.gtm'), eyebrow: 'Growth', match: '/admin/gtm' },
+		{
+			href: '/admin/customers',
+			label: t('admin.nav.customers'),
+			eyebrow: 'CRM',
+			match: '/admin/customers'
+		},
+		{ href: '/admin/inbox', label: t('admin.nav.inbox'), eyebrow: 'Public', match: '/admin/inbox' },
+		{ href: '/admin/blog', label: t('admin.nav.blog'), eyebrow: 'Content', match: '/admin/blog' },
+		{ href: '/admin/copy', label: t('admin.nav.copy'), eyebrow: 'Content', match: '/admin/copy' },
+		{
+			href: '/admin/messages',
+			label: t('admin.nav.messages'),
+			eyebrow: 'i18n',
+			match: '/admin/messages'
+		},
+		{ href: '/admin/share', label: t('admin.nav.share'), eyebrow: 'Growth', match: '/admin/share' },
+		{
+			href: '/admin/support',
+			label: t('admin.nav.support'),
+			eyebrow: 'Help',
+			match: '/admin/support'
+		},
+		{
+			href: '/admin/invites',
+			label: t('admin.nav.invites'),
+			eyebrow: 'Access',
+			match: '/admin/invites'
+		},
+		{
+			href: '/admin/settings',
+			label: t('admin.nav.settings'),
+			eyebrow: 'System',
+			match: '/admin/settings'
+		}
 	];
 
 	function isActive(item: AdminNavItem): boolean {
@@ -67,14 +94,15 @@
 						>
 						<span>
 							<span class="block text-sm font-semibold leading-none">saaskaya</span>
-							<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]">Admin Console</span
+							<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]"
+								>{t('admin.chrome.console')}</span
 							>
 						</span>
 					</a>
 				</div>
 				<nav
 					class="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible"
-					aria-label="Admin"
+					aria-label={t('admin.chrome.ariaLabel')}
 				>
 					{#each nav as item (item.href)}
 						<a
@@ -94,7 +122,9 @@
 					{/each}
 				</nav>
 				<div class="mt-auto hidden border-t border-[var(--sk-line)] p-3 lg:block">
-					<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm w-full">Back to app</a>
+					<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm w-full"
+						>{t('admin.nav.backToApp')}</a
+					>
 				</div>
 			</div>
 		</aside>
@@ -105,7 +135,9 @@
 					class="flex flex-col gap-3 border-b border-[var(--sk-line)] pb-4 md:flex-row md:items-start md:justify-between"
 				>
 					<div class="min-w-0">
-						<div class="sk-mono text-[10px] text-[var(--sk-faint)]">Admin</div>
+						<div class="sk-mono text-[10px] text-[var(--sk-faint)]">
+							{t('admin.chrome.eyebrow')}
+						</div>
 						<h1 class="mt-1 text-2xl font-semibold text-[var(--sk-ink)] sm:text-3xl">
 							{title}
 						</h1>

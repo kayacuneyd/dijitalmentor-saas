@@ -4,24 +4,26 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 </script>
 
 <svelte:head>
-	<title>Copy · saaskaya admin</title>
+	<title>{t('admin.copyPanel.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Public copy"
-	description="Edit marketing-page text without touching code. Empty fields fall back to the built-in defaults."
+	title={t('admin.copyPanel.title')}
+	description={t('admin.copyPanel.description')}
 	active="/admin/copy"
 	max="max-w-[96rem]"
 >
 	{#if form?.saved}
-		<div class="sk-alert sk-alert-success">Saved <code>{form.saved}</code>.</div>
+		<div class="sk-alert sk-alert-success">{t('admin.copyPanel.saved', { value: form.saved })}</div>
 	{:else if form?.reset}
-		<div class="sk-alert">Reset <code>{form.reset}</code> to code defaults.</div>
+		<div class="sk-alert">{t('admin.copyPanel.reset', { value: form.reset })}</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
@@ -36,10 +38,10 @@
 						<span>
 							<span class="block text-base font-semibold">{page.label}</span>
 							<span class="mt-1 block text-xs text-[var(--sk-faint)]">
-								{page.path} · {page.fields.length} editable fields
+								{page.path} · {t('admin.copyPanel.editableFields', { count: page.fields.length })}
 							</span>
 						</span>
-						<span class="sk-btn sk-btn-secondary sk-btn-sm">Open</span>
+						<span class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.copyPanel.open')}</span>
 					</summary>
 					<div class="grid gap-4 border-t border-[var(--sk-line)] p-4 xl:grid-cols-3">
 						{#each page.locales as localeRow (localeRow.locale)}
@@ -50,11 +52,13 @@
 											{localeRow.locale}
 										</h2>
 										<p class="mt-1 text-xs text-[var(--sk-faint)]">
-											Only filled fields override the default copy.
+											{t('admin.copyPanel.overrideHelp')}
 										</p>
 									</div>
 									<StatusPill tone={Object.keys(localeRow.value).length ? 'success' : 'neutral'}>
-										{Object.keys(localeRow.value).length ? 'custom' : 'default'}
+										{Object.keys(localeRow.value).length
+											? t('admin.copyPanel.custom')
+											: t('admin.copyPanel.default')}
 									</StatusPill>
 								</div>
 
@@ -69,7 +73,8 @@
 													name={field.path}
 													rows="3"
 													class="mt-1 w-full rounded-[8px] border border-[var(--sk-line)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--sk-ink)]"
-												>{getPathValue(localeRow.value, field.path)}</textarea>
+													>{getPathValue(localeRow.value, field.path)}</textarea
+												>
 											{:else}
 												<input
 													name={field.path}
@@ -78,19 +83,23 @@
 												/>
 											{/if}
 											{#if field.help}
-												<span class="mt-1 block text-[11px] text-[var(--sk-faint)]">{field.help}</span>
+												<span class="mt-1 block text-[11px] text-[var(--sk-faint)]"
+													>{field.help}</span
+												>
 											{/if}
 										</label>
 									{/each}
 									<div class="mt-2 flex flex-wrap gap-2">
-										<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Save copy</button>
+										<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
+											>{t('admin.copyPanel.save')}</button
+										>
 									</div>
 								</form>
 								<form method="POST" action="?/reset" class="mt-2" use:enhance>
 									<input type="hidden" name="page" value={page.key} />
 									<input type="hidden" name="locale" value={localeRow.locale} />
 									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
-										Reset this language
+										{t('admin.copyPanel.resetLanguage')}
 									</button>
 								</form>
 							</section>

@@ -11,7 +11,10 @@ describe('tool input schemas', () => {
 		for (const s of [generatedSiteSchema, chatPatchSchema, translationSchemaFor(['en', 'de'])]) {
 			const json = toInputSchema(s);
 			expect(json.type).toBe('object');
-			expect(JSON.stringify(json).length).toBeLessThan(60000);
+			// Seventeen supported block types expand the generated schema beyond the
+			// original 60 KB budget. Keep a guardrail while leaving room for the
+			// current controlled component set.
+			expect(JSON.stringify(json).length).toBeLessThan(70000);
 		}
 	});
 

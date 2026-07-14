@@ -10,6 +10,7 @@ import {
 import { setSetting } from '$lib/server/config';
 import { sendBetaInvitation } from '$lib/server/email';
 import { DEFAULT_LOCALE, isLocale } from '$lib/i18n';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -26,13 +27,14 @@ const addSchema = z.object({
 export const actions: Actions = {
 	send: async ({ request, locals, url }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const parsed = addSchema.safeParse({
 			email: String(form.get('email') ?? '').trim(),
 			profession: String(form.get('profession') ?? '').trim() || undefined,
 			notes: String(form.get('notes') ?? '').trim() || undefined
 		});
-		if (!parsed.success) return fail(400, { message: 'A valid email is required.' });
+		if (!parsed.success) return fail(400, { message: t('admin.invites.validEmail') });
 		addInvite(parsed.data.email, parsed.data.profession, parsed.data.notes);
 		const loginUrl = `${url.origin}/login?email=${encodeURIComponent(parsed.data.email)}`;
 		const localeInput = form.get('locale');
@@ -40,7 +42,7 @@ export const actions: Actions = {
 		const result = await sendBetaInvitation(parsed.data.email, loginUrl, locale);
 		if (!result.sent) {
 			return fail(502, {
-				message: `Invite saved, but email delivery failed: ${result.error ?? 'unknown error'}`,
+				message: t('admin.invites.deliveryFailed', { error: result.error ?? 'unknown error' }),
 				saved: parsed.data.email
 			});
 		}
@@ -54,15 +56,17 @@ export const actions: Actions = {
 	},
 	revoke: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const email = String((await request.formData()).get('email') ?? '');
-		if (!email) return fail(400, { message: 'Missing email.' });
+		if (!email) return fail(400, { message: t('admin.invites.missingEmail') });
 		setInviteStatus(email, 'revoked');
 		return { revoked: email };
 	},
 	reactivate: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const email = String((await request.formData()).get('email') ?? '');
-		if (!email) return fail(400, { message: 'Missing email.' });
+		if (!email) return fail(400, { message: t('admin.invites.missingEmail') });
 		setInviteStatus(email, 'invited');
 		return { reactivated: email };
 	}

@@ -5,8 +5,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 	const statuses = ['draft', 'published', 'archived'] as const;
 	const tone = (status: string) =>
 		status === 'published' ? 'success' : status === 'archived' ? 'error' : 'neutral';
@@ -18,18 +20,20 @@
 
 <AdminShell
 	title={data.post.title.en}
-	description="Edit the public blog article in Turkish, English, and German."
+	description={t('admin.blog.editDescription')}
 	active="/admin/blog"
 	max="max-w-[78rem]"
 >
 	{#snippet actions()}
-		<a href="/admin/blog" class="sk-btn sk-btn-secondary sk-btn-sm">Back to blog</a>
-		<a href={`/blog/${data.post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm">Open public</a>
+		<a href="/admin/blog" class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.blog.back')}</a>
+		<a href={`/blog/${data.post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm"
+			>{t('admin.blog.openPublic')}</a
+		>
 		<StatusPill tone={tone(data.post.status)}>{data.post.status}</StatusPill>
 	{/snippet}
 
 	{#if form?.saved}
-		<div class="sk-alert sk-alert-success">Blog post saved.</div>
+		<div class="sk-alert sk-alert-success">{t('admin.blog.saved')}</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
@@ -38,11 +42,12 @@
 		<AppCard class="p-4">
 			<div class="grid gap-4 lg:grid-cols-[1fr_16rem_12rem]">
 				<div class="grid gap-1">
-					<label for="slug" class="text-xs text-[var(--sk-faint)]">Slug</label>
+					<label for="slug" class="text-xs text-[var(--sk-faint)]">{t('admin.blog.slug')}</label>
 					<input id="slug" name="slug" required class="sk-input" value={data.post.slug} />
 				</div>
 				<div class="grid gap-1">
-					<label for="status" class="text-xs text-[var(--sk-faint)]">Status</label>
+					<label for="status" class="text-xs text-[var(--sk-faint)]">{t('admin.blog.status')}</label
+					>
 					<select id="status" name="status" class="sk-select" value={data.post.status}>
 						{#each statuses as status (status)}
 							<option value={status}>{status}</option>
@@ -50,7 +55,9 @@
 					</select>
 				</div>
 				<div class="grid gap-1">
-					<label for="publishedAt" class="text-xs text-[var(--sk-faint)]">Publish date</label>
+					<label for="publishedAt" class="text-xs text-[var(--sk-faint)]"
+						>{t('admin.blog.publishDate')}</label
+					>
 					<input
 						id="publishedAt"
 						name="publishedAt"
@@ -61,7 +68,7 @@
 				</div>
 				<div class="grid gap-1">
 					<label for="coverImageUrl" class="text-xs text-[var(--sk-faint)]"
-						>Cover / SEO image URL</label
+						>{t('admin.blog.coverUrl')}</label
 					>
 					<input
 						id="coverImageUrl"
@@ -72,11 +79,15 @@
 					/>
 				</div>
 				<div class="grid gap-1">
-					<label for="coverAlt" class="text-xs text-[var(--sk-faint)]">Cover alt text</label>
+					<label for="coverAlt" class="text-xs text-[var(--sk-faint)]"
+						>{t('admin.blog.coverAlt')}</label
+					>
 					<input id="coverAlt" name="coverAlt" class="sk-input" value={data.post.coverAlt ?? ''} />
 				</div>
 				<div class="grid gap-1">
-					<label for="readingMinutes" class="text-xs text-[var(--sk-faint)]">Reading minutes</label>
+					<label for="readingMinutes" class="text-xs text-[var(--sk-faint)]"
+						>{t('admin.blog.readingMinutes')}</label
+					>
 					<input
 						id="readingMinutes"
 						name="readingMinutes"
@@ -88,7 +99,9 @@
 					/>
 				</div>
 				<div class="grid gap-1 lg:col-span-3">
-					<label for="authorName" class="text-xs text-[var(--sk-faint)]">Author</label>
+					<label for="authorName" class="text-xs text-[var(--sk-faint)]"
+						>{t('admin.blog.author')}</label
+					>
 					<input id="authorName" name="authorName" class="sk-input" value={data.post.authorName} />
 				</div>
 			</div>
@@ -174,7 +187,7 @@
 		</div>
 
 		<div class="sticky bottom-3 z-10 flex justify-end">
-			<button type="submit" class="sk-btn sk-btn-primary">Save blog post</button>
+			<button type="submit" class="sk-btn sk-btn-primary">{t('admin.blog.save')}</button>
 		</div>
 	</form>
 </AdminShell>

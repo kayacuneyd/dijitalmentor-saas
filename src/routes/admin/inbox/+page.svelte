@@ -2,8 +2,10 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data } = $props();
+	const t = getTranslate();
 
 	const statuses = ['all', 'open', 'pending', 'resolved', 'closed'] as const;
 	const sources = ['all', 'contact', 'chat', 'assistant'] as const;
@@ -21,12 +23,12 @@
 </script>
 
 <svelte:head>
-	<title>Inbox · saaskaya admin</title>
+	<title>{t('admin.list.inboxTitle')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Inbox"
-	description="Public contact-form and message-bubble inquiries, most recently active first."
+	title={t('admin.list.inboxTitle')}
+	description={t('admin.list.inboxDescription')}
 	active="/admin/inbox"
 >
 	<div class="flex flex-col gap-2">
@@ -54,9 +56,11 @@
 
 	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
-			<h2 class="sk-display text-2xl leading-none">{data.inquiries.length} inquiry(s)</h2>
+			<h2 class="sk-display text-2xl leading-none">
+				{t('admin.list.inquiryCount', { count: data.inquiries.length })}
+			</h2>
 			{#if data.inquiries.length === 0}
-				<p class="text-sm text-[var(--sk-muted)]">No public inquiries.</p>
+				<p class="text-sm text-[var(--sk-muted)]">{t('admin.list.noInquiries')}</p>
 			{:else}
 				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
 					{#each data.inquiries as inquiry (inquiry.id)}
@@ -66,7 +70,7 @@
 									<span class="truncate font-medium">{inquiry.name}</span>
 									<StatusPill tone={statusTone(inquiry.status)}>{inquiry.status}</StatusPill>
 									{#if inquiry.lastMessageBy === 'visitor' && inquiry.status !== 'closed'}
-										<StatusPill tone="warning">new</StatusPill>
+										<StatusPill tone="warning">{t('admin.list.new')}</StatusPill>
 									{/if}
 								</div>
 								<p class="text-xs text-[var(--sk-faint)]">
@@ -76,7 +80,7 @@
 								</p>
 							</div>
 							<a href="/admin/inbox/{inquiry.id}" class="sk-btn sk-btn-secondary sk-btn-sm">
-								Open
+								{t('admin.list.open')}
 							</a>
 						</li>
 					{/each}

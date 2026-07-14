@@ -18,7 +18,10 @@ const sectionLabels: Record<SectionType, string> = {
 	booking: 'Randevu',
 	credentials: 'Sertifikalar',
 	team: 'Ekip',
-	footer: 'Footer'
+	footer: 'Footer',
+	stats: 'İstatistikler',
+	clients: 'Referans Logolar',
+	video: 'Video'
 };
 const templateImages = new Set([
 	'calm-intake',

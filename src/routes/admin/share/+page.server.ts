@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { requireAdmin } from '$lib/server/auth';
 import { getSetting, setSetting } from '$lib/server/config';
 import { LOCALES } from '$lib/i18n';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import {
 	MAX_SHARE_VIDEO_BYTES,
 	deleteShareAsset,
@@ -43,13 +44,14 @@ function requiredId(form: FormData): string | null {
 export const actions: Actions = {
 	upload: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const upload = form.get('file');
 		if (!(upload instanceof File) || upload.size === 0) {
-			return fail(400, { message: 'Choose an image or MP4 video to upload.' });
+			return fail(400, { message: t('admin.share.chooseFile') });
 		}
 		if (upload.size > MAX_SHARE_VIDEO_BYTES) {
-			return fail(413, { message: 'File must be 60 MB or smaller.' });
+			return fail(413, { message: t('admin.share.fileTooLarge') });
 		}
 		try {
 			const asset = await uploadShareAsset({
@@ -60,9 +62,9 @@ export const actions: Actions = {
 			});
 			return { uploaded: asset.fileName };
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Upload failed.';
+			const message = error instanceof Error ? error.message : t('admin.share.uploadFailed');
 			if (message.startsWith('Upload a')) return fail(400, { message });
-			return fail(503, { message: `Storage error: ${message}` });
+			return fail(503, { message: t('admin.share.storageError', { error: message }) });
 		}
 	},
 	toggle: async ({ request, locals }) => {

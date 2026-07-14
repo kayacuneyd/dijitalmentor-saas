@@ -4,8 +4,10 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data, form } = $props();
+	const t = getTranslate();
 
 	let query = $state('');
 
@@ -32,29 +34,31 @@
 </script>
 
 <svelte:head>
-	<title>Messages · saaskaya admin</title>
+	<title>{t('admin.messagePanel.title')} · saaskaya admin</title>
 </svelte:head>
 
 <AdminShell
-	title="Messages"
-	description="Edit any product text — dashboard, editor, admin, email, common — without touching code. Empty fields fall back to the built-in defaults."
+	title={t('admin.messagePanel.title')}
+	description={t('admin.messagePanel.description')}
 	active="/admin/messages"
 	max="max-w-[96rem]"
 >
 	{#if form?.saved}
-		<div class="sk-alert sk-alert-success">Saved <code>{form.saved}</code>.</div>
+		<div class="sk-alert sk-alert-success">
+			{t('admin.messagePanel.saved', { value: form.saved })}
+		</div>
 	{:else if form?.reset}
-		<div class="sk-alert">Reset <code>{form.reset}</code> to the code default.</div>
+		<div class="sk-alert">{t('admin.messagePanel.reset', { value: form.reset })}</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
 
 	<label class="block max-w-md">
-		<span class="text-xs font-medium text-[var(--sk-muted)]">Search</span>
+		<span class="text-xs font-medium text-[var(--sk-muted)]">{t('admin.messagePanel.search')}</span>
 		<input
 			type="search"
 			bind:value={query}
-			placeholder="Search by key, label, or text…"
+			placeholder={t('admin.messagePanel.searchPlaceholder')}
 			class="mt-1 w-full rounded-[8px] border border-[var(--sk-line)] bg-white px-3 py-2 text-sm outline-none focus:border-[var(--sk-ink)]"
 		/>
 	</label>
@@ -72,7 +76,7 @@
 								{entries.length} editable {entries.length === 1 ? 'string' : 'strings'}
 							</span>
 						</span>
-						<span class="sk-btn sk-btn-secondary sk-btn-sm">Open</span>
+						<span class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.messagePanel.open')}</span>
 					</summary>
 					<div class="grid gap-4 border-t border-[var(--sk-line)] p-4">
 						{#each entries as entry (entry.key)}

@@ -84,6 +84,20 @@
 		message: string;
 		version?: number;
 	} | null>(null);
+	// Deliberate initial-value capture: only show the first-run publish success
+	// banner when opening the editor directly from onboarding.
+	// svelte-ignore state_referenced_locally
+	const initialPublishNotice: typeof publishNotice =
+		data.fromOnboarding && data.publishedVersion
+			? {
+					tone: 'success',
+					title: `Siten yayında v${data.publishedVersion}`,
+					message:
+						'İlk canlı subdomain snapshot hazır. Şimdi metinleri ve görselleri iyileştirip istediğinde tekrar yayınlayabilirsin.',
+					version: data.publishedVersion
+				}
+			: null;
+	if (initialPublishNotice) publishNotice = initialPublishNotice;
 	let saveNotice = $state<{ tone: 'success' | 'error'; message: string } | null>(null);
 	const liveUrl = $derived(
 		`${data.appOrigin}${publicHandle}.${data.appHost}${publicSitePath(
@@ -146,7 +160,8 @@
 				return;
 			}
 			if (!canPublish) {
-				if (publishIdentityMissing) activeTab = 'Settings';
+				activeTab = publishIdentityMissing ? 'Settings' : 'Content';
+				dockOpen = true;
 				publishNotice = {
 					tone: 'error',
 					title: 'Yayın için eksik var',
@@ -301,12 +316,12 @@
 						<button
 							class="sk-btn sk-btn-primary sk-btn-sm"
 							onclick={publish}
-							disabled={publishing || !canPublish}
-							title={canPublish ? 'Publish' : 'Fix publish blockers before publishing'}
+							disabled={publishing}
+							title={canPublish ? 'Publish' : 'Publish engelini görmek için tıkla'}
 						>
 							{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
 							{#if !canPublish}
-								Yayına hazır değil
+								Yayın engelini çöz
 							{:else if publishedVersion}
 								Republish
 							{:else}
@@ -409,17 +424,17 @@
 								</div>
 								<p class="mt-1 truncate text-xs text-[var(--sk-muted)]">{nextAction.helper}</p>
 							</div>
-							<button
-								type="button"
-								class="sk-btn sk-btn-secondary sk-btn-sm shrink-0"
-								onclick={(e) => {
-									e.stopPropagation();
-									goToChecklistItem(nextAction);
-								}}
-							>
-								Aç
-							</button>
+							<span class="sk-mono shrink-0 text-[10px] text-[var(--sk-faint)]">
+								{checklistOpen ? 'Gizle' : 'Detay'}
+							</span>
 						</summary>
+						<button
+							type="button"
+							class="sk-btn sk-btn-secondary sk-btn-sm mt-3 shrink-0"
+							onclick={() => goToChecklistItem(nextAction)}
+						>
+							Aç
+						</button>
 						<div class="mt-3 flex flex-col gap-2">
 							{#each checklist as item (item.id)}
 								<button

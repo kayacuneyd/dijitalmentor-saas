@@ -1,6 +1,62 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIProviderRejectedRequestError } from '$lib/server/ai/llm';
 
+function validSite(siteId = 'site-fallback') {
+	return {
+		id: siteId,
+		tenantId: 'tenant-user-1',
+		defaultLocale: 'tr',
+		locales: ['tr', 'en', 'de'],
+		theme: {
+			preset: 'law',
+			colors: { primary: '#111111', secondary: '#222222', accent: '#333333' },
+			fonts: { heading: 'Inter', body: 'Inter' },
+			radius: 'sm'
+		},
+		nav: { items: [{ pageSlug: 'home', label: { tr: 'Ana Sayfa', en: 'Home', de: 'Start' } }] },
+		pages: [
+			{
+				slug: 'home',
+				title: { tr: 'Ana Sayfa', en: 'Home', de: 'Start' },
+				sections: [
+					{
+						id: 'hero-1',
+						type: 'hero',
+						props: { variant: 'centered', background: 'plain', ctaHref: '#contact-1' },
+						content: {
+							tr: { headline: 'Demir Hukuk ile güvenli destek' },
+							en: { headline: 'Trusted support from Demir Law' },
+							de: { headline: 'Verlässliche Unterstützung von Demir Law' }
+						}
+					},
+					{
+						id: 'contact-1',
+						type: 'contact',
+						props: { variant: 'form', email: 'info@example.com' },
+						content: {
+							tr: { title: 'İletişim' },
+							en: { title: 'Contact' },
+							de: { title: 'Kontakt' }
+						}
+					}
+				]
+			}
+		],
+		settings: {
+			siteName: 'Demir Hukuk',
+			contactEmail: 'info@example.com',
+			poweredByBadge: true,
+			seo: {
+				description: {
+					tr: 'Demir Hukuk iletişim sitesi.',
+					en: 'Demir Law contact site.',
+					de: 'Kontaktseite von Demir Law.'
+				}
+			}
+		}
+	};
+}
+
 vi.mock('$lib/server/ai/generate', () => ({
 	generateSite: vi.fn()
 }));
@@ -11,9 +67,28 @@ vi.mock('$lib/server/ai/usage', () => ({
 	tenantIdForUser: vi.fn(() => 'tenant-user-1')
 }));
 
-vi.mock('$lib/server/db/repo', () => ({
-	saveDraft: vi.fn()
-}));
+vi.mock('$lib/server/db/repo', async () => {
+	const actual = await vi.importActual<typeof import('$lib/server/db/repo')>('$lib/server/db/repo');
+	return {
+		...actual,
+		saveDraft: vi.fn(),
+		getSiteMeta: vi.fn(() => ({
+			id: 'site-fallback',
+			tenantId: 'tenant-user-1',
+			publicHandle: 'demir-hukuk',
+			ownerUserId: 'user-1',
+			publishedVersion: null,
+			updatedAt: new Date()
+		})),
+		isPublicHandleAvailable: vi.fn(() => true),
+		publishDraft: vi.fn(() => 1),
+		setSiteIdentity: vi.fn((input: { siteId: string; publicHandle: string }) => ({
+			ok: true,
+			site: validSite(input.siteId),
+			publicHandle: input.publicHandle
+		}))
+	};
+});
 
 vi.mock('$lib/server/error-log', () => ({
 	recordError: vi.fn(() => 'err-test')
@@ -49,30 +124,17 @@ vi.mock('$lib/server/ai/memory', () => ({
 
 vi.mock('$lib/server/siteQuota', () => ({
 	assertCanCreateFreePreviewSite: vi.fn(),
+	assertCanPublishFreeSite: vi.fn(),
 	SiteQuotaError: class SiteQuotaError extends Error {}
 }));
 
 vi.mock('$lib/server/siteFallback', () => ({
-	createFallbackSite: vi.fn(() => ({
-		id: 'site-fallback',
-		tenantId: 'tenant-user-1',
-		defaultLocale: 'tr',
-		locales: ['tr', 'en', 'de'],
-		theme: {
-			preset: 'law',
-			colors: { primary: '#111111', secondary: '#222222', accent: '#333333' },
-			fonts: { heading: 'Inter', body: 'Inter' },
-			radius: 'sm'
-		},
-		nav: { items: [{ pageSlug: 'home', label: { tr: 'Ana Sayfa', en: 'Home', de: 'Start' } }] },
-		pages: [],
-		settings: { siteName: 'Fallback', poweredByBadge: true }
-	}))
+	createFallbackSite: vi.fn(() => validSite('site-fallback'))
 }));
 
 const { POST } = await import('./+server');
 const { generateSite } = await import('$lib/server/ai/generate');
-const { saveDraft } = await import('$lib/server/db/repo');
+const { publishDraft, saveDraft, setSiteIdentity } = await import('$lib/server/db/repo');
 const { recordError } = await import('$lib/server/error-log');
 
 function request() {
@@ -103,8 +165,19 @@ describe('POST /api/sites', () => {
 		const data = await res.json();
 
 		expect(res.status).toBe(200);
-		expect(data).toMatchObject({ ok: true, fallback: true, errorId: 'err-test' });
+		expect(data).toMatchObject({
+			ok: true,
+			fallback: true,
+			errorId: 'err-test',
+			autoPublished: true,
+			publishedVersion: 1,
+			publicHandle: 'demir-hukuk'
+		});
 		expect(saveDraft).toHaveBeenCalled();
+		expect(setSiteIdentity).toHaveBeenCalledWith(
+			expect.objectContaining({ siteId: 'site-fallback', publicHandle: 'demir-hukuk' })
+		);
+		expect(publishDraft).toHaveBeenCalledWith('site-fallback');
 		expect(recordError).toHaveBeenCalledWith(
 			expect.any(AIProviderRejectedRequestError),
 			expect.objectContaining({ status: 422, source: 'site-generation' })

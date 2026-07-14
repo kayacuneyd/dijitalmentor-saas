@@ -80,7 +80,7 @@ describe('assembleSite', () => {
 		expect(hero.content.tr.headline).toBe('Hukukta güvenilir ortak');
 		expect(hero.content.en.headline).toBe('EN headline');
 		expect(hero.content.de.headline).toBe('DE headline');
-		expect(site.settings.seo?.description.de).toBe('DE seo');
+		expect(site.settings.seo?.description?.de).toBe('DE seo');
 		expect(site.settings.poweredByBadge).toBe(true);
 	});
 

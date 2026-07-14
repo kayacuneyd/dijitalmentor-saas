@@ -19,6 +19,7 @@ import {
 } from '$lib/server/reservations';
 import { listRecentErrors, resolveError, unresolvedErrorCount } from '$lib/server/error-log';
 import { listRequestProbes } from '$lib/server/requestProbes';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -48,48 +49,54 @@ const saveSchema = z.object({ key: z.string().min(1), value: z.string().min(1) }
 export const actions: Actions = {
 	save: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const parsed = saveSchema.safeParse({
 			key: String(form.get('key') ?? ''),
 			value: String(form.get('value') ?? '').trim()
 		});
-		if (!parsed.success) return fail(400, { message: 'A value is required.' });
+		if (!parsed.success) return fail(400, { message: t('admin.settings.valueRequired') });
 		try {
 			setSetting(parsed.data.key, parsed.data.value);
 		} catch {
-			return fail(400, { message: 'Unknown setting.' });
+			return fail(400, { message: t('admin.settings.unknownSetting') });
 		}
 		return { saved: parsed.data.key };
 	},
 	clear: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const key = String((await request.formData()).get('key') ?? '');
 		try {
 			clearSetting(key);
 		} catch {
-			return fail(400, { message: 'Unknown setting.' });
+			return fail(400, { message: t('admin.settings.unknownSetting') });
 		}
 		return { cleared: key };
 	},
 	resolveError: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const id = String((await request.formData()).get('errorId') ?? '');
-		if (!resolveError(id)) return fail(404, { message: 'Error record not found.' });
+		if (!resolveError(id)) return fail(404, { message: t('admin.settings.errorNotFound') });
 		return { errorResolved: id };
 	},
 	// --- domain reservation payments (beta-launch spec) -----------------------
 	confirmPayment: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const id = String((await request.formData()).get('reservationId') ?? '');
-		if (!confirmPayment(id)) return fail(404, { message: 'Reservation not found.' });
+		if (!confirmPayment(id)) return fail(404, { message: t('admin.settings.reservationNotFound') });
 		return { paymentConfirmed: id };
 	},
 	rejectPayment: async ({ request, locals }) => {
 		requireAdmin(locals);
+		const t = serverTranslator(locals.locale);
 		const form = await request.formData();
 		const id = String(form.get('reservationId') ?? '');
 		const reason = String(form.get('reason') ?? '').trim() || undefined;
-		if (!rejectPayment(id, reason)) return fail(404, { message: 'Reservation not found.' });
+		if (!rejectPayment(id, reason))
+			return fail(404, { message: t('admin.settings.reservationNotFound') });
 		return { paymentRejected: id };
 	},
 	fulfillReservation: async ({ request, locals }) => {

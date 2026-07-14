@@ -42,7 +42,7 @@ describe('?/create', () => {
 		const user = getOrCreateUser(`account-support-invalid-${Date.now()}@example.com`);
 		const res = (await actions.create({
 			request: formRequest({ subject: '', body: '' }),
-			locals: { user }
+			locals: { user, locale: 'en' }
 		} as never)) as { status: number };
 		expect(res.status).toBe(400);
 	});
@@ -56,7 +56,7 @@ describe('?/create', () => {
 					body: 'The magic link expired.',
 					category: 'not-a-real-category'
 				}),
-				locals: { user }
+				locals: { user, locale: 'en' }
 			} as never)
 		).rejects.toBeTruthy(); // SvelteKit redirect() throws
 

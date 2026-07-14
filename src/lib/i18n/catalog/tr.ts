@@ -10,6 +10,89 @@ export const tr = {
 		loading: 'Yükleniyor…',
 		error: 'Bir şeyler ters gitti.'
 	},
+	account: {
+		supportLink: 'Destek',
+		signOut: 'Çıkış yap',
+		stats: {
+			sites: 'Siteler',
+			published: 'Yayınlanan',
+			messages: 'Mesajlar'
+		},
+		plan: {
+			title: 'Plan',
+			description:
+				'Özel domain için Pro gerekir. Yayınlanan subdomainler Free planda da kullanılabilir.',
+			pro: 'Pro',
+			proGrace: 'Pro · ek süre',
+			free: 'Free',
+			graceUntil: 'Ücretli özellikler {date} tarihine kadar aktif kalır.',
+			upgrade: "Pro'ya geç",
+			manageSites: 'Siteleri yönet'
+		},
+		usage: {
+			title: 'Bu ay AI kullanımı',
+			description:
+				'Editördeki doğrudan metin/renk düzenlemeleri her zaman ücretsizdir — bu limitler yalnızca AI ile üretilen değişiklikler içindir.',
+			edits: 'Düzenlemeler',
+			generations: 'Site üretimleri'
+		},
+		profile: {
+			title: 'Profil',
+			description: 'Hesabın magic-link ile giriş kullanıyor. Şifre saklanmıyor.',
+			email: 'E-posta',
+			role: 'Rol',
+			roleAdmin: 'Süper admin',
+			roleCustomer: 'Müşteri'
+		},
+		exports: {
+			title: "Site export'ları",
+			description: 'Tam site export Pro siteler ve operatör destek durumları için kullanılabilir.',
+			empty: 'Henüz export edilecek site yok.',
+			export: 'Export',
+			proRequired: 'Pro site gerekli'
+		},
+		deletion: {
+			title: 'Silme talepleri',
+			description:
+				'Hesap silme şu an operatör tarafından yürütülür. Hesabını, sitelerini, yayınlanan sürümleri ve mesajları veritabanından kaldırır; yedekler saklama politikasına göre zaman içinde silinir.',
+			request: 'Silme talep et'
+		},
+		support: {
+			title: 'Destek',
+			description: 'Bize mesaj gönder — burada gerçek bir kişi yanıtlar.',
+			newRequest: 'Yeni talep',
+			categoryLabel: 'Kategori',
+			categoryGeneral: 'Genel',
+			categoryBilling: 'Faturalama',
+			categoryTechnical: 'Teknik',
+			categoryHumanReview: 'İnsan incelemesi (Premium)',
+			subjectLabel: 'Konu',
+			subjectPlaceholder: 'Bu ne hakkında?',
+			messageLabel: 'Mesaj',
+			messagePlaceholder: 'Ne olduğunu anlat.',
+			send: 'Gönder',
+			ticketCount: '{count} talep',
+			empty: 'Henüz talep yok.',
+			updated: '{date} güncellendi',
+			statusOpen: 'açık',
+			statusPending: 'beklemede',
+			statusResolved: 'çözüldü',
+			statusClosed: 'kapalı',
+			tooManyTickets: 'Çok fazla talep açtın — yeni bir tane açmadan önce biraz bekle.',
+			subjectBodyRequired: 'Konu ve mesaj alanlarının ikisi de gerekli.',
+			detail: {
+				openedOn: '{date} açıldı',
+				you: 'Sen',
+				team: 'saaskaya destek',
+				replyPlaceholder: 'Bir yanıt yaz…',
+				reply: 'Yanıtla',
+				closedNotice: 'Bu talep kapatıldı.',
+				tooManyReplies: 'Çok fazla yanıt gönderdin — yeni bir tane göndermeden önce biraz bekle.',
+				emptyMessage: 'Mesaj boş olamaz.',
+				unknownTicket: 'Talep bulunamadı.'
+			}
+		}
+	},
 	dashboard: {
 		title: 'Sitelerin',
 		nav: {

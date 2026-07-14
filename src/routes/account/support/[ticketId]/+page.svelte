@@ -3,29 +3,41 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
+	import type { CatalogKey } from '$lib/i18n/catalog';
 
 	let { data, form } = $props();
 
+	const t = getTranslate();
+
 	const statusTone = (status: string) =>
 		status === 'resolved' ? 'success' : status === 'closed' ? 'neutral' : 'warning';
+	const statusLabel = (status: string) =>
+		t(`account.support.status${status.charAt(0).toUpperCase()}${status.slice(1)}` as CatalogKey);
+	const categoryLabel = (category: string) =>
+		category === 'human_review'
+			? t('account.support.categoryHumanReview')
+			: t(
+					`account.support.category${category.charAt(0).toUpperCase()}${category.slice(1)}` as CatalogKey
+				);
 </script>
 
 <svelte:head>
-	<title>{data.ticket.subject} · Support · saaskaya</title>
+	<title>{data.ticket.subject} · {t('account.support.title')} · saaskaya</title>
 </svelte:head>
 
 <PageShell
 	backHref="/account/support"
 	backLabel="support"
 	title={data.ticket.subject}
-	description="{data.ticket.category} · opened {new Date(
-		data.ticket.createdAt
-	).toLocaleDateString()}"
+	description="{categoryLabel(data.ticket.category)} · {t('account.support.detail.openedOn', {
+		date: new Date(data.ticket.createdAt).toLocaleDateString()
+	})}"
 	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
 	{#snippet actions()}
-		<StatusPill tone={statusTone(data.ticket.status)}>{data.ticket.status}</StatusPill>
+		<StatusPill tone={statusTone(data.ticket.status)}>{statusLabel(data.ticket.status)}</StatusPill>
 	{/snippet}
 
 	{#if form?.message}
@@ -38,7 +50,9 @@
 				<li class="flex flex-col gap-1">
 					<div class="flex items-center gap-2">
 						<span class="text-xs font-semibold">
-							{message.authorKind === 'admin' ? 'saaskaya support' : 'You'}
+							{message.authorKind === 'admin'
+								? t('account.support.detail.team')
+								: t('account.support.detail.you')}
 						</span>
 						<span class="text-xs text-[var(--sk-faint)]">
 							{new Date(message.createdAt).toLocaleString()}
@@ -58,11 +72,13 @@
 					required
 					rows="4"
 					class="sk-input py-1.5 text-sm"
-					placeholder="Write a reply…"></textarea>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start">Reply</button>
+					placeholder={t('account.support.detail.replyPlaceholder')}></textarea>
+				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
+					>{t('account.support.detail.reply')}</button
+				>
 			</form>
 		</AppCard>
 	{:else}
-		<p class="text-sm text-[var(--sk-muted)]">This ticket is closed.</p>
+		<p class="text-sm text-[var(--sk-muted)]">{t('account.support.detail.closedNotice')}</p>
 	{/if}
 </PageShell>

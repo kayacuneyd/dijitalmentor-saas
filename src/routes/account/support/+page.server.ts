@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { rateLimit } from '$lib/server/auth';
 import { getSetting } from '$lib/server/config';
 import { sendEmail } from '$lib/server/email';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import { createTicket, listTicketsForUser, type TicketCategory } from '$lib/server/support';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -15,8 +16,9 @@ export const load: PageServerLoad = ({ locals }) => {
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
 		if (!locals.user) redirect(303, '/login');
+		const t = serverTranslator(locals.locale);
 		if (!rateLimit(`ticket-create:${locals.user.id}`, 5, 3_600_000)) {
-			return fail(429, { message: 'Too many tickets — please wait before opening another.' });
+			return fail(429, { message: t('account.support.tooManyTickets') });
 		}
 		const form = await request.formData();
 		const subject = String(form.get('subject') ?? '').trim();
@@ -26,7 +28,7 @@ export const actions: Actions = {
 			? (categoryInput as TicketCategory)
 			: 'general';
 		if (!subject || !body) {
-			return fail(400, { message: 'Subject and message are both required.' });
+			return fail(400, { message: t('account.support.subjectBodyRequired') });
 		}
 		const ticket = createTicket({
 			userId: locals.user.id,

@@ -10,6 +10,91 @@ export const de = {
 		loading: 'Wird geladen…',
 		error: 'Etwas ist schiefgelaufen.'
 	},
+	account: {
+		supportLink: 'Support',
+		signOut: 'Abmelden',
+		stats: {
+			sites: 'Websites',
+			published: 'Veröffentlicht',
+			messages: 'Nachrichten'
+		},
+		plan: {
+			title: 'Tarif',
+			description:
+				'Eigene Domains benötigen Pro. Veröffentlichte Subdomains bleiben auch im Free-Tarif verfügbar.',
+			pro: 'Pro',
+			proGrace: 'Pro · Kulanz',
+			free: 'Free',
+			graceUntil: 'Bezahlte Funktionen bleiben bis {date} aktiv.',
+			upgrade: 'Auf Pro upgraden',
+			manageSites: 'Websites verwalten'
+		},
+		usage: {
+			title: 'KI-Nutzung diesen Monat',
+			description:
+				'Direkte Text-/Farbänderungen im Editor sind immer kostenlos — diese Limits gelten nur für KI-generierte Änderungen.',
+			edits: 'Bearbeitungen',
+			generations: 'Website-Generierungen'
+		},
+		profile: {
+			title: 'Profil',
+			description:
+				'Dein Konto nutzt die Anmeldung per Magic-Link. Es wird kein Passwort gespeichert.',
+			email: 'E-Mail',
+			role: 'Rolle',
+			roleAdmin: 'Super-Admin',
+			roleCustomer: 'Kunde'
+		},
+		exports: {
+			title: 'Website-Exporte',
+			description:
+				'Der vollständige Website-Export ist für Pro-Websites und Betreuer-Support-Fälle verfügbar.',
+			empty: 'Noch keine Websites zum Exportieren.',
+			export: 'Exportieren',
+			proRequired: 'Pro-Website erforderlich'
+		},
+		deletion: {
+			title: 'Löschanfragen',
+			description:
+				'Die Kontolöschung wird derzeit vom Betreiber durchgeführt. Dabei werden dein Konto, deine Websites, veröffentlichten Versionen und Nachrichten aus der Datenbank entfernt; Backups laufen gemäß der Aufbewahrungsrichtlinie aus.',
+			request: 'Löschung beantragen'
+		},
+		support: {
+			title: 'Support',
+			description: 'Schick uns eine Nachricht — hier antwortet ein echter Mensch.',
+			newRequest: 'Neue Anfrage',
+			categoryLabel: 'Kategorie',
+			categoryGeneral: 'Allgemein',
+			categoryBilling: 'Abrechnung',
+			categoryTechnical: 'Technisch',
+			categoryHumanReview: 'Persönliche Prüfung (Premium)',
+			subjectLabel: 'Betreff',
+			subjectPlaceholder: 'Worum geht es?',
+			messageLabel: 'Nachricht',
+			messagePlaceholder: 'Erzähl uns, was los ist.',
+			send: 'Senden',
+			ticketCount: '{count} Anfrage(n)',
+			empty: 'Noch keine Anfragen.',
+			updated: 'aktualisiert {date}',
+			statusOpen: 'offen',
+			statusPending: 'in Bearbeitung',
+			statusResolved: 'gelöst',
+			statusClosed: 'geschlossen',
+			tooManyTickets: 'Zu viele Anfragen — bitte warte, bevor du eine weitere eröffnest.',
+			subjectBodyRequired: 'Betreff und Nachricht sind beide erforderlich.',
+			detail: {
+				openedOn: 'eröffnet am {date}',
+				you: 'Du',
+				team: 'saaskaya Support',
+				replyPlaceholder: 'Antwort schreiben…',
+				reply: 'Antworten',
+				closedNotice: 'Diese Anfrage ist geschlossen.',
+				tooManyReplies: 'Zu viele Antworten — bitte warte, bevor du eine weitere sendest.',
+				emptyMessage: 'Die Nachricht darf nicht leer sein.',
+				unknownTicket: 'Anfrage nicht gefunden.'
+			}
+		}
+	},
 	dashboard: {
 		title: 'Deine Websites',
 		nav: {

@@ -13,6 +13,88 @@ export const en = {
 		loading: 'Loading…',
 		error: 'Something went wrong.'
 	},
+	account: {
+		supportLink: 'Support',
+		signOut: 'Sign out',
+		stats: {
+			sites: 'Sites',
+			published: 'Published',
+			messages: 'Messages'
+		},
+		plan: {
+			title: 'Plan',
+			description: 'Custom domains require Pro. Published subdomains stay available on Free.',
+			pro: 'Pro',
+			proGrace: 'Pro · grace',
+			free: 'Free',
+			graceUntil: 'Paid features remain active until {date}.',
+			upgrade: 'Upgrade to Pro',
+			manageSites: 'Manage sites'
+		},
+		usage: {
+			title: 'AI usage this month',
+			description:
+				'Direct text/color edits in the editor are always free — these limits are only for AI-generated changes.',
+			edits: 'Edits',
+			generations: 'Site generations'
+		},
+		profile: {
+			title: 'Profile',
+			description: 'Your account uses magic-link sign-in. No password is stored.',
+			email: 'Email',
+			role: 'Role',
+			roleAdmin: 'Super admin',
+			roleCustomer: 'Customer'
+		},
+		exports: {
+			title: 'Site exports',
+			description: 'Full site export is available for Pro sites and operator support cases.',
+			empty: 'No sites to export yet.',
+			export: 'Export',
+			proRequired: 'Pro site required'
+		},
+		deletion: {
+			title: 'Deletion requests',
+			description:
+				'Account deletion is handled by the operator for now. It removes your account, sites, published versions and messages from the database; backups age out under the retention policy.',
+			request: 'Request deletion'
+		},
+		support: {
+			title: 'Support',
+			description: 'Send us a message — a real person replies here.',
+			newRequest: 'New request',
+			categoryLabel: 'Category',
+			categoryGeneral: 'General',
+			categoryBilling: 'Billing',
+			categoryTechnical: 'Technical',
+			categoryHumanReview: 'Human review (Premium)',
+			subjectLabel: 'Subject',
+			subjectPlaceholder: "What's this about?",
+			messageLabel: 'Message',
+			messagePlaceholder: "Tell us what's going on.",
+			send: 'Send',
+			ticketCount: '{count} ticket(s)',
+			empty: 'No tickets yet.',
+			updated: 'updated {date}',
+			statusOpen: 'open',
+			statusPending: 'pending',
+			statusResolved: 'resolved',
+			statusClosed: 'closed',
+			tooManyTickets: 'Too many tickets — please wait before opening another.',
+			subjectBodyRequired: 'Subject and message are both required.',
+			detail: {
+				openedOn: 'opened {date}',
+				you: 'You',
+				team: 'saaskaya support',
+				replyPlaceholder: 'Write a reply…',
+				reply: 'Reply',
+				closedNotice: 'This ticket is closed.',
+				tooManyReplies: 'Too many replies — please wait before sending another.',
+				emptyMessage: 'Message cannot be empty.',
+				unknownTicket: 'Unknown ticket.'
+			}
+		}
+	},
 	dashboard: {
 		title: 'Your sites',
 		nav: {

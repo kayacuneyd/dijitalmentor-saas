@@ -13,7 +13,7 @@ function formRequest(fields: Record<string, string>) {
 describe('GET /account/support/[ticketId] (load)', () => {
 	it('redirects signed-out visitors to /login', () => {
 		try {
-			load({ params: { ticketId: 'whoever' }, locals: { user: null } } as never);
+			load({ params: { ticketId: 'whoever' }, locals: { user: null, locale: 'en' } } as never);
 			throw new Error('expected a redirect to be thrown');
 		} catch (e) {
 			expect(isRedirect(e)).toBe(true);
@@ -30,7 +30,7 @@ describe('GET /account/support/[ticketId] (load)', () => {
 			authorEmail: owner.email
 		});
 		try {
-			load({ params: { ticketId: ticket.id }, locals: { user: stranger } } as never);
+			load({ params: { ticketId: ticket.id }, locals: { user: stranger, locale: 'en' } } as never);
 			throw new Error('expected an error to be thrown');
 		} catch (e) {
 			expect((e as { status: number }).status).toBe(404);
@@ -47,7 +47,7 @@ describe('GET /account/support/[ticketId] (load)', () => {
 		});
 		const result = load({
 			params: { ticketId: ticket.id },
-			locals: { user: owner }
+			locals: { user: owner, locale: 'en' }
 		} as never) as { ticket: { id: string; messages: unknown[] } };
 		expect(result.ticket.id).toBe(ticket.id);
 		expect(result.ticket.messages).toHaveLength(1);
@@ -65,7 +65,7 @@ describe('?/reply', () => {
 		});
 		const res = (await actions.reply({
 			request: formRequest({ body: '' }),
-			locals: { user: owner },
+			locals: { user: owner, locale: 'en' },
 			params: { ticketId: ticket.id }
 		} as never)) as { status: number };
 		expect(res.status).toBe(400);
@@ -83,7 +83,7 @@ describe('?/reply', () => {
 
 		const res = await actions.reply({
 			request: formRequest({ body: 'Still broken.' }),
-			locals: { user: owner },
+			locals: { user: owner, locale: 'en' },
 			params: { ticketId: ticket.id }
 		} as never);
 		expect((res as { replied: boolean }).replied).toBe(true);
@@ -102,7 +102,7 @@ describe('?/reply', () => {
 		setTicketStatus(ticket.id, 'closed');
 		const res = (await actions.reply({
 			request: formRequest({ body: 'Reopening?' }),
-			locals: { user: owner },
+			locals: { user: owner, locale: 'en' },
 			params: { ticketId: ticket.id }
 		} as never)) as { status: number };
 		expect(res.status).toBe(400);
@@ -120,7 +120,7 @@ describe('?/reply', () => {
 		await expect(
 			actions.reply({
 				request: formRequest({ body: 'Sneaky' }),
-				locals: { user: stranger },
+				locals: { user: stranger, locale: 'en' },
 				params: { ticketId: ticket.id }
 			} as never)
 		).rejects.toBeTruthy();

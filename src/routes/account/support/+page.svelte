@@ -3,22 +3,34 @@
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
+	import { getTranslate } from '$lib/i18n/context';
+	import type { CatalogKey } from '$lib/i18n/catalog';
 
 	let { data, form } = $props();
 
+	const t = getTranslate();
+
 	const statusTone = (status: string) =>
 		status === 'resolved' ? 'success' : status === 'closed' ? 'neutral' : 'warning';
+	const statusLabel = (status: string) =>
+		t(`account.support.status${status.charAt(0).toUpperCase()}${status.slice(1)}` as CatalogKey);
+	const categoryLabel = (category: string) =>
+		category === 'human_review'
+			? t('account.support.categoryHumanReview')
+			: t(
+					`account.support.category${category.charAt(0).toUpperCase()}${category.slice(1)}` as CatalogKey
+				);
 </script>
 
 <svelte:head>
-	<title>Support · saaskaya</title>
+	<title>{t('account.support.title')} · saaskaya</title>
 </svelte:head>
 
 <PageShell
 	backHref="/account"
 	backLabel="account"
-	title="Support"
-	description="Send us a message — a real person replies here."
+	title={t('account.support.title')}
+	description={t('account.support.description')}
 	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
@@ -28,45 +40,55 @@
 
 	<AppCard>
 		<form method="POST" action="?/create" use:enhance class="flex flex-col gap-3">
-			<h2 class="sk-display text-2xl leading-none">New request</h2>
+			<h2 class="sk-display text-2xl leading-none">{t('account.support.newRequest')}</h2>
 			<div class="flex flex-col gap-1">
-				<label for="category" class="text-xs text-[var(--sk-faint)]">Category</label>
+				<label for="category" class="text-xs text-[var(--sk-faint)]"
+					>{t('account.support.categoryLabel')}</label
+				>
 				<select id="category" name="category" class="sk-input min-h-8 py-1.5 text-sm">
-					<option value="general">General</option>
-					<option value="billing">Billing</option>
-					<option value="technical">Technical</option>
-					<option value="human_review">Human review (Premium)</option>
+					<option value="general">{t('account.support.categoryGeneral')}</option>
+					<option value="billing">{t('account.support.categoryBilling')}</option>
+					<option value="technical">{t('account.support.categoryTechnical')}</option>
+					<option value="human_review">{t('account.support.categoryHumanReview')}</option>
 				</select>
 			</div>
 			<div class="flex flex-col gap-1">
-				<label for="subject" class="text-xs text-[var(--sk-faint)]">Subject</label>
+				<label for="subject" class="text-xs text-[var(--sk-faint)]"
+					>{t('account.support.subjectLabel')}</label
+				>
 				<input
 					id="subject"
 					name="subject"
 					required
 					class="sk-input min-h-8 py-1.5 text-sm"
-					placeholder="What's this about?"
+					placeholder={t('account.support.subjectPlaceholder')}
 				/>
 			</div>
 			<div class="flex flex-col gap-1">
-				<label for="body" class="text-xs text-[var(--sk-faint)]">Message</label>
+				<label for="body" class="text-xs text-[var(--sk-faint)]"
+					>{t('account.support.messageLabel')}</label
+				>
 				<textarea
 					id="body"
 					name="body"
 					required
 					rows="4"
 					class="sk-input py-1.5 text-sm"
-					placeholder="Tell us what's going on."></textarea>
+					placeholder={t('account.support.messagePlaceholder')}></textarea>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start">Send</button>
+			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
+				>{t('account.support.send')}</button
+			>
 		</form>
 	</AppCard>
 
 	<AppCard>
 		<div class="flex flex-col gap-3">
-			<h2 class="sk-display text-2xl leading-none">{data.tickets.length} ticket(s)</h2>
+			<h2 class="sk-display text-2xl leading-none">
+				{t('account.support.ticketCount', { count: data.tickets.length })}
+			</h2>
 			{#if data.tickets.length === 0}
-				<p class="text-sm text-[var(--sk-muted)]">No tickets yet.</p>
+				<p class="text-sm text-[var(--sk-muted)]">{t('account.support.empty')}</p>
 			{:else}
 				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
 					{#each data.tickets as ticket (ticket.id)}
@@ -76,10 +98,14 @@
 									<a href="/account/support/{ticket.id}" class="sk-link truncate font-medium">
 										{ticket.subject}
 									</a>
-									<StatusPill tone={statusTone(ticket.status)}>{ticket.status}</StatusPill>
+									<StatusPill tone={statusTone(ticket.status)}
+										>{statusLabel(ticket.status)}</StatusPill
+									>
 								</div>
 								<p class="text-xs text-[var(--sk-faint)]">
-									{ticket.category} · updated {new Date(ticket.lastMessageAt).toLocaleString()}
+									{categoryLabel(ticket.category)} · {t('account.support.updated', {
+										date: new Date(ticket.lastMessageAt).toLocaleString()
+									})}
 								</p>
 							</div>
 						</li>

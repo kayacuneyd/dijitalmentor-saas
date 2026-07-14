@@ -86,6 +86,14 @@
 					class="sk-input min-h-8 py-1.5 text-sm"
 				/>
 			</div>
+			<div class="flex w-24 flex-col gap-1">
+				<label for="locale" class="text-xs text-[var(--sk-faint)]">Language</label>
+				<select id="locale" name="locale" class="sk-input min-h-8 py-1.5 text-sm">
+					<option value="en">EN</option>
+					<option value="tr">TR</option>
+					<option value="de">DE</option>
+				</select>
+			</div>
 			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Send invite</button>
 		</form>
 	</AppCard>

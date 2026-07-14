@@ -10,6 +10,20 @@ export const tr = {
 		loading: 'Yükleniyor…',
 		error: 'Bir şeyler ters gitti.'
 	},
+	email: {
+		magicLink: {
+			subject: 'saaskaya giriş bağlantın',
+			body: "saaskaya'ya giriş yap:\n\n{link}\n\nBağlantı 15 dakika geçerlidir ve bir kez kullanılabilir."
+		},
+		betaInvitation: {
+			subject: 'saaskaya betasına davet edildin',
+			body: 'saaskaya kapalı betasına davet edildin.\n\nDavetini aç:\n{loginUrl}\n\nGüvenli, tek kullanımlık giriş bağlantını istemek için bu e-posta adresini kullan.'
+		},
+		contactNotification: {
+			subject: '{siteName} üzerinden yeni mesaj',
+			body: 'Gönderen: {name} <{email}>\n\n{message}\n\n— {siteName} iletişim formundan gönderildi (saaskaya)'
+		}
+	},
 	account: {
 		supportLink: 'Destek',
 		signOut: 'Çıkış yap',
@@ -225,6 +239,12 @@ export const tr = {
 				'{locale} içeriği düzenleniyor — dili araç çubuğundan değiştir. Değişiklikler doğrudan taslağa yazılır (AI kullanılmaz).',
 			sectionImageLabel: 'bölüm görseli'
 		}
+	},
+	auth: {
+		tooManyAttempts: 'Çok fazla deneme yaptın — bir dakika bekleyip tekrar dene.',
+		invalidEmail: 'Lütfen geçerli bir e-posta adresi gir.',
+		betaDenied: 'saaskaya şu anda kapalı betadadır. Davetiye için operatörle iletişime geçin.',
+		betaLinkNotActive: 'Bu beta bağlantısı aktif değil.'
 	},
 	dashboard: {
 		title: 'Sitelerin',

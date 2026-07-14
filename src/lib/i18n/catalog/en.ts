@@ -13,6 +13,20 @@ export const en = {
 		loading: 'Loading…',
 		error: 'Something went wrong.'
 	},
+	email: {
+		magicLink: {
+			subject: 'Your saaskaya sign-in link',
+			body: 'Sign in to saaskaya:\n\n{link}\n\nThe link is valid for 15 minutes and can be used once.'
+		},
+		betaInvitation: {
+			subject: "You're invited to the saaskaya beta",
+			body: "You've been invited to the saaskaya closed beta.\n\nOpen your invitation:\n{loginUrl}\n\nUse this email address to request your secure, one-time sign-in link."
+		},
+		contactNotification: {
+			subject: 'New message via {siteName}',
+			body: 'From: {name} <{email}>\n\n{message}\n\n— sent from your {siteName} contact form (saaskaya)'
+		}
+	},
 	account: {
 		supportLink: 'Support',
 		signOut: 'Sign out',
@@ -229,6 +243,12 @@ export const en = {
 				'Editing {locale} copy — switch the locale in the toolbar. Edits go straight to the draft (no AI).',
 			sectionImageLabel: 'section image'
 		}
+	},
+	auth: {
+		tooManyAttempts: 'Too many attempts — wait a minute and try again.',
+		invalidEmail: 'Please enter a valid email address.',
+		betaDenied: 'saaskaya is currently in closed beta. Contact the operator for an invite.',
+		betaLinkNotActive: 'This beta link is not active.'
 	},
 	dashboard: {
 		title: 'Your sites',

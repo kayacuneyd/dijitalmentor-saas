@@ -6,6 +6,7 @@ import { sendMagicLink } from '$lib/server/email';
 import { PENDING_COOKIE } from '$lib/server/onboarding/session';
 import { getPublicCopyOverrides } from '$lib/server/publicCopy';
 import { withLocale } from '$lib/i18n';
+import { serverTranslator } from '$lib/server/messageOverrides';
 import type { Actions, PageServerLoad } from './$types';
 
 function configuredCode(): string {
@@ -30,13 +31,14 @@ export const load: PageServerLoad = ({ locals, url }) => {
 
 export const actions: Actions = {
 	default: async ({ request, url, locals, cookies, getClientAddress }) => {
+		const t = serverTranslator(locals.locale);
 		if (!rateLimit(`beta:${getClientAddress()}`, 8, 60_000)) {
-			return fail(429, { message: 'Too many attempts — wait a minute and try again.' });
+			return fail(429, { message: t('auth.tooManyAttempts') });
 		}
 		const form = await request.formData();
 		const code = String(form.get('code') ?? '');
 		if (!codeAllowed(code)) {
-			return fail(403, { message: 'This beta link is not active.' });
+			return fail(403, { message: t('auth.betaLinkNotActive') });
 		}
 		const email = z.email().safeParse(
 			String(form.get('email') ?? '')
@@ -44,7 +46,7 @@ export const actions: Actions = {
 				.toLowerCase()
 		);
 		if (!email.success) {
-			return fail(400, { message: 'Please enter a valid email address.' });
+			return fail(400, { message: t('auth.invalidEmail') });
 		}
 		selfServeBetaInvite(email.data);
 		const token = createLoginToken(email.data);
@@ -53,7 +55,7 @@ export const actions: Actions = {
 		const link = pendingToken
 			? `${url.origin}${verifyPath}?token=${token}&p=${encodeURIComponent(pendingToken)}`
 			: `${url.origin}${verifyPath}?token=${token}`;
-		const { devEchoLink } = await sendMagicLink(email.data, link);
+		const { devEchoLink } = await sendMagicLink(email.data, link, locals.locale);
 		return { sent: true, email: email.data, devEchoLink };
 	}
 };

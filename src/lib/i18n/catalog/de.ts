@@ -10,6 +10,20 @@ export const de = {
 		loading: 'Wird geladen…',
 		error: 'Etwas ist schiefgelaufen.'
 	},
+	email: {
+		magicLink: {
+			subject: 'Dein saaskaya-Anmeldelink',
+			body: 'Bei saaskaya anmelden:\n\n{link}\n\nDer Link ist 15 Minuten gültig und kann einmal verwendet werden.'
+		},
+		betaInvitation: {
+			subject: 'Du bist zur saaskaya-Beta eingeladen',
+			body: 'Du wurdest zur geschlossenen saaskaya-Beta eingeladen.\n\nÖffne deine Einladung:\n{loginUrl}\n\nVerwende diese E-Mail-Adresse, um deinen sicheren, einmaligen Anmeldelink anzufordern.'
+		},
+		contactNotification: {
+			subject: 'Neue Nachricht über {siteName}',
+			body: 'Von: {name} <{email}>\n\n{message}\n\n— gesendet über das Kontaktformular von {siteName} (saaskaya)'
+		}
+	},
 	account: {
 		supportLink: 'Support',
 		signOut: 'Abmelden',
@@ -231,6 +245,13 @@ export const de = {
 				'{locale}-Inhalt wird bearbeitet — wechsle die Sprache in der Werkzeugleiste. Änderungen gehen direkt in den Entwurf (keine KI).',
 			sectionImageLabel: 'Abschnittsbild'
 		}
+	},
+	auth: {
+		tooManyAttempts: 'Zu viele Versuche — warte eine Minute und versuche es erneut.',
+		invalidEmail: 'Bitte gib eine gültige E-Mail-Adresse ein.',
+		betaDenied:
+			'saaskaya befindet sich derzeit in der geschlossenen Beta. Kontaktiere den Betreiber für eine Einladung.',
+		betaLinkNotActive: 'Dieser Beta-Link ist nicht aktiv.'
 	},
 	dashboard: {
 		title: 'Deine Websites',

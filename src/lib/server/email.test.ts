@@ -112,7 +112,7 @@ describe('sendEmail provider seam', () => {
 		const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 		const link = 'https://saaskaya.com/login/verify?token=secret-token';
 
-		const result = await sendMagicLink('person@example.com', link);
+		const result = await sendMagicLink('person@example.com', link, 'en');
 
 		expect(result).toEqual({});
 		expect(error).toHaveBeenCalledWith(expect.stringContaining('delivery failed'));
@@ -132,7 +132,8 @@ describe('sendEmail provider seam', () => {
 
 		const result = await sendBetaInvitation(
 			'invitee@example.com',
-			'https://saaskaya.com/login?email=invitee%40example.com'
+			'https://saaskaya.com/login?email=invitee%40example.com',
+			'en'
 		);
 
 		expect(result.sent).toBe(true);
@@ -140,5 +141,23 @@ describe('sendEmail provider seam', () => {
 		expect(request.to).toEqual(['invitee@example.com']);
 		expect(request.text).toContain('https://saaskaya.com/login?email=');
 		vi.unstubAllGlobals();
+	});
+
+	it('sends the magic link subject/body in the requested locale', async () => {
+		setSetting('EMAIL_PROVIDER', 'smtp');
+		setSetting('SMTP_HOST', 'smtp.hostinger.com');
+		setSetting('SMTP_USER', 'u');
+		setSetting('SMTP_PASS', 'p');
+		const link = 'https://saaskaya.com/login/verify?token=t';
+
+		await sendMagicLink('person@example.com', link, 'de');
+		expect(sendMail).toHaveBeenCalledWith(
+			expect.objectContaining({ subject: 'Dein saaskaya-Anmeldelink' })
+		);
+
+		await sendMagicLink('person@example.com', link, 'tr');
+		expect(sendMail).toHaveBeenCalledWith(
+			expect.objectContaining({ subject: 'saaskaya giriş bağlantın' })
+		);
 	});
 });

@@ -57,13 +57,17 @@ export const actions: Actions = {
 		addSubmission({ siteId: site.id, ...parsed.data });
 
 		if (site.settings.contactEmail) {
-			// best-effort: a mail failure must never lose the stored submission
+			// best-effort: a mail failure must never lose the stored submission.
+			// The recipient is the site owner, not the visitor — site.defaultLocale
+			// (the language the business itself operates in) is the right signal,
+			// not the visitor's viewing locale.
 			await sendContactNotification({
 				to: site.settings.contactEmail,
 				siteName: site.settings.siteName,
 				name: parsed.data.name,
 				email: parsed.data.email,
-				message: parsed.data.message
+				message: parsed.data.message,
+				locale: site.defaultLocale
 			});
 		}
 		return { contact: 'sent' as const };

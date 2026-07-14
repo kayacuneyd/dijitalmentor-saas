@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
 import { env } from '$env/dynamic/private';
 import { getSetting } from '$lib/server/config';
+import type { Locale } from '$lib/i18n';
+import { serverTranslator } from '$lib/server/messageOverrides';
 
 /**
  * Transactional mail (PLAN §7 / beta-launch spec). One `sendEmail()` seam, three
@@ -94,12 +96,14 @@ export async function sendEmail(input: {
 /** Magic-link delivery; the dev echo stays available until real email is configured. */
 export async function sendMagicLink(
 	email: string,
-	link: string
+	link: string,
+	locale: Locale
 ): Promise<{ devEchoLink?: string }> {
+	const t = serverTranslator(locale);
 	const result = await sendEmail({
 		to: email,
-		subject: 'Your saaskaya sign-in link',
-		text: `Sign in to saaskaya:\n\n${link}\n\nThe link is valid for 15 minutes and can be used once.`
+		subject: t('email.magicLink.subject'),
+		text: t('email.magicLink.body', { link })
 	});
 	if (result.sent) return {};
 	if (env.AUTH_DEV_ECHO_LINK === '1' && env.NODE_ENV !== 'production') {
@@ -113,11 +117,16 @@ export async function sendMagicLink(
 }
 
 /** Closed-beta invitation. The recipient requests a fresh, short-lived magic link on arrival. */
-export function sendBetaInvitation(email: string, loginUrl: string): Promise<EmailResult> {
+export function sendBetaInvitation(
+	email: string,
+	loginUrl: string,
+	locale: Locale
+): Promise<EmailResult> {
+	const t = serverTranslator(locale);
 	return sendEmail({
 		to: email,
-		subject: "You're invited to the saaskaya beta",
-		text: `You've been invited to the saaskaya closed beta.\n\nOpen your invitation:\n${loginUrl}\n\nUse this email address to request your secure, one-time sign-in link.`
+		subject: t('email.betaInvitation.subject'),
+		text: t('email.betaInvitation.body', { loginUrl })
 	});
 }
 
@@ -128,10 +137,17 @@ export async function sendContactNotification(input: {
 	name: string;
 	email: string;
 	message: string;
+	locale: Locale;
 }): Promise<EmailResult> {
+	const t = serverTranslator(input.locale);
 	return sendEmail({
 		to: input.to,
-		subject: `New message via ${input.siteName}`,
-		text: `From: ${input.name} <${input.email}>\n\n${input.message}\n\n— sent from your ${input.siteName} contact form (saaskaya)`
+		subject: t('email.contactNotification.subject', { siteName: input.siteName }),
+		text: t('email.contactNotification.body', {
+			name: input.name,
+			email: input.email,
+			message: input.message,
+			siteName: input.siteName
+		})
 	});
 }

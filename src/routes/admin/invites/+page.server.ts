@@ -9,6 +9,7 @@ import {
 } from '$lib/server/auth';
 import { setSetting } from '$lib/server/config';
 import { sendBetaInvitation } from '$lib/server/email';
+import { DEFAULT_LOCALE, isLocale } from '$lib/i18n';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -34,7 +35,9 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(400, { message: 'A valid email is required.' });
 		addInvite(parsed.data.email, parsed.data.profession, parsed.data.notes);
 		const loginUrl = `${url.origin}/login?email=${encodeURIComponent(parsed.data.email)}`;
-		const result = await sendBetaInvitation(parsed.data.email, loginUrl);
+		const localeInput = form.get('locale');
+		const locale = isLocale(localeInput) ? localeInput : DEFAULT_LOCALE;
+		const result = await sendBetaInvitation(parsed.data.email, loginUrl, locale);
 		if (!result.sent) {
 			return fail(502, {
 				message: `Invite saved, but email delivery failed: ${result.error ?? 'unknown error'}`,

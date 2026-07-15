@@ -284,38 +284,6 @@
 						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
 					<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-						<div class="dropdown dropdown-end">
-							<button
-								tabindex="0"
-								class="sk-btn sk-btn-ghost sk-btn-sm gap-1 px-1.5 text-[10px] font-bold"
-								aria-label="Düzenleme dili"
-							>
-								<svg class="text-base-content/70 size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-									><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
-									/></svg
-								>
-								<span>{store.editLocale.toUpperCase()}</span>
-							</button>
-							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-							<div
-								tabindex="0"
-								class="dropdown-content bg-base-200 text-base-content rounded-box z-20 mt-1 max-h-44 w-44 overflow-y-auto border border-white/5 p-2 shadow-2xl outline outline-1 outline-black/5"
-							>
-								<ul class="menu menu-sm w-full">
-									{#each store.site.locales as locale (locale)}
-										<li>
-											<button
-												class:menu-active={store.editLocale === locale}
-												onclick={() => (store.editLocale = locale)}
-											>
-												{@html flagSvgs[locale]}
-												<span class="font-sans">{localeLabels[locale]}</span>
-											</button>
-										</li>
-									{/each}
-								</ul>
-							</div>
-						</div>
 						<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
 							{statusBadge[store.status].label}
 						</StatusPill>
@@ -364,6 +332,38 @@
 								</a>
 							</div>
 						</details>
+						<div class="dropdown dropdown-end">
+							<button
+								tabindex="0"
+								class="sk-btn sk-btn-ghost sk-btn-sm gap-1 px-1.5 text-[10px] font-bold"
+								aria-label="Düzenleme dili"
+							>
+								<svg class="text-base-content/70 size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+									><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
+									/></svg
+								>
+								<span>{store.editLocale.toUpperCase()}</span>
+							</button>
+							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+							<div
+								tabindex="0"
+								class="dropdown-content bg-base-200 text-base-content rounded-box z-20 mt-1 max-h-44 w-44 overflow-y-auto border border-white/5 p-2 shadow-2xl outline outline-1 outline-black/5"
+							>
+								<ul class="menu menu-sm w-full">
+									{#each store.site.locales as locale (locale)}
+										<li>
+											<button
+												class:menu-active={store.editLocale === locale}
+												onclick={() => (store.editLocale = locale)}
+											>
+												{@html flagSvgs[locale]}
+												<span class="font-sans">{localeLabels[locale]}</span>
+											</button>
+										</li>
+									{/each}
+								</ul>
+							</div>
+						</div>
 					</div>
 				</header>
 

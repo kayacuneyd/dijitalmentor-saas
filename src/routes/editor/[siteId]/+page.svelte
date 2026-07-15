@@ -577,11 +577,6 @@
 						class="relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
 						style="width: {viewport.width}; max-width: 100%;"
 					>
-						<div
-							class="pointer-events-none absolute top-3 left-3 z-10 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
-						>
-							Live draft
-						</div>
 						<iframe
 							bind:this={iframeEl}
 							src={previewSrc}

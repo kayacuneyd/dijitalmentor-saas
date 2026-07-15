@@ -55,6 +55,15 @@
 			</select>
 		</label>
 		<label class="form-control">
+			<span class="label-text mb-1 text-xs">Vertical margin</span>
+			<select class="select select-sm w-full" value={style.marginY} onchange={(e) => update('marginY', e.currentTarget.value as SectionStyle['marginY'])}>
+				<option value="none">None</option>
+				<option value="compact">Compact</option>
+				<option value="standard">Standard</option>
+				<option value="spacious">Spacious</option>
+			</select>
+		</label>
+		<label class="form-control">
 			<span class="label-text mb-1 text-xs">Section height</span>
 			<select class="select select-sm w-full" value={style.minHeight} onchange={(e) => update('minHeight', e.currentTarget.value as SectionStyle['minHeight'])}>
 				<option value="auto">Content based</option>

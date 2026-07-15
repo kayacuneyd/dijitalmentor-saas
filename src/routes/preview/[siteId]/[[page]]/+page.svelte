@@ -35,11 +35,15 @@
 </svelte:head>
 
 <div
-	class="fixed top-3 left-3 z-50 flex items-center gap-2 rounded-full border border-black/10 bg-white/90 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur"
+	class="fixed top-3 left-3 z-50 flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[11px] font-semibold text-[#171614] shadow-sm backdrop-blur transition-opacity duration-150 hover:bg-white/95 hover:shadow-md"
 >
+	<span
+		class="inline-block h-1.5 w-1.5 rounded-full {pushedDraft ? 'bg-amber-400' : 'bg-emerald-500'}"
+	></span>
 	<span>{surfaceLabel}</span>
 	{#if data.liveUrl}
-		<a href={data.liveUrl} class="text-[#2f6f6a] underline-offset-2 hover:underline">
+		<span class="text-black/20">·</span>
+		<a href={data.liveUrl} class="font-medium text-[#2f6f6a] underline-offset-2 hover:underline">
 			Published v{data.publishedVersion}
 		</a>
 	{/if}

@@ -20,6 +20,28 @@
 	import '@fontsource/inter/latin.css';
 	import '@fontsource/inter/latin-ext.css';
 
+	const SELF_HOSTED_FONTS = new Set([
+		'Playfair Display',
+		'Lora',
+		'Poppins',
+		'Open Sans',
+		'Roboto',
+		'Inter'
+	]);
+	const loadedGoogleFonts = new Set<string>();
+
+	function loadGoogleFont(fontName: string) {
+		if (SELF_HOSTED_FONTS.has(fontName) || loadedGoogleFonts.has(fontName)) return;
+		loadedGoogleFonts.add(fontName);
+		const id = `gf-${fontName.toLowerCase().replace(/\s+/g, '-')}`;
+		if (document.getElementById(id)) return;
+		const link = document.createElement('link');
+		link.id = id;
+		link.rel = 'stylesheet';
+		link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@400;500;600;700&display=swap`;
+		document.head.appendChild(link);
+	}
+
 	let {
 		site,
 		page,
@@ -107,6 +129,14 @@
 			inline2.textContent = `fbq('init','${pixelId}');fbq('track','PageView')`;
 			document.head.appendChild(inline2);
 		}
+	});
+
+	// Dynamically load fonts not in the self-hosted set from Google Fonts.
+	$effect(() => {
+		const heading = site.theme.fonts.heading;
+		const body = site.theme.fonts.body;
+		loadGoogleFont(heading);
+		if (body !== heading) loadGoogleFont(body);
 	});
 </script>
 

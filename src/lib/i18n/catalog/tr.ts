@@ -210,7 +210,12 @@ export const tr = {
 			pagesRemoved: '{count} sayfa kaldırıldı.',
 			titlesUpdated: '{count} sayfa başlığı güncellendi.',
 			navUpdated: 'Menü güncellendi.',
-			themeUpdated: 'Tema güncellendi.'
+			themeUpdated: 'Tema güncellendi.',
+			pagesReordered: 'Sayfa sıralaması değiştirildi.',
+			sectionStyleUpdated: 'Bölüm stili güncellendi.',
+			sectionsAdded: '{count} bölüm eklendi.',
+			sectionsRemoved: '{count} bölüm kaldırıldı.',
+			sectionsMoved: '{count} bölüm taşındı.'
 		},
 		theme: {
 			nichePreset: 'Niş şablonu',

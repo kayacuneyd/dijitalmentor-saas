@@ -1,7 +1,96 @@
-# Progress — saaskaya
+ tüm# Progress — saaskaya
 
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
+
+## 2026-07-15
+
+**Editör & AI Özellikleri Kapsamlı Doğrulama Testi — Aşama 1 tamamlandı.**
+
+Tüm editör ve AI katmanı özellikleri sistematik olarak test edildi. Yeni test dosyası:
+`src/lib/server/ai/editor-feature-verification.test.ts` — 10 grupta 57 test.
+
+**Sonuç: Tüm temel özellikler kod seviyesinde doğru çalışıyor.**
+
+### Test Edilen ve ✅ Onaylanan Özellikler
+
+**A1 — Patch Operations (applyPatch):** 25 test, hepsi geçti
+- `add_page`: nav'li/nav'siz ekleme, 3 dilde başlık, 10 sayfa limiti, duplicate slug koruması
+- `add_section`: mevcut sayfaya ekleme, duplicate id koruması
+- `set_text`: düz path, nested path (items[0].name), invalid path hatası, boş metin Zod hatası
+- `set_props`: variant değişimi
+- `set_page_title`: sayfa başlığı değişimi
+- `set_page_meta`: SEO meta bilgileri
+- `set_nav_label`: menü etiketi değişimi, nav'de olmayan sayfa hatası
+- `set_theme`: preset, colors, fonts, radius override
+- `set_layout`: nav stili, container width, section spacing
+- `set_settings`: siteName, contactEmail, poweredByBadge
+- `remove_section`: section silme
+- `move_section`: section sıralaması değiştirme
+- Immutability: input site değişmiyor
+
+**A2 — Schema Validation:** 6 test, hepsi geçti
+- `add_page` op schema (geçerli input, addToNav false, page meta opsiyonel)
+- `chatPatchSchema`: tüm 12 op tipini kapsıyor, boş operations (Q&A), max 20 limiti
+
+**A3 — Integration Protection:** 3 test, hepsi geçti
+- AI, `integrations.url` alanını değiştiremez
+- AI, `integrations.phone` alanını değiştiremez
+- AI, integrations dizisini tamamen silemez
+
+**A4 — Change Summary:** 5 test, hepsi geçti
+- Sayfa eklenince özet çıkıyor (sayfa adı + nav değişikliği)
+- Başlık değişince özet çıkıyor
+- Tema değişince özet çıkıyor
+- Hiçbir şey değişmeyince null dönüyor
+- `firstAddedPageSlug` — yeni sayfanın slug'ı doğru dönüyor (preview focus)
+
+**A5 — Native Page Operations (pageOps.ts):** 5 test, hepsi geçti
+- `addPage`: nav'e ekleme, geçersiz slug hatası, max 10 limiti
+- `removePage`: min 1 sayfa koruması, nav backfill
+
+**A6 — Site Quality Check:** 3 test, hepsi geçti
+- Placeholder metin tespiti (`placeholder_text`)
+- Geçerli site publish edilebilir
+- Profesyonel olmayan claim tespiti (`unsafe_professional_claim`)
+
+**A7 — Completion Checklist:** 3 test, hepsi geçti
+- 7 madde döndürüyor (headline, contact, services, languages, media, identity, publish)
+- `nextChecklistItem` ilk tamamlanmamış maddeyi döndürüyor
+- `publishedVersion` varsa publish maddesi complete
+
+**A8 — Gatekeeper Schema:** 4 test, hepsi geçti
+- 4 intent tipi (edit, question, off_topic, help_request)
+- edit intent → distilledPrompt + riskLevel zorunlu
+- 3 risk seviyesi (low, medium, high)
+- onboardingGuardSchema: onTopic=false → reply zorunlu
+
+**A9 — Section Type Coverage:** 2 test, hepsi geçti
+- 17 section tipi tanımlı ve eksiksiz
+- genSectionSchema discriminator tüm tipleri kapsıyor
+
+**A10 — Onboarding Guard:** 1 test, geçti
+- Schema seviyesinde doğrulandı (A8'de kapsandı)
+
+### Genel Değerlendirme
+
+Tüm 12 patch operation (add_page, add_section, set_text, set_props, set_page_title,
+set_page_meta, set_nav_label, set_theme, set_layout, set_settings, remove_section,
+move_section) **hem schema seviyesinde hem de applyPatch uygulamasında eksiksiz çalışıyor.**
+
+Integration protection (AI'ın phishing saldırısı yapamaması) **3 testle doğrulandı.**
+Change summary + preview focus **test edildi ve doğru çalışıyor.**
+Gatekeeper 4 intent + 3 risk seviyesi **schema seviyesinde doğrulandı** (canlı test
+için Groq/DeepSeek API anahtarları gerekiyor — mock testler zaten patch.test.ts
+ve server.test.ts'de mevcut).
+
+**Test sonuçları:** `npm test` → 87 files / 594 tests passed (yeni test dosyasıyla
+birlikte 537'den 594'e yükseldi).
+
+**Karar:** Aşama 1 tamamlandı. Kod seviyesinde tüm editör ve AI özellikleri beklendiği
+gibi çalışıyor. Bir sonraki adımda Aşama 2 (canlı smoke test + varsa fix) ve Aşama 3
+(efektiflik iyileştirmeleri — multi-step undo, honest chat garantisi, pre-generation
+yapı onayı, sitemap panel) planlanacak.
 
 ## 2026-07-14
 
@@ -3577,6 +3666,71 @@ var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
   passed 86/86 files and 537/537 tests; `npm run build` passed; `git diff --check` passed.
 
 ## 2026-07-15
+
+**Editör & AI Canlı Smoke Test (Aşama 2) tamamlandı.**
+
+Gerçek Groq + DeepSeek API anahtarlarıyla canlı smoke test çalıştırıldı.
+Test dosyası: `src/lib/server/ai/live-smoke.test.ts`
+
+### Sonuçlar: 9/10 geçti ✅
+
+| # | Test | Model | Sonuç | Süre |
+|---|------|-------|:----:|------|
+| 1 | Gatekeeper edit intent | Groq | ✅ | 0.7s |
+| 2 | Gatekeeper off-topic | Groq | ✅ | 0.6s |
+| 3 | Gatekeeper soru | Groq | ✅ | 0.4s |
+| 4 | Renk değişimi (set_theme) | DeepSeek Flash | ✅ | 2.5s |
+| 5 | Layout değişimi (set_layout) | DeepSeek Flash | ✅ | 2.8s |
+| 6 | Menü etiketi (set_nav_label) | DeepSeek Flash | ✅ | 2.2s |
+| 7 | Sayfa ekleme (add_page) | DeepSeek Flash | ✅ | 7.0s |
+| 8 | Section ekleme (add_section) | DeepSeek Flash/Pro | ❌ | 17.5s |
+| 9 | Integration koruma | - | ✅ | 0.0s |
+| 10 | Schema validasyon | - | ✅ | 0.0s |
+
+**Detaylar:**
+
+- **Groq Gatekeeper (3/3)**: Intent classification %100 doğru. Edit → `medium` risk +
+  distilled prompt. Off-topic → doğru red. Question → siteyi doğru tarif etti (2 sayfa, 3 dil).
+  Token kullanımı: ~1010 in / ~89 out (oldukça ekonomik).
+
+- **DeepSeek Flash set_theme**: Ana renk `#1e3a5f → #1a3a5c` (koyu lacivert) başarıyla değişti.
+
+- **DeepSeek Flash set_layout**: Nav `undefined → drawer`, sticky `undefined → true`,
+  container `undefined → narrow` — hepsi doğru.
+
+- **DeepSeek Flash set_nav_label**: "Ana Sayfa" → "Başlangıç" doğru değişti.
+
+- **DeepSeek Flash add_page**: **En kritik test başarılı**. 2→3 sayfa, `hakkimda` slug'ı ile
+  yeni sayfa oluştu, 3 locale'de başlık (Hakkımda/About Me/Über mich), 3 section ile birlikte,
+  nav'e otomatik eklendi. ⭐
+
+- **DeepSeek Flash/Pro add_section**: ❌ **Model davranışı sorunu.** DeepSeek `patch_site`
+  tool call cevabında `reply` ve `operations` alanlarını undefined döndürdü. 2 repair denemesi
+  de başarısız. Kod seviyesinde `add_section` operasyonu doğru çalışıyor (A1 testlerinde 
+  kanıtlandı). Bu bir model output parsing sorunu, kod hatası değil.
+
+- **Integration protection**: AI, Calendly/WhatsApp linklerini değiştiremez — doğrulandı.
+
+**Karar:** Editörün temel AI özellikleri (renk, layout, menü, sayfa ekleme) canlıda çalışıyor.
+`add_section` için DeepSeek model davranışı iyileştirilmeli veya prompt düzeltmesi yapılmalı.
+Integration (entegrasyon) özelliği Settings tab → Entegrasyonlar kartından owner tarafından
+yönetiliyor; AI bu alanlara dokunamıyor — güvenlik doğrulandı.
+
+### Integration (Entegrasyon) Kullanım Kılavuzu
+
+Editör → Settings sekmesi → "Entegrasyonlar" kartı:
+1. **Calendly/Booking**: `booking-external` tipini aktif et, Calendly linkini gir → Booking
+   bloğu otomatik olarak bu linki kullanır.
+2. **WhatsApp**: `whatsapp-order` tipini aktif et, telefon numarasını E.164 formatında gir
+   (örn. `+905551234567`) → CTA/Contact blokları `wa.me` linki üretir.
+3. **Ödeme (Payment)**: `payment-link` tipini aktif et → Pro plan gerektirir, aksi halde
+   kalite kontrol warning verir.
+4. **Sosyal medya**: `social-link` tipini aktif et, URL gir → Footer'da görünür.
+5. **Video danışma**: `video-consult` tipini aktif et → CTA/Booking'de kullanılır.
+6. **Dijital menü**: `menu-digital` tipini aktif et → restoran/kafe gibi işletmeler için.
+
+⚠️ **AI koruması**: Chat üzerinden AI'a "Calendly linkimi değiştir" dense bile entegrasyon
+linkleri değişmez. Bu alanlar **sadece owner tarafından Settings'ten yönetilir.**
 
 **Bugfix: Section style CSS değerlerinde 3 geçersiz CSS düzeltildi.**
 

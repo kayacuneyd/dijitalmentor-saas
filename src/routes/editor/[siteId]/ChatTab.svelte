@@ -13,7 +13,7 @@
 
 	type ChatMessage = { role: 'user' | 'assistant' | 'error'; text: string };
 	type Proposal = {
-		message: string; // original user message — resent verbatim on confirm
+		message: string;
 		distilledPrompt: string;
 		riskLevel: 'low' | 'medium' | 'high';
 		reply: string;
@@ -25,10 +25,11 @@
 	let busy = $state(false);
 	let proposal = $state<Proposal | null>(null);
 	let transcriptEl = $state<HTMLDivElement>();
-	/** Original message behind the last off-topic redirect ("yine de gönder"). */
 	let redirected = $state<string | null>(null);
-	/** Draft as it was before the last applied AI edit — one-step Geri Al. */
-	let undoSite = $state<Site | null>(null);
+	/** Multi-step undo stack — her AI editinde önceki draft buraya push'lanır (max 5). */
+	let undoStack = $state<Site[]>([]);
+	const MAX_UNDO = 5;
+
 	type PromptNote = { id: string; title: string; text: string };
 	const defaultPromptNotes: PromptNote[] = [
 		{ id: 'clarity', title: 'Clearer copy', text: 'Rewrite the page copy to be clearer, warmer, and easier to scan.' },
@@ -46,7 +47,7 @@
 			if (!saved) return;
 			const parsed = JSON.parse(saved);
 			if (Array.isArray(parsed)) promptNotes = [...defaultPromptNotes, ...parsed];
-		} catch { /* local storage is optional */ }
+		} catch { /* optional */ }
 	});
 
 	function persistPromptNotes() {
@@ -82,6 +83,44 @@
 			const previous = before.pages.find((p) => p.slug === page.slug);
 			return previous && JSON.stringify(previous.title) !== JSON.stringify(page.title);
 		});
+		// Section-count diff per matching page.
+		let sectionsAdded = 0;
+		let sectionsRemoved = 0;
+		let sectionsMoved = 0;
+		let sectionStyleChanged = false;
+		for (const afterPage of after.pages) {
+			const beforePage = before.pages.find((p) => p.slug === afterPage.slug);
+			if (!beforePage) continue;
+			const bLen = beforePage.sections.length;
+			const aLen = afterPage.sections.length;
+			if (aLen > bLen) sectionsAdded += aLen - bLen;
+			if (bLen > aLen) sectionsRemoved += bLen - aLen;
+			// Detect moves: same set of ids, different order.
+			if (
+				aLen === bLen &&
+				beforePage.sections.map((s) => s.id).join() === afterPage.sections.map((s) => s.id).join() &&
+				!beforePage.sections.every((s, i) => s.id === afterPage.sections[i].id)
+			) {
+				sectionsMoved += aLen;
+			}
+			// Detect style changes.
+			if (!sectionStyleChanged) {
+				sectionStyleChanged = afterPage.sections.some((afterSec) => {
+					const beforeSec = beforePage.sections.find((s) => s.id === afterSec.id);
+					return (
+						beforeSec &&
+						JSON.stringify(beforeSec.style) !== JSON.stringify(afterSec.style)
+					);
+				});
+			}
+		}
+		// Detect page reorder: same slugs, different order.
+		const beforeOrder = before.pages.map((p) => p.slug);
+		const afterOrder = after.pages.map((p) => p.slug);
+		const pagesReordered =
+			beforeOrder.length === afterOrder.length &&
+			JSON.stringify([...beforeOrder].sort()) === JSON.stringify([...afterOrder].sort()) &&
+			JSON.stringify(beforeOrder) !== JSON.stringify(afterOrder);
 		const pieces: string[] = [];
 		if (addedPages.length) {
 			pieces.push(
@@ -94,10 +133,21 @@
 		if (removedPages.length) {
 			pieces.push(t('editor.chat.pagesRemoved', { count: removedPages.length }));
 		}
+		if (pagesReordered) pieces.push(t('editor.chat.pagesReordered'));
 		if (titleChanged.length) {
 			pieces.push(t('editor.chat.titlesUpdated', { count: titleChanged.length }));
 		}
 		if (navChanged) pieces.push(t('editor.chat.navUpdated'));
+		if (sectionsAdded) {
+			pieces.push(t('editor.chat.sectionsAdded', { count: sectionsAdded }));
+		}
+		if (sectionsRemoved) {
+			pieces.push(t('editor.chat.sectionsRemoved', { count: sectionsRemoved }));
+		}
+		if (sectionsMoved) {
+			pieces.push(t('editor.chat.sectionsMoved', { count: sectionsMoved }));
+		}
+		if (sectionStyleChanged) pieces.push(t('editor.chat.sectionStyleUpdated'));
 		if (!pieces.length && JSON.stringify(before.theme) !== JSON.stringify(after.theme)) {
 			pieces.push(t('editor.chat.themeUpdated'));
 		}
@@ -110,7 +160,6 @@
 		return after.pages.find((page) => !beforeSlugs.has(page.slug))?.slug ?? null;
 	}
 
-	// Keep the newest bubble/proposal in view inside the pinned-input layout.
 	$effect(() => {
 		void messages.length;
 		void busy;
@@ -151,22 +200,29 @@
 			}
 			switch (data.kind) {
 				case 'applied': {
-					// snapshot BEFORE replacing → tek tık Geri Al
 					const before = $state.snapshot(store.site) as Site;
-					undoSite = before;
-					store.replace(data.site); // server-persisted draft → live preview
-					const focusSlug = firstAddedPageSlug(before, data.site as Site);
+					const after = data.site as Site;
+
+					// Honest chat: AI değişiklik yapmadıysa kullanıcıya bildir
+					const summary = changeSummary(before, after);
+					if (!summary && JSON.stringify(before) === JSON.stringify(after)) {
+						messages.push({ role: 'assistant', text: data.reply || 'Hiçbir değişiklik yapılmadı.' });
+						proposal = null;
+						break;
+					}
+
+					// Multi-step undo stack
+					undoStack.push(before);
+					if (undoStack.length > MAX_UNDO) undoStack.shift();
+
+					store.replace(after);
+					const focusSlug = firstAddedPageSlug(before, after);
 					if (focusSlug) store.currentSlug = focusSlug;
 					proposal = null;
 					messages.push({ role: 'assistant', text: data.reply });
-					const summary = changeSummary(before, data.site as Site);
 					if (summary) messages.push({ role: 'assistant', text: summary });
-					// Below lg the preview is behind the pane toggle — point at it.
 					if (window.matchMedia('(max-width: 1023px)').matches) {
-						messages.push({
-							role: 'assistant',
-							text: t('editor.chat.viewPreviewHint')
-						});
+						messages.push({ role: 'assistant', text: t('editor.chat.viewPreviewHint') });
 					}
 					break;
 				}
@@ -177,7 +233,7 @@
 					messages.push({ role: 'assistant', text: data.reply });
 					redirected = String(body.message);
 					break;
-				default: // 'reply' | 'help' — gate answered, 0 düzenleme hakkı harcandı
+				default:
 					messages.push({ role: 'assistant', text: data.reply });
 			}
 		} catch {
@@ -215,13 +271,13 @@
 	}
 
 	async function undo() {
-		if (!undoSite || busy) return;
+		if (!undoStack.length || busy) return;
 		busy = true;
 		try {
-			store.replace(undoSite);
-			await store.save(); // replace() alone doesn't persist — the server had the AI version
-			undoSite = null;
-			messages.push({ role: 'assistant', text: t('editor.chat.undoApplied') });
+			const previous = undoStack.pop()!;
+			store.replace(previous);
+			await store.save();
+			messages.push({ role: 'assistant', text: `Geri alındı (${undoStack.length} adım kaldı).` });
 		} finally {
 			busy = false;
 		}
@@ -230,7 +286,7 @@
 
 <div class="flex h-full flex-col gap-3">
 	<div class="shrink-0 rounded-[12px] border border-[#e4d7bb] bg-[#f8edc9] p-3 shadow-[2px_3px_0_rgb(23_22_20/.08)] rotate-[-.35deg]">
-		<button type="button" class="flex w-full items-center justify-between text-left" onclick={() => (showPromptNotes = !showPromptNotes)} aria-expanded={showPromptNotes}>
+    		<button type="button" class="flex w-full items-center justify-between text-left" onclick={() => (showPromptNotes = !showPromptNotes)} aria-expanded={showPromptNotes}>
 			<span><span class="text-sm font-semibold">Prompt notes</span><span class="ml-2 text-xs text-black/55">copy-ready ideas</span></span>
 			<span class="text-xs text-black/55">{showPromptNotes ? 'Hide' : 'Open'}</span>
 		</button>
@@ -252,12 +308,8 @@
 	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 		{#if messages.length === 0}
 			<ChatBubble role="assistant">
-				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]"
-					>{t('editor.chat.assistantLabel')}</span
-				>
-				<span>
-					{t('editor.chat.greeting')}
-				</span>
+				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]">{t('editor.chat.assistantLabel')}</span>
+				<span>{t('editor.chat.greeting')}</span>
 			</ChatBubble>
 		{/if}
 		{#each messages as msg, i (i)}
@@ -271,9 +323,9 @@
 			</button>
 		{/if}
 
-		{#if undoSite && !busy && !proposal}
+		{#if undoStack.length > 0 && !busy && !proposal}
 			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={undo}>
-				{t('editor.chat.undo')}
+				{t('editor.chat.undo')} ({undoStack.length})
 			</button>
 		{/if}
 
@@ -287,20 +339,10 @@
 						{t('editor.chat.previewNote')}
 					</p>
 					<div class="mt-1 flex flex-wrap gap-2">
-						<button
-							type="button"
-							class="sk-btn sk-btn-primary sk-btn-sm"
-							onclick={approve}
-							disabled={busy}
-						>
+						<button type="button" class="sk-btn sk-btn-primary sk-btn-sm" onclick={approve} disabled={busy}>
 							{t('editor.chat.apply')}
 						</button>
-						<button
-							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
-							onclick={cancel}
-							disabled={busy}
-						>
+						<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick={cancel} disabled={busy}>
 							{t('editor.chat.cancelProposal')}
 						</button>
 					</div>
@@ -313,13 +355,7 @@
 		{/if}
 	</div>
 
-	<form
-		class="flex gap-2"
-		onsubmit={(e) => {
-			e.preventDefault();
-			send();
-		}}
-	>
+	<form class="flex gap-2" onsubmit={(e) => { e.preventDefault(); send(); }}>
 		<input
 			type="text"
 			class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
@@ -329,11 +365,7 @@
 			onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
 			disabled={busy || proposal !== null}
 		/>
-		<button
-			type="submit"
-			class="sk-btn sk-btn-primary sk-btn-sm"
-			disabled={busy || proposal !== null || !input.trim()}
-		>
+		<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm" disabled={busy || proposal !== null || !input.trim()}>
 			{t('editor.chat.send')}
 		</button>
 	</form>

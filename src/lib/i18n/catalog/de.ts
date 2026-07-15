@@ -216,7 +216,12 @@ export const de = {
 			pagesRemoved: '{count} Seite(n) entfernt.',
 			titlesUpdated: '{count} Seitentitel aktualisiert.',
 			navUpdated: 'Menü aktualisiert.',
-			themeUpdated: 'Theme aktualisiert.'
+			themeUpdated: 'Theme aktualisiert.',
+			pagesReordered: 'Seitenreihenfolge geändert.',
+			sectionStyleUpdated: 'Abschnittstil aktualisiert.',
+			sectionsAdded: '{count} Abschnitt(e) hinzugefügt.',
+			sectionsRemoved: '{count} Abschnitt(e) entfernt.',
+			sectionsMoved: '{count} Abschnitt(e) verschoben.'
 		},
 		theme: {
 			nichePreset: 'Branchen-Vorlage',

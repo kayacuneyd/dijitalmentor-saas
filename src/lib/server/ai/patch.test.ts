@@ -190,6 +190,97 @@ describe('applyPatch', () => {
 			])
 		).toThrow(); // ZodError from the final siteSchema.parse
 	});
+
+	it('removes a page and its nav entries', () => {
+		const base = site();
+		const next = applyPatch(base, [
+			{
+				op: 'add_page',
+				addToNav: true,
+				page: {
+					slug: 'test-page',
+					title: { tr: 'Test', en: 'Test', de: 'Test' },
+					sections: [
+						{
+							id: 'hero-test',
+							type: 'hero',
+							props: { variant: 'centered', background: 'plain' },
+							content: {
+								tr: { headline: 'Test' },
+								en: { headline: 'Test' },
+								de: { headline: 'Test' }
+							}
+						}
+					]
+				}
+			}
+		]);
+		expect(next.pages.map((p) => p.slug)).toContain('test-page');
+		expect(next.nav.items.some((item) => item.pageSlug === 'test-page')).toBe(true);
+
+		const removed = applyPatch(next, [{ op: 'remove_page', pageSlug: 'test-page' }]);
+		expect(removed.pages.map((p) => p.slug)).not.toContain('test-page');
+		expect(removed.nav.items.some((item) => item.pageSlug === 'test-page')).toBe(false);
+	});
+
+	it('rejects removing the last page', () => {
+		expect(() =>
+			applyPatch(site(), [{ op: 'remove_page', pageSlug: 'home' }])
+		).toThrow(PatchApplyError);
+	});
+
+	it('reorders pages to match given order', () => {
+		const base = site();
+		const reversed = [...base.pages.map((p) => p.slug)].reverse();
+		const next = applyPatch(base, [{ op: 'reorder_pages', order: reversed }]);
+		expect(next.pages.map((p) => p.slug)).toEqual(reversed);
+	});
+
+	it('rejects reorder with missing slug', () => {
+		const slugs = site().pages.map((p) => p.slug).slice(0, -1);
+		expect(() =>
+			applyPatch(site(), [{ op: 'reorder_pages', order: slugs }])
+		).toThrow(PatchApplyError);
+	});
+
+	it('sets section style properties', () => {
+		const next = applyPatch(site(), [
+			{
+				op: 'set_section_style',
+				pageSlug: 'home',
+				sectionId: 'hero-1',
+				style: { paddingY: 'compact', marginY: 'standard', contentWidth: 'narrow' }
+			}
+		]);
+		const hero = next.pages[0].sections[0];
+		expect(hero.style?.paddingY).toBe('compact');
+		expect(hero.style?.marginY).toBe('standard');
+		expect(hero.style?.contentWidth).toBe('narrow');
+		expect(hero.style?.layout).toBe('full'); // default preserved
+	});
+
+	it('partially updates section style without losing existing properties', () => {
+		const first = applyPatch(site(), [
+			{
+				op: 'set_section_style',
+				pageSlug: 'home',
+				sectionId: 'hero-1',
+				style: { paddingY: 'spacious', backgroundColor: '#ff0000' }
+			}
+		]);
+		const second = applyPatch(first, [
+			{
+				op: 'set_section_style',
+				pageSlug: 'home',
+				sectionId: 'hero-1',
+				style: { marginY: 'compact' }
+			}
+		]);
+		const hero = second.pages[0].sections[0];
+		expect(hero.style?.paddingY).toBe('spacious'); // from first
+		expect(hero.style?.backgroundColor).toBe('#ff0000'); // from first
+		expect(hero.style?.marginY).toBe('compact'); // from second
+	});
 });
 
 describe('chatEdit (mocked LLM)', () => {
@@ -242,5 +333,64 @@ describe('chatEdit (mocked LLM)', () => {
 		const result = await chatEdit({ site: before, message: 'Kaç dil var?' }, { run });
 		expect(result.reply).toContain('üç');
 		expect(result.site).toEqual(before);
+	});
+
+	it('applies remove_page from the LLM', async () => {
+		const base = site();
+		// First add a page so we can remove it later.
+		const withExtra = applyPatch(base, [
+			{
+				op: 'add_page',
+				addToNav: true,
+				page: {
+					slug: 'extra',
+					title: { tr: 'Ekstra', en: 'Extra', de: 'Extra' },
+					sections: [
+						{
+							id: 'hero-extra',
+							type: 'hero',
+							props: { variant: 'centered', background: 'plain' },
+							content: {
+								tr: { headline: 'Ekstra' },
+								en: { headline: 'Extra' },
+								de: { headline: 'Extra' }
+							}
+						}
+					]
+				}
+			}
+		]);
+		const run = vi.fn<RunToolCall>().mockResolvedValueOnce(
+			asResult({
+				reply: 'Ekstra sayfasını kaldırdım.',
+				operations: [{ op: 'remove_page', pageSlug: 'extra' }]
+			})
+		);
+		const result = await chatEdit({ site: withExtra, message: 'Ekstra sayfayı sil' }, { run });
+		expect(result.reply).toBe('Ekstra sayfasını kaldırdım.');
+		expect(result.site.pages.map((p) => p.slug)).not.toContain('extra');
+	});
+
+	it('applies set_section_style from the LLM', async () => {
+		const run = vi.fn<RunToolCall>().mockResolvedValueOnce(
+			asResult({
+				reply: 'Section padding güncellendi.',
+				operations: [
+					{
+						op: 'set_section_style',
+						pageSlug: 'home',
+						sectionId: 'hero-1',
+						style: { paddingY: 'spacious', minHeight: 'tall' }
+					}
+				]
+			})
+		);
+		const result = await chatEdit(
+			{ site: site(), message: 'Hero bölümünü daha geniş yap' },
+			{ run }
+		);
+		const hero = result.site.pages[0].sections[0];
+		expect(hero.style?.paddingY).toBe('spacious');
+		expect(hero.style?.minHeight).toBe('tall');
 	});
 });

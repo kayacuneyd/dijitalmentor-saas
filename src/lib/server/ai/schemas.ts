@@ -18,6 +18,9 @@ import {
 
 const nonEmpty = z.string().trim().min(1);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'kebab-case slug');
+const hexColor = z
+	.string()
+	.regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'hex color like #1a2b3c');
 const localized = <S extends z.ZodType>(shape: S) =>
 	z.strictObject({ tr: shape, en: shape, de: shape });
 
@@ -295,7 +298,32 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 		addToNav: z.boolean().default(true).describe('whether to add the page to the main navigation')
 	}),
 	z.strictObject({ op: z.literal('remove_section'), ...target }),
-	z.strictObject({ op: z.literal('move_section'), ...target, toIndex: z.number().int().min(0) })
+	z.strictObject({ op: z.literal('move_section'), ...target, toIndex: z.number().int().min(0) }),
+	z.strictObject({
+		op: z.literal('remove_page'),
+		pageSlug: slug.describe('slug of the page to remove — at least one page must remain')
+	}),
+	z.strictObject({
+		op: z.literal('reorder_pages'),
+		order: z
+			.array(slug)
+			.min(1)
+			.max(10)
+			.describe('new order of all page slugs — must include every current slug exactly once')
+	}),
+	z.strictObject({
+		op: z.literal('set_section_style'),
+		pageSlug: slug,
+		sectionId: nonEmpty,
+		style: z.strictObject({
+			layout: z.enum(['full', 'boxed']).optional(),
+			backgroundColor: hexColor.optional(),
+			paddingY: z.enum(['compact', 'standard', 'spacious']).optional(),
+			marginY: z.enum(['none', 'compact', 'standard', 'spacious']).optional(),
+			minHeight: z.enum(['auto', 'compact', 'standard', 'tall']).optional(),
+			contentWidth: z.enum(['narrow', 'wide', 'full']).optional()
+		}).describe('partial style override — only set the fields the user asked for')
+	})
 ]);
 export type PatchOp = z.infer<typeof patchOpSchema>;
 

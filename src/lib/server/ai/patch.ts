@@ -1,4 +1,4 @@
-import { DEFAULT_LAYOUT, siteSchema, type Site } from '$lib/schema/site';
+import { DEFAULT_LAYOUT, DEFAULT_SECTION_STYLE, siteSchema, type Site } from '$lib/schema/site';
 import { themePresets } from '$lib/presets';
 import { chatPatchSchema, toInputSchema, type ChatPatch, type PatchOp } from './schemas';
 import { AIInvalidOutputError, runToolCall, type RunToolCall, type TokenUsage } from './llm';
@@ -25,7 +25,10 @@ Rules:
 - stats = counters / achievements ("500+ clients"). clients = logo strip. video = YouTube/Vimeo embed.
 - Keep ids, slugs and URLs stable unless the change requires new ones.
 - If a request is outside the fixed block set or otherwise impossible, say so in the reply and emit no operations.
-- Do not say a change was completed unless the operations actually implement it.`;
+- Do not say a change was completed unless the operations actually implement it.
+- remove_page (medium risk) deletes a page by slug. The last page can never be removed. Nav entries for that page are cleaned up automatically.
+- reorder_pages (medium risk) accepts an array of every page slug in the new order.
+- set_section_style (low risk) controls layout, background color, paddingY, marginY, min-height, and contentWidth for a single section. All style fields are optional — only set what the user asked to change.`;
 
 export class PatchApplyError extends Error {}
 
@@ -147,6 +150,30 @@ function applyOp(site: Site, op: PatchOp): void {
 			if (from === -1) throw new PatchApplyError(`unknown section "${op.sectionId}"`);
 			const [section] = page.sections.splice(from, 1);
 			page.sections.splice(Math.min(op.toIndex, page.sections.length), 0, section);
+			break;
+		}
+		case 'remove_page': {
+			if (site.pages.length <= 1) throw new PatchApplyError('cannot remove the last page');
+			const index = site.pages.findIndex((p) => p.slug === op.pageSlug);
+			if (index === -1) throw new PatchApplyError(`unknown page "${op.pageSlug}"`);
+			site.pages.splice(index, 1);
+			site.nav.items = site.nav.items.filter((item) => item.pageSlug !== op.pageSlug);
+			break;
+		}
+		case 'reorder_pages': {
+			const existing = new Set(site.pages.map((p) => p.slug));
+			if (
+				op.order.length !== existing.size ||
+				!op.order.every((s) => existing.has(s))
+			) {
+				throw new PatchApplyError('order must include exactly all current page slugs');
+			}
+			site.pages.sort((a, b) => op.order.indexOf(a.slug) - op.order.indexOf(b.slug));
+			break;
+		}
+		case 'set_section_style': {
+			const { section } = findSection(site, op.pageSlug, op.sectionId);
+			section.style = { ...DEFAULT_SECTION_STYLE, ...(section.style ?? {}), ...op.style };
 			break;
 		}
 	}

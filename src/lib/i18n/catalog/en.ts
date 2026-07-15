@@ -214,7 +214,12 @@ export const en = {
 			pagesRemoved: '{count} page(s) removed.',
 			titlesUpdated: '{count} page title(s) updated.',
 			navUpdated: 'Menu updated.',
-			themeUpdated: 'Theme updated.'
+			themeUpdated: 'Theme updated.',
+			pagesReordered: 'Pages reordered.',
+			sectionStyleUpdated: 'Section style updated.',
+			sectionsAdded: '{count} section(s) added.',
+			sectionsRemoved: '{count} section(s) removed.',
+			sectionsMoved: '{count} section(s) moved.'
 		},
 		theme: {
 			nichePreset: 'Niche preset',

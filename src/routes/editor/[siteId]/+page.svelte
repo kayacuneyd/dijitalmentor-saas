@@ -284,32 +284,38 @@
 						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
 					<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-						<details class="relative">
-							<summary
-								class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden"
+						<div class="dropdown dropdown-end">
+							<button
+								tabindex="0"
+								class="sk-btn sk-btn-ghost sk-btn-sm gap-1 px-1.5 text-[10px] font-bold"
 								aria-label="Düzenleme dili"
 							>
-								{@html flagSvgs[store.editLocale]}
-								<span class="hidden sm:inline">{store.editLocale.toUpperCase()}</span>
-							</summary>
+								<svg class="text-base-content/70 size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+									><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
+									/></svg
+								>
+								<span>{store.editLocale.toUpperCase()}</span>
+							</button>
+							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 							<div
-								class="absolute right-0 z-20 mt-1 flex max-h-56 w-40 max-w-[calc(100vw-2rem)] flex-col gap-1 overflow-y-auto rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg sm:w-44"
+								tabindex="0"
+								class="dropdown-content bg-base-200 text-base-content rounded-box z-20 mt-1 max-h-44 w-44 overflow-y-auto border border-white/5 p-2 shadow-2xl outline outline-1 outline-black/5"
 							>
-								{#each store.site.locales as locale (locale)}
-									<button
-										type="button"
-										class="flex items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5 {store.editLocale ===
-										locale
-											? 'font-semibold text-[var(--sk-ink)]'
-											: 'text-[var(--sk-muted)]'}"
-										onclick={() => (store.editLocale = locale)}
-									>
-										{@html flagSvgs[locale]}
-										{localeLabels[locale]}
-									</button>
-								{/each}
+								<ul class="menu menu-sm w-full">
+									{#each store.site.locales as locale (locale)}
+										<li>
+											<button
+												class:menu-active={store.editLocale === locale}
+												onclick={() => (store.editLocale = locale)}
+											>
+												{@html flagSvgs[locale]}
+												<span class="font-sans">{localeLabels[locale]}</span>
+											</button>
+										</li>
+									{/each}
+								</ul>
 							</div>
-						</details>
+						</div>
 						<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
 							{statusBadge[store.status].label}
 						</StatusPill>

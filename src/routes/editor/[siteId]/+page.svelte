@@ -9,7 +9,6 @@
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import EditorDock from '$lib/ui/EditorDock.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
-	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import {
 		buildCompletionChecklist,
 		nextChecklistItem,
@@ -210,13 +209,6 @@
 		}
 	}
 
-	const statusBadge = {
-		saved: { label: 'Saved', tone: 'success' },
-		dirty: { label: 'Unsaved', tone: 'warning' },
-		saving: { label: 'Saving…', tone: 'neutral' },
-		error: { label: 'Save failed', tone: 'error' }
-	} as const;
-
 	const tabClass = (tab: (typeof tabs)[number]) =>
 		activeTab === tab ? 'bg-[#171614] text-[#f3ecdd]' : 'text-[var(--sk-muted)] hover:bg-white/70';
 
@@ -284,9 +276,6 @@
 						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
 					<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-						<StatusPill tone={statusBadge[store.status].tone} class="shrink-0">
-							{statusBadge[store.status].label}
-						</StatusPill>
 						<button
 							class="sk-btn sk-btn-primary sk-btn-sm"
 							onclick={publish}

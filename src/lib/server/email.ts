@@ -106,7 +106,12 @@ export async function sendMagicLink(
 		text: t('email.magicLink.body', { link })
 	});
 	if (result.sent) return {};
-	if (env.AUTH_DEV_ECHO_LINK === '1' && env.NODE_ENV !== 'production') {
+	// Dev echo: only available when no real provider is configured (dev mode).
+	// When a real provider (Resend/SMTP) is configured, a failed delivery must
+	// not expose the token through the dev echo fallback.
+	const provider = getSetting('EMAIL_PROVIDER');
+	const hasRealProvider = provider && provider !== 'dev';
+	if (!hasRealProvider && env.AUTH_DEV_ECHO_LINK === '1' && env.NODE_ENV !== 'production') {
 		console.log(
 			`[auth] development magic link for ${email}: ${link} (email not sent: ${result.error})`
 		);

@@ -263,34 +263,32 @@
 					{@html uiIcons.x(16)}
 				</button>
 				<header
-					class="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] py-3 pr-14 pl-4"
+					class="flex shrink-0 flex-col gap-1 border-b border-[var(--sk-line)] py-2 pr-14 pl-4"
 				>
-					<div class="flex min-w-0 items-center gap-2">
+					<div class="flex min-w-0 flex-wrap items-center justify-between gap-2">
 						<a
 							href="/dashboard"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
+							class="sk-btn sk-btn-ghost sk-btn-sm shrink-0"
 							aria-label="saaskaya dashboard"
 						>
 							{@html uiIcons.arrowLeft(13)} Dashboard
 						</a>
-						<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
-					</div>
-					<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-						<button
-							class="sk-btn sk-btn-primary sk-btn-sm"
-							onclick={publish}
-							disabled={publishing}
-							title={canPublish ? 'Publish' : 'Publish engelini görmek için tıkla'}
-						>
-							{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
-							{#if !canPublish}
-								Yayın engelini çöz
-							{:else if publishedVersion}
-								Republish
-							{:else}
-								Publish
-							{/if}
-						</button>
+						<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
+							<button
+								class="sk-btn sk-btn-primary sk-btn-sm"
+								onclick={publish}
+								disabled={publishing}
+								title={canPublish ? 'Publish' : 'Publish engelini görmek için tıkla'}
+							>
+								{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
+								{#if !canPublish}
+									Yayın engelini çöz
+								{:else if publishedVersion}
+									Republish
+								{:else}
+									Publish
+								{/if}
+							</button>
 						<details class="relative">
 							<summary
 								class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
@@ -354,6 +352,8 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 				</header>
 
 				<div

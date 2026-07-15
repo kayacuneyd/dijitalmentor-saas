@@ -10,6 +10,7 @@ import {
 import { computeAlerts } from '$lib/server/alerts';
 import { listActivityFeed } from '$lib/server/activity';
 import type { PageServerLoad } from './$types';
+import { siteVisitSummary } from '$lib/server/siteVisits';
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireAdmin(locals);
@@ -39,6 +40,7 @@ export const load: PageServerLoad = ({ locals }) => {
 					'/sellers.json'
 				].includes(route);
 			})
-			.slice(0, 12)
+			.slice(0, 12),
+		visits: siteVisitSummary(30)
 	};
 };

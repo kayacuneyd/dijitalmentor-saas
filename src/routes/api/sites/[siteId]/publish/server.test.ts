@@ -46,9 +46,9 @@ describe('site publish API quality gate', () => {
 		const site = structuredClone(seedSites.psych);
 		site.id = 'site-publish-quality-blocked';
 		site.tenantId = 'tenant-publish-quality-blocked';
-		const hero = site.pages[0].sections.find((section) => section.type === 'hero');
-		if (!hero || hero.type !== 'hero') throw new Error('psych seed hero missing');
-		hero.content.tr.headline = 'Kesin sonuç garantisiyle terapi';
+		const about = site.pages[0].sections.find((section) => section.type === 'about');
+		if (!about || about.type !== 'about') throw new Error('psych seed about missing');
+		about.content.tr.body = 'Gerekirse antidepresan yazar ve tanı koyar.';
 		savePublishableDraft(site);
 
 		const response = await POST({
@@ -62,9 +62,7 @@ describe('site publish API quality gate', () => {
 			ok: false,
 			quality: { canPublish: false }
 		});
-		expect(body.quality.blockers.map((issue: { code: string }) => issue.code)).toContain(
-			'unsafe_professional_claim'
-		);
+		expect(body.quality.blockers.map((issue: { code: string }) => issue.code)).toContain('psych_scope_claim');
 	});
 
 	it('limits Free users to one first-time published website', async () => {

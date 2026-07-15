@@ -3487,3 +3487,91 @@ var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
 - `npx vitest`: **30/30 passed** (site 13 + generate 6 + patch 11) ✅
 
 **Editor Value Upgrade Plan durumu:** Tüm 6 workstream tamamlandı veya zaten implemente edilmişti.
+### 2026-07-14 — Admin command center Stage 4 foundation: privacy-safe public visit counters
+
+- Started the previously pending command-center Stage 4 with a deliberately narrow, privacy-safe
+  foundation. Added migration v30 and the `site_visit_stats` aggregate table, keyed by site + UTC day
+  + locale + page slug. It stores only integer counters; no IP, user-agent, cookie, referrer,
+  visitor identifier, or page content is persisted.
+- Public published-site page loads now increment the matching aggregate bucket. The admin overview
+  shows the last-30-day total and top sites, without exposing tenant visitor identities or raw request
+  data. Preview/editor routes do not use this counter.
+- Added `src/lib/server/siteVisits.ts` and migration/schema coverage. The implementation uses an
+  idempotent SQLite upsert, so concurrent page loads do not create duplicate buckets.
+- Verification: targeted migration + visit tests passed (9/9); `npm run check` passed with 0 errors and
+  0 warnings; Prettier passed for touched files. Full suite reached 84/86 files and 530/536 tests; the
+  six failures are pre-existing admin-customer test issues outside this slice (missing
+  `admin.customer.*` locale catalog resolution and one HTTP-error assertion), with no stack trace
+  through the new visit-counter code.
+- Remaining Stage 4 work: add a small daily trend visualization and site-name lookup in the admin
+  card, then run the production read-only smoke after controlled deployment.
+
+### 2026-07-14 — Correct release deploy + admin customer test fix
+
+- Root-caused the reported terminal failures: admin customer server actions used
+  `serverTranslator(locals.locale)` without a fallback, while direct route tests intentionally omit
+  the locale. This caused catalog lookup failures and masked the expected 400/404 responses. Added
+  the safe Turkish fallback; the affected admin customer tests now pass 15/15.
+- Verified the complete workspace before deploy: `npm test` **86 files / 536 tests**, `npm run check`
+  **0 errors / 0 warnings**, and `npm run build` passed.
+- The first manual PM2 restart was corrected after discovering PM2 runs `/current/build`, not the root
+  `build/` directory. Ran the repository's atomic `npm run deploy:production -- --skip-check --skip-tests`
+  flow, which created release `20260714T215612Z`, switched `/current` atomically, restarted/saved PM2,
+  applied production migration v30, and passed `scripts/smoke-production.mjs` on mobile + desktop.
+- Final live evidence: `https://saaskaya.com/api/health` returned DB/disk OK; `/current` points to the
+  new release. PM2 logs show only pre-existing scanner 404s, AWS SDK Node 20 compatibility warnings,
+  and historical AI provider/invalid-output records—not a new deploy failure.
+- Git commit could not be created because this managed checkout exposes `.git/index` as read-only;
+  the verified source changes remain in the working tree and are already live in the atomic release.
+### 2026-07-14 — Brand logo and favicon integration
+
+- Integrated the operator-provided `static/logo.png` as the SaaS wordmark in `BrandMark` and the
+  public footer, and `static/icon.png` as the compact admin mark.
+- Replaced the old Svelte favicon in both `src/app.html` and the root layout with `/icon.png`, also
+  using it for the apple-touch icon. Organization JSON-LD now points to `/logo.png`.
+- Verification: `npm run check` passed with 0 errors/warnings; the atomic deploy created release
+  `20260714T224457Z`, switched `/current`, restarted/saved PM2, and production smoke passed on mobile
+  and desktop. Live asset checks returned `200 image/png` for both `/icon.png` and `/logo.png`.
+
+### 2026-07-14 — Logo visibility refinement: cropped brand assets
+
+- Root cause confirmed: the supplied 2000×2000 logo files contained large transparent margins and
+  the original wordmark was placed on a black wrapper, making it read as a black rectangle.
+- Generated non-destructive derivatives from the supplied assets: `static/brand-logo.png` is a
+  cropped horizontal wordmark and `static/brand-icon.png` is a padded 512px square icon. The original
+  `logo.png` and `icon.png` remain unchanged; `/icon.png` remains the favicon as requested.
+- Updated SaaS wordmark, footer, admin mark, and Organization JSON-LD to use the derivatives. The
+  compact wordmark uses `h-7 w-32`; `h-28` would create a 112px-tall header logo, so it is retained
+  only as a sizing reference rather than applied to the navigation chrome.
+### 2026-07-14 — Professional outcome claims changed from blocker to warning
+
+- The `unsafe_professional_claim` check (`kesin sonuç`, `garanti`, `%100`, etc.) was incorrectly
+  classified as a publish blocker. It is a copy-risk review signal, not a schema or structural safety
+  failure; that classification could make new users abandon the flow before seeing their site live.
+- Changed it to a warning. The editor now explains that only critical blockers stop publishing, while
+  the claim remains visible for review. Structural/schema failures, missing contact path, and
+  psych-specific prescription/diagnosis claims remain blockers.
+- Updated the quality test to prove the site remains publishable with the warning present.
+
+### 2026-07-15 — Smalldevs spec implementation: responsive locale menu, section styling, full-width defaults, prompt notes
+
+- Implemented the `docs/specs/2026-07-13-smalldevs.md` items with schema-safe editor controls:
+  the editor locale dropdown is now width-constrained and scrollable on small screens, so long locale
+  menus cannot overflow the viewport.
+- Added optional per-section `style` data to the Zod Site schema and a `SectionStyleControls` editor
+  panel for direct layout/background/padding/height/content-width adjustments. The field is optional
+  on input so existing seeds, kits, and older drafts remain valid; renderer/editor boundaries merge
+  `DEFAULT_SECTION_STYLE`.
+- Switched the canonical fallback layout to full-width (`DEFAULT_LAYOUT.container.width = "full"`)
+  and updated the renderer plus AI layout patch fallback to use the same default. AI chat add-section
+  and add-page schemas intentionally do not expose section `style`; advanced styling remains a direct
+  editor surface rather than raw AI styling.
+- Added sticky-note prompt cards in the chat tab with reusable default prompts and per-site
+  localStorage-backed custom prompt notes.
+- Test/root-cause notes: the first check failed because `style` and then `layout` defaults made old
+  hand-authored `Site` objects TypeScript-required. The fix keeps those fields optional at the input
+  boundary and applies defaults at render/edit time. Full publish tests also exposed stale fixture
+  expectations for `unsafe_professional_claim`; those tests now use the existing blocker
+  `psych_scope_claim`.
+- Verification: `npm run check` passed; targeted schema/AI/publish/admin tests passed; `npm test`
+  passed 86/86 files and 537/537 tests; `npm run build` passed; `git diff --check` passed.

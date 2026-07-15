@@ -120,7 +120,7 @@
 <footer class="border-t border-[var(--sk-line)] bg-[rgb(251_250_247/.82)]">
 	<div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_2.8fr]">
 		<div>
-			<div class="sk-display text-2xl">saaskaya</div>
+			<img src="/brand-logo.png" alt="saaskaya" class="h-10 w-40 object-contain object-left" />
 			<p class="mt-3 max-w-xs text-sm leading-6 text-[var(--sk-muted)]">{copy.tagline}</p>
 			<p class="mt-2 text-xs text-[var(--sk-faint)]">{copy.location}</p>
 		</div>

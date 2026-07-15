@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { env } from '$env/dynamic/public';
-	import type { Locale, Page, Site } from '$lib/schema/site';
+	import { DEFAULT_LAYOUT, DEFAULT_SECTION_STYLE, type Locale, type Page, type Site } from '$lib/schema/site';
 	import { blockFor } from '$lib/blocks/registry';
 	import { setRenderContext, type RenderContext } from './context';
 	import { themeStyle } from './theme';
@@ -46,7 +46,7 @@
 
 	const appHost = env.PUBLIC_APP_HOST || 'localhost:5173';
 
-	const layout = $derived(site.layout ?? { nav: { variant: 'inline' as const, mobileBreakpoint: 'lg' as const, sticky: true }, container: { width: 'wide' as const }, sectionSpacing: 'normal' as const });
+	const layout = $derived(site.layout ?? DEFAULT_LAYOUT);
 	const containerClass = $derived(
 		layout.container.width === 'narrow' ? 'max-w-4xl' :
 		layout.container.width === 'full' ? 'max-w-none' :
@@ -61,6 +61,17 @@
 	const integrations = $derived(site.settings.integrations ?? []);
 	const isMobileHidden = (section: Page['sections'][number]) =>
 		!!((section.props as Record<string, unknown>).hideOnMobile);
+	const sectionStyle = (section: Page['sections'][number]) => {
+		const style = { ...DEFAULT_SECTION_STYLE, ...section.style };
+		return [
+			`--sk-section-layout:${style.layout}`,
+			style.backgroundColor ? `--sk-section-bg:${style.backgroundColor}` : '',
+			`--sk-section-py:${style.paddingY}`,
+			`--sk-section-my:${style.marginY}`,
+			`--sk-section-min-height:${style.minHeight}`,
+			`--sk-section-content:${style.contentWidth}`
+		].filter(Boolean).join(';');
+	};
 
 	// Cookie consent — only relevant in public mode with analytics or consent setting
 	const hasAnalytics = $derived(!!(site.settings.analytics?.ga4Id || site.settings.analytics?.metaPixelId));
@@ -105,10 +116,15 @@
 >
 	<SiteHeader {site} {locale} activeSlug={page.slug} {hrefFor} {localeHrefFor} {layout} />
 
-	<main class="{containerClass} mx-auto px-5 {spacingClass}">
+	<main class="{containerClass} mx-auto w-full {spacingClass}">
 		{#each page.sections as section, i (`${section.id}-${i}`)}
 			{@const Block = blockFor(section)}
-			<div class:hidden-mobile={isMobileHidden(section)}>
+			<div
+				class="section-frame"
+				class:bg-custom={Boolean(section.style?.backgroundColor)}
+				style={sectionStyle(section)}
+				class:hidden-mobile={isMobileHidden(section)}
+			>
 				<Block
 					sectionId={section.id}
 					{locale}
@@ -149,6 +165,35 @@
 	.site-root :global(section) {
 		scroll-margin-top: 5rem;
 	}
+	.section-frame {
+		--sk-section-bg: transparent;
+	}
+	.section-frame :global(section) {
+		--sk-section-py: 5rem;
+		--sk-section-my: 0;
+		--sk-section-min-height: auto;
+		padding-block: var(--sk-section-py, 5rem) !important;
+		min-height: var(--sk-section-min-height, auto);
+		margin-block: var(--sk-section-my, none);
+	}
+	.section-frame.bg-custom :global(section) {
+		background-color: var(--sk-section-bg) !important;
+	}
+	.section-frame :global(section) > :global(.mx-auto) {
+		max-width: var(--sk-section-content, wide);
+	}
+	.section-frame[style*='--sk-section-py:compact'] :global(section) { --sk-section-py: 3rem; }
+	.section-frame[style*='--sk-section-py:spacious'] :global(section) { --sk-section-py: 7rem; }
+	.section-frame[style*='--sk-section-my:compact'] :global(section) { --sk-section-my: 1rem; }
+	.section-frame[style*='--sk-section-my:standard'] :global(section) { --sk-section-my: 3rem; }
+	.section-frame[style*='--sk-section-my:spacious'] :global(section) { --sk-section-my: 6rem; }
+	.section-frame[style*='--sk-section-min-height:compact'] :global(section) { --sk-section-min-height: 18rem; }
+	.section-frame[style*='--sk-section-min-height:standard'] :global(section) { --sk-section-min-height: 28rem; }
+	.section-frame[style*='--sk-section-min-height:tall'] :global(section) { --sk-section-min-height: 42rem; }
+	.section-frame[style*='--sk-section-content:narrow'] :global(section) > :global(.mx-auto) { max-width: 48rem; }
+	.section-frame[style*='--sk-section-content:wide'] :global(section) > :global(.mx-auto) { max-width: 72rem; }
+	.section-frame[style*='--sk-section-content:full'] :global(section) > :global(.mx-auto) { max-width: none; }
+	.section-frame[style*='--sk-section-layout:boxed'] :global(section) { margin-inline: 1rem; border-radius: var(--radius-box); }
 	.hidden-mobile {
 		@media (max-width: 767px) {
 			display: none !important;

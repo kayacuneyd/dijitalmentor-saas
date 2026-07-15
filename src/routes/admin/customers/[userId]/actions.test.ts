@@ -179,9 +179,9 @@ describe('?/publish', () => {
 		const draft = structuredClone(getOrSeedDraft('seed-psych')!);
 		draft.id = 'site-admin-publish-blocked';
 		draft.tenantId = 'tenant-site-admin-publish-blocked';
-		const hero = draft.pages[0].sections.find((section) => section.type === 'hero');
-		if (!hero || hero.type !== 'hero') throw new Error('psych seed hero missing');
-		hero.content.tr.headline = 'Kesin sonuç garantisiyle terapi';
+		const about = draft.pages[0].sections.find((section) => section.type === 'about');
+		if (!about || about.type !== 'about') throw new Error('psych seed about missing');
+		about.content.tr.body = 'Gerekirse antidepresan yazar ve tanı koyar.';
 		saveDraft(draft, { ownerUserId: user.id });
 
 		const res = (await call('publish', { siteId: 'site-admin-publish-blocked' }, user.id)) as {

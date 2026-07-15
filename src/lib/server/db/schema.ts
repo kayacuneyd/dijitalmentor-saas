@@ -357,6 +357,24 @@ export const requestProbeStats = sqliteTable('request_probe_stats', {
 	lastIpPrefixHash: text('last_ip_prefix_hash')
 });
 
+// Privacy-safe public traffic counters. One row is a site/page/locale/day
+// bucket; no visitor identifier, IP, user-agent, cookie, or referrer is stored.
+export const siteVisitStats = sqliteTable(
+	'site_visit_stats',
+	{
+		siteId: text('site_id').notNull(),
+		day: text('day').notNull(), // UTC YYYY-MM-DD
+		locale: text('locale').notNull(),
+		pageSlug: text('page_slug').notNull(),
+		visits: integer('visits').notNull().default(0)
+	},
+	(table) => [
+		primaryKey({ columns: [table.siteId, table.day, table.locale, table.pageSlug] }),
+		index('site_visit_stats_day_idx').on(table.day),
+		index('site_visit_stats_site_day_idx').on(table.siteId, table.day)
+	]
+);
+
 // Guided onboarding Q&A (Hostinger Horizons roadmap Phase 2): a short-lived, anonymous
 // pending record of in-progress answers. `tokenHash` identifies it via either the
 // `sk_pending` cookie or the magic-link URL fallback param — never the raw token.

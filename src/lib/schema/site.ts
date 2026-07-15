@@ -21,6 +21,24 @@ const href = z.union([z.url(), z.string().regex(/^[/#][\w\-./#]*$/)]);
 
 const hideOnMobile = z.boolean().optional();
 
+/** Language-neutral, schema-safe controls shared by every rendered section. */
+export const sectionStyleSchema = z.strictObject({
+	layout: z.enum(['full', 'boxed']).default('full'),
+	backgroundColor: hexColor.optional(),
+	paddingY: z.enum(['compact', 'standard', 'spacious']).default('standard'),
+	marginY: z.enum(['none', 'compact', 'standard', 'spacious']).default('none'),
+	minHeight: z.enum(['auto', 'compact', 'standard', 'tall']).default('auto'),
+	contentWidth: z.enum(['narrow', 'wide', 'full']).default('wide')
+});
+export type SectionStyle = z.infer<typeof sectionStyleSchema>;
+export const DEFAULT_SECTION_STYLE: SectionStyle = {
+	layout: 'full',
+	paddingY: 'standard',
+	marginY: 'none',
+	minHeight: 'auto',
+	contentWidth: 'wide'
+};
+
 export const sectionShapes = {
 	hero: {
 		props: z.strictObject({
@@ -307,6 +325,9 @@ const localizedSection = <T extends SectionType, P extends z.ZodType, C extends 
 		id: nonEmpty,
 		type: z.literal(type),
 		props: shape.props,
+		// Optional on input so hand-authored seeds and older drafts remain valid;
+		// the editor and renderer fill DEFAULT_SECTION_STYLE at the boundary.
+		style: sectionStyleSchema.optional(),
 		content: localized(shape.content)
 	});
 
@@ -391,6 +412,11 @@ export const layoutSchema = z.strictObject({
 	sectionSpacing: z.enum(['tight', 'normal', 'loose']).default('normal')
 });
 export type Layout = z.infer<typeof layoutSchema>;
+export const DEFAULT_LAYOUT: Layout = {
+	nav: { variant: 'inline', mobileBreakpoint: 'lg', sticky: true },
+	container: { width: 'full' },
+	sectionSpacing: 'normal'
+};
 
 export const navSchema = z.strictObject({
 	items: z

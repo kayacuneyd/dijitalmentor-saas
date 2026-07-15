@@ -14,14 +14,14 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ params, locals }) => {
 	requireAdmin(locals);
 	const customer = getCustomerDetail(params.userId);
-	if (!customer) error(404, serverTranslator(locals.locale)('admin.customer.unknown'));
+	if (!customer) error(404, serverTranslator(locals.locale ?? 'tr')('admin.customer.unknown'));
 	return { customer };
 };
 
 export const actions: Actions = {
 	overrideSubscription: async ({ request, locals, params }) => {
 		requireAdmin(locals);
-		const t = serverTranslator(locals.locale);
+		const t = serverTranslator(locals.locale ?? 'tr');
 		const next = String((await request.formData()).get('next') ?? '');
 		if (next !== 'active' && next !== 'free') {
 			return fail(400, { message: t('admin.customer.invalidPlan') });
@@ -38,7 +38,7 @@ export const actions: Actions = {
 
 	topUp: async ({ request, locals, params }) => {
 		requireAdmin(locals);
-		const t = serverTranslator(locals.locale);
+		const t = serverTranslator(locals.locale ?? 'tr');
 		const form = await request.formData();
 		const edits = Number(form.get('edits') ?? 0) || 0;
 		const generations = Number(form.get('generations') ?? 0) || 0;
@@ -60,7 +60,7 @@ export const actions: Actions = {
 
 	detachDomain: async ({ request, locals, params }) => {
 		requireAdmin(locals);
-		const t = serverTranslator(locals.locale);
+		const t = serverTranslator(locals.locale ?? 'tr');
 		const siteId = String((await request.formData()).get('siteId') ?? '');
 		const domain = getDomainForSite(siteId);
 		if (!domain || !detachSiteDomain(siteId)) {
@@ -81,7 +81,7 @@ export const actions: Actions = {
 
 	publish: async ({ request, locals, params }) => {
 		requireAdmin(locals);
-		const t = serverTranslator(locals.locale);
+		const t = serverTranslator(locals.locale ?? 'tr');
 		const siteId = String((await request.formData()).get('siteId') ?? '');
 		if (!siteId) return fail(400, { message: t('admin.customer.missingSite') });
 		const draft = getOrSeedDraft(siteId);

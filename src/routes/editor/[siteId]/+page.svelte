@@ -293,7 +293,7 @@
 								<span class="hidden sm:inline">{store.editLocale.toUpperCase()}</span>
 							</summary>
 							<div
-								class="absolute right-0 z-20 mt-1 flex w-40 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+								class="absolute right-0 z-20 mt-1 flex max-h-56 w-40 max-w-[calc(100vw-2rem)] flex-col gap-1 overflow-y-auto rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg sm:w-44"
 							>
 								{#each store.site.locales as locale (locale)}
 									<button
@@ -480,7 +480,7 @@
 									</span>
 								</div>
 								<p class="mt-1 truncate text-xs opacity-75">
-									Detayları görmek için aç; engeller publish'i durdurur.
+									Detayları görmek için aç; yalnızca kritik engeller publish'i durdurur.
 								</p>
 							</div>
 						</summary>

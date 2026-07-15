@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { siteSchema, sectionSchema } from './site';
+import { DEFAULT_LAYOUT, siteSchema, sectionSchema, sectionStyleSchema } from './site';
 import { seedSites } from '$lib/seed';
 
 /** Deep-clone a seed so each test can mutate it freely. */
@@ -23,6 +23,17 @@ describe('siteSchema — good fixtures', () => {
 			}
 		});
 		expect(section.props).toMatchObject({ variant: 'centered', background: 'plain' });
+	});
+
+	it('keeps section style schema-safe while defaulting new layouts to full width', () => {
+		expect(DEFAULT_LAYOUT.container.width).toBe('full');
+		expect(sectionStyleSchema.parse({ backgroundColor: '#f8edc9' })).toMatchObject({
+			layout: 'full',
+			backgroundColor: '#f8edc9',
+			paddingY: 'standard',
+			contentWidth: 'wide'
+		});
+		expect(sectionStyleSchema.safeParse({ backgroundColor: 'papayawhip' }).success).toBe(false);
 	});
 });
 

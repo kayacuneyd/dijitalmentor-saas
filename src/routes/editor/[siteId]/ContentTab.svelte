@@ -5,6 +5,8 @@
 	import ImageUploadField from './ImageUploadField.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 	import type { CatalogKey } from '$lib/i18n/catalog';
+	import SectionStyleControls from './SectionStyleControls.svelte';
+	import { DEFAULT_SECTION_STYLE, type SectionStyle } from '$lib/schema/site';
 
 	const t = getTranslate();
 	const sectionLabel = (type: string) => t(`editor.blocks.${type}` as CatalogKey);
@@ -37,6 +39,14 @@
 				<span class="text-base-content/40 ml-1 text-xs font-normal">#{section.id}</span>
 			</summary>
 			<div class="collapse-content">
+				<SectionStyleControls
+					style={{ ...DEFAULT_SECTION_STYLE, ...section.style }}
+					{store}
+					onupdate={(key, value) =>
+						store.update(() => {
+							section.style = { ...DEFAULT_SECTION_STYLE, ...section.style, [key]: value } as SectionStyle;
+						})}
+				/>
 				{#if section.type === 'hero' || section.type === 'about'}
 					<div class="mb-4">
 						<ImageUploadField

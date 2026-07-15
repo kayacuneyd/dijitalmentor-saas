@@ -125,6 +125,28 @@
 
 	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
+			<div class="flex items-baseline justify-between gap-3">
+				<h2 class="font-semibold">Public site visits</h2>
+				<span class="text-xs text-[var(--sk-faint)]">last 30 days · aggregate only</span>
+			</div>
+			<strong class="sk-display text-4xl leading-none">{data.visits.total}</strong>
+			{#if data.visits.bySite.length === 0}
+				<p class="text-sm text-[var(--sk-muted)]">No public visits recorded yet.</p>
+			{:else}
+				<ul class="flex flex-col divide-y divide-[var(--sk-line)]">
+					{#each data.visits.bySite.slice(0, 5) as site (site.siteId)}
+						<li class="flex justify-between gap-2 py-2 text-sm">
+							<span class="truncate">{site.siteId}</span>
+							<strong>{site.visits}</strong>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
+	</AppCard>
+
+	<AppCard class="p-4">
+		<div class="flex flex-col gap-3">
 			<div class="flex items-center justify-between gap-3">
 				<h2 class="font-semibold">Aktivite akışı</h2>
 				<a href="/admin/settings#errors" class="sk-btn sk-btn-secondary sk-btn-sm">System logs</a>

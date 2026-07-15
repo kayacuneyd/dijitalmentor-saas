@@ -6,6 +6,7 @@ import { sendContactNotification } from '$lib/server/email';
 import { rateLimit } from '$lib/server/auth';
 import { localeSchema, type Locale } from '$lib/schema/site';
 import type { Actions, PageServerLoad } from './$types';
+import { recordSiteVisit } from '$lib/server/siteVisits';
 
 /**
  * The public tenant site (PLAN §5): Host routing (src/hooks.ts) rewrites
@@ -24,6 +25,7 @@ export const load: PageServerLoad = ({ params, setHeaders }) => {
 	const page = site.pages.find((p) => p.slug === slug);
 	if (!page) error(404, `Unknown page "${slug}"`);
 	const meta = getSiteMeta(site.id);
+	recordSiteVisit({ siteId: site.id, locale, pageSlug: page.slug });
 
 	setHeaders({ 'cache-control': 'no-cache, must-revalidate' });
 	return { site, page, locale, publishedVersion: meta?.publishedVersion ?? null };

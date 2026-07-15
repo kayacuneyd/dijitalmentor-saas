@@ -89,8 +89,10 @@
 				<div class="border-b border-[var(--sk-line)] p-4">
 					<a href="/dashboard" class="sk-link inline-flex items-center gap-2">
 						<span
-							class="flex size-8 items-center justify-center rounded-[8px] bg-[#171614] pb-0.5 font-[var(--font-display)] text-xl text-[#f3ecdd]"
-							>s</span
+							class="flex size-8 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]"
+						>
+							<img src="/brand-icon.png" alt="saaskaya" class="size-full object-contain" />
+						</span>
 						>
 						<span>
 							<span class="block text-sm font-semibold leading-none">saaskaya</span>

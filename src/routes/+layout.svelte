@@ -1,7 +1,6 @@
 <script lang="ts">
 	import './layout.css';
 	import { dev } from '$app/environment';
-	import favicon from '$lib/assets/favicon.svg';
 	import { setTranslateContext } from '$lib/i18n/context';
 
 	// Self-hosted (no Google Fonts CDN request from a SaaS page — no third-party
@@ -33,11 +32,11 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" href="/icon.png" type="image/png" />
+	<link rel="apple-touch-icon" href="/icon.png" />
 	{#if !data.isTenantHost}
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="theme-color" content="#ece7dd" />
-		<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 		{#if data.googleSiteVerification}
 			<meta name="google-site-verification" content={data.googleSiteVerification} />
 		{/if}

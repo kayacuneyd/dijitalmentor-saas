@@ -33,9 +33,15 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				'media_assets',
 				'domain_credits',
 				'share_assets',
+				'site_visit_stats',
 				'schema_migrations'
 			])
 		);
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('site_visit_stats') WHERE name='visits'`)
+				.get()
+		).toBeTruthy();
 		// v2 column exists
 		const col = client
 			.prepare(`SELECT 1 FROM pragma_table_info('users') WHERE name='subscription_ends_at'`)

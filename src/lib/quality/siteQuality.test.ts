@@ -69,14 +69,14 @@ describe('siteQualityCheck', () => {
 		expect(report.blockers.map((issue) => issue.code)).toContain('contact_path_missing');
 	});
 
-	it('blocks absolute professional outcome claims', () => {
+	it('warns on absolute professional outcome claims without blocking publish', () => {
 		const site = clone(seedSites.psych);
 		const hero = site.pages[0].sections.find((section) => section.type === 'hero');
 		if (!hero || hero.type !== 'hero') throw new Error('psych seed hero missing');
 		hero.content.tr.headline = 'Kesin sonuç garantisiyle terapi';
 		const report = siteQualityCheck(site);
-		expect(report.canPublish).toBe(false);
-		expect(report.blockers.map((issue) => issue.code)).toContain('unsafe_professional_claim');
+		expect(report.canPublish).toBe(true);
+		expect(report.warnings.map((issue) => issue.code)).toContain('unsafe_professional_claim');
 	});
 
 	it('warns on placeholder copy, missing SEO, seed media, CTA, and unknown local media', () => {

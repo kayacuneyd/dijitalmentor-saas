@@ -1,4 +1,4 @@
-import { siteSchema, type Site } from '$lib/schema/site';
+import { DEFAULT_LAYOUT, siteSchema, type Site } from '$lib/schema/site';
 import { themePresets } from '$lib/presets';
 import { chatPatchSchema, toInputSchema, type ChatPatch, type PatchOp } from './schemas';
 import { AIInvalidOutputError, runToolCall, type RunToolCall, type TokenUsage } from './llm';
@@ -100,7 +100,7 @@ function applyOp(site: Site, op: PatchOp): void {
 			break;
 		}
 		case 'set_layout': {
-			if (!site.layout) site.layout = { nav: { variant: 'inline', mobileBreakpoint: 'lg', sticky: true }, container: { width: 'wide' }, sectionSpacing: 'normal' };
+			if (!site.layout) site.layout = structuredClone(DEFAULT_LAYOUT);
 			const { nav, container, sectionSpacing } = op.layout;
 			if (nav) site.layout.nav = { ...site.layout.nav, ...nav };
 			if (container) site.layout.container = { ...site.layout.container, ...container };

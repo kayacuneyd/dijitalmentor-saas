@@ -18,6 +18,8 @@ import {
 
 const nonEmpty = z.string().trim().min(1);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'kebab-case slug');
+const localized = <S extends z.ZodType>(shape: S) =>
+	z.strictObject({ tr: shape, en: shape, de: shape });
 
 /** A section as the AI generates it: one locale's content, no per-locale record. */
 const genSection = <
@@ -55,6 +57,51 @@ export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('clients', sectionShapes.clients),
 	genSection('video', sectionShapes.video)
 ]);
+
+const patchSection = <
+	T extends (typeof SECTION_TYPES)[number],
+	P extends z.ZodType,
+	C extends z.ZodType
+>(
+	type: T,
+	shape: { props: P; content: C }
+) =>
+	z.strictObject({
+		id: nonEmpty,
+		type: z.literal(type),
+		props: shape.props,
+		content: localized(shape.content)
+	});
+
+const patchSectionSchema = z.discriminatedUnion('type', [
+	patchSection('hero', sectionShapes.hero),
+	patchSection('about', sectionShapes.about),
+	patchSection('services', sectionShapes.services),
+	patchSection('gallery', sectionShapes.gallery),
+	patchSection('contact', sectionShapes.contact),
+	patchSection('cta', sectionShapes.cta),
+	patchSection('faq', sectionShapes.faq),
+	patchSection('testimonials', sectionShapes.testimonials),
+	patchSection('pricing', sectionShapes.pricing),
+	patchSection('process', sectionShapes.process),
+	patchSection('booking', sectionShapes.booking),
+	patchSection('credentials', sectionShapes.credentials),
+	patchSection('team', sectionShapes.team),
+	patchSection('footer', sectionShapes.footer),
+	patchSection('stats', sectionShapes.stats),
+	patchSection('clients', sectionShapes.clients),
+	patchSection('video', sectionShapes.video)
+]);
+
+const patchPageSchema = z.strictObject({
+	slug,
+	title: localized(nonEmpty),
+	sections: z.array(patchSectionSchema).min(1).max(12),
+	meta: z.strictObject({
+		title: nonEmpty.max(70).optional(),
+		description: nonEmpty.max(200).optional()
+	}).optional()
+});
 
 // Drift guard: the generated schema MUST have exactly the same count as SECTION_TYPES.
 if (genSectionSchema.options.length !== SECTION_TYPES.length) {
@@ -238,11 +285,11 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 		op: z.literal('add_section'),
 		pageSlug: slug,
 		index: z.number().int().min(0).optional(),
-		section: sectionSchema
+		section: patchSectionSchema
 	}),
 	z.strictObject({
 		op: z.literal('add_page'),
-		page: pageSchema.describe(
+		page: patchPageSchema.describe(
 			'complete new page with localized title and valid localized sections'
 		),
 		addToNav: z.boolean().default(true).describe('whether to add the page to the main navigation')

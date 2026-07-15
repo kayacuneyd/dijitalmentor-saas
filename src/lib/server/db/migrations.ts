@@ -837,6 +837,24 @@ export const migrations: Migration[] = [
 				}
 			}
 		}
+	},
+	{
+		version: 30,
+		name: 'site-visit-stats',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS site_visit_stats (
+				site_id text NOT NULL,
+				day text NOT NULL,
+				locale text NOT NULL,
+				page_slug text NOT NULL,
+				visits integer NOT NULL DEFAULT 0,
+				PRIMARY KEY (site_id, day, locale, page_slug)
+			)`);
+			client.exec(`CREATE INDEX IF NOT EXISTS site_visit_stats_day_idx ON site_visit_stats (day)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS site_visit_stats_site_day_idx ON site_visit_stats (site_id, day)`
+			);
+		}
 	}
 ];
 

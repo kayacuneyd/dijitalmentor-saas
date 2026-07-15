@@ -30,7 +30,7 @@ export function organizationJsonLd() {
 		'@type': 'Organization',
 		name: 'saaskaya',
 		url: SITE_ORIGIN,
-		logo: `${SITE_ORIGIN}/favicon.svg`,
+		logo: `${SITE_ORIGIN}/brand-logo.png`,
 		founder: {
 			'@type': 'Person',
 			name: 'Cüneyt Kaya',

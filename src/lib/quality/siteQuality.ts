@@ -1,4 +1,10 @@
-import { siteSchema, type Locale, type Section, type SectionType, type Site } from '$lib/schema/site';
+import {
+	siteSchema,
+	type Locale,
+	type Section,
+	type SectionType,
+	type Site
+} from '$lib/schema/site';
 
 export type QualitySeverity = 'blocker' | 'warning';
 
@@ -275,7 +281,10 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 					);
 				}
 			}
-			if (section.type === 'booking' && (section.props.href === '#' || section.props.href === '/')) {
+			if (
+				section.type === 'booking' &&
+				(section.props.href === '#' || section.props.href === '/')
+			) {
 				addIssue(
 					issues,
 					'warning',
@@ -324,10 +333,10 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 					if (PROFESSIONAL_CLAIM_RE.test(trimmed)) {
 						addIssue(
 							issues,
-							'blocker',
+							'warning',
 							'unsafe_professional_claim',
 							item.path,
-							'Professional copy contains an absolute/guaranteed outcome claim.'
+							'Professional copy contains an absolute/guaranteed outcome claim; review it before publishing.'
 						);
 					}
 					if (site.theme.preset === 'psych' && PSYCH_PRESCRIPTION_CLAIM_RE.test(trimmed)) {
@@ -432,12 +441,14 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 		'booking-external': {
 			type: 'booking-external',
 			block: 'booking',
-			message: 'Booking bloğu var ama booking-external entegrasyonu aktif değil — randevu butonu pasif görünecek.'
+			message:
+				'Booking bloğu var ama booking-external entegrasyonu aktif değil — randevu butonu pasif görünecek.'
 		},
 		'payment-link': {
 			type: 'payment-link',
 			block: 'pricing',
-			message: 'Pricing bloğu var ama payment-link entegrasyonu aktif değil — ödeme butonu görünmeyecek.'
+			message:
+				'Pricing bloğu var ama payment-link entegrasyonu aktif değil — ödeme butonu görünmeyecek.'
 		}
 	};
 
@@ -446,7 +457,13 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 		if (sectionTypes.has(cfg.block as SectionType)) {
 			const entry = integrations.find((i) => i.type === cfg.type);
 			if (!entry || !entry.enabled) {
-				addIssue(issues, 'warning', `integration_${key}_inactive`, 'settings.integrations', cfg.message);
+				addIssue(
+					issues,
+					'warning',
+					`integration_${key}_inactive`,
+					'settings.integrations',
+					cfg.message
+				);
 			}
 		}
 	}

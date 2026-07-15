@@ -3575,3 +3575,28 @@ var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
   `psych_scope_claim`.
 - Verification: `npm run check` passed; targeted schema/AI/publish/admin tests passed; `npm test`
   passed 86/86 files and 537/537 tests; `npm run build` passed; `git diff --check` passed.
+
+## 2026-07-15
+
+**Bugfix: Section style CSS değerlerinde 3 geçersiz CSS düzeltildi.**
+
+`src/lib/render/SiteRenderer.svelte` içindeki section-frame stillerinde tarayıcının sessizce
+yok saydığı 3 CSS hatası tespit edildi ve düzeltildi:
+
+1. **`margin-block: var(--sk-section-my, none)`** — `none`, `margin-block` için geçerli bir
+   CSS değeri değil. `none` anahtar kelimesi sadece `border`, `outline`, `background-image` gibi
+   spesifik özelliklerde geçerli. `0` ile değiştirildi.
+
+2. **`max-width: var(--sk-section-content, wide)`** — `wide` geçerli bir CSS `max-width` değeri
+   değil. Fallback `none` yapıldı.
+
+3. **`marginY: 'none'` için CSS override eksik** — `compact`/`standard`/`spacious` değerleri için
+   override mevcutken `none` → `0` mapping'i hiç yapılmamıştı. `[style*='--sk-section-my:none']`
+   kuralı eklendi.
+
+Bu 3 hata tarayıcının ilgili CSS bildirimlerini tamamen yok saymasına neden oluyordu: varsayılan
+`marginY: 'none'` çalışmıyor, `contentWidth` fallback'i tarayıcı toleransıyla `none` düşüyordu
+(şans eseri), ve `marginY` override eksikliği nedeniyle `none` hiçbir zaman CSS custom property
+üzerinden `0`'a eşlenmiyordu.
+
+Doğrulama: `npm test` 86/86 dosya, 537/537 test geçti.

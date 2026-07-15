@@ -174,16 +174,17 @@
 		--sk-section-min-height: auto;
 		padding-block: var(--sk-section-py, 5rem) !important;
 		min-height: var(--sk-section-min-height, auto);
-		margin-block: var(--sk-section-my, none);
+		margin-block: var(--sk-section-my, 0);
 	}
 	.section-frame.bg-custom :global(section) {
 		background-color: var(--sk-section-bg) !important;
 	}
 	.section-frame :global(section) > :global(.mx-auto) {
-		max-width: var(--sk-section-content, wide);
+		max-width: var(--sk-section-content, none);
 	}
 	.section-frame[style*='--sk-section-py:compact'] :global(section) { --sk-section-py: 3rem; }
 	.section-frame[style*='--sk-section-py:spacious'] :global(section) { --sk-section-py: 7rem; }
+	.section-frame[style*='--sk-section-my:none'] :global(section) { --sk-section-my: 0; }
 	.section-frame[style*='--sk-section-my:compact'] :global(section) { --sk-section-my: 1rem; }
 	.section-frame[style*='--sk-section-my:standard'] :global(section) { --sk-section-my: 3rem; }
 	.section-frame[style*='--sk-section-my:spacious'] :global(section) { --sk-section-my: 6rem; }

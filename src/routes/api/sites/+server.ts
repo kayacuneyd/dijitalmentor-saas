@@ -221,6 +221,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				route: '/api/sites',
 				method: 'POST',
 				status: 422,
+				level: 'warning',
 				userId: locals.user.id,
 				siteId: id
 			});

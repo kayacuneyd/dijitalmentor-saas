@@ -3754,3 +3754,38 @@ Bu 3 hata tarayıcının ilgili CSS bildirimlerini tamamen yok saymasına neden 
 üzerinden `0`'a eşlenmiyordu.
 
 Doğrulama: `npm test` 86/86 dosya, 537/537 test geçti.
+
+## 2026-07-15 — Son 24 saat hata analizi
+
+`data/production.db` içindeki `error_events` tablosu ve PM2 `saaskaya-error.log` karşılaştırıldı.
+İnceleme penceresi: `2026-07-14 23:44:01 UTC` → `2026-07-15 23:44:01 UTC`.
+
+- Toplam uygulama hatası: 5.
+- `onboarding-guard` / `/api/onboarding/answer`: 4 hata. Üçü Groq
+  `llama-3.3-70b-versatile` günlük token limitine takıldı (`100000 TPD` dolu); biri guard rejection
+  cap aşımı sonrası auto-accept davranışıydı.
+- `site-generation` / `/api/sites`: 1 hata. AI sağlayıcısı structured request'i reddetti; sonuç 422.
+- PM2 loglarında görünen eski `Cannot find module` 500'leri 2026-07-10 tarihli, son 24 saat kapsamına
+  girmiyor.
+- Canlı sağlık kontrolü: `GET http://127.0.0.1:3021/api/health` → 200, DB ok, disk ok.
+
+Karar: Son 24 saatte kalıcı servis çökmesi yok; ana risk AI sağlayıcı/limit dayanıklılığı. Onboarding
+guard için Groq limitine fallback/degrade davranışı ve site-generation structured request reddi için
+provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
+
+## 2026-07-15 — AI sağlayıcı hata dayanıklılığı
+
+- Onboarding guard için sağlayıcı rate-limit hataları `AIProviderRateLimitError` olarak ayrıştırıldı;
+  Groq `429` yanıtı artık genel 500/503 gibi sınıflandırılmıyor ve `retry-after` bilgisi korunuyor.
+- Operatör isterse `GATEKEEPER_FALLBACK_PROVIDER` ayarıyla `anthropic`, `deepseek` veya `groq`
+  sağlayıcısını açıkça tanımlayabilir. Fallback yalnızca primary gatekeeper rate-limit olduğunda
+  deneniyor; ayar yoksa mevcut fail-open davranışı cevap akışını kesmeden devam ediyor.
+- Guard rejection cap ve AI sağlayıcı degrade kayıtları `warning` seviyesinde, sırasıyla status 200
+  ve 429/503 ile kaydediliyor. Böylece kullanıcıya başarıyla devam eden akışlar çözümlenmemiş kritik
+  hata sayacını şişirmiyor.
+- Structured request reddi artık sağlayıcı/model/status metadatasını hata nesnesinde taşıyor ve güvenli
+  fallback draft açıldığı için operational log'da `warning` olarak sınıflandırılıyor; Zod doğrulama ve
+  üretim fallback sözleşmesi değişmedi.
+- Doğrulama: hedef testler 37/37, tam test paketi 605 geçti / 11 skip. `npm run check` bu değişiklikten
+  bağımsız mevcut `src/lib/server/customers.ts` içindeki `SiteMeta.createdAt` tip hatası nedeniyle
+  3 hata ile durdu; bu task kapsamında düzeltilmedi.

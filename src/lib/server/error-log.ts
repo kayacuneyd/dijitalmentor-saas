@@ -10,6 +10,7 @@ const redact = (value: string): string =>
 
 export type ErrorContext = {
 	source: string;
+	level?: 'error' | 'warning';
 	route?: string;
 	method?: string;
 	status?: number;
@@ -28,7 +29,7 @@ export function recordError(error: unknown, context: ErrorContext): string {
 	const normalized = error instanceof Error ? error : new Error(String(error));
 	const row = {
 		id,
-		level: 'error',
+		level: context.level ?? 'error',
 		source: context.source,
 		route: context.route ?? null,
 		method: context.method ?? null,
@@ -73,7 +74,7 @@ export function unresolvedErrorCount(): number {
 		.from(errorEvents)
 		.where(isNull(errorEvents.resolvedAt))
 		.all()
-		.filter((event) => event.status !== 404).length;
+		.filter((event) => event.status !== 404 && event.level === 'error').length;
 }
 
 export function resolveError(id: string): boolean {

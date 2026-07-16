@@ -1,13 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { clearSetting, setSetting } from '$lib/server/config';
 import { classifyOnboardingAnswer } from './onboardingGuard';
 import { onboardingGuardSchema } from './schemas';
-import { AIInvalidOutputError, type ToolCallResult } from './llm';
+import { AIInvalidOutputError, AIProviderRateLimitError, type ToolCallResult } from './llm';
 
 const asResult = (input: unknown): ToolCallResult => ({
 	input,
 	toolUseId: 'toolu_guard',
 	assistantContent: [],
 	usage: { inputTokens: 15, outputTokens: 8 }
+});
+
+afterEach(() => {
+	clearSetting('GATEKEEPER_FALLBACK_PROVIDER');
 });
 
 describe('onboardingGuardSchema', () => {
@@ -107,6 +112,25 @@ describe('classifyOnboardingAnswer', () => {
 		expect(calls).toBe(2);
 		expect(result.onTopic).toBe(false);
 		expect(usage).toEqual({ inputTokens: 30, outputTokens: 16 });
+	});
+
+	it('uses the explicitly configured fallback provider after a rate limit', async () => {
+		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'deepseek');
+		const providers: string[] = [];
+		let calls = 0;
+		const { result } = await classifyOnboardingAnswer(
+			{ questionPrompt: 'Hangi şehirde hizmet veriyorsun?', answer: 'Kadıköy', locale: 'tr' },
+			{
+				run: async (req) => {
+					providers.push(req.provider ?? 'unset');
+					calls += 1;
+					if (calls === 1) throw new AIProviderRateLimitError('limited');
+					return asResult({ onTopic: true });
+				}
+			}
+		);
+		expect(result.onTopic).toBe(true);
+		expect(providers).toEqual(['groq', 'deepseek']);
 	});
 
 	it('throws AIInvalidOutputError when the repair also fails', async () => {

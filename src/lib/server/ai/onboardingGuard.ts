@@ -8,7 +8,9 @@ import {
 } from './schemas';
 import {
 	AIInvalidOutputError,
+	AIProviderRateLimitError,
 	addUsage,
+	configuredGatekeeperFallbackProvider,
 	configuredGatekeeperProvider,
 	configuredModel,
 	runToolCall,
@@ -64,19 +66,28 @@ export async function classifyOnboardingAnswer(
 		inputSchema: toInputSchema(onboardingGuardObjectSchema)
 	};
 	const userText = `Visitor locale: ${input.locale} (${GUARD_LOCALE_NAMES[input.locale]}) — write "reply" in this language only.\nQuestion asked: ${input.questionPrompt}\n\nVisitor's answer:\n${input.answer}`;
+	const primaryProvider = configuredGatekeeperProvider();
 
-	const attempt = (extraHint?: string) =>
+	const attempt = (extraHint?: string, provider = primaryProvider) =>
 		deps.run({
 			system: GUARD_SYSTEM,
 			messages: [{ role: 'user', content: extraHint ? `${userText}\n\n${extraHint}` : userText }],
 			tool,
 			maxTokens: 300,
-			provider: configuredGatekeeperProvider(),
+			provider,
 			model:
-				getSetting('GATEKEEPER_MODEL') || configuredModel(configuredGatekeeperProvider(), 'light')
+				(provider === primaryProvider ? getSetting('GATEKEEPER_MODEL') : undefined) ||
+				configuredModel(provider, 'light')
 		});
 
-	const first = await attempt();
+	let first;
+	try {
+		first = await attempt();
+	} catch (error) {
+		const fallbackProvider = configuredGatekeeperFallbackProvider();
+		if (!(error instanceof AIProviderRateLimitError) || !fallbackProvider) throw error;
+		first = await attempt(undefined, fallbackProvider);
+	}
 	const parsed = onboardingGuardSchema.safeParse(first.input);
 	if (parsed.success) return { result: parsed.data, usage: first.usage };
 

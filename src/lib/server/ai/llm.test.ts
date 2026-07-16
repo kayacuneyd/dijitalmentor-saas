@@ -3,6 +3,7 @@ import { clearSetting, setSetting } from '$lib/server/config';
 import {
 	AIProviderRejectedRequestError,
 	AIUnavailableError,
+	configuredGatekeeperFallbackProvider,
 	configuredAgentProvider,
 	configuredGatekeeperProvider,
 	configuredModel,
@@ -14,6 +15,7 @@ afterEach(() => {
 	for (const key of [
 		'AI_PROVIDER',
 		'GATEKEEPER_PROVIDER',
+		'GATEKEEPER_FALLBACK_PROVIDER',
 		'GROQ_API_KEY',
 		'GROQ_MODEL',
 		'DEEPSEEK_MODEL_LIGHT',
@@ -37,6 +39,14 @@ describe('LLM provider routing', () => {
 		expect(configuredModel('groq', 'light')).toBe('llama-3.3-70b-versatile');
 		expect(configuredModel('deepseek', 'light')).toBe('deepseek-v4-flash');
 		expect(configuredModel('deepseek', 'heavy')).toBe('deepseek-v4-pro');
+	});
+
+	it('only enables a distinct configured gatekeeper fallback provider', () => {
+		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'deepseek');
+		expect(configuredGatekeeperFallbackProvider()).toBe('deepseek');
+		setSetting('GATEKEEPER_PROVIDER', 'anthropic');
+		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'anthropic');
+		expect(configuredGatekeeperFallbackProvider()).toBeUndefined();
 	});
 
 	it('estimates provider spend in integer micro-USD', () => {

@@ -11,7 +11,27 @@ export type AIProvider = 'anthropic' | 'deepseek' | 'groq';
 export type ModelTier = 'light' | 'heavy';
 
 export class AIUnavailableError extends Error {}
-export class AIProviderRejectedRequestError extends AIUnavailableError {}
+export class AIProviderRateLimitError extends AIUnavailableError {
+	constructor(message: string, options?: { cause?: unknown; retryAfterSeconds?: number }) {
+		super(message, options);
+		this.name = 'AIProviderRateLimitError';
+		this.retryAfterSeconds = options?.retryAfterSeconds;
+	}
+
+	readonly retryAfterSeconds?: number;
+}
+export class AIProviderRejectedRequestError extends AIUnavailableError {
+	constructor(
+		message: string,
+		public readonly provider?: AIProvider,
+		public readonly model?: string,
+		public readonly providerStatus?: number,
+		options?: { cause?: unknown }
+	) {
+		super(message, options);
+		this.name = 'AIProviderRejectedRequestError';
+	}
+}
 export class AIInvalidOutputError extends Error {
 	constructor(
 		message: string,
@@ -50,6 +70,12 @@ export type RunToolCall = (req: ToolCallRequest) => Promise<ToolCallResult>;
 export function configuredGatekeeperProvider(): AIProvider {
 	const value = getSetting('GATEKEEPER_PROVIDER');
 	return value === 'anthropic' ? 'anthropic' : 'groq';
+}
+
+export function configuredGatekeeperFallbackProvider(): AIProvider | undefined {
+	const value = getSetting('GATEKEEPER_FALLBACK_PROVIDER');
+	if (value !== 'anthropic' && value !== 'deepseek' && value !== 'groq') return undefined;
+	return value === configuredGatekeeperProvider() ? undefined : value;
 }
 
 export function configuredAgentProvider(): AIProvider {
@@ -173,7 +199,15 @@ async function runAnthropicCompatible(
 			if (error.status === 402) {
 				throw new AIUnavailableError('DeepSeek balance is exhausted.', { cause: error });
 			}
-			if (error.status === 429 || (error.status ?? 0) >= 500) {
+			if (error.status === 429) {
+				throw new AIProviderRateLimitError(
+					'The AI provider rate limit was reached — retry shortly.',
+					{
+						cause: error
+					}
+				);
+			}
+			if ((error.status ?? 0) >= 500) {
 				throw new AIUnavailableError('The AI is busy right now — retry shortly.', {
 					cause: error
 				});
@@ -181,6 +215,9 @@ async function runAnthropicCompatible(
 			if (error.status === 400 || error.status === 422) {
 				throw new AIProviderRejectedRequestError(
 					'The AI provider rejected the structured request — check provider/model settings.',
+					provider,
+					model,
+					error.status,
 					{ cause: error }
 				);
 			}
@@ -245,6 +282,16 @@ async function runGroq(req: ToolCallRequest, model: string): Promise<ToolCallRes
 	const payload = (await response.json()) as GroqResponse;
 	if (!response.ok) {
 		const auth = response.status === 401 || response.status === 403;
+		if (response.status === 429) {
+			const retryAfter = response.headers.get('retry-after');
+			const retryAfterSeconds = retryAfter ? Number(retryAfter) : undefined;
+			throw new AIProviderRateLimitError(
+				payload.error?.message || 'Groq rate limit reached — retry shortly.',
+				{
+					retryAfterSeconds: Number.isFinite(retryAfterSeconds) ? retryAfterSeconds : undefined
+				}
+			);
+		}
 		throw new AIUnavailableError(
 			auth
 				? 'Groq API key is invalid or unauthorized — check /admin/settings.'

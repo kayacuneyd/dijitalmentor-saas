@@ -1,7 +1,11 @@
 import { json } from '@sveltejs/kit';
 import { z } from 'zod';
 import { classifyOnboardingAnswer } from '$lib/server/ai/onboardingGuard';
-import { AIInvalidOutputError, AIUnavailableError } from '$lib/server/ai/llm';
+import {
+	AIInvalidOutputError,
+	AIProviderRateLimitError,
+	AIUnavailableError
+} from '$lib/server/ai/llm';
 import { rateLimit } from '$lib/server/auth';
 import { recordError } from '$lib/server/error-log';
 import { localizeQuestion } from '$lib/i18n/onboarding';
@@ -115,10 +119,7 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress,
 	const parsedValue = question.schema.safeParse(body.data.value);
 	if (!parsedValue.success) {
 		const err = validationError(parsedValue.error.issues[0]);
-		return json(
-			{ ok: false, code: err.code, message: err.message },
-			{ status: 400 }
-		);
+		return json({ ok: false, code: err.code, message: err.message }, { status: 400 });
 	}
 
 	// Only a brand-new pending session is throttled here — resuming an existing one
@@ -159,7 +160,9 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress,
 				recordError(new Error('Onboarding guard rejection cap exceeded — answer auto-accepted'), {
 					source: 'onboarding-guard',
 					route: '/api/onboarding/answer',
-					method: 'POST'
+					method: 'POST',
+					status: 200,
+					level: 'warning'
 				});
 			}
 		} catch (err) {
@@ -169,7 +172,9 @@ export const POST: RequestHandler = async ({ request, cookies, getClientAddress,
 				recordError(err, {
 					source: 'onboarding-guard',
 					route: '/api/onboarding/answer',
-					method: 'POST'
+					method: 'POST',
+					status: err instanceof AIProviderRateLimitError ? 429 : 503,
+					level: 'warning'
 				});
 			} else {
 				throw err;

@@ -63,4 +63,15 @@ describe('operational error log', () => {
 		expect(resolveError(scannerId)).toBe(true);
 		expect(unresolvedErrorCount()).toBe(1);
 	});
+
+	it('stores provider degradation as a warning without inflating unresolved errors', () => {
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		const id = recordError(new Error('provider rate limit'), {
+			source: 'onboarding-guard',
+			status: 429,
+			level: 'warning'
+		});
+		expect(listRecentErrors(1)[0]).toMatchObject({ id, level: 'warning', status: 429 });
+		expect(unresolvedErrorCount()).toBe(0);
+	});
 });

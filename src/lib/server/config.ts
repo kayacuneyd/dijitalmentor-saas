@@ -98,6 +98,13 @@ export const SETTING_DEFS: SettingDef[] = [
 		secret: false,
 		help: 'groq / anthropic; beta default groq'
 	},
+	{
+		key: 'GATEKEEPER_FALLBACK_PROVIDER',
+		label: 'Gatekeeper fallback provider',
+		group: 'AI Providers',
+		secret: false,
+		help: 'optional: anthropic / deepseek / groq; only used after a provider rate limit'
+	},
 	{ key: 'GROQ_API_KEY', label: 'Groq API key', group: 'AI Providers', secret: true },
 	{
 		key: 'GROQ_MODEL',

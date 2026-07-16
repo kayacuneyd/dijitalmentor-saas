@@ -83,6 +83,52 @@
 
 	<AppCard class="p-4">
 		<div class="flex flex-col gap-3">
+			<h2 class="font-semibold">Profile</h2>
+			<div class="-mx-1 grid gap-3 text-sm sm:grid-cols-3">
+				<div>
+					<dt class="text-[var(--sk-faint)]">Full name</dt>
+					<dd class="font-medium">{c.fullName ?? '—'}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Profession</dt>
+					<dd class="font-medium">{c.profession ?? '—'}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">City</dt>
+					<dd class="font-medium">{c.city ?? '—'}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Email</dt>
+					<dd class="break-all font-medium">{c.email}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Locale</dt>
+					<dd class="font-medium">{c.locale?.toUpperCase() ?? '—'}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Joined</dt>
+					<dd class="font-medium">{new Date(c.createdAt).toLocaleDateString()}</dd>
+				</div>
+				{#if c.betaProfileCompletedAt}
+					<div>
+						<dt class="text-[var(--sk-faint)]">Beta profile</dt>
+						<dd class="font-medium">{new Date(c.betaProfileCompletedAt).toLocaleDateString()}</dd>
+					</div>
+				{/if}
+				<div>
+					<dt class="text-[var(--sk-faint)]">Last AI edit</dt>
+					<dd class="font-medium">{c.lastAiEditAt ? new Date(c.lastAiEditAt).toLocaleString() : 'Never'}</dd>
+				</div>
+				<div>
+					<dt class="text-[var(--sk-faint)]">Last publish</dt>
+					<dd class="font-medium">{c.lastPublishedAt ? new Date(c.lastPublishedAt).toLocaleString() : 'Never'}</dd>
+				</div>
+			</div>
+		</div>
+	</AppCard>
+
+	<AppCard class="p-4">
+		<div class="flex flex-col gap-3">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div>
 					<h2 class="font-semibold">Plan</h2>
@@ -184,11 +230,13 @@
 							<div class="flex flex-wrap items-center justify-between gap-2">
 								<div class="min-w-0">
 									<p class="truncate text-sm font-medium">{site.siteName}</p>
-									<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
-										{site.id}
-										{#if site.domain}
-											· {site.domain}{/if}
-									</p>
+								<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
+									{site.id}
+									{#if site.domain}
+										· {site.domain}{/if}
+									{#if site.lastChatAt}
+										· last chat {new Date(site.lastChatAt).toLocaleDateString()}{/if}
+								</p>
 								</div>
 								<div class="flex flex-wrap items-center gap-2">
 									<StatusPill tone={site.publishedVersion ? 'success' : 'neutral'}>
@@ -197,6 +245,18 @@
 									<StatusPill tone={sitePlanTone(site.plan)}>
 										{sitePlanLabel(site.plan)}
 									</StatusPill>
+									{#if site.chatCount > 0}
+										<StatusPill>{site.chatCount} chats</StatusPill>
+									{/if}
+									{#if site.lastGateDecision}
+										<StatusPill
+											tone={site.lastGateDecision === 'applied' || site.lastGateDecision === 'auto_applied'
+												? 'success'
+												: 'neutral'}
+										>
+											AI: {site.lastGateDecision}
+										</StatusPill>
+									{/if}
 									<a
 										href="/preview/{site.id}"
 										target="_blank"

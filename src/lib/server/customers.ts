@@ -1,7 +1,7 @@
 import { desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { db } from '$lib/server/db';
-import { adminActions, aiUsage, sites, users } from '$lib/server/db/schema';
+import { adminActions, aiGateLog, aiUsage, siteChatMessages, siteVersions, sites, users } from '$lib/server/db/schema';
 import {
 	siteSubscriptionState,
 	subscriptionState,
@@ -102,7 +102,22 @@ export type AdminActionRow = {
 export type CustomerDetail = CustomerSummary & {
 	/** True if a live Stripe subscription exists — overriding here won't cancel it. */
 	hasStripeCustomer: boolean;
-	sites: (SiteMeta & { siteName: string; domain: string | null; plan: SiteSubscriptionState })[];
+	fullName: string | null;
+	profession: string | null;
+	city: string | null;
+	locale: string | null;
+	betaProfileCompletedAt: Date | null;
+	lastSiteCreatedAt: Date | null;
+	lastPublishedAt: Date | null;
+	lastAiEditAt: Date | null;
+	sites: (SiteMeta & {
+		siteName: string;
+		domain: string | null;
+		plan: SiteSubscriptionState;
+		chatCount: number;
+		lastChatAt: Date | null;
+		lastGateDecision: string | null;
+	})[];
 	submissions: ReturnType<typeof listSubmissionsForOwner>;
 	actions: AdminActionRow[];
 	tickets: SupportTicket[];
@@ -111,16 +126,93 @@ export type CustomerDetail = CustomerSummary & {
 export function getCustomerDetail(userId: string): CustomerDetail | null {
 	const user = db.select().from(users).where(eq(users.id, userId)).get();
 	if (!user) return null;
-	const sitesList = listSitesByOwner(userId).map((site) => ({
-		...site,
-		plan: siteSubscriptionState(site.id, userId),
-		domain: getDomainForSite(site.id)
-	}));
+
+	// Login activity from existing data
+	const ownedSites = listSitesByOwner(userId);
+	const siteIds = ownedSites.map((s) => s.id);
+	const lastSiteCreatedAt =
+		ownedSites.length > 0
+			? ownedSites.reduce(
+					(latest, s) => (s.updatedAt > latest ? s.updatedAt : latest),
+					ownedSites[0].updatedAt
+				)
+			: null;
+	const lastPublishedAt =
+		siteIds.length > 0
+			? db
+					.select({ createdAt: siteVersions.createdAt })
+					.from(siteVersions)
+					.where(eq(siteVersions.siteId, siteIds[0]))
+					.orderBy(desc(siteVersions.version))
+					.limit(1)
+					.get()?.createdAt ?? null
+			: null;
+	// Get max version across all user sites
+	let maxPub: Date | null = null;
+	for (const sid of siteIds) {
+		const row = db
+			.select({ createdAt: siteVersions.createdAt })
+			.from(siteVersions)
+			.where(eq(siteVersions.siteId, sid))
+			.orderBy(desc(siteVersions.version))
+			.limit(1)
+			.get();
+		if (row && (!maxPub || row.createdAt > maxPub)) maxPub = row.createdAt;
+	}
+	const lastAiEditAt =
+		siteIds.length > 0
+			? db
+					.select({ createdAt: aiGateLog.createdAt })
+					.from(aiGateLog)
+					.where(eq(aiGateLog.siteId, siteIds[0]))
+					.orderBy(desc(aiGateLog.createdAt))
+					.limit(1)
+					.get()?.createdAt ?? null
+			: null;
+
+	const sitesList = ownedSites.map((site) => {
+		const chatCount = db
+			.select({ n: sql<number>`count(*)` })
+			.from(siteChatMessages)
+			.where(eq(siteChatMessages.siteId, site.id))
+			.get()?.n ?? 0;
+		const lastChat = db
+			.select({ createdAt: siteChatMessages.createdAt })
+			.from(siteChatMessages)
+			.where(eq(siteChatMessages.siteId, site.id))
+			.orderBy(desc(siteChatMessages.createdAt))
+			.limit(1)
+			.get()?.createdAt ?? null;
+		const lastGate = db
+			.select({ decision: aiGateLog.decision })
+			.from(aiGateLog)
+			.where(eq(aiGateLog.siteId, site.id))
+			.orderBy(desc(aiGateLog.createdAt))
+			.limit(1)
+			.get()?.decision ?? null;
+		return {
+			...site,
+			plan: siteSubscriptionState(site.id, userId),
+			domain: getDomainForSite(site.id),
+			chatCount,
+			lastChatAt: lastChat,
+			lastGateDecision: lastGate
+		};
+	});
+
 	return {
 		id: user.id,
 		email: user.email,
 		createdAt: user.createdAt,
 		hasStripeCustomer: Boolean(user.stripeCustomerId),
+		fullName: user.fullName ?? null,
+		profession: user.profession ?? null,
+		city: user.city ?? null,
+		locale: user.locale ?? null,
+		betaProfileCompletedAt: user.betaProfileCompletedAt ?? null,
+		lastSiteCreatedAt,
+		lastPublishedAt: maxPub,
+		lastAiEditAt,
 		subscription: subscriptionState(userId),
 		siteCount: sitesList.length,
 		proSiteCount: sitesList.filter((site) => site.plan.state !== 'free').length,

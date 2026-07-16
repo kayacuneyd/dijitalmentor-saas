@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { seedSites } from '$lib/seed';
-import { getSiteMeta, saveDraft } from '$lib/server/db/repo';
+import {
+	findSiteIdByPublicHandle,
+	getSiteMeta,
+	publishDraft,
+	saveDraft
+} from '$lib/server/db/repo';
 import { PUT } from './+server';
 
 const owner = { id: 'identity-owner', email: 'identity-owner@example.com', isAdmin: false };
@@ -48,5 +53,41 @@ describe('site identity API', () => {
 		} as never);
 
 		expect(response.status).toBe(403);
+	});
+
+	it('allows one published subdomain rename and keeps the old handle as an alias', async () => {
+		const site = structuredClone(seedSites.law);
+		site.id = 'site-identity-one-rename';
+		site.tenantId = 'tenant-identity-one-rename';
+		saveDraft(site, { ownerUserId: owner.id });
+		expect(
+			(await PUT({
+				params: { siteId: site.id },
+				request: jsonRequest({ siteName: 'Rename Test', publicHandle: 'before-rename' }),
+				locals: { user: owner }
+			} as never)).status
+		).toBe(200);
+		publishDraft(site.id);
+
+		const renamed = await PUT({
+			params: { siteId: site.id },
+			request: jsonRequest({ siteName: 'Rename Test', publicHandle: 'after-rename' }),
+			locals: { user: owner }
+		} as never);
+		expect(renamed.status).toBe(200);
+		expect(getSiteMeta(site.id)).toMatchObject({
+		publicHandle: 'after-rename',
+		previousPublicHandle: 'before-rename',
+		publicHandleChangeCount: 1
+		});
+		expect(findSiteIdByPublicHandle('before-rename')).toBe(site.id);
+
+		const secondRename = await PUT({
+			params: { siteId: site.id },
+			request: jsonRequest({ siteName: 'Rename Test', publicHandle: 'third-rename' }),
+			locals: { user: owner }
+		} as never);
+		expect(secondRename.status).toBe(400);
+		expect(await secondRename.json()).toMatchObject({ reason: 'published-handle-change' });
 	});
 });

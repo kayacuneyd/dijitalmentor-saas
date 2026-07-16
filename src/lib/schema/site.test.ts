@@ -35,6 +35,37 @@ describe('siteSchema — good fixtures', () => {
 		});
 		expect(sectionStyleSchema.safeParse({ backgroundColor: 'papayawhip' }).success).toBe(false);
 	});
+
+	it('accepts a profession collection with safe link and media fields', () => {
+		const result = sectionSchema.safeParse({
+			id: 'projects-1',
+			type: 'collection',
+			props: { kind: 'projects', variant: 'cards' },
+			content: {
+				tr: { title: 'Projeler', items: [{ title: 'Klinik web sitesi', href: '#contact' }] },
+				en: { title: 'Projects', items: [{ title: 'Clinic website', href: '#contact' }] },
+				de: { title: 'Projekte', items: [{ title: 'Website', href: '#contact' }] }
+			}
+		});
+		expect(result.success).toBe(true);
+	});
+
+	it.each(['downloads', 'media-appearances', 'case-studies', 'positions', 'academic-service'] as const)(
+		'accepts the P2 collection kind %s',
+		(kind) => {
+			const result = sectionSchema.safeParse({
+				id: `${kind}-1`,
+				type: 'collection',
+				props: { kind },
+				content: {
+					tr: { title: 'İçerikler', items: [{ title: 'Bir kayıt' }] },
+					en: { title: 'Content', items: [{ title: 'One item' }] },
+					de: { title: 'Inhalte', items: [{ title: 'Eintrag' }] }
+				}
+			});
+			expect(result.success).toBe(true);
+		}
+	);
 });
 
 describe('siteSchema — malformed AI output is rejected', () => {

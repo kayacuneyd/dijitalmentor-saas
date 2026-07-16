@@ -39,10 +39,9 @@
 				<span class="text-base-content/40 ml-1 text-xs font-normal">#{section.id}</span>
 			</summary>
 			<div class="collapse-content">
-				<SectionStyleControls
-					style={{ ...DEFAULT_SECTION_STYLE, ...section.style }}
-					{store}
-					onupdate={(key, value) =>
+					<SectionStyleControls
+						style={{ ...DEFAULT_SECTION_STYLE, ...section.style }}
+						onupdate={(key, value) =>
 						store.update(() => {
 							section.style = { ...DEFAULT_SECTION_STYLE, ...section.style, [key]: value } as SectionStyle;
 						})}

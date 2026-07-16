@@ -8,7 +8,7 @@ import { POST } from './+server';
 import { gateMessage } from '$lib/server/ai/gatekeeper';
 import { chatEdit } from '$lib/server/ai/patch';
 import { AIInvalidOutputError } from '$lib/server/ai/llm';
-import { getMonthlyUsage } from '$lib/server/ai/usage';
+import { getMonthlyUsage, recordUsage } from '$lib/server/ai/usage';
 import { clearSetting, setSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { aiGateLog } from '$lib/server/db/schema';
@@ -170,6 +170,9 @@ describe('two-layer chat endpoint', () => {
 	});
 
 	it('returns 429 once the plan edit credits are spent', async () => {
+		// This test must establish its own spent-credit state; it cannot depend on
+		// an earlier test in the file having consumed an edit.
+		recordUsage(tenantId(), gateUsage, 'edit');
 		setSetting('AI_EDITS_FREE', String(editCount()));
 		try {
 			const res = await call({

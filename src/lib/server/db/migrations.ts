@@ -906,6 +906,14 @@ export const migrations: Migration[] = [
 		up(client) {
 			ensureColumn(client, 'users', 'plan', "text NOT NULL DEFAULT 'free'");
 		}
+	},
+	{
+		version: 36,
+		name: 'one-time-published-subdomain-rename',
+		up(client) {
+			ensureColumn(client, 'sites', 'previous_public_handle', 'text');
+			ensureColumn(client, 'sites', 'public_handle_change_count', 'integer NOT NULL DEFAULT 0');
+		}
 	}
 ];
 

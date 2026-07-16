@@ -11,15 +11,49 @@ export {
 	type PsychKitSlug
 } from './psych';
 export { professionKits, type ControlledKit, type PromptRecipe } from './professions';
+export {
+	riskProfileForKit,
+	strategyForKit,
+	type KitConversionEvent,
+	type KitRiskProfile,
+	type KitStrategy
+} from './strategy';
 
 import { psychProfessionalKits } from './psych';
 import { professionKits, type ControlledKit } from './professions';
+import { riskProfileForKit, strategyForKit } from './strategy';
 
 const psychAsControlledKits: ControlledKit[] = psychProfessionalKits.map((kit) => ({
 	...kit,
 	profession: 'Psikolog / Terapist',
 	category: 'psychology' as const,
 	featureKits: ['booking-external', 'whatsapp-order'],
+	createSite: () => {
+		const site = kit.createSite();
+		const hero = site.pages[0]?.sections.find((section) => section.type === 'hero');
+		site.settings = {
+			...site.settings,
+			profession: 'Psikolog / Terapist',
+			riskProfile: riskProfileForKit('psychology'),
+			primaryOutcome: kit.outcome,
+			primaryCta:
+				hero?.type === 'hero'
+					? {
+							tr: hero.content.tr.ctaLabel ?? 'İletişime geç',
+							en: hero.content.en.ctaLabel ?? 'Get in touch',
+							de: hero.content.de.ctaLabel ?? 'Kontakt aufnehmen'
+						}
+					: undefined
+		};
+		return site;
+	},
+	strategy: strategyForKit({
+		outcome: kit.outcome,
+		category: 'psychology',
+		profession: 'Psikolog / Terapist',
+		featureKits: ['booking-external', 'whatsapp-order'],
+		createSite: kit.createSite
+	}),
 	promptRecipes: [
 		{
 			title: `${kit.label} taslağını kişiselleştir`,

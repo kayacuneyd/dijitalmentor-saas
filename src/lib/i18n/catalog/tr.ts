@@ -123,11 +123,18 @@ export const tr = {
 			credentials: 'Yetkinlikler',
 			team: 'Ekip',
 			footer: 'Footer'
+			,stats: 'İstatistikler'
+			,clients: 'Referans logoları'
+			,video: 'Video'
+			,collection: 'Koleksiyon'
 		},
 		settings: {
 			siteNameLabel: 'Site adı',
 			publicSubdomainLabel: 'Public subdomain',
 			publicSubdomainHelp: 'İlk yayından önce site id yerine okunabilir bir adres seç.',
+			publicSubdomainRenameNotice:
+				'Yayınlandıktan sonra bu adresi bir kez değiştirebilirsin. Eski adresin alias olarak çalışmaya devam eder.',
+			publicSubdomainRenameUsed: 'Yayın sonrası tek seferlik subdomain değişikliği kullanıldı.',
 			contactEmailLabel: 'İletişim e-postası',
 			saveIdentity: 'Yayın bilgilerini kaydet',
 			flushFailed: 'Önce son taslak kaydedilemedi. Bağlantıyı kontrol edip tekrar dene.',

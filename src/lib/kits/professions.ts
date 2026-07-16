@@ -1,6 +1,7 @@
 import type { Locale, Site } from '$lib/schema/site';
 import { seedSites } from '$lib/seed';
 import { coerceFeatureKits, type IntegrationType } from '$lib/kits/integrations';
+import { riskProfileForKit, strategyForKit, type KitStrategy } from '$lib/kits/strategy';
 
 export type PromptRecipe = {
 	title: string;
@@ -15,6 +16,7 @@ export type ControlledKit = {
 	category: 'psychology' | 'health' | 'local-service' | 'property';
 	audience: string;
 	outcome: string;
+	strategy: KitStrategy;
 	featureKits: IntegrationType[];
 	promptRecipes: PromptRecipe[];
 	createSite: () => Site;
@@ -220,6 +222,10 @@ function createProfessionSite(config: ProfessionKitConfig): Site {
 		...site.settings,
 		siteName: config.siteName,
 		contactEmail: config.contactEmail,
+		profession: config.profession,
+		riskProfile: riskProfileForKit(config.category, config.siteName),
+		primaryOutcome: config.outcome,
+		primaryCta: config.hero.ctaLabel,
 		seo: { description: config.seo },
 		poweredByBadge: true
 	};
@@ -920,5 +926,12 @@ const configs: ProfessionKitConfig[] = [
 		outcome: config.outcome,
 		featureKits: coerceFeatureKits(config.featureKits),
 		promptRecipes: config.promptRecipes,
-		createSite: () => createProfessionSite(config)
+		createSite: () => createProfessionSite(config),
+		strategy: strategyForKit({
+			outcome: config.outcome,
+			category: config.category,
+			profession: config.profession,
+			featureKits: coerceFeatureKits(config.featureKits),
+			createSite: () => createProfessionSite(config)
+		})
 	}));

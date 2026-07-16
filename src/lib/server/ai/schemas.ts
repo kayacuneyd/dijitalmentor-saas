@@ -56,7 +56,8 @@ export const genSectionSchema = z.discriminatedUnion('type', [
 	genSection('footer', sectionShapes.footer),
 	genSection('stats', sectionShapes.stats),
 	genSection('clients', sectionShapes.clients),
-	genSection('video', sectionShapes.video)
+	genSection('video', sectionShapes.video),
+	genSection('collection', sectionShapes.collection)
 ]);
 
 const patchSection = <
@@ -91,7 +92,8 @@ const patchSectionSchema = z.discriminatedUnion('type', [
 	patchSection('footer', sectionShapes.footer),
 	patchSection('stats', sectionShapes.stats),
 	patchSection('clients', sectionShapes.clients),
-	patchSection('video', sectionShapes.video)
+	patchSection('video', sectionShapes.video),
+	patchSection('collection', sectionShapes.collection)
 ]);
 
 const patchPageSchema = z.strictObject({
@@ -158,7 +160,8 @@ const translatableContentShapes = z.union([
 	sectionShapes.footer.content,
 	sectionShapes.stats.content,
 	sectionShapes.clients.content,
-	sectionShapes.video.content
+	sectionShapes.video.content,
+	sectionShapes.collection.content
 ]);
 
 export const translatablePayloadSchema = z.strictObject({

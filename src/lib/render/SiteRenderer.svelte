@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { env } from '$env/dynamic/public';
-	import { DEFAULT_LAYOUT, DEFAULT_SECTION_STYLE, type Locale, type Page, type Site } from '$lib/schema/site';
+	import { DEFAULT_LAYOUT, type Locale, type Page, type Site } from '$lib/schema/site';
 	import { blockFor } from '$lib/blocks/registry';
 	import { setRenderContext, type RenderContext } from './context';
+	import { normalizedSectionStyle, sectionStyleClasses } from './sectionStyle';
 	import { themeStyle } from './theme';
 	import SiteHeader from './SiteHeader.svelte';
 
@@ -61,30 +62,40 @@
 	} = $props();
 
 	setRenderContext({
-		get mode() { return mode; },
-		get contactState() { return contactState; },
-		get integrations() { return site.settings.integrations ?? []; }
+		get mode() {
+			return mode;
+		},
+		get contactState() {
+			return contactState;
+		},
+		get integrations() {
+			return site.settings.integrations ?? [];
+		}
 	});
 
 	const appHost = env.PUBLIC_APP_HOST || 'localhost:5173';
 
 	const layout = $derived(site.layout ?? DEFAULT_LAYOUT);
 	const containerClass = $derived(
-		layout.container.width === 'narrow' ? 'max-w-4xl' :
-		layout.container.width === 'full' ? 'max-w-none' :
-		'max-w-6xl'
+		layout.container.width === 'narrow'
+			? 'max-w-4xl'
+			: layout.container.width === 'full'
+				? 'max-w-none'
+				: 'max-w-6xl'
 	);
 	const spacingClass = $derived(
-		layout.sectionSpacing === 'tight' ? 'space-y-6' :
-		layout.sectionSpacing === 'loose' ? 'space-y-20' :
-		'space-y-12'
+		layout.sectionSpacing === 'tight'
+			? 'space-y-6'
+			: layout.sectionSpacing === 'loose'
+				? 'space-y-20'
+				: 'space-y-12'
 	);
 
 	const integrations = $derived(site.settings.integrations ?? []);
 	const isMobileHidden = (section: Page['sections'][number]) =>
-		!!((section.props as Record<string, unknown>).hideOnMobile);
+		!!(section.props as Record<string, unknown>).hideOnMobile;
 	const sectionStyle = (section: Page['sections'][number]) => {
-		const style = { ...DEFAULT_SECTION_STYLE, ...section.style };
+		const style = normalizedSectionStyle(section.style);
 		return [
 			`--sk-section-layout:${style.layout}`,
 			style.backgroundColor ? `--sk-section-bg:${style.backgroundColor}` : '',
@@ -92,11 +103,15 @@
 			`--sk-section-my:${style.marginY}`,
 			`--sk-section-min-height:${style.minHeight}`,
 			`--sk-section-content:${style.contentWidth}`
-		].filter(Boolean).join(';');
+		]
+			.filter(Boolean)
+			.join(';');
 	};
 
 	// Cookie consent — only relevant in public mode with analytics or consent setting
-	const hasAnalytics = $derived(!!(site.settings.analytics?.ga4Id || site.settings.analytics?.metaPixelId));
+	const hasAnalytics = $derived(
+		!!(site.settings.analytics?.ga4Id || site.settings.analytics?.metaPixelId)
+	);
 	const needsConsent = $derived(mode === 'public' && (hasAnalytics || site.settings.cookieConsent));
 	let consentGiven = $state(false);
 
@@ -150,7 +165,7 @@
 		{#each page.sections as section, i (`${section.id}-${i}`)}
 			{@const Block = blockFor(section)}
 			<div
-				class="section-frame"
+				class="section-frame {sectionStyleClasses(section.style)}"
 				class:bg-custom={Boolean(section.style?.backgroundColor)}
 				style={sectionStyle(section)}
 				class:hidden-mobile={isMobileHidden(section)}
@@ -175,11 +190,24 @@
 	{/if}
 
 	{#if needsConsent && !consentGiven}
-		<div class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-lg rounded-xl border border-base-300 bg-base-100 p-4 shadow-2xl sm:left-auto">
-			<p class="mb-3 text-sm">Bu site, deneyiminizi iyileştirmek için çerez kullanır. Siteyi kullanmaya devam ederek çerez kullanımını kabul etmiş olursunuz.</p>
+		<div
+			class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-lg rounded-xl border border-base-300 bg-base-100 p-4 shadow-2xl sm:left-auto"
+		>
+			<p class="mb-3 text-sm">
+				Bu site, deneyiminizi iyileştirmek için çerez kullanır. Siteyi kullanmaya devam ederek çerez
+				kullanımını kabul etmiş olursunuz.
+			</p>
 			<div class="flex gap-2">
-				<button onclick={acceptCookies} class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content hover:opacity-90">Kabul Et</button>
-				<button onclick={acceptCookies} class="rounded-lg border border-base-300 px-4 py-2 text-sm hover:bg-base-200">Sadece Gerekli</button>
+				<button
+					onclick={acceptCookies}
+					class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-content hover:opacity-90"
+					>Kabul Et</button
+				>
+				<button
+					onclick={acceptCookies}
+					class="rounded-lg border border-base-300 px-4 py-2 text-sm hover:bg-base-200"
+					>Sadece Gerekli</button
+				>
 			</div>
 		</div>
 	{/if}
@@ -212,19 +240,46 @@
 	.section-frame :global(section) > :global(.mx-auto) {
 		max-width: var(--sk-section-content, none);
 	}
-	.section-frame[style*='--sk-section-py:compact'] :global(section) { --sk-section-py: 3rem; }
-	.section-frame[style*='--sk-section-py:spacious'] :global(section) { --sk-section-py: 7rem; }
-	.section-frame[style*='--sk-section-my:none'] :global(section) { --sk-section-my: 0; }
-	.section-frame[style*='--sk-section-my:compact'] :global(section) { --sk-section-my: 1rem; }
-	.section-frame[style*='--sk-section-my:standard'] :global(section) { --sk-section-my: 3rem; }
-	.section-frame[style*='--sk-section-my:spacious'] :global(section) { --sk-section-my: 6rem; }
-	.section-frame[style*='--sk-section-min-height:compact'] :global(section) { --sk-section-min-height: 18rem; }
-	.section-frame[style*='--sk-section-min-height:standard'] :global(section) { --sk-section-min-height: 28rem; }
-	.section-frame[style*='--sk-section-min-height:tall'] :global(section) { --sk-section-min-height: 42rem; }
-	.section-frame[style*='--sk-section-content:narrow'] :global(section) > :global(.mx-auto) { max-width: 48rem; }
-	.section-frame[style*='--sk-section-content:wide'] :global(section) > :global(.mx-auto) { max-width: 72rem; }
-	.section-frame[style*='--sk-section-content:full'] :global(section) > :global(.mx-auto) { max-width: none; }
-	.section-frame[style*='--sk-section-layout:boxed'] :global(section) { margin-inline: 1rem; border-radius: var(--radius-box); }
+	.section-frame.section-padding-compact :global(section) {
+		--sk-section-py: 3rem;
+	}
+	.section-frame.section-padding-spacious :global(section) {
+		--sk-section-py: 7rem;
+	}
+	.section-frame.section-margin-none :global(section) {
+		--sk-section-my: 0;
+	}
+	.section-frame.section-margin-compact :global(section) {
+		--sk-section-my: 1rem;
+	}
+	.section-frame.section-margin-standard :global(section) {
+		--sk-section-my: 3rem;
+	}
+	.section-frame.section-margin-spacious :global(section) {
+		--sk-section-my: 6rem;
+	}
+	.section-frame.section-height-compact :global(section) {
+		--sk-section-min-height: 18rem;
+	}
+	.section-frame.section-height-standard :global(section) {
+		--sk-section-min-height: 28rem;
+	}
+	.section-frame.section-height-tall :global(section) {
+		--sk-section-min-height: 42rem;
+	}
+	.section-frame.section-content-narrow :global(section) > :global(.mx-auto) {
+		max-width: 48rem;
+	}
+	.section-frame.section-content-wide :global(section) > :global(.mx-auto) {
+		max-width: 72rem;
+	}
+	.section-frame.section-content-full :global(section) > :global(.mx-auto) {
+		max-width: none;
+	}
+	.section-frame.section-layout-boxed :global(section) {
+		margin-inline: 1rem;
+		border-radius: var(--radius-box);
+	}
 	.hidden-mobile {
 		@media (max-width: 767px) {
 			display: none !important;

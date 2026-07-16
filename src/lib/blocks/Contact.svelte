@@ -10,10 +10,16 @@
 
 	const social = $derived(getSiteIntegration(integrations ?? [], 'social-link'));
 	const video = $derived(getSiteIntegration(integrations ?? [], 'video-consult'));
+	const review = $derived(getSiteIntegration(integrations ?? [], 'review-platform'));
+	const academic = $derived(getSiteIntegration(integrations ?? [], 'academic-profile'));
+	const portfolio = $derived(getSiteIntegration(integrations ?? [], 'portfolio-gallery'));
 	const extraLinks = $derived(
 		[
 			social ? { href: social.url!, label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link'] } : null,
-			video ? { href: video.url!, label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult'] } : null
+			video ? { href: video.url!, label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult'] } : null,
+			review ? { href: review.url!, label: review.label?.tr ?? INTEGRATION_DEFAULT_LABELS['review-platform'] } : null,
+			academic ? { href: academic.url!, label: academic.label?.tr ?? INTEGRATION_DEFAULT_LABELS['academic-profile'] } : null,
+			portfolio ? { href: portfolio.url!, label: portfolio.label?.tr ?? INTEGRATION_DEFAULT_LABELS['portfolio-gallery'] } : null
 		].filter(Boolean) as { href: string; label: string }[]
 	);
 

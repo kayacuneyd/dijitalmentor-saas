@@ -40,6 +40,28 @@ export type SiteVisitSummary = {
 	bySite: { siteId: string; visits: number }[];
 };
 
+/** Privacy-safe aggregate for one tenant, used by owner-facing export/reporting. */
+export function siteVisitSummaryForSite(siteId: string, days = 30, now = new Date()) {
+	const since = new Date(now.getTime() - Math.max(1, days) * 24 * 60 * 60 * 1000);
+	const rows = db
+		.select()
+		.from(siteVisitStats)
+		.where(and(eq(siteVisitStats.siteId, siteId), gte(siteVisitStats.day, utcDay(since))))
+		.all();
+	return {
+		days,
+		total: rows.reduce((sum, row) => sum + row.visits, 0),
+		// Materialize before sorting so the export is stable across runtimes.
+		byDay: [
+			...rows
+				.reduce((map, row) => map.set(row.day, (map.get(row.day) ?? 0) + row.visits), new Map<string, number>())
+				.entries()
+		]
+			.sort(([a], [b]) => a.localeCompare(b))
+			.map(([day, visits]) => ({ day, visits }))
+	};
+}
+
 /** Admin-only aggregate for the last `days` UTC days, zero-identifying by design. */
 export function siteVisitSummary(days = 30, now = new Date()): SiteVisitSummary {
 	const since = new Date(now.getTime() - Math.max(1, days) * 24 * 60 * 60 * 1000);

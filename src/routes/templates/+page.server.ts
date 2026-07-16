@@ -21,7 +21,8 @@ const sectionLabels: Record<SectionType, string> = {
 	footer: 'Footer',
 	stats: 'İstatistikler',
 	clients: 'Referans Logolar',
-	video: 'Video'
+	video: 'Video',
+	collection: 'Koleksiyon'
 };
 const templateImages = new Set([
 	'calm-intake',

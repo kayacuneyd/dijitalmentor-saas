@@ -4,7 +4,10 @@ export const INTEGRATION_TYPES = [
 	'payment-link',
 	'social-link',
 	'video-consult',
-	'menu-digital'
+	'menu-digital',
+	'review-platform',
+	'academic-profile',
+	'portfolio-gallery'
 ] as const;
 export type IntegrationType = (typeof INTEGRATION_TYPES)[number];
 
@@ -22,7 +25,10 @@ export const INTEGRATION_DOMAIN_ALLOWLIST: Record<IntegrationType, string[]> = {
 	],
 	'social-link': ['instagram.com', 'tiktok.com', '@tiktok', 'youtube.com', 'linkedin.com', 'twitter.com', 'x.com'],
 	'video-consult': ['zoom.us', 'meet.google.com', 'teams.microsoft.com', 'whereby.com'],
-	'menu-digital': [] // open-ended — restaurants may host menus anywhere
+	'menu-digital': [], // open-ended — restaurants may host menus anywhere
+	'review-platform': ['trustpilot.com', 'provenexpert.com', 'doctoralia.com'],
+	'academic-profile': ['orcid.org', 'scholar.google.com', 'researchgate.net'],
+	'portfolio-gallery': ['behance.net', 'dribbble.com', 'artstation.com', 'github.com', 'gitlab.com', '500px.com']
 };
 
 /** Default display label per integration type (tr). Renderer uses locale key. */
@@ -32,7 +38,10 @@ export const INTEGRATION_DEFAULT_LABELS: Record<IntegrationType, string> = {
 	'payment-link': 'Ödeme Yap',
 	'social-link': 'Takip Et',
 	'video-consult': 'Görüntülü Görüşme',
-	'menu-digital': 'Menü'
+	'menu-digital': 'Menü',
+	'review-platform': 'Bewertungen',
+	'academic-profile': 'Akademik profil',
+	'portfolio-gallery': 'Portföy'
 };
 
 /**

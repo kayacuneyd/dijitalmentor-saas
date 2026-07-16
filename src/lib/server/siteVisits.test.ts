@@ -1,30 +1,19 @@
-import Database from 'better-sqlite3';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { db } from '$lib/server/db';
+import { siteVisitStats } from '$lib/server/db/schema';
+import { recordSiteVisit, siteVisitSummaryForSite } from './siteVisits';
 
-const { fakeDb } = vi.hoisted(() => ({ fakeDb: {} as Record<string, unknown> }));
-
-vi.mock('$lib/server/db', () => ({ db: fakeDb }));
-vi.mock('$lib/server/db/schema', () => ({
-	siteVisitStats: {
-		siteId: 'site_id',
-		day: 'day',
-		locale: 'locale',
-		pageSlug: 'page_slug',
-		visits: 'visits'
-	}
-}));
-
-describe('site visits', () => {
+describe('siteVisitSummaryForSite', () => {
 	beforeEach(() => {
-		for (const key of Object.keys(fakeDb)) delete fakeDb[key];
+		db.delete(siteVisitStats).run();
 	});
 
-	it('migration creates the privacy-safe aggregate table', async () => {
-		const { migrations, runMigrations } = await import('./db/migrations');
-		const client = new Database(':memory:');
-		runMigrations(client);
-		const visitMigration = migrations.find((migration) => migration.name === 'site-visit-stats');
-		expect(visitMigration?.version).toBe(30);
-		expect(client.prepare('PRAGMA table_info(site_visit_stats)').all()).toHaveLength(5);
+	it('returns only anonymous aggregates for the requested site', () => {
+		const now = new Date('2026-07-16T12:00:00.000Z');
+		recordSiteVisit({ siteId: 'site-a', locale: 'tr', pageSlug: 'home', date: now });
+		recordSiteVisit({ siteId: 'site-a', locale: 'en', pageSlug: 'home', date: now });
+		recordSiteVisit({ siteId: 'site-b', locale: 'tr', pageSlug: 'home', date: now });
+
+		expect(siteVisitSummaryForSite('site-a', 30, now)).toMatchObject({ total: 2, days: 30 });
 	});
 });

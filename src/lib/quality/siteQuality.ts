@@ -445,6 +445,36 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 		}
 	}
 
+	// Kit-level professional risk policy. The profile is optional so legacy and
+	// free-form generated sites retain their existing behavior; profession kits
+	// opt in through settings and get an explicit owner-review reminder.
+	const riskProfile = site.settings.riskProfile;
+	const joinedCopy = allCopy.join(' ');
+	if (
+		riskProfile === 'health' &&
+		!/(gizlilik|etik|mahremiyet|confidential|privacy|medical advice|not medical advice)/i.test(joinedCopy)
+	) {
+		addIssue(
+			issues,
+			'warning',
+			'health_disclaimer_missing',
+			'pages',
+			'Health-profession sites should explain privacy, ethics, or the limits of online information.'
+		);
+	}
+	if (
+		riskProfile === 'legal' &&
+		!/(hukuki danışmanlık yerine geçmez|hukuki bilgi|legal advice|not legal advice|rechtliche beratung)/i.test(joinedCopy)
+	) {
+		addIssue(
+			issues,
+			'warning',
+			'legal_disclaimer_missing',
+			'pages',
+			'Legal-profession sites should clarify that public information is not a substitute for legal advice.'
+		);
+	}
+
 	// --- Integration quality warnings ---
 	const integrations = site.settings.integrations ?? [];
 	const sectionTypes = new Set(site.pages.flatMap((p) => p.sections.map((s) => s.type)));

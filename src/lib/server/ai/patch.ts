@@ -32,8 +32,9 @@ Rules:
 - set_layout controls nav style (inline / hamburger / drawer), sticky header, container width, and section spacing.
 - set_page_meta edits per-page SEO title and description.
 - hideOnMobile in section props hides a section on mobile viewports.
-- Available section types (17): hero, about, services, gallery, contact, cta, faq, testimonials, pricing, process, booking, credentials, team, footer, stats, clients, video.
+- Available section types (18): hero, about, services, gallery, contact, cta, faq, testimonials, pricing, process, booking, credentials, team, footer, stats, clients, video, collection.
 - stats = counters / achievements ("500+ clients"). clients = logo strip. video = YouTube/Vimeo embed.
+- collection = fixed cards/list for concrete projects, publications, courses, resources, downloads, media appearances, case studies, positions or academic service.
 - Keep ids, slugs and URLs stable unless the change requires new ones.
 - If a request is outside the fixed block set or otherwise impossible, say so in the reply and emit no operations.
 - Do not say a change was completed unless the operations actually implement it.

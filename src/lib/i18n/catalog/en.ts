@@ -125,12 +125,19 @@ export const en = {
 			credentials: 'Credentials',
 			team: 'Team',
 			footer: 'Footer'
+			,stats: 'Stats'
+			,clients: 'Client logos'
+			,video: 'Video'
+			,collection: 'Collection'
 		},
 		settings: {
 			siteNameLabel: 'Site name',
 			publicSubdomainLabel: 'Public subdomain',
 			publicSubdomainHelp:
 				'Choose a readable address instead of the site id before your first publish.',
+			publicSubdomainRenameNotice:
+				'After publishing, you can change this address once. Your previous address remains as an alias.',
+			publicSubdomainRenameUsed: 'The one-time published subdomain rename has already been used.',
 			contactEmailLabel: 'Contact email',
 			saveIdentity: 'Save publish info',
 			flushFailed: 'Could not save the latest draft first. Check your connection and try again.',

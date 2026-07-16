@@ -15,6 +15,10 @@ export const sites = sqliteTable('sites', {
 	draft: text('draft', { mode: 'json' }).notNull(),
 	// Customer-facing saaskaya subdomain handle. Internal `id` remains immutable.
 	publicHandle: text('public_handle'),
+	// A published site may rename its subdomain once. Keep the former handle as
+	// an alias so an already-shared URL does not become a dead link.
+	previousPublicHandle: text('previous_public_handle'),
+	publicHandleChangeCount: integer('public_handle_change_count').notNull().default(0),
 	// NULL = ownerless demo site (the seeds); set on generation once auth exists (M4).
 	ownerUserId: text('owner_user_id'),
 	// Points at the site_versions row currently served publicly; NULL = not published.

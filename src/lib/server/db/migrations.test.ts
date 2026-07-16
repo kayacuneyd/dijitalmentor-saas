@@ -105,6 +105,14 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 			)
 			.get();
 		expect(mediaIdx).toBeTruthy();
+		expect(
+			client.prepare(`SELECT 1 FROM pragma_table_info('sites') WHERE name='previous_public_handle'`).get()
+		).toBeTruthy();
+		expect(
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('sites') WHERE name='public_handle_change_count'`)
+				.get()
+		).toBeTruthy();
 		// v7: provider-independent estimated spend accounting
 		expect(
 			client

@@ -34,8 +34,9 @@ export default defineConfig({
 				test: {
 				name: 'server',
 				environment: 'node',
-				testTimeout: 15_000,
-				include: ['src/**/*.{test,spec}.{js,ts}'],
+					testTimeout: 15_000,
+					setupFiles: ['./src/test/setup.ts'],
+					include: ['src/**/*.{test,spec}.{js,ts}'],
 					exclude: ['src/**/*.svelte.{test,spec}.{js,ts}']
 				}
 			}

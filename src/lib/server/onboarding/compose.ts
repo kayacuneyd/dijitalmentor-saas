@@ -9,6 +9,7 @@ import {
 import { visualDirectionById } from '$lib/onboarding/directions';
 import { kitBySlug } from '$lib/kits';
 import { UNSUPPORTED_NICHE } from '$lib/onboarding/support';
+import { serviceStrategyForAnswers } from '$lib/onboarding/strategy';
 
 /**
  * Composes the collected onboarding answers into a single flowing description
@@ -54,6 +55,7 @@ export function composeDescription(
 	const hasMedia = answers.media === 'has_media';
 	const anythingElse = asString(answers.anythingElse);
 	const languages = asStringArray(answers.languages);
+	const serviceStrategy = serviceStrategyForAnswers(answers);
 
 	const sentences: string[] = [];
 
@@ -64,6 +66,9 @@ export function composeDescription(
 	);
 	if (audience) sentences.push(`Hedef kitlesi: ${audience}.`);
 	if (differentiator) sentences.push(`Fark yaratan yönü: ${differentiator}.`);
+	sentences.push(
+		`Birincil hedef: ${serviceStrategy.primaryOutcome}. Ana çağrı: ${serviceStrategy.primaryCta}. Güven kanıtları: ${serviceStrategy.trustEvidence.join(', ')}.`
+	);
 	if (services.length) sentences.push(`Sunduğu başlıca hizmetler: ${services.join(', ')}.`);
 	if (credentials) sentences.push(`Unvan/sertifika/üyelikler: ${credentials}.`);
 	if (tone) sentences.push(`Sitenin tonu ${tone.toLowerCase()} olmalı.`);

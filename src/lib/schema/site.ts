@@ -314,6 +314,35 @@ export const sectionShapes = {
 			title: nonEmpty,
 			caption: z.string().optional()
 		})
+	},
+	collection: {
+		props: z.strictObject({
+			variant: z.enum(['cards', 'list']).default('cards'),
+			kind: z.enum([
+				'projects',
+				'resources',
+				'publications',
+				'courses',
+				'media-appearances',
+				'downloads',
+				'case-studies',
+				'positions',
+				'academic-service'
+			]).default('resources'),
+			hideOnMobile
+		}),
+		content: z.strictObject({
+			title: nonEmpty,
+			intro: z.string().optional(),
+			items: z.array(z.strictObject({
+				title: nonEmpty,
+				description: z.string().optional(),
+				href: href.optional(),
+				meta: z.string().optional(),
+				imageUrl: imageRef.optional(),
+				imageAlt: z.string().optional()
+			})).min(1).max(12)
+		})
 	}
 } as const;
 
@@ -348,7 +377,8 @@ export const SECTION_TYPES = [
 	'footer',
 	'stats',
 	'clients',
-	'video'
+	'video',
+	'collection'
 ] as const;
 export type SectionType = (typeof SECTION_TYPES)[number];
 
@@ -369,7 +399,8 @@ export const sectionSchema = z.discriminatedUnion('type', [
 	localizedSection('footer', sectionShapes.footer),
 	localizedSection('stats', sectionShapes.stats),
 	localizedSection('clients', sectionShapes.clients),
-	localizedSection('video', sectionShapes.video)
+	localizedSection('video', sectionShapes.video),
+	localizedSection('collection', sectionShapes.collection)
 ]);
 export type Section = z.infer<typeof sectionSchema>;
 export type SectionProps<T extends SectionType> = Extract<Section, { type: T }>['props'];
@@ -446,6 +477,10 @@ const integrationEntrySchema = z
 
 export const siteSettingsSchema = z.strictObject({
 	siteName: nonEmpty,
+	profession: z.string().trim().min(1).max(80).optional(),
+	riskProfile: z.enum(['general', 'health', 'legal', 'property']).optional(),
+	primaryOutcome: z.string().trim().min(1).max(240).optional(),
+	primaryCta: localized(nonEmpty).optional(),
 	contactEmail: z.email().optional(),
 	poweredByBadge: z.boolean().default(true),
 	seo: z.strictObject({

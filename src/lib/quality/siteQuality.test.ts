@@ -69,6 +69,18 @@ describe('siteQualityCheck', () => {
 		expect(report.blockers.map((issue) => issue.code)).toContain('contact_path_missing');
 	});
 
+	it('adds kit-specific owner-review warnings for health and legal profiles', () => {
+		const health = structuredClone(seedSites.law);
+		health.settings.riskProfile = 'health';
+		const healthReport = siteQualityCheck(health);
+		expect(healthReport.warnings.map((issue) => issue.code)).toContain('health_disclaimer_missing');
+
+		const legal = structuredClone(seedSites.law);
+		legal.settings.riskProfile = 'legal';
+		const legalReport = siteQualityCheck(legal);
+		expect(legalReport.warnings.map((issue) => issue.code)).toContain('legal_disclaimer_missing');
+	});
+
 	it('warns on absolute professional outcome claims without blocking publish', () => {
 		const site = clone(seedSites.psych);
 		const hero = site.pages[0].sections.find((section) => section.type === 'hero');

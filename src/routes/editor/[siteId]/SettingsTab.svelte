@@ -13,10 +13,12 @@
 	let {
 		store,
 		publicHandle = store.site.id,
+		publicHandleChangeCount = 0,
 		onIdentitySaved
 	}: {
 		store: DraftStore;
 		publicHandle?: string;
+		publicHandleChangeCount?: number;
 		onIdentitySaved?: (publicHandle: string) => void;
 	} = $props();
 
@@ -173,6 +175,11 @@
 		<p class="mt-1 text-xs text-[var(--sk-faint)]">
 			{t('editor.settings.publicSubdomainHelp')}
 		</p>
+		{#if publicHandleChangeCount === 0}
+			<p class="mt-1 text-xs text-amber-700">{t('editor.settings.publicSubdomainRenameNotice')}</p>
+		{:else}
+			<p class="mt-1 text-xs text-[var(--sk-faint)]">{t('editor.settings.publicSubdomainRenameUsed')}</p>
+		{/if}
 	</label>
 
 	<label class="form-control">

@@ -8,8 +8,8 @@ import {
 } from './integrations';
 
 describe('INTEGRATION_TYPES', () => {
-	it('has exactly 6 types', () => {
-		expect(INTEGRATION_TYPES).toHaveLength(6);
+	it('has exactly 9 controlled link types', () => {
+		expect(INTEGRATION_TYPES).toHaveLength(9);
 	});
 
 	it('every type has a domain allowlist entry', () => {
@@ -153,6 +153,29 @@ describe('validateIntegrationTarget', () => {
 			c
 		);
 		expect(c.issues).toHaveLength(0);
+	});
+
+	it('accepts owner-entered ORCID and portfolio links', () => {
+		for (const entry of [
+			{ type: 'academic-profile' as const, url: 'https://orcid.org/0000-0002-1825-0097' },
+			{ type: 'portfolio-gallery' as const, url: 'https://behance.net/example' },
+			{ type: 'review-platform' as const, url: 'https://trustpilot.com/review/example.com' }
+		]) {
+			const c = ctx();
+			validateIntegrationTarget({ ...entry, enabled: true }, c);
+			expect(c.issues).toHaveLength(0);
+		}
+	});
+
+	it('rejects an unapproved academic or portfolio host', () => {
+		for (const entry of [
+			{ type: 'academic-profile' as const, url: 'https://evil.com/profile' },
+			{ type: 'portfolio-gallery' as const, url: 'https://evil.com/work' }
+		]) {
+			const c = ctx();
+			validateIntegrationTarget({ ...entry, enabled: true }, c);
+			expect(c.issues.some((issue) => issue.path.includes('url'))).toBe(true);
+		}
 	});
 
 	it('rejects invalid URL format', () => {

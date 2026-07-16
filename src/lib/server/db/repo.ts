@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, ne, or, sql } from 'drizzle-orm';
 import { db } from './index';
 import { customDomains, sites, siteVersions } from './schema';
 import { seedSites } from '$lib/seed';
@@ -19,6 +19,8 @@ export type SiteMeta = {
 	id: string;
 	tenantId: string;
 	publicHandle: string | null;
+	previousPublicHandle: string | null;
+	publicHandleChangeCount: number;
 	ownerUserId: string | null;
 	publishedVersion: number | null;
 	updatedAt: Date;
@@ -35,8 +37,8 @@ export function getDraft(siteId: string): Site | null {
 export function getSiteMeta(siteId: string): SiteMeta | null {
 	const row = db.select().from(sites).where(eq(sites.id, siteId)).get();
 	if (!row) return null;
-	const { id, tenantId, publicHandle, ownerUserId, publishedVersion, updatedAt } = row;
-	return { id, tenantId, publicHandle, ownerUserId, publishedVersion, updatedAt };
+	const { id, tenantId, publicHandle, previousPublicHandle, publicHandleChangeCount, ownerUserId, publishedVersion, updatedAt } = row;
+	return { id, tenantId, publicHandle, previousPublicHandle, publicHandleChangeCount, ownerUserId, publishedVersion, updatedAt };
 }
 
 export function saveDraft(site: Site, opts?: { ownerUserId?: string }): Site {
@@ -82,6 +84,8 @@ export function listSitesByOwner(ownerUserId: string): (SiteMeta & {
 		id: row.id,
 		tenantId: row.tenantId,
 		publicHandle: row.publicHandle,
+		previousPublicHandle: row.previousPublicHandle,
+		publicHandleChangeCount: row.publicHandleChangeCount,
 		ownerUserId: row.ownerUserId,
 		publishedVersion: row.publishedVersion,
 		updatedAt: row.updatedAt,
@@ -97,7 +101,7 @@ export function findSiteIdByPublicHandle(handle: string): string | null {
 	const row = db
 		.select({ id: sites.id })
 		.from(sites)
-		.where(eq(sites.publicHandle, normalized))
+		.where(or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized)))
 		.get();
 	return row?.id ?? null;
 }
@@ -109,8 +113,11 @@ export function isPublicHandleAvailable(handle: string, exceptSiteId?: string): 
 		.from(sites)
 		.where(
 			exceptSiteId
-				? and(eq(sites.publicHandle, normalized), ne(sites.id, exceptSiteId))
-				: eq(sites.publicHandle, normalized)
+				? and(
+					or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized)),
+					ne(sites.id, exceptSiteId)
+				)
+				: or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized))
 		)
 		.get();
 	return !row;
@@ -141,12 +148,13 @@ export function setSiteIdentity(input: {
 			message: 'Bu subdomain başka bir site tarafından kullanılıyor.'
 		};
 	}
-	if (row.publishedVersion && row.publicHandle && row.publicHandle !== handle.handle) {
+	const isPublishedRename =
+		Boolean(row.publishedVersion) && Boolean(row.publicHandle) && row.publicHandle !== handle.handle;
+	if (isPublishedRename && row.publicHandleChangeCount >= 1) {
 		return {
 			ok: false,
 			reason: 'published-handle-change',
-			message:
-				'Yayındaki sitenin subdomaini bu sürümde değiştirilemez. Önce yayından kaldırıp tekrar yayınla.'
+			message: 'Yayınlanmış sitenin subdomaini yalnızca bir kez değiştirilebilir.'
 		};
 	}
 	const draft = siteSchema.parse(row.draft);
@@ -159,7 +167,17 @@ export function setSiteIdentity(input: {
 		}
 	});
 	db.update(sites)
-		.set({ draft: next, publicHandle: handle.handle, updatedAt: new Date() })
+		.set({
+			draft: next,
+			publicHandle: handle.handle,
+			...(isPublishedRename
+				? {
+					previousPublicHandle: row.publicHandle,
+					publicHandleChangeCount: row.publicHandleChangeCount + 1
+				}
+				: {}),
+			updatedAt: new Date()
+		})
 		.where(eq(sites.id, input.siteId))
 		.run();
 	return { ok: true, site: next, publicHandle: handle.handle };

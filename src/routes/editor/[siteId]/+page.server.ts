@@ -30,6 +30,7 @@ export const load: PageServerLoad = ({ params, locals, url }) => {
 		site,
 		publishedVersion: meta?.publishedVersion ?? null,
 		publicHandle: meta?.publicHandle ?? site.id,
+		publicHandleChangeCount: meta?.publicHandleChangeCount ?? 0,
 		fromOnboarding: Boolean(onboardingPendingId),
 		appOrigin: `${url.protocol}//`,
 		appHost: url.host,

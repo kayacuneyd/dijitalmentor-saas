@@ -512,6 +512,7 @@
 							<SettingsTab
 								{store}
 								{publicHandle}
+								publicHandleChangeCount={data.publicHandleChangeCount}
 								onIdentitySaved={(handle) => {
 									publicHandle = handle;
 									publishNotice = null;

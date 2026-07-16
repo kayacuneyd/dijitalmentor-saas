@@ -3,6 +3,46 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-16 — Section style değişikliklerinin preview/publish akışı
+
+Editördeki section layout, content width, padding, margin, min-height ve background kontrolleri
+sağlamlaştırıldı. `SectionStyleControls` artık normalized prop görünümünü doğrudan mutate etmiyor;
+section draft mutasyonu yalnızca parent callback üzerinden gerçekleşiyor. Böylece Zod `Site` draft,
+preview postMessage ve autosave zinciri tek sahiplik akışında kalıyor.
+
+Renderer’daki serialized `style` attribute substring selector’ları deterministic section class’larıyla
+değiştirildi. `normalizedSectionStyle` ve `sectionStyleClasses` yardımcıları varsayılanları tek noktada
+uyguluyor; yeni renderer contract testleri tüm görsel style kontrol sınıflarını doğruluyor.
+
+Karar: Public tenant bilinçli olarak yalnızca published snapshot sunuyor. Editör değişiklikleri draft ve
+live preview’de görünür; public domain’e çıkması için Publish/Republish gerekir. Otomatik publish güvenlik
+ve kullanıcı onayı nedeniyle eklenmedi.
+
+Doğrulama:
+- `npx vitest --run src/lib/render/sectionStyle.test.ts` — 2 başarılı test
+- `npm run check` — başarılı
+- `npm run build` — başarılı
+- `npm test` — 81 dosya / 600 test geçti, 11 mevcut izolasyon hatası; hatalar section style değişikliğiyle
+  ilgili değil (global SQLite state temizliği, seed/publish version kalıntıları ve provider test uyarıları).
+
+## 2026-07-16 — Test SQLite izolasyonu
+
+Tam suite’teki state leak’ler giderildi. Önceki test komutu `.env` içindeki `local.db` değerini
+yükleyerek geliştirme veritabanını kullanıyor ve `:memory:` prefix’i SvelteKit dynamic env katmanında
+etkili olmuyordu. `.env.test` ile Vitest artık yalnızca process-local `:memory:` DB kullanıyor;
+development `local.db` test koşularından ayrıldı.
+
+`src/test/setup.ts`, migration metadata’sı hariç tüm SQLite tablolarını her test öncesi temizliyor ve
+gelecekteki migration tablolarını sqlite_master üzerinden otomatik kapsıyor. Credit quota testi de
+önceki test sırasına bağımlı olmaması için kendi harcanmış credit state’ini kuruyor.
+
+Doğrulama:
+- Hedef izolasyon testleri — 11/11 başarılı
+- `npm test -- --reporter=dot` — 89 dosya başarılı, 611 test başarılı, 11 skip
+- Suite ikinci kez tekrarlandı — yine 89 dosya / 611 test başarılı / 11 skip
+- `npm run check` — başarılı
+- Test stderr’ler kontrollü provider fallback ve email/R2 yapılandırma uyarılarıdır; başarısız assertion yok.
+
 ## 2026-07-16 — Geliştirme planı Faz 5–8 uygulaması
 
 Faz 5–8 için mevcut beta altyapısı denetlendi ve gerçek boşluklar kapatıldı.
@@ -3852,3 +3892,73 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Faz 4: site medya listesi, thumbnail seçimi, section içinden yeniden kullanım, silme, R2 best-effort cleanup ve free/pro/premium depolama kotaları eklendi.
 - Doğrulama: canlı AI smoke 1/1, hedef testler 39/39, tam test paketi 88 dosya geçti / 2 skip, 608 test geçti / 11 skip; `npm run check` 0 hata/0 uyarı, production build başarılı ve `scripts/verify-release.sh` başarılı.
 - Karar: server test timeout’u CPU/crypto maliyeti nedeniyle CI’da rastgele kırılmayı önlemek için 5 saniyeden 15 saniyeye çıkarıldı. Production deploy, gerçek ödeme ürünü oluşturma ve secret aktivasyonu bu çalışma kapsamında yapılmadı.
+
+## 2026-07-16 — Production canlı doğrulaması
+
+- `node scripts/smoke-production.mjs` başarılı: `https://saaskaya.com` üzerinde mobil 375×812 ve desktop 1365×900 public smoke; kritik sayfalar 200, yatay taşma yok, kırık görsel yok, browser console/page error yok.
+- `http://saaskaya.com/` → `301 https://saaskaya.com/`; TLS subject `CN = saaskaya.com`, sertifika 2026-10-06 tarihine kadar geçerli.
+- `https://saaskaya.com/api/health` → 200; DB ve disk kontrolleri sağlıklı. `/sitemap.xml` → 200 XML, `/robots.txt` → 200 text/plain.
+- `/en` sayfasında title, description ve canonical metadata doğrulandı. Contact sayfasında form, alanlar ve “Send message” aksiyonu render edildi.
+- Canlı doğrulamada ödeme, authenticated magic-link, gerçek AI tüketimi, upload/delete ve gerçek contact gönderimi çalıştırılmadı; veri/ücret/mesaj üretmemek için read-only kapsam korundu.
+
+## 2026-07-16 — Kontrollü production contact testi
+
+- `site-26dd6870.saaskaya.com/en` üzerinde gerçek browser submit çalıştırıldı; başarı mesajı gösterildi, browser console hatası oluşmadı.
+- Production DB’de `msg-b5138ecf` kaydı doğrulandı: site `site-26dd6870`, test adı `Saaskaya Live Test`, locale `en`. Site sahibi alıcısı `donbassllm@gmail.com`; test göndereni `kayacuneyd@gmail.com`.
+- AI ve medya testleri için site sahibi hesabına magic-link gönderildi; link 15 dakika geçerli. Kullanıcı linki açtıktan sonra authenticated testler sürdürülecek.
+
+## 2026-07-16 — Yayın sonrası tek seferlik subdomain değişikliği
+
+- Root cause: `setSiteIdentity()` yayınlanmış sitelerde her public handle değişikliğini koşulsuz reddediyordu.
+- Çözüm: migration v36 ile `previous_public_handle` ve `public_handle_change_count` alanları eklendi. Yayın sonrası ilk subdomain değişikliği kabul ediliyor; eski handle alias olarak çözülmeye devam ediyor; ikinci değişiklik server tarafında reddediliyor.
+- Editor Settings görünümünde kullanıcıya tek seferlik hakkın durumu gösteriliyor. Current/previous handle çakışmaları da availability kontrolüne dahil edildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; identity, migration ve publish hedef testleri 15/15 geçti.
+
+## 2026-07-16 — Meslek bazlı özellik setleri analizi
+
+- `docs/specs/2026-07-16-meslek-bazli-ozellik-setleri.md` analiz edildi ve brainstorming önerileri dokümana eklendi.
+- Ana karar: meslek sayısını ve özel block sayısını doğrudan artırmak yerine ortak `primaryOutcome`, `primaryCta`, `trustEvidence`, `conversionEvent` sözleşmesi; yeniden kullanılabilir portfolio/resource/list koleksiyonları; adaptive onboarding; kit bazlı risk profilleri ve deterministic export önceliklendirildi.
+- Scholar scraping, portal, online test, danışan/mükellef belge akışı ve canlı harici metrikler; izin, veri izolasyonu, retention ve incident planı gerektiren sonraki ürün katmanına ayrıldı.
+- Üç dalgalı yol haritası önerildi: service conversion foundation, reusable content collections, ardından Pro value proof ve trust integrations. Kod değişikliği yapılmadı; yalnızca ürün/spec dokümanı güncellendi.
+
+## 2026-07-16 — Meslek stratejisi sözleşmesi ve risk profilleri
+
+- `ControlledKit` kayıtlarına `primaryOutcome`, localized `primaryCta`, `trustEvidence`, `riskProfile` ve aggregate `conversionEvent` stratejisi eklendi. Bu, kitlerin yalnızca blok listesi değil, hedeflenen hizmet sonucunu da taşımasını sağlar.
+- Site settings schema’sına isteğe bağlı `profession`, `riskProfile`, `primaryOutcome` ve localized `primaryCta` metadata alanları eklendi; mevcut siteler geriye dönük uyumlu kaldı.
+- Profession kit üreticileri bu metadata’yı dolduruyor; psychology/health/legal/property profilleri quality gate’e bağlandı. Sağlık ve hukuk sitelerinde disclaimer/owner-review eksikliği warning olarak raporlanıyor.
+- Yeni strategy contract ve quality risk testleri eklendi. Doğrulama: `npm run check` 0 hata/0 uyarı; hedef kit/quality testleri 27/27 geçti.
+
+## 2026-07-16 — Meslek hizmet sonucu ve ortak koleksiyon bloğu
+
+- Kit stratejisi artık meslek adını da değerlendiriyor; avukat kitleri `legal` risk profiline doğru sınıflanıyor. Collection bloğu varsa `projects` güven kanıtı olarak stratejiye ekleniyor.
+- `collection` sabit blok tipi eklendi. `projects`, `resources`, `publications`, `courses` ve `appearances` türlerini; kart/liste görünümünü; güvenli link, medya, meta ve açıklama alanlarını destekliyor.
+- Şema, renderer registry, AI generate/patch/translation sözleşmeleri, template kataloğu ve üç dilde editör etiketleri senkronize edildi. Mevcut bloklar ve eski siteler geriye dönük uyumlu kaldı.
+- Doğrulama: collection schema ve AI coverage dahil hedef testler 87/87 geçti; `npm run check` 0 hata/0 uyarı; production build başarılı; `git diff --check` temiz.
+- Bu adımda deploy yapılmadı; değişiklikler yalnızca workspace içinde hazırlandı.
+
+## 2026-07-16 — Pro export ve değer kanıtı
+
+- Pro site export'u `saaskaya-site-v2` formatına yükseltildi; draft, yayınlanan snapshot, yayın versiyonu, contact kayıtları ve 30 günlük anonim ziyaret/dönüşüm özetleri birlikte taşınıyor.
+- Ziyaretçi kimliği, IP veya ham izleme verisi export'a eklenmedi. Tenant bazlı aggregate yardımcı fonksiyonu ve test fixture'ı eklendi.
+- Doğrulama: hedef testler 18/18 geçti; `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-16 — Güvenli meslek entegrasyonları
+
+- `review-platform`, `academic-profile` ve `portfolio-gallery` link-out entegrasyonları eklendi.
+- Trustpilot/ProvenExpert/Doctoralia, ORCID/Scholar/ResearchGate ve Behance/Dribbble/ArtStation/GitHub/GitLab/500px allowlist'leri tanımlandı.
+- Editör Settings otomatik olarak yeni türleri sunuyor; Contact bloğu etkin bağlantıları locale-safe kontrollü CTA olarak gösteriyor.
+- Scraping, OAuth, canlı harici metrik ve doğrulanmamış kullanıcı verisi deliberately eklenmedi; bu sprint yalnızca owner-entered link-out kapsamındadır.
+- Doğrulama: entegrasyon/schema hedef testleri 36/36 geçti; `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-16 — P2 kontrollü içerik setleri
+
+- `collection` bloğunun kontrollü kind sözlüğü P2 içeriklerini kapsayacak şekilde genişletildi: `downloads`, `media-appearances`, `case-studies`, `positions` ve `academic-service`.
+- AI generate/patch prompt'ları ve Site Zod sözleşmesi aynı vocabulary ile güncellendi; editör ve renderer mevcut sabit block motorunu kullanmaya devam ediyor.
+- Scholar scraping/import, canlı h-index, danışan/öğrenci/mükellef portalı, sağlık formu ve belge akışları bu değişiklikte açılmadı. Bunlar kişisel veri, retention, tenant izolasyonu, audit ve incident planı olmadan güvenli biçimde implement edilemez.
+- Doğrulama: P2 schema/AI coverage hedefleri 98/98 geçti; `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-16 — Dış servis kapsamının sadeleştirilmesi
+
+- Kullanıcı kararı: yeni API key, OAuth kaydı veya müşteri tarafında teknik provider kurulumu gerektiren özellikler talep oluşmadan uygulanmayacak.
+- Scholar/GitHub canlı importu, canlı metrikler, portal/form, belge akışı ve sertifika PDF'i backlog'da tutuldu; mevcut manuel link-out, R2, JSON export ve anonim analytics kapsamı korunuyor.
+- Spec'e dış servis/token politikası eklendi. Böylece kullanılmayacak entegrasyonlar için kod, secret ve bakım yükü oluşturulmayacak.

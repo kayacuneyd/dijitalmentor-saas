@@ -40,7 +40,7 @@ Rules:
 - Pick the niche preset that fits best (law, psych or dental) and a matching professional theme (colors as hex).
 - Structure: honor any explicit page-count/site-structure preference in the description. If the user asks for one page, create only "home". If they ask for 3 pages, create home/services/contact. If they ask for 5 pages, create home/about/services/faq/contact. If no preference is given, choose 1–3 pages. Every page must appear in nav. Keep each page purposeful; do not create empty filler pages.
 - Section order: hero first and footer last on home; use a sensible order such as hero → about → services → [process] → [pricing] → [testimonials] → [credentials] → faq → [booking] → contact → footer.
-- Available section types (14): hero, about, services, gallery, contact, cta, faq, testimonials, pricing, process, booking, credentials, team, footer.
+- Available section types (18): hero, about, services, gallery, contact, cta, faq, testimonials, pricing, process, booking, credentials, team, footer, stats, clients, video, collection.
 - New section guides (include only when the description mentions the topic):
   * testimonials: 2–4 anonymous quotes (initials like "A.K."). Rating 4-5 only if plausible.
   * pricing: only if description mentions packages/fees. 2–3 plans, exactly 1 highlighted, default ₺.
@@ -48,6 +48,7 @@ Rules:
   * booking: href to contact anchor (e.g. "#contact-1"). Action-inviting button copy.
   * credentials: only list certifications the description mentions. Include issuer + year.
 - If the description includes feature-kit keywords, match those section types.
+- collection = a fixed cards/list section for concrete projects, publications, courses, resources, downloads, media appearances, case studies, positions or academic service; choose its kind to match the profession.
 - Copy must be concrete and grounded in the description — real service names, real tone, no lorem ipsum, no invented certifications or medical/legal claims.
 - contact section: if no email is given, use info@<business-name>.example. Include phone/address only if provided.
 - ${PLACEHOLDER_IMAGES}

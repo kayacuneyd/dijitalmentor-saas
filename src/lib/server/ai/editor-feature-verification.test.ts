@@ -838,7 +838,7 @@ describe('A8 — Gatekeeper Schema', () => {
 describe('A9 — Section Type Coverage', () => {
 	it('✅ 17 section tipi tanımlı', async () => {
 		const { SECTION_TYPES } = await import('$lib/schema/site');
-		expect(SECTION_TYPES).toHaveLength(17);
+		expect(SECTION_TYPES).toHaveLength(18);
 		expect(SECTION_TYPES).toContain('hero');
 		expect(SECTION_TYPES).toContain('about');
 		expect(SECTION_TYPES).toContain('services');
@@ -856,11 +856,12 @@ describe('A9 — Section Type Coverage', () => {
 		expect(SECTION_TYPES).toContain('stats');
 		expect(SECTION_TYPES).toContain('clients');
 		expect(SECTION_TYPES).toContain('video');
+		expect(SECTION_TYPES).toContain('collection');
 	});
 
-	it('✅ genSectionSchema — tüm 17 tip için discriminator var', async () => {
+	it('✅ genSectionSchema — tüm 18 tip için discriminator var', async () => {
 		const { genSectionSchema } = await import('$lib/server/ai/schemas');
-		expect(genSectionSchema.options).toHaveLength(17);
+		expect(genSectionSchema.options).toHaveLength(18);
 	});
 });
 

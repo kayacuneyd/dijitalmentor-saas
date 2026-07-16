@@ -1,8 +1,10 @@
 import { error, json } from '@sveltejs/kit';
 import { canManageSite } from '$lib/server/auth';
 import { hasActiveSiteSubscription } from '$lib/server/billing';
-import { getDraft, getSiteMeta } from '$lib/server/db/repo';
+import { getDraft, getPublished, getSiteMeta } from '$lib/server/db/repo';
 import { listSubmissions } from '$lib/server/db/contact';
+import { conversionSummary } from '$lib/server/siteAnalytics';
+import { siteVisitSummaryForSite } from '$lib/server/siteVisits';
 import type { RequestHandler } from './$types';
 
 /** Full export: Pro site entitlement, grace window, or admin/operator support. */
@@ -23,7 +25,22 @@ export const GET: RequestHandler = ({ params, locals }) => {
 	}
 	const site = getDraft(params.siteId);
 	return new Response(
-		JSON.stringify({ site, contactSubmissions: listSubmissions(params.siteId) }, null, 2),
+		JSON.stringify(
+			{
+				exportFormat: 'saaskaya-site-v2',
+				site,
+				publishedSite: getPublished(params.siteId),
+				publishedVersion: meta?.publishedVersion ?? null,
+				contactSubmissions: listSubmissions(params.siteId),
+				analytics: {
+					windowDays: 30,
+					visits: siteVisitSummaryForSite(params.siteId),
+					conversions: conversionSummary(params.siteId)
+				}
+			},
+			null,
+			2
+		),
 		{
 			headers: {
 				'content-type': 'application/json',

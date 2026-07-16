@@ -117,11 +117,15 @@
 				{/if}
 				<div>
 					<dt class="text-[var(--sk-faint)]">Last AI edit</dt>
-					<dd class="font-medium">{c.lastAiEditAt ? new Date(c.lastAiEditAt).toLocaleString() : 'Never'}</dd>
+					<dd class="font-medium">
+						{c.lastAiEditAt ? new Date(c.lastAiEditAt).toLocaleString() : 'Never'}
+					</dd>
 				</div>
 				<div>
 					<dt class="text-[var(--sk-faint)]">Last publish</dt>
-					<dd class="font-medium">{c.lastPublishedAt ? new Date(c.lastPublishedAt).toLocaleString() : 'Never'}</dd>
+					<dd class="font-medium">
+						{c.lastPublishedAt ? new Date(c.lastPublishedAt).toLocaleString() : 'Never'}
+					</dd>
 				</div>
 			</div>
 		</div>
@@ -146,6 +150,10 @@
 					<form method="POST" action="?/overrideSubscription" use:enhance>
 						<input type="hidden" name="next" value="active" />
 						<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">Comp Pro</button>
+					</form>
+					<form method="POST" action="?/overrideSubscription" use:enhance>
+						<input type="hidden" name="next" value="premium" />
+						<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">Comp Premium</button>
 					</form>
 				{:else}
 					<form method="POST" action="?/overrideSubscription" use:enhance>
@@ -230,13 +238,13 @@
 							<div class="flex flex-wrap items-center justify-between gap-2">
 								<div class="min-w-0">
 									<p class="truncate text-sm font-medium">{site.siteName}</p>
-								<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
-									{site.id}
-									{#if site.domain}
-										· {site.domain}{/if}
-									{#if site.lastChatAt}
-										· last chat {new Date(site.lastChatAt).toLocaleDateString()}{/if}
-								</p>
+									<p class="font-[var(--font-mono)] text-[10.5px] text-[var(--sk-faint)]">
+										{site.id}
+										{#if site.domain}
+											· {site.domain}{/if}
+										{#if site.lastChatAt}
+											· last chat {new Date(site.lastChatAt).toLocaleDateString()}{/if}
+									</p>
 								</div>
 								<div class="flex flex-wrap items-center gap-2">
 									<StatusPill tone={site.publishedVersion ? 'success' : 'neutral'}>
@@ -250,7 +258,8 @@
 									{/if}
 									{#if site.lastGateDecision}
 										<StatusPill
-											tone={site.lastGateDecision === 'applied' || site.lastGateDecision === 'auto_applied'
+											tone={site.lastGateDecision === 'applied' ||
+											site.lastGateDecision === 'auto_applied'
 												? 'success'
 												: 'neutral'}
 										>

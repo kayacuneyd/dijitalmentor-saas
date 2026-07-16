@@ -40,7 +40,7 @@ export const SETTING_DEFS: SettingDef[] = [
 		label: 'Gatekeeper model id (Layer 1 triage)',
 		group: 'AI',
 		secret: false,
-		help: 'default claude-haiku-4-5 — classify/distill before the patch agent'
+		help: 'default deepseek-v4-flash — classify/distill before the patch agent'
 	},
 	{
 		key: 'AI_MONTHLY_TOKEN_LIMIT',
@@ -78,6 +78,20 @@ export const SETTING_DEFS: SettingDef[] = [
 		help: 'default 5'
 	},
 	{
+		key: 'AI_EDITS_PREMIUM',
+		label: 'AI chat edits / month (Premium)',
+		group: 'AI',
+		secret: false,
+		help: 'default 200'
+	},
+	{
+		key: 'AI_GENERATIONS_PREMIUM',
+		label: 'Site generations / month (Premium)',
+		group: 'AI',
+		secret: false,
+		help: 'default 20'
+	},
+	{
 		key: 'AI_BUDGET_FREE_USD',
 		label: 'Per-tenant monthly AI $ cap (Free)',
 		group: 'AI',
@@ -96,14 +110,14 @@ export const SETTING_DEFS: SettingDef[] = [
 		label: 'Gatekeeper provider',
 		group: 'AI Providers',
 		secret: false,
-		help: 'groq / anthropic; beta default groq'
+		help: 'deepseek / groq / anthropic; default deepseek'
 	},
 	{
 		key: 'GATEKEEPER_FALLBACK_PROVIDER',
 		label: 'Gatekeeper fallback provider',
 		group: 'AI Providers',
 		secret: false,
-		help: 'optional: anthropic / deepseek / groq; only used after a provider rate limit'
+		help: 'default groq for DeepSeek; used after transient/rate-limit/tool-output failures'
 	},
 	{ key: 'GROQ_API_KEY', label: 'Groq API key', group: 'AI Providers', secret: true },
 	{
@@ -119,6 +133,13 @@ export const SETTING_DEFS: SettingDef[] = [
 		group: 'AI Providers',
 		secret: false,
 		help: 'deepseek / anthropic; beta default deepseek'
+	},
+	{
+		key: 'AI_FALLBACK_PROVIDER',
+		label: 'Layer-2 fallback provider',
+		group: 'AI Providers',
+		secret: false,
+		help: 'optional: anthropic / deepseek; used after rate-limit or structured-request rejection'
 	},
 	{ key: 'DEEPSEEK_API_KEY', label: 'DeepSeek API key', group: 'AI Providers', secret: true },
 	{
@@ -141,6 +162,41 @@ export const SETTING_DEFS: SettingDef[] = [
 		group: 'AI Providers',
 		secret: false,
 		help: 'hard application backstop; default 5'
+	},
+	{
+		key: 'MEDIA_LIMIT_FREE_MB',
+		label: 'Free site media limit (MB)',
+		group: 'Media',
+		secret: false,
+		help: 'default 20 MB'
+	},
+	{
+		key: 'MEDIA_LIMIT_PRO_MB',
+		label: 'Pro site media limit (MB)',
+		group: 'Media',
+		secret: false,
+		help: 'default 500 MB'
+	},
+	{
+		key: 'MEDIA_LIMIT_PREMIUM_MB',
+		label: 'Premium site media limit (MB)',
+		group: 'Media',
+		secret: false,
+		help: 'default 2048 MB'
+	},
+	{
+		key: 'CREEM_AI_TOPUP_PRODUCT_ID',
+		label: 'Creem AI top-up product id',
+		group: 'Billing',
+		secret: false,
+		help: 'optional one-time product; grants 10 edits + 1 generation'
+	},
+	{
+		key: 'STRIPE_AI_TOPUP_PRICE_ID',
+		label: 'Stripe AI top-up price id',
+		group: 'Billing',
+		secret: false,
+		help: 'optional one-time price; grants 10 edits + 1 generation'
 	},
 	{
 		key: 'EMAIL_PROVIDER',

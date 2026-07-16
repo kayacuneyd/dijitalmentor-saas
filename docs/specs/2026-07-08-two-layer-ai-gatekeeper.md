@@ -276,3 +276,18 @@ when Groq rate-limits or is unavailable.
 - Should the approval card support editing the distilled prompt before sending to Layer 2? (Phase 1:
   no; Phase 2: maybe.)
 - Should "auto-approve" be available for low-risk edits to reduce friction? (Future iteration.)
+
+## 2026-07-16 provider routing revision
+
+The production default is now **DeepSeek V4 Flash → Groq fallback** for Layer 1. DeepSeek Flash is
+used for cheap intent/risk classification and distillation; Groq is used once only after a transient,
+rate-limit, network or malformed-tool-output failure. Authentication, balance and permanent 400/422
+configuration errors do not silently fall through.
+
+Layer 2 remains DeepSeek: low-risk copy edits use Flash, while medium/high-risk and structural edits
+use DeepSeek V4 Pro. All output still passes the existing Zod schema, one-repair boundary and publish
+quality gate. Provider/model/fallback metadata is recorded in `ai_gate_log` (migration v32).
+
+The emergency rollback is configuration-only: set `GATEKEEPER_PROVIDER=groq` and optionally
+`GATEKEEPER_FALLBACK_PROVIDER=deepseek` in `/admin/settings`. The exact provider prices and Groq
+account limits remain operator-managed; Groq is not assumed to be permanently free.

@@ -10,6 +10,7 @@ import {
 	creditLimits,
 	getMonthlyUsage,
 	grantAiTopUp,
+	applyPaidAiTopUp,
 	recordUsage,
 	tenantIdForUser,
 	tenantMonthlyBudgetMicrousd
@@ -200,5 +201,20 @@ describe('grantAiTopUp (admin support gesture: /admin/customers)', () => {
 	it('works on a tenant with no existing ai_usage row this month', () => {
 		grantAiTopUp('t-topup-fresh', { edits: 5 });
 		expect(getMonthlyUsage('t-topup-fresh').editCount).toBe(-5); // enforcement reads this as headroom
+	});
+
+	it('applies a paid top-up exactly once for a provider checkout id', () => {
+		const input = {
+			checkoutId: 'checkout-idempotent-1',
+			userId: 'topup-user-1',
+			edits: 10,
+			generations: 1
+		};
+		expect(applyPaidAiTopUp(input)).toBe(true);
+		expect(applyPaidAiTopUp(input)).toBe(false);
+		expect(getMonthlyUsage(tenantIdForUser(input.userId))).toMatchObject({
+			editCount: -10,
+			generationCount: -1
+		});
 	});
 });

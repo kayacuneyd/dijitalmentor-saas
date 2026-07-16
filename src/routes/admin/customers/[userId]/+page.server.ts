@@ -23,7 +23,7 @@ export const actions: Actions = {
 		requireAdmin(locals);
 		const t = serverTranslator(locals.locale ?? 'tr');
 		const next = String((await request.formData()).get('next') ?? '');
-		if (next !== 'active' && next !== 'free') {
+		if (next !== 'active' && next !== 'free' && next !== 'premium') {
 			return fail(400, { message: t('admin.customer.invalidPlan') });
 		}
 		overrideSubscription(params.userId, next);

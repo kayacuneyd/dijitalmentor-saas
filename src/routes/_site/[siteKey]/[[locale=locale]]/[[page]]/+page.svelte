@@ -10,10 +10,19 @@
 </script>
 
 <svelte:head>
-	<title>{data.page.title[data.locale]} · {data.site.settings.siteName}</title>
+	<title>{data.page.meta?.title ?? `${data.page.title[data.locale]} · ${data.site.settings.siteName}`}</title>
 	{#if data.site.settings.seo?.description}
-		<meta name="description" content={data.site.settings.seo.description[data.locale]} />
+		<meta name="description" content={data.page.meta?.description ?? data.site.settings.seo.description[data.locale]} />
 	{/if}
+	<link rel="canonical" href={data.canonicalUrl} />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content={data.canonicalUrl} />
+	<meta property="og:title" content={data.page.meta?.title ?? data.page.title[data.locale]} />
+	<meta property="og:description" content={data.page.meta?.description ?? data.site.settings.seo?.description?.[data.locale] ?? data.page.title[data.locale]} />
+	{#if data.site.settings.seo?.ogImage}<meta property="og:image" content={data.site.settings.seo.ogImage} />{/if}
+	<meta name="twitter:card" content={data.site.settings.seo?.twitterCard ?? 'summary_large_image'} />
+	<meta name="twitter:title" content={data.page.meta?.title ?? data.page.title[data.locale]} />
+	<meta name="twitter:description" content={data.page.meta?.description ?? data.site.settings.seo?.description?.[data.locale] ?? data.page.title[data.locale]} />
 </svelte:head>
 
 {#if data.publishedVersion}

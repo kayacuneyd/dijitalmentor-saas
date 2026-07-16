@@ -16,7 +16,9 @@ afterEach(() => {
 		'AI_PROVIDER',
 		'GATEKEEPER_PROVIDER',
 		'GATEKEEPER_FALLBACK_PROVIDER',
+		'GATEKEEPER_MODEL',
 		'GROQ_API_KEY',
+		'DEEPSEEK_API_KEY',
 		'GROQ_MODEL',
 		'DEEPSEEK_MODEL_LIGHT',
 		'DEEPSEEK_MODEL_HEAVY'
@@ -34,7 +36,8 @@ describe('LLM provider routing', () => {
 	});
 
 	it('uses the low-cost beta providers and models by default', () => {
-		expect(configuredGatekeeperProvider()).toBe('groq');
+		expect(configuredGatekeeperProvider()).toBe('deepseek');
+		expect(configuredGatekeeperFallbackProvider()).toBe('groq');
 		expect(configuredAgentProvider()).toBe('deepseek');
 		expect(configuredModel('groq', 'light')).toBe('llama-3.3-70b-versatile');
 		expect(configuredModel('deepseek', 'light')).toBe('deepseek-v4-flash');
@@ -43,9 +46,11 @@ describe('LLM provider routing', () => {
 
 	it('only enables a distinct configured gatekeeper fallback provider', () => {
 		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'deepseek');
+		expect(configuredGatekeeperFallbackProvider()).toBeUndefined();
+		setSetting('GATEKEEPER_PROVIDER', 'groq');
+		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'deepseek');
 		expect(configuredGatekeeperFallbackProvider()).toBe('deepseek');
-		setSetting('GATEKEEPER_PROVIDER', 'anthropic');
-		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'anthropic');
+		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'groq');
 		expect(configuredGatekeeperFallbackProvider()).toBeUndefined();
 	});
 
@@ -107,4 +112,5 @@ describe('LLM provider routing', () => {
 			})
 		);
 	});
+
 });

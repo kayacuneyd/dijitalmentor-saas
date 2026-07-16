@@ -73,6 +73,7 @@ export const users = sqliteTable(
 		// Billing (M5/M6): filled by the Stripe webhook.
 		stripeCustomerId: text('stripe_customer_id'),
 		subscriptionStatus: text('subscription_status'),
+		plan: text('plan').notNull().default('free'),
 		// End of the paid period (from Stripe) — grace window counts from here (M6 policy).
 		subscriptionEndsAt: integer('subscription_ends_at', { mode: 'timestamp' }),
 		createdAt: integer('created_at', { mode: 'timestamp' })
@@ -232,6 +233,23 @@ export const aiUsage = sqliteTable(
 	(table) => [primaryKey({ columns: [table.tenantId, table.month] })]
 );
 
+// Idempotency ledger for paid AI top-ups. A provider checkout/session id may
+// only grant credits once, even if the webhook is retried.
+export const aiTopupGrants = sqliteTable(
+	'ai_topup_grants',
+	{
+		checkoutId: text('checkout_id').primaryKey(),
+		userId: text('user_id').notNull(),
+		edits: integer('edits').notNull().default(0),
+		generations: integer('generations').notNull().default(0),
+		usdWaived: integer('usd_waived').notNull().default(0),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [index('ai_topup_grants_user_idx').on(table.userId, table.createdAt)]
+);
+
 // Closed-beta invite allowlist (beta-launch spec). When BETA_MODE is on, only
 // emails here (status != 'revoked') can obtain a magic link. Managed at /admin/invites.
 export const betaInvites = sqliteTable('beta_invites', {
@@ -316,6 +334,8 @@ export const aiGateLog = sqliteTable('ai_gate_log', {
 	gateTokens: integer('gate_tokens').notNull().default(0),
 	agentTokens: integer('agent_tokens').notNull().default(0),
 	model: text('model'),
+	provider: text('provider'),
+	fallbackUsed: integer('fallback_used', { mode: 'boolean' }).notNull().default(false),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.$defaultFn(() => new Date())
@@ -372,6 +392,23 @@ export const siteVisitStats = sqliteTable(
 		primaryKey({ columns: [table.siteId, table.day, table.locale, table.pageSlug] }),
 		index('site_visit_stats_day_idx').on(table.day),
 		index('site_visit_stats_site_day_idx').on(table.siteId, table.day)
+	]
+);
+
+// Privacy-safe conversion buckets. Like siteVisitStats, this stores no visitor
+// identity or request payload: only an aggregate event count per site/day/type.
+export const siteConversionStats = sqliteTable(
+	'site_conversion_stats',
+	{
+		siteId: text('site_id').notNull(),
+		day: text('day').notNull(),
+		event: text('event').notNull(),
+		count: integer('count').notNull().default(0)
+	},
+	(table) => [
+		primaryKey({ columns: [table.siteId, table.day, table.event] }),
+		index('site_conversion_stats_day_idx').on(table.day),
+		index('site_conversion_stats_site_day_idx').on(table.siteId, table.day)
 	]
 );
 

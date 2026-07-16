@@ -1,7 +1,19 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { POST } from './+server';
 import { POST as answerPOST } from '../answer/+server';
 import { PENDING_COOKIE, getPendingByToken } from '$lib/server/onboarding/session';
+import { clearSetting, setSetting } from '$lib/server/config';
+
+// These route tests exercise the deterministic onboarding flow, not live model
+// availability. Empty DB settings intentionally override developer .env keys.
+beforeAll(() => {
+	setSetting('DEEPSEEK_API_KEY', '');
+	setSetting('GROQ_API_KEY', '');
+});
+afterAll(() => {
+	clearSetting('DEEPSEEK_API_KEY');
+	clearSetting('GROQ_API_KEY');
+});
 
 function makeCookieJar(initial: Record<string, string> = {}) {
 	const store: Record<string, string> = { ...initial };

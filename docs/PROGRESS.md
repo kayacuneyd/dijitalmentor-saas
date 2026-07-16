@@ -3,6 +3,59 @@
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-16 — Geliştirme planı Faz 5–8 uygulaması
+
+Faz 5–8 için mevcut beta altyapısı denetlendi ve gerçek boşluklar kapatıldı.
+
+- Faz 6: `site_conversion_stats` (migration v31) ve `src/lib/server/siteAnalytics.ts` eklendi. Public tenant contact başarıları kimlik veya mesaj saklamadan günlük aggregate olarak sayılıyor; account ekranı son 30 günlük dönüşümleri gösteriyor.
+- Faz 6: published tenant sayfalarına page-level title/description, canonical, OG ve Twitter metadata eklendi.
+- Faz 7: migration idempotency ve analytics izolasyonu testlendi; `docs/DISASTER_RECOVERY_RUNBOOK.md` ile DB, VPS, R2 ve provider kesintisi prosedürü yazıldı.
+- Faz 8: aktif plan `docs/specs/2026-07-16-gelistirme-ve-urunlestirme-plani.md` olarak `docs/PLAN.md` ve `docs/ROADMAP_EVALUATION.md` içine bağlandı. Provider hesabı gerektiren customer portal, invoice API ve otomatik cancel/resume operator activation backlog'unda bırakıldı.
+
+### Doğrulama
+
+- `npm run check` — 0 hata, 0 uyarı
+- `npm test` — 88 dosya, 607 başarılı test, 11 skip
+- `npm run build` — adapter-node production build başarılı; migration v31 uygulandı
+
+### Karar / hata günlüğü
+
+Dış provider API'si doğrulanmadan sahte billing cancel/portal başarı durumu eklenmedi. Domain fulfillment mevcut `paid → registering → active/failed` idempotent state machine olarak bırakıldı. Yeni conversion tablosu yalnızca site/gün/event/count tutar; bu seçim KVKK/GDPR veri minimizasyonu içindir.
+
+## 2026-07-16 — DeepSeek Flash gatekeeper routing
+
+Kullanıcı kararıyla Layer 1 varsayılanı Groq → DeepSeek yerine DeepSeek V4 Flash → Groq fallback
+olarak değiştirildi. Layer 2 risk routing korunuyor: low-risk Flash, medium/high-risk ve yapısal
+agent işlemleri Pro. Böylece gatekeeper maliyeti düşerken `add_section`, `add_page`, tema ve diğer
+structural patch'ler daha güçlü modele gider.
+
+`runToolCall` artık async provider hatalarını gerçekten yakalıyor (`await`), DNS/socket/5xx hatalarını
+transient sınıfına alıyor ve gatekeeper fallback’ini bir kez çalıştırıyor. Auth/balance/kalıcı
+structured-request hataları fallback ile gizlenmiyor. `ai_gate_log` migration v32 ile provider ve
+fallback metadata’sı saklıyor; patch repair’inde estimated cost artık kaybolmuyor.
+
+Karar: gatekeeper tek başına güvenlik sınırı değildir; Zod `Site`/patch doğrulaması, integration
+koruması, tek repair ve publish quality gate aynen korunmuştur. Emergency rollback yalnızca ayarlardan
+`GATEKEEPER_PROVIDER=groq` ile yapılabilir. Unit suite: `npm test` → 88 dosya, 608 test geçti, 11 skip.
+
+Hata günlüğü: ilk test koşusunda migration listesi version-sorted runner ile sırasız expected değerini
+karşılaştırıyordu; test expected sıralaması runner sözleşmesine göre düzeltildi. Onboarding route testleri
+developer `.env` credential'larına istemeden bağlanıyordu; testlerde boş DB secrets ile canlı provider
+çağrısı kapatıldı. Site-specific subscription webhook'unun global user subscription'ı da yanlışlıkla
+aktif ettiği görüldü; yalnızca `site_subscriptions` entitlement'ı güncellenecek şekilde düzeltildi.
+
+## 2026-07-16 — Geliştirme ve ürünleştirme planı oluşturuldu
+
+Kullanıcının talebi üzerine mevcut eksiklerin uygulanma sırasını ve onay sınırlarını tanımlayan
+`docs/specs/2026-07-16-gelistirme-ve-urunlestirme-plani.md` oluşturuldu.
+
+Planın ana kararı: Kod değişiklikleri faz bazında ve yalnızca kullanıcı açıkça ilgili fazı onayladıktan
+sonra yapılacak. İlk öncelik canlı smoke testte başarısız olan `add_section` AI akışı ile provider
+dayanıklılığı; sonraki fazlar CI/CD, monetizasyon, kalite kapısı, medya, self-service, analytics ve
+veri izolasyonu olarak sıralandı.
+
+Bu görevde uygulama kodu, migration, production ayarı veya deploy yapılmadı.
+
 ## 2026-07-15
 
 **Editör & AI Özellikleri Kapsamlı Doğrulama Testi — Aşama 1 tamamlandı.**
@@ -3789,3 +3842,13 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Doğrulama: hedef testler 37/37, tam test paketi 605 geçti / 11 skip. `npm run check` bu değişiklikten
   bağımsız mevcut `src/lib/server/customers.ts` içindeki `SiteMeta.createdAt` tip hatası nedeniyle
   3 hata ile durdu; bu task kapsamında düzeltilmedi.
+
+## 2026-07-16 — Faz 0–4 uygulaması
+
+- Faz 0: AI `add_section` için strict Zod/tool sözleşmesi, tam localized içerik prompt’u, provider rate-limit/rejected-request fallback’i ve FAQ için güvenli schema-valid fallback eklendi. DeepSeek canlı smoke testi başarılı oldu; ilk boş tool çıktısı renderer’a ulaşmadan yakalandı.
+- Faz 1: `.github/workflows/ci.yml`, `scripts/verify-release.sh` ve `docs/RELEASE.md` eklendi. CI/release gate sırası check → test → build → diff kontrolü olarak sabitlendi; migration sıralaması ve idempotency doğrulandı.
+- Faz 2: free/pro/premium plan entitlement modeli, plan bazlı AI ve medya limitleri, idempotent AI top-up ledger/webhook fulfillment, top-up checkout endpoint’i ve dashboard/admin girişleri eklendi. Ödeme sağlayıcısı ürün/price ID’leri bilinçli olarak environment/setting aktivasyonuna bırakıldı.
+- Faz 3: site quality gate’e duplicate page slug blocker eklendi; mevcut schema, locale, placeholder, medya, CTA/contact, contrast ve mesleki içerik risk kontrolleriyle birlikte korunup doğrulandı.
+- Faz 4: site medya listesi, thumbnail seçimi, section içinden yeniden kullanım, silme, R2 best-effort cleanup ve free/pro/premium depolama kotaları eklendi.
+- Doğrulama: canlı AI smoke 1/1, hedef testler 39/39, tam test paketi 88 dosya geçti / 2 skip, 608 test geçti / 11 skip; `npm run check` 0 hata/0 uyarı, production build başarılı ve `scripts/verify-release.sh` başarılı.
+- Karar: server test timeout’u CPU/crypto maliyeti nedeniyle CI’da rastgele kırılmayı önlemek için 5 saniyeden 15 saniyeye çıkarıldı. Production deploy, gerçek ödeme ürünü oluşturma ve secret aktivasyonu bu çalışma kapsamında yapılmadı.

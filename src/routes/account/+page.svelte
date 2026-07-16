@@ -104,6 +104,26 @@
 
 	<AppCard>
 		<div class="flex flex-col gap-4">
+			<div>
+				<h2 class="font-semibold">Site dönüşümleri</h2>
+				<p class="text-sm text-[var(--sk-muted)]">Son 30 gün · anonim toplulaştırılmış ölçüm</p>
+			</div>
+			<ul class="grid gap-3 sm:grid-cols-2">
+				{#each data.sites as site (site.id)}
+					<li class="rounded-[10px] border border-[var(--sk-line)] p-3">
+						<p class="truncate text-sm font-medium">{site.siteName}</p>
+						<div class="mt-2 flex gap-4 text-xs text-[var(--sk-muted)]">
+							<span>İletişim: {site.conversions.find((item) => item.event === 'contact_submitted')?.count ?? 0}</span>
+							<span>CTA: {site.conversions.find((item) => item.event === 'cta_clicked')?.count ?? 0}</span>
+						</div>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</AppCard>
+
+	<AppCard>
+		<div class="flex flex-col gap-4">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div>
 					<h2 class="font-semibold">{t('account.usage.title')}</h2>

@@ -122,6 +122,10 @@ Complete the deferred project-wide i18n work in small, independently verifiable 
 > materially complete with legal-counsel caveat, and the next active implementation milestone is
 > `docs/specs/2026-07-09-phase2-closure-sprint.md`: close Guided First-Run Experience before Phase 3
 > kit/quality work.
+
+> **2026-07-16 active roadmap:** Faz 5–8 status and evidence are tracked in
+> `docs/specs/2026-07-16-gelistirme-ve-urunlestirme-plani.md`; this file remains the architecture and
+> historical milestone reference.
 >
 > **2026-07-14 operator-approved editor value upgrade:** after beta editor testing, the next
 > chat/editor improvement bundle is captured in

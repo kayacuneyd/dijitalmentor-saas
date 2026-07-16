@@ -81,7 +81,12 @@
 					{t('dashboard.plan.description')}
 				</p>
 			</div>
-			<span class="text-xs text-[var(--sk-faint)]">{t('dashboard.plan.billingNote')}</span>
+			<div class="flex flex-wrap items-center gap-2">
+				<span class="text-xs text-[var(--sk-faint)]">{t('dashboard.plan.billingNote')}</span>
+				<form method="POST" action="/api/billing/topup">
+					<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">AI kredisi satın al</button>
+				</form>
+			</div>
 		</div>
 	</AppCard>
 

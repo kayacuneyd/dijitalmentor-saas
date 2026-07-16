@@ -20,6 +20,7 @@ export class AIProviderRateLimitError extends AIUnavailableError {
 
 	readonly retryAfterSeconds?: number;
 }
+export class AIProviderTransientError extends AIUnavailableError {}
 export class AIProviderRejectedRequestError extends AIUnavailableError {
 	constructor(
 		message: string,
@@ -63,24 +64,35 @@ export type ToolCallResult = {
 	toolUseId: string;
 	assistantContent: Anthropic.ContentBlock[];
 	usage: TokenUsage;
+	provider?: AIProvider;
+	model?: string;
+	fallbackUsed?: boolean;
 };
 
 export type RunToolCall = (req: ToolCallRequest) => Promise<ToolCallResult>;
 
 export function configuredGatekeeperProvider(): AIProvider {
 	const value = getSetting('GATEKEEPER_PROVIDER');
-	return value === 'anthropic' ? 'anthropic' : 'groq';
+	return value === 'anthropic' || value === 'deepseek' || value === 'groq' ? value : 'deepseek';
 }
 
 export function configuredGatekeeperFallbackProvider(): AIProvider | undefined {
 	const value = getSetting('GATEKEEPER_FALLBACK_PROVIDER');
-	if (value !== 'anthropic' && value !== 'deepseek' && value !== 'groq') return undefined;
-	return value === configuredGatekeeperProvider() ? undefined : value;
+	if (value === 'anthropic' || value === 'deepseek' || value === 'groq') {
+		return value === configuredGatekeeperProvider() ? undefined : value;
+	}
+	return configuredGatekeeperProvider() === 'deepseek' ? 'groq' : undefined;
 }
 
 export function configuredAgentProvider(): AIProvider {
 	const value = getSetting('AI_PROVIDER');
 	return value === 'anthropic' ? 'anthropic' : 'deepseek';
+}
+
+export function configuredAgentFallbackProvider(): AIProvider | undefined {
+	const value = getSetting('AI_FALLBACK_PROVIDER');
+	if (value !== 'anthropic' && value !== 'deepseek') return undefined;
+	return value === configuredAgentProvider() ? undefined : value;
 }
 
 export function configuredModel(provider: AIProvider, tier: ModelTier = 'heavy'): string {
@@ -171,7 +183,23 @@ async function runAnthropicCompatible(
 			...(provider === 'deepseek' ? { thinking: { type: 'disabled' as const } } : {})
 		});
 		const block = message.content.find((item) => item.type === 'tool_use');
-		if (!block) throw new AIInvalidOutputError('The model returned no tool call.');
+		if (!block) {
+			console.warn('[ai] model returned no tool call', {
+				provider,
+				model,
+				content: message.content.map((item) => ({ type: item.type, keys: Object.keys(item) }))
+			});
+			throw new AIInvalidOutputError('The model returned no tool call.');
+		}
+		if (block.input === undefined || block.input === null) {
+			console.warn('[ai] tool call contained no input', {
+				provider,
+				model,
+				blockKeys: Object.keys(block),
+				content: message.content.map((item) => ({ type: item.type, keys: Object.keys(item) }))
+			});
+			throw new AIInvalidOutputError('The model returned an empty tool call.');
+		}
 		return {
 			input: block.input,
 			toolUseId: block.id,
@@ -208,7 +236,7 @@ async function runAnthropicCompatible(
 				);
 			}
 			if ((error.status ?? 0) >= 500) {
-				throw new AIUnavailableError('The AI is busy right now — retry shortly.', {
+				throw new AIProviderTransientError('The AI is busy right now — retry shortly.', {
 					cause: error
 				});
 			}
@@ -222,7 +250,11 @@ async function runAnthropicCompatible(
 				);
 			}
 		}
-		throw error;
+		// The SDK wraps DNS failures, socket resets and aborted fetches as plain
+		// Errors. Treat those as transient so the configured fallback can help.
+		throw new AIProviderTransientError('The AI provider is unreachable — retry shortly.', {
+			cause: error
+		});
 	}
 }
 
@@ -277,7 +309,7 @@ async function runGroq(req: ToolCallRequest, model: string): Promise<ToolCallRes
 			signal: AbortSignal.timeout(60_000)
 		});
 	} catch (error) {
-		throw new AIUnavailableError('Groq is unavailable — retry shortly.', { cause: error });
+		throw new AIProviderTransientError('Groq is unavailable — retry shortly.', { cause: error });
 	}
 	const payload = (await response.json()) as GroqResponse;
 	if (!response.ok) {
@@ -292,11 +324,10 @@ async function runGroq(req: ToolCallRequest, model: string): Promise<ToolCallRes
 				}
 			);
 		}
-		throw new AIUnavailableError(
-			auth
-				? 'Groq API key is invalid or unauthorized — check /admin/settings.'
-				: payload.error?.message || 'Groq is unavailable — retry shortly.'
-		);
+		if (auth) {
+			throw new AIUnavailableError('Groq API key is invalid or unauthorized — check /admin/settings.');
+		}
+		throw new AIProviderTransientError(payload.error?.message || 'Groq is unavailable — retry shortly.');
 	}
 	const call = payload.choices?.[0]?.message?.tool_calls?.find(
 		(item) => item.function?.name === req.tool.name
@@ -325,8 +356,32 @@ async function runGroq(req: ToolCallRequest, model: string): Promise<ToolCallRes
 export const runToolCall: RunToolCall = async (req) => {
 	const provider = req.provider || configuredAgentProvider();
 	const model = req.model || configuredModel(provider, req.tier);
-	if (provider === 'groq') return runGroq(req, model);
-	return runAnthropicCompatible(req, provider, model);
+	const withMeta = (result: ToolCallResult, fallbackUsed = false): ToolCallResult => ({
+		...result,
+		provider,
+		model,
+		fallbackUsed
+	});
+	try {
+		if (provider === 'groq') return withMeta(await runGroq(req, model));
+		return withMeta(await runAnthropicCompatible(req, provider, model));
+	} catch (cause) {
+		const fallback =
+			req.tool.name === 'gate_message'
+				? configuredGatekeeperFallbackProvider()
+				: configuredAgentFallbackProvider();
+		const retryable =
+			cause instanceof AIProviderRateLimitError ||
+			cause instanceof AIProviderTransientError ||
+			cause instanceof AIInvalidOutputError;
+		if (!fallback || !retryable) throw cause;
+		const fallbackModel = configuredModel(fallback, req.tier);
+		const result =
+			fallback === 'groq'
+				? await runGroq(req, fallbackModel)
+				: await runAnthropicCompatible(req, fallback, fallbackModel);
+		return { ...result, provider: fallback, model: fallbackModel, fallbackUsed: true };
+	}
 };
 
 export const addUsage = (a: TokenUsage, b: TokenUsage): TokenUsage => {

@@ -3,7 +3,7 @@ import { getSetting } from '$lib/server/config';
 import { gateObjectSchema, gateSchema, toInputSchema, type GateResult } from './schemas';
 import {
 	AIInvalidOutputError,
-	DEFAULT_GROQ_MODEL,
+	DEFAULT_DEEPSEEK_LIGHT_MODEL,
 	addUsage,
 	configuredGatekeeperProvider,
 	configuredModel,
@@ -20,7 +20,7 @@ import {
  * adds no new safety surface (constitution §2 untouched: still Claude tool-use).
  */
 
-export const DEFAULT_GATEKEEPER_MODEL = DEFAULT_GROQ_MODEL;
+export const DEFAULT_GATEKEEPER_MODEL = DEFAULT_DEEPSEEK_LIGHT_MODEL;
 
 export type ChatTurn = { role: 'user' | 'assistant'; text: string };
 
@@ -73,7 +73,7 @@ Examples:
 export async function gateMessage(
 	input: { site: Site; message: string; history?: ChatTurn[]; memory?: string },
 	deps: { run: RunToolCall } = { run: runToolCall }
-): Promise<{ gate: GateResult; usage: TokenUsage }> {
+): Promise<{ gate: GateResult; usage: TokenUsage; provider?: string; model?: string; fallbackUsed?: boolean }> {
 	const tool = {
 		name: 'gate_message',
 		description: 'Classify the user message and, for edits, distill the request and its risk.',
@@ -105,7 +105,15 @@ export async function gateMessage(
 
 	const first = await attempt();
 	const parsed = gateSchema.safeParse(first.input);
-	if (parsed.success) return { gate: parsed.data, usage: first.usage };
+	if (parsed.success) {
+		return {
+			gate: parsed.data,
+			usage: first.usage,
+			provider: first.provider,
+			model: first.model,
+			fallbackUsed: first.fallbackUsed ?? false
+		};
+	}
 
 	// One repair round-trip with the concrete validation failure (same budget as Layer 2).
 	const second = await attempt(
@@ -113,7 +121,13 @@ export async function gateMessage(
 	);
 	const repaired = gateSchema.safeParse(second.input);
 	if (repaired.success) {
-		return { gate: repaired.data, usage: addUsage(first.usage, second.usage) };
+		return {
+			gate: repaired.data,
+			usage: addUsage(first.usage, second.usage),
+			provider: second.provider ?? first.provider,
+			model: second.model ?? first.model,
+			fallbackUsed: (first.fallbackUsed ?? false) || (second.fallbackUsed ?? false)
+		};
 	}
 	throw new AIInvalidOutputError('The gatekeeper produced invalid output.', repaired.error.issues);
 }

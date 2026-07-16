@@ -3,8 +3,9 @@ import { canManageSite, rateLimit } from '$lib/server/auth';
 import { getOrSeedDraft, getSiteMeta } from '$lib/server/db/repo';
 import {
 	listMedia,
+	deleteMediaAsset,
 	MAX_MEDIA_BYTES,
-	MAX_SITE_MEDIA_BYTES,
+	siteMediaLimit,
 	siteMediaUsage,
 	uploadMedia
 } from '$lib/server/media';
@@ -50,9 +51,13 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 	if (file.size > MAX_MEDIA_BYTES) {
 		return json({ ok: false, message: 'Image must be 8 MB or smaller.' }, { status: 413 });
 	}
-	if (siteMediaUsage(params.siteId) + file.size > MAX_SITE_MEDIA_BYTES) {
+	const mediaLimit = siteMediaLimit(locals.user?.id);
+	if (siteMediaUsage(params.siteId) + file.size > mediaLimit) {
 		return json(
-			{ ok: false, message: 'This site has reached its 100 MB media limit.' },
+			{
+				ok: false,
+				message: `This site has reached its ${Math.round(mediaLimit / 1024 / 1024)} MB media limit.`
+			},
 			{ status: 413 }
 		);
 	}
@@ -75,4 +80,23 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			{ status: clientError ? 400 : 503 }
 		);
 	}
+};
+
+export const DELETE: RequestHandler = async ({ params, request, locals }) => {
+	const denied = guard(locals, params.siteId);
+	if (denied) return denied;
+	if (!locals.user) error(401);
+	let body: { id?: string };
+	try {
+		body = (await request.json()) as { id?: string };
+	} catch {
+		return json({ ok: false, message: 'Invalid request.' }, { status: 400 });
+	}
+	if (
+		!body.id ||
+		!(await deleteMediaAsset({ id: body.id, siteId: params.siteId, ownerUserId: locals.user.id }))
+	) {
+		return json({ ok: false, message: 'Media asset not found.' }, { status: 404 });
+	}
+	return json({ ok: true });
 };

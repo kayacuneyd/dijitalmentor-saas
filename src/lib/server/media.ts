@@ -5,9 +5,28 @@ import sharp from 'sharp';
 import { getSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { mediaAssets } from '$lib/server/db/schema';
+import { planTierForUser } from '$lib/server/plan';
 
 export const MAX_MEDIA_BYTES = 8 * 1024 * 1024;
-export const MAX_SITE_MEDIA_BYTES = 100 * 1024 * 1024;
+export const FREE_SITE_MEDIA_BYTES = 20 * 1024 * 1024;
+export const PRO_SITE_MEDIA_BYTES = 500 * 1024 * 1024;
+
+export function siteMediaLimit(ownerUserId?: string | null): number {
+	const plan = ownerUserId ? planTierForUser(ownerUserId) : 'free';
+	const key =
+		plan === 'premium'
+			? 'MEDIA_LIMIT_PREMIUM_MB'
+			: plan === 'pro'
+				? 'MEDIA_LIMIT_PRO_MB'
+				: 'MEDIA_LIMIT_FREE_MB';
+	const configured = Number(getSetting(key));
+	if (Number.isFinite(configured) && configured > 0) return Math.round(configured * 1024 * 1024);
+	return plan === 'premium'
+		? 2048 * 1024 * 1024
+		: plan === 'pro'
+			? PRO_SITE_MEDIA_BYTES
+			: FREE_SITE_MEDIA_BYTES;
+}
 
 const IMAGE_TYPES = {
 	'image/jpeg': { extension: 'jpg', matches: (b: Uint8Array) => b[0] === 0xff && b[1] === 0xd8 },
@@ -76,7 +95,10 @@ export function imageExtension(mime: ImageMime): string {
 	return IMAGE_TYPES[mime].extension;
 }
 
-export async function prepareStoredImage(bytes: Uint8Array, mimeType: ImageMime): Promise<StoredImage> {
+export async function prepareStoredImage(
+	bytes: Uint8Array,
+	mimeType: ImageMime
+): Promise<StoredImage> {
 	if (mimeType === 'image/gif') {
 		return { bytes, mimeType, extension: imageExtension(mimeType) };
 	}
@@ -114,6 +136,15 @@ export async function deleteMediaObjects(objectKeys: string[]): Promise<void> {
 			s3.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: key })).catch(() => undefined)
 		)
 	);
+}
+
+export async function deleteMediaAsset(input: { id: string; siteId: string; ownerUserId: string }) {
+	const asset = db.select().from(mediaAssets).where(eq(mediaAssets.id, input.id)).get();
+	if (!asset || asset.siteId !== input.siteId || asset.ownerUserId !== input.ownerUserId)
+		return false;
+	db.delete(mediaAssets).where(eq(mediaAssets.id, input.id)).run();
+	await deleteMediaObjects([asset.objectKey]);
+	return true;
 }
 
 export function listMedia(siteId: string) {

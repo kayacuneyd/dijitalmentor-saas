@@ -3,7 +3,13 @@ import { and, desc, eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { billingEvents, siteSubscriptions, users } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
-import { confirmPayment, domainPriceEur, grantYearlyProDomainCredit } from '$lib/server/reservations';
+import {
+	confirmPayment,
+	domainPriceEur,
+	grantYearlyProDomainCredit
+} from '$lib/server/reservations';
+import { applyPaidAiTopUp } from '$lib/server/ai/usage';
+import { planTierForUser } from '$lib/server/plan';
 
 /**
  * Stripe subscriptions (PLAN §8) over the plain REST API — no SDK, one less
@@ -27,7 +33,7 @@ function normalizedProvider(value: string | undefined): BillingProvider | undefi
 export function creemConfigured(): boolean {
 	return Boolean(
 		getSetting('CREEM_API_KEY') &&
-			(getSetting('CREEM_PRO_MONTHLY_PRODUCT_ID') || getSetting('CREEM_PRO_PRODUCT_ID'))
+		(getSetting('CREEM_PRO_MONTHLY_PRODUCT_ID') || getSetting('CREEM_PRO_PRODUCT_ID'))
 	);
 }
 
@@ -55,6 +61,72 @@ export async function createCheckoutSession(input: {
 }): Promise<string> {
 	if (billingProvider() === 'creem') return createCreemCheckoutSession(input);
 	return createStripeCheckoutSession(input);
+}
+
+export async function createAiTopupCheckoutSession(input: {
+	userId: string;
+	email: string;
+	origin: string;
+}): Promise<string> {
+	const metadata = {
+		kind: 'ai_topup',
+		userId: input.userId,
+		edits: '10',
+		generations: '1',
+		usdWaived: '0.50'
+	};
+	if (billingProvider() === 'creem') {
+		const apiKey = getSetting('CREEM_API_KEY');
+		const productId = getSetting('CREEM_AI_TOPUP_PRODUCT_ID');
+		if (!apiKey || !productId)
+			throw new BillingNotConfiguredError('AI top-up billing is not configured yet.');
+		const res = await fetch(`${creemApiBase()}/checkouts`, {
+			method: 'POST',
+			headers: { 'x-api-key': apiKey, 'content-type': 'application/json' },
+			body: JSON.stringify({
+				product_id: productId,
+				request_id: `ai-topup-${input.userId}-${Date.now()}`,
+				success_url: `${input.origin}/dashboard?topup=success`,
+				customer: { email: input.email },
+				metadata
+			})
+		});
+		const body = (await res.json()) as CreemCheckoutResponse;
+		const checkoutUrl = body.checkout_url ?? body.checkoutUrl;
+		if (!res.ok || !checkoutUrl)
+			throw new Error(`Creem AI top-up failed: ${messageFromCreemError(body, res.status)}`);
+		return checkoutUrl;
+	}
+	const secretKey = getSetting('STRIPE_SECRET_KEY');
+	const priceId = getSetting('STRIPE_AI_TOPUP_PRICE_ID');
+	if (!secretKey || !priceId)
+		throw new BillingNotConfiguredError('AI top-up billing is not configured yet.');
+	const body = new URLSearchParams({
+		mode: 'payment',
+		'line_items[0][price]': priceId,
+		'line_items[0][quantity]': '1',
+		client_reference_id: input.userId,
+		customer_email: input.email,
+		success_url: `${input.origin}/dashboard?topup=success`,
+		cancel_url: `${input.origin}/dashboard?topup=cancelled`,
+		'metadata[kind]': metadata.kind,
+		'metadata[userId]': metadata.userId,
+		'metadata[edits]': metadata.edits,
+		'metadata[generations]': metadata.generations,
+		'metadata[usdWaived]': metadata.usdWaived
+	});
+	const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+		method: 'POST',
+		headers: {
+			authorization: `Bearer ${secretKey}`,
+			'content-type': 'application/x-www-form-urlencoded'
+		},
+		body
+	});
+	const session = (await res.json()) as { url?: string; error?: { message?: string } };
+	if (!res.ok || !session.url)
+		throw new Error(`Stripe AI top-up failed: ${session.error?.message ?? res.status}`);
+	return session.url;
 }
 
 export async function createStripeCheckoutSession(input: {
@@ -427,6 +499,9 @@ type StripeEvent = {
 				userId?: string;
 				plan?: string;
 				price?: string;
+				edits?: string;
+				generations?: string;
+				usdWaived?: string;
 			} | null;
 			/** epoch seconds — end of the paid period */
 			current_period_end?: number;
@@ -442,6 +517,20 @@ export function handleStripeEvent(event: StripeEvent): string {
 			// A one-time DOMAIN payment shares this event type with subscription
 			// checkout — route by mode/metadata so it never flips the user to Pro.
 			const reservationId = object.metadata?.reservationId;
+			if (object.metadata?.kind === 'ai_topup') {
+				const userId = object.metadata.userId ?? object.client_reference_id;
+				if (!userId || !object.id) return 'ignored: AI top-up without userId/checkout id';
+				const applied = applyPaidAiTopUp({
+					checkoutId: object.id,
+					userId,
+					edits: Number(object.metadata.edits ?? 10),
+					generations: Number(object.metadata.generations ?? 1),
+					usdWaived: Number(object.metadata.usdWaived ?? 0.5)
+				});
+				return applied
+					? `AI top-up granted to ${userId}`
+					: `AI top-up already granted ${object.id}`;
+			}
 			if (object.mode === 'payment' || reservationId) {
 				if (!reservationId) return 'ignored: domain payment without reservationId';
 				confirmPayment(reservationId); // → paid; cron/admin fulfills (register+attach)
@@ -730,6 +819,21 @@ export function handleCreemEvent(event: CreemEvent): string {
 		case 'subscription.paid':
 		case 'subscription.active': {
 			const metadata = creemMetadata(object);
+			if (metadata?.kind === 'ai_topup') {
+				const userId = creemUserId(object);
+				const checkoutId = object.id ?? object.checkout?.id;
+				if (!userId || !checkoutId) return 'ignored: AI top-up without userId/checkout id';
+				const applied = applyPaidAiTopUp({
+					checkoutId,
+					userId,
+					edits: 10,
+					generations: 1,
+					usdWaived: 0.5
+				});
+				return applied
+					? `AI top-up granted to ${userId}`
+					: `AI top-up already granted ${checkoutId}`;
+			}
 			if (metadata?.kind === 'domain') {
 				if (!metadata.reservationId) return 'ignored: domain payment without reservationId';
 				confirmPayment(metadata.reservationId);
@@ -802,6 +906,8 @@ export function hasActiveSubscription(userId: string): boolean {
 	return subscriptionState(userId).state !== 'free';
 }
 
+export { planTierForUser } from '$lib/server/plan';
+
 /**
  * Admin support gesture (/admin/customers): manually comp Pro or revert to
  * Free, bypassing Stripe. NOTE: if the user has a live `stripeCustomerId`,
@@ -810,10 +916,11 @@ export function hasActiveSubscription(userId: string): boolean {
  * responsible for surfacing that risk to the admin before calling this for a
  * user with a Stripe customer on file.
  */
-export function overrideSubscription(userId: string, next: 'active' | 'free'): void {
+export function overrideSubscription(userId: string, next: 'active' | 'free' | 'premium'): void {
 	db.update(users)
 		.set({
-			subscriptionStatus: next === 'active' ? 'active' : null,
+			subscriptionStatus: next === 'free' ? null : 'active',
+			plan: next === 'premium' ? 'premium' : next === 'active' ? 'pro' : 'free',
 			...(next === 'free' ? { subscriptionEndsAt: null } : {})
 		})
 		.where(eq(users.id, userId))

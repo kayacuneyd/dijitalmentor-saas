@@ -11,7 +11,9 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 	it('brings a fresh database to the full schema and records every version', () => {
 		const client = new Database(':memory:');
 		const { applied } = runMigrations(client);
-		expect(applied).toEqual(migrations.map((m) => `${m.version}-${m.name}`));
+		expect(applied).toEqual(
+			[...migrations].sort((a, b) => a.version - b.version).map((m) => `${m.version}-${m.name}`)
+		);
 		expect(tables(client)).toEqual(
 			expect.arrayContaining([
 				'sites',
@@ -144,7 +146,11 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='billing_events_created_idx'`
 			)
 			.get();
-		expect(billingEventsIdx).toBeTruthy();
+		 expect(billingEventsIdx).toBeTruthy();
+		const conversionTable = client
+			.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='site_conversion_stats'")
+			.get();
+		expect(conversionTable).toBeTruthy();
 		// v13: support ticket tables
 		expect(tables(client)).toEqual(
 			expect.arrayContaining(['support_tickets', 'support_ticket_messages'])
@@ -249,7 +255,9 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 		const client = new Database(':memory:');
 		runMigrations(client, migrations.slice(0, 1)); // stop after v1 (simulated crash)
 		const { applied } = runMigrations(client); // full list
-		expect(applied).toEqual(migrations.slice(1).map((m) => `${m.version}-${m.name}`));
+		expect(applied).toEqual(
+			[...migrations].filter((m) => m.version !== 1).sort((a, b) => a.version - b.version).map((m) => `${m.version}-${m.name}`)
+		);
 	});
 
 	it('adopts a pre-M6 database created by the old ad-hoc bootstrap', () => {

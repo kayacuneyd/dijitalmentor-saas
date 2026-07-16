@@ -18,9 +18,7 @@ import {
 
 const nonEmpty = z.string().trim().min(1);
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'kebab-case slug');
-const hexColor = z
-	.string()
-	.regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'hex color like #1a2b3c');
+const hexColor = z.string().regex(/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, 'hex color like #1a2b3c');
 const localized = <S extends z.ZodType>(shape: S) =>
 	z.strictObject({ tr: shape, en: shape, de: shape });
 
@@ -100,10 +98,12 @@ const patchPageSchema = z.strictObject({
 	slug,
 	title: localized(nonEmpty),
 	sections: z.array(patchSectionSchema).min(1).max(12),
-	meta: z.strictObject({
-		title: nonEmpty.max(70).optional(),
-		description: nonEmpty.max(200).optional()
-	}).optional()
+	meta: z
+		.strictObject({
+			title: nonEmpty.max(70).optional(),
+			description: nonEmpty.max(200).optional()
+		})
+		.optional()
 });
 
 // Drift guard: the generated schema MUST have exactly the same count as SECTION_TYPES.
@@ -209,6 +209,17 @@ export function translationSchemaFor(targets: Locale[]) {
 
 const target = { pageSlug: slug, sectionId: nonEmpty };
 
+// Kept separate from the full patch union because the larger union can cause
+// some provider tool callers to emit an empty object for high-cardinality
+// structural requests. A narrow tool contract improves add_section reliability
+// without widening what the AI is allowed to mutate.
+export const addSectionOpSchema = z.strictObject({
+	op: z.literal('add_section'),
+	pageSlug: slug,
+	index: z.number().int().min(0).optional(),
+	section: patchSectionSchema
+});
+
 const layoutPatchShape = {
 	nav: z
 		.strictObject({
@@ -284,12 +295,7 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 			poweredByBadge: z.boolean().optional()
 		})
 	}),
-	z.strictObject({
-		op: z.literal('add_section'),
-		pageSlug: slug,
-		index: z.number().int().min(0).optional(),
-		section: patchSectionSchema
-	}),
+	addSectionOpSchema,
 	z.strictObject({
 		op: z.literal('add_page'),
 		page: patchPageSchema.describe(
@@ -315,14 +321,16 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 		op: z.literal('set_section_style'),
 		pageSlug: slug,
 		sectionId: nonEmpty,
-		style: z.strictObject({
-			layout: z.enum(['full', 'boxed']).optional(),
-			backgroundColor: hexColor.optional(),
-			paddingY: z.enum(['compact', 'standard', 'spacious']).optional(),
-			marginY: z.enum(['none', 'compact', 'standard', 'spacious']).optional(),
-			minHeight: z.enum(['auto', 'compact', 'standard', 'tall']).optional(),
-			contentWidth: z.enum(['narrow', 'wide', 'full']).optional()
-		}).describe('partial style override — only set the fields the user asked for')
+		style: z
+			.strictObject({
+				layout: z.enum(['full', 'boxed']).optional(),
+				backgroundColor: hexColor.optional(),
+				paddingY: z.enum(['compact', 'standard', 'spacious']).optional(),
+				marginY: z.enum(['none', 'compact', 'standard', 'spacious']).optional(),
+				minHeight: z.enum(['auto', 'compact', 'standard', 'tall']).optional(),
+				contentWidth: z.enum(['narrow', 'wide', 'full']).optional()
+			})
+			.describe('partial style override — only set the fields the user asked for')
 	})
 ]);
 export type PatchOp = z.infer<typeof patchOpSchema>;
@@ -333,6 +341,11 @@ export const chatPatchSchema = z.strictObject({
 	operations: z.array(patchOpSchema).max(20)
 });
 export type ChatPatch = z.infer<typeof chatPatchSchema>;
+
+export const addSectionPatchSchema = z.strictObject({
+	reply: nonEmpty,
+	operations: z.array(addSectionOpSchema).min(1).max(1)
+});
 
 // ---------------------------------------------------------------------------
 // Gatekeeper (Layer 1) — cheap intent triage before the expensive patch agent.

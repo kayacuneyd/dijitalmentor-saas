@@ -54,6 +54,8 @@ function logGate(row: {
 	gateTokens?: number;
 	agentTokens?: number;
 	model?: string | null;
+	provider?: string | null;
+	fallbackUsed?: boolean;
 }): void {
 	db.insert(aiGateLog)
 		.values({
@@ -65,7 +67,9 @@ function logGate(row: {
 			decision: row.decision,
 			gateTokens: row.gateTokens ?? 0,
 			agentTokens: row.agentTokens ?? 0,
-			model: row.model ?? null
+			model: row.model ?? null,
+			provider: row.provider ?? null,
+			fallbackUsed: row.fallbackUsed ?? false
 		})
 		.run();
 }
@@ -133,7 +137,9 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			decision: opts.decision,
 			gateTokens: opts.gateTokens,
 			agentTokens: totalTokens(result.usage),
-			model: model ?? heavyModel()
+			model: result.model ?? model ?? heavyModel(),
+			provider: result.provider ?? configuredAgentProvider(),
+			fallbackUsed: result.fallbackUsed
 		});
 		appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'applied', body: result.reply });
 		// Append a memory note so the AI remembers this decision across sessions.
@@ -158,9 +164,15 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		// Stage 1: the gate. Its failure must never block editing — invalid gate
 		// output degrades to the pre-gate single-layer path.
 		assertWithinQuota(tenantId, quotaOpts); // token backstop; gate spends no credit
-		let gate, gateUsage;
+		let gate, gateUsage, gateProvider, gateModel, gateFallbackUsed;
 		try {
-			({ gate, usage: gateUsage } = await gateMessage({
+			({
+				gate,
+				usage: gateUsage,
+				provider: gateProvider,
+				model: gateModel,
+				fallbackUsed: gateFallbackUsed
+			} = await gateMessage({
 				site,
 				message: body.data.message,
 				history: body.data.history,
@@ -174,19 +186,24 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		}
 		recordUsage(tenantId, gateUsage);
 		const gateTokens = totalTokens(gateUsage);
+		const gateMeta = {
+			provider: gateProvider,
+			model: gateModel,
+			fallbackUsed: gateFallbackUsed
+		};
 
 		if (gate.intent === 'off_topic') {
-			logGate({ ...base, intent: gate.intent, decision: 'redirected', gateTokens });
+			logGate({ ...base, intent: gate.intent, decision: 'redirected', gateTokens, ...gateMeta });
 			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'redirect', body: gate.reply });
 			return json({ ok: true, kind: 'redirect', reply: gate.reply });
 		}
 		if (gate.intent === 'question') {
-			logGate({ ...base, intent: gate.intent, decision: 'answered', gateTokens });
+			logGate({ ...base, intent: gate.intent, decision: 'answered', gateTokens, ...gateMeta });
 			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'reply', body: gate.reply });
 			return json({ ok: true, kind: 'reply', reply: gate.reply });
 		}
 		if (gate.intent === 'help_request') {
-			logGate({ ...base, intent: gate.intent, decision: 'help', gateTokens });
+			logGate({ ...base, intent: gate.intent, decision: 'help', gateTokens, ...gateMeta });
 			appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'help', body: gate.reply });
 			return json({ ok: true, kind: 'help', reply: gate.reply });
 		}
@@ -198,7 +215,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 				approvedPrompt: gate.distilledPrompt,
 				riskLevel: 'low',
 				decision: 'auto_applied',
-				gateTokens
+				gateTokens,
+				...gateMeta
 			});
 		}
 		logGate({
@@ -206,7 +224,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			intent: 'edit',
 			riskLevel: gate.riskLevel,
 			decision: 'proposed',
-			gateTokens
+			gateTokens,
+			...gateMeta
 		});
 		return json({
 			ok: true,

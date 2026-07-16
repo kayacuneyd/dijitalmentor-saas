@@ -127,6 +127,7 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 
 	const site: Site = parsed.data;
 	const sectionIds = new Map<string, string>();
+	const pageSlugs = new Set<string>();
 	let hasContactPath = Boolean(site.settings.contactEmail);
 	let hasCtaPath = false;
 	let hasSeedMedia = false;
@@ -157,6 +158,17 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 	}
 
 	for (const [pageIndex, page] of site.pages.entries()) {
+		if (pageSlugs.has(page.slug)) {
+			addIssue(
+				issues,
+				'blocker',
+				'duplicate_page_slug',
+				`pages[${pageIndex}].slug`,
+				`Page slug "${page.slug}" is duplicated.`
+			);
+		} else {
+			pageSlugs.add(page.slug);
+		}
 		for (const locale of site.locales) {
 			if (!page.title[locale]?.trim()) {
 				addIssue(

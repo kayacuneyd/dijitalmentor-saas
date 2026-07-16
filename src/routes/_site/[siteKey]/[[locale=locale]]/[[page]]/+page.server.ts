@@ -7,6 +7,7 @@ import { rateLimit } from '$lib/server/auth';
 import { localeSchema, type Locale } from '$lib/schema/site';
 import type { Actions, PageServerLoad } from './$types';
 import { recordSiteVisit } from '$lib/server/siteVisits';
+import { recordConversion } from '$lib/server/siteAnalytics';
 
 /**
  * The public tenant site (PLAN §5): Host routing (src/hooks.ts) rewrites
@@ -14,7 +15,7 @@ import { recordSiteVisit } from '$lib/server/siteVisits';
  * only — drafts are never visible on the public surface.
  * Locale routes: `/` = default locale, `/en/…`, `/de/…` (matcher-gated).
  */
-export const load: PageServerLoad = ({ params, setHeaders }) => {
+export const load: PageServerLoad = ({ params, setHeaders, url }) => {
 	const site = resolvePublishedByKey(params.siteKey);
 	if (!site) error(404, 'This site is not published.');
 
@@ -28,7 +29,13 @@ export const load: PageServerLoad = ({ params, setHeaders }) => {
 	recordSiteVisit({ siteId: site.id, locale, pageSlug: page.slug });
 
 	setHeaders({ 'cache-control': 'no-cache, must-revalidate' });
-	return { site, page, locale, publishedVersion: meta?.publishedVersion ?? null };
+	return {
+		site,
+		page,
+		locale,
+		publishedVersion: meta?.publishedVersion ?? null,
+		canonicalUrl: `${url.origin}${url.pathname}`
+	};
 };
 
 const contactSchema = z.object({
@@ -57,6 +64,7 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(400, { contact: 'error' as const });
 
 		addSubmission({ siteId: site.id, ...parsed.data });
+		recordConversion({ siteId: site.id, event: 'contact_submitted' });
 
 		if (site.settings.contactEmail) {
 			// best-effort: a mail failure must never lose the stored submission.

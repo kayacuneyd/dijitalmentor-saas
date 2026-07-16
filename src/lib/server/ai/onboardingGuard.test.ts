@@ -12,6 +12,7 @@ const asResult = (input: unknown): ToolCallResult => ({
 });
 
 afterEach(() => {
+	clearSetting('GATEKEEPER_PROVIDER');
 	clearSetting('GATEKEEPER_FALLBACK_PROVIDER');
 });
 
@@ -115,6 +116,7 @@ describe('classifyOnboardingAnswer', () => {
 	});
 
 	it('uses the explicitly configured fallback provider after a rate limit', async () => {
+		setSetting('GATEKEEPER_PROVIDER', 'groq');
 		setSetting('GATEKEEPER_FALLBACK_PROVIDER', 'deepseek');
 		const providers: string[] = [];
 		let calls = 0;

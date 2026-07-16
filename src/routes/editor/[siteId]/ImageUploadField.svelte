@@ -17,6 +17,28 @@
 
 	let uploading = $state(false);
 	let uploadError = $state('');
+	let assets = $state<{ id: string; url: string; fileName: string }[]>([]);
+	let libraryOpen = $state(false);
+
+	async function loadLibrary() {
+		libraryOpen = true;
+		try {
+			const response = await fetch(`/api/sites/${siteId}/media`);
+			const body = await response.json();
+			if (body.ok) assets = body.assets;
+		} catch {
+			assets = [];
+		}
+	}
+
+	async function removeAsset(id: string) {
+		const response = await fetch(`/api/sites/${siteId}/media`, {
+			method: 'DELETE',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ id })
+		});
+		if (response.ok) assets = assets.filter((asset) => asset.id !== id);
+	}
 
 	async function upload(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -73,7 +95,40 @@
 			/>
 		{/if}
 	</div>
+	<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick={loadLibrary}>
+		{libraryOpen ? 'Medya kütüphanesini yenile' : 'Medya kütüphanesini aç'}
+	</button>
 	{#if uploadError}
 		<p class="text-xs text-[var(--sk-error)]">{uploadError}</p>
+	{/if}
+	{#if libraryOpen}
+		<div
+			class="grid grid-cols-3 gap-2 rounded-[6px] border border-[var(--sk-line)] bg-base-100 p-2"
+		>
+			{#if assets.length === 0}
+				<p class="col-span-3 text-xs text-base-content/60">Henüz yüklenmiş medya yok.</p>
+			{:else}
+				{#each assets as asset (asset.id)}
+					<div class="group relative overflow-hidden rounded border border-base-300">
+						<button
+							type="button"
+							class="block w-full"
+							onclick={() => onchange(asset.url)}
+							title={asset.fileName}
+						>
+							<img src={asset.url} alt={asset.fileName} class="aspect-square w-full object-cover" />
+						</button>
+						<button
+							type="button"
+							class="absolute right-1 top-1 hidden rounded bg-black/70 px-1.5 py-1 text-[10px] text-white group-hover:block"
+							onclick={() => removeAsset(asset.id)}
+							aria-label={`Delete ${asset.fileName}`}
+						>
+							×
+						</button>
+					</div>
+				{/each}
+			{/if}
+		</div>
 	{/if}
 </div>

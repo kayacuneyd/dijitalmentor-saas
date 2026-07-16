@@ -1,8 +1,8 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { aiUsage } from '$lib/server/db/schema';
+import { aiTopupGrants, aiUsage } from '$lib/server/db/schema';
 import { getSetting } from '$lib/server/config';
-import { subscriptionState } from '$lib/server/billing';
+import { planTierForUser } from '$lib/server/plan';
 import { QuotaExceededError, type TokenUsage } from './llm';
 
 /**
@@ -26,8 +26,14 @@ export type CreditKind = 'edit' | 'generation';
 
 /** Plan-tier credit limits (Free vs Pro; Premium arrives with Phase 2). */
 export function creditLimits(ownerUserId?: string | null): { edit: number; generation: number } {
-	const pro = ownerUserId ? subscriptionState(ownerUserId).state !== 'free' : false;
-	return pro
+	const plan = ownerUserId ? planTierForUser(ownerUserId) : 'free';
+	if (plan === 'premium') {
+		return {
+			edit: intSetting('AI_EDITS_PREMIUM', 200),
+			generation: intSetting('AI_GENERATIONS_PREMIUM', 20)
+		};
+	}
+	return plan === 'pro'
 		? { edit: intSetting('AI_EDITS_PRO', 50), generation: intSetting('AI_GENERATIONS_PRO', 5) }
 		: { edit: intSetting('AI_EDITS_FREE', 10), generation: intSetting('AI_GENERATIONS_FREE', 1) };
 }
@@ -44,9 +50,9 @@ export function tenantIdForUser(userId: string): string {
  * (provider price changes, unusually large sites/edits).
  */
 export function tenantMonthlyBudgetMicrousd(ownerUserId?: string | null): number {
-	const pro = ownerUserId ? subscriptionState(ownerUserId).state !== 'free' : false;
-	const key = pro ? 'AI_BUDGET_PRO_USD' : 'AI_BUDGET_FREE_USD';
-	const fallback = pro ? 4 : 1;
+	const plan = ownerUserId ? planTierForUser(ownerUserId) : 'free';
+	const key = plan === 'free' ? 'AI_BUDGET_FREE_USD' : 'AI_BUDGET_PRO_USD';
+	const fallback = plan === 'free' ? 1 : plan === 'premium' ? 20 : 4;
 	const configured = Number(getSetting(key) || fallback);
 	const usd = Number.isFinite(configured) && configured > 0 ? configured : fallback;
 	return Math.round(usd * 1_000_000);
@@ -151,6 +157,35 @@ export function grantAiTopUp(tenantId: string, grant: TopUpGrant): void {
 			}
 		})
 		.run();
+}
+
+/** Apply a paid top-up exactly once per provider checkout/session id. */
+export function applyPaidAiTopUp(input: {
+	checkoutId: string;
+	userId: string;
+	edits: number;
+	generations: number;
+	usdWaived?: number;
+}): boolean {
+	if (!input.checkoutId || input.edits < 0 || input.generations < 0) return false;
+	const inserted = db
+		.insert(aiTopupGrants)
+		.values({
+			checkoutId: input.checkoutId,
+			userId: input.userId,
+			edits: input.edits,
+			generations: input.generations,
+			usdWaived: Math.max(0, input.usdWaived ?? 0)
+		})
+		.onConflictDoNothing()
+		.run();
+	if (inserted.changes === 0) return false;
+	grantAiTopUp(tenantIdForUser(input.userId), {
+		edits: input.edits,
+		generations: input.generations,
+		usdWaived: input.usdWaived
+	});
+	return true;
 }
 
 /**

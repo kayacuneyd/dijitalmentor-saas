@@ -9,6 +9,7 @@ import {
 import {
 	AIInvalidOutputError,
 	AIProviderRateLimitError,
+	AIProviderTransientError,
 	addUsage,
 	configuredGatekeeperFallbackProvider,
 	configuredGatekeeperProvider,
@@ -85,7 +86,10 @@ export async function classifyOnboardingAnswer(
 		first = await attempt();
 	} catch (error) {
 		const fallbackProvider = configuredGatekeeperFallbackProvider();
-		if (!(error instanceof AIProviderRateLimitError) || !fallbackProvider) throw error;
+		const retryable =
+			error instanceof AIProviderRateLimitError ||
+			error instanceof AIProviderTransientError;
+		if (!retryable || !fallbackProvider) throw error;
 		first = await attempt(undefined, fallbackProvider);
 	}
 	const parsed = onboardingGuardSchema.safeParse(first.input);

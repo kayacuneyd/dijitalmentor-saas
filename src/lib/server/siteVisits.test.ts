@@ -23,8 +23,8 @@ describe('site visits', () => {
 		const { migrations, runMigrations } = await import('./db/migrations');
 		const client = new Database(':memory:');
 		runMigrations(client);
-		const latest = migrations.at(-1);
-		expect(latest?.name).toBe('site-visit-stats');
+		const visitMigration = migrations.find((migration) => migration.name === 'site-visit-stats');
+		expect(visitMigration?.version).toBe(30);
 		expect(client.prepare('PRAGMA table_info(site_visit_stats)').all()).toHaveLength(5);
 	});
 });

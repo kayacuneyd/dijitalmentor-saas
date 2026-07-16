@@ -1,5 +1,21 @@
 # Roadmap Evaluation — saaskaya
 
+> Aktif uygulama planı: [`2026-07-16 geliştirme ve ürünleştirme planı`](specs/2026-07-16-gelistirme-ve-urunlestirme-plani.md).
+> Bu değerlendirme mevcut kanıt ve ertelenen işleri sınıflandırır; faz sırasını değiştirmez.
+
+## 2026-07-16 senkron durumu
+
+- Faz 5: Creem checkout/webhook, reservation timeline ve idempotent domain fulfillment korunuyor.
+  Gerçek provider hesabı gerektiren customer portal, invoice API ve otomatik cancel/resume işlemleri
+  operator activation backlog'da; kullanıcıya hazırmış gibi gösterilmiyor.
+- Faz 6: page-level SEO metadata, canonical/OG/Twitter etiketleri, public visit aggregation ve
+  contact conversion aggregation uygulandı. Draft/preview trafiği public analytics'e yazılmaz.
+- Faz 7: production DB ayrımı, migration runner, authorization testleri ve admin/billing/domain audit
+  kayıtları mevcut. Restore adımları [`DISASTER_RECOVERY_RUNBOOK.md`](DISASTER_RECOVERY_RUNBOOK.md)
+  içinde; off-site remote backup yine operator configuration gerektiriyor.
+- Faz 8: bu dosya aktif planı referanslıyor; eski provider ifadeleri mevcut Creem + Groq/DeepSeek
+  mimarisiyle karşılaştırmalı backlog olarak yeniden sınıflandırıldı.
+
 > **Tarih:** 2026-07-08 · **Durum:** değerlendirme kaydedildi · **Amaç:** projenin nerede olduğunu, en
 > kritik boşlukları ve önerilen öncelik sırasını tek bir karar-verilebilir dokümanda toplamak.
 >

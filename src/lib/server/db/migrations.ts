@@ -855,6 +855,57 @@ export const migrations: Migration[] = [
 				`CREATE INDEX IF NOT EXISTS site_visit_stats_site_day_idx ON site_visit_stats (site_id, day)`
 			);
 		}
+	},
+	{
+		version: 31,
+		name: 'site-conversion-stats',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS site_conversion_stats (
+				site_id text NOT NULL,
+				day text NOT NULL,
+				event text NOT NULL,
+				count integer NOT NULL DEFAULT 0,
+				PRIMARY KEY (site_id, day, event)
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS site_conversion_stats_day_idx ON site_conversion_stats (day)`
+			);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS site_conversion_stats_site_day_idx ON site_conversion_stats (site_id, day)`
+			);
+		}
+	},
+	{
+		version: 32,
+		name: 'ai-provider-telemetry',
+		up(client) {
+			ensureColumn(client, 'ai_gate_log', 'provider', 'text');
+			ensureColumn(client, 'ai_gate_log', 'fallback_used', 'integer NOT NULL DEFAULT 0');
+		}
+	},
+	{
+		version: 34,
+		name: 'ai-topup-grants',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS ai_topup_grants (
+				checkout_id text PRIMARY KEY,
+				user_id text NOT NULL,
+				edits integer NOT NULL DEFAULT 0,
+				generations integer NOT NULL DEFAULT 0,
+				usd_waived integer NOT NULL DEFAULT 0,
+				created_at integer NOT NULL
+			)`);
+			client.exec(
+				`CREATE INDEX IF NOT EXISTS ai_topup_grants_user_idx ON ai_topup_grants (user_id, created_at)`
+			);
+		}
+	},
+	{
+		version: 35,
+		name: 'user-plan-tier',
+		up(client) {
+			ensureColumn(client, 'users', 'plan', "text NOT NULL DEFAULT 'free'");
+		}
 	}
 ];
 

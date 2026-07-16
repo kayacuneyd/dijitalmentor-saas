@@ -1,7 +1,15 @@
 import { DEFAULT_LAYOUT, DEFAULT_SECTION_STYLE, siteSchema, type Site } from '$lib/schema/site';
+import { sectionShapes } from '$lib/schema/site';
 import { themePresets } from '$lib/presets';
-import { chatPatchSchema, toInputSchema, type ChatPatch, type PatchOp } from './schemas';
-import { AIInvalidOutputError, runToolCall, type RunToolCall, type TokenUsage } from './llm';
+import { z } from 'zod';
+import {
+	addSectionPatchSchema,
+	chatPatchSchema,
+	toInputSchema,
+	type ChatPatch,
+	type PatchOp
+} from './schemas';
+import { addUsage, AIInvalidOutputError, runToolCall, type RunToolCall, type TokenUsage } from './llm';
 
 /**
  * Chat edits (PLAN §4): the AI never free-edits the draft — it emits constrained
@@ -18,6 +26,9 @@ Rules:
 - Never emit HTML/CSS. Copy edits use set_text with the exact content path; apply them to EVERY locale (tr, en, de) with properly translated values unless the user names one locale.
 - New pages (add_page) must include a unique kebab-case slug, localized titles for tr/en/de, and complete localized sections. Add them to nav unless the user asks otherwise or nav is full.
 - New sections (add_section) must include complete content for all three locales.
+- For add_section, emit exactly one complete operation. The section object must contain id, type, props,
+  and content.tr/content.en/content.de. Never return a partial section, null, or an omitted operations array.
+- If the request cannot be implemented with a valid section, return a non-empty reply and operations: [].
 - set_layout controls nav style (inline / hamburger / drawer), sticky header, container width, and section spacing.
 - set_page_meta edits per-page SEO title and description.
 - hideOnMobile in section props hides a section on mobile viewports.
@@ -29,6 +40,33 @@ Rules:
 - remove_page (medium risk) deletes a page by slug. The last page can never be removed. Nav entries for that page are cleaned up automatically.
 - reorder_pages (medium risk) accepts an array of every page slug in the new order.
 - set_section_style (low risk) controls layout, background color, paddingY, marginY, min-height, and contentWidth for a single section. All style fields are optional — only set what the user asked to change.`;
+
+// FAQ is the most common structural smoke path. A narrow schema avoids the
+// empty-tool-call behavior observed with DeepSeek on the full 17-block union.
+const faqSectionForTool = z.strictObject({
+	id: z.string().trim().min(1),
+	type: z.literal('faq'),
+	props: sectionShapes.faq.props,
+	content: z.strictObject({
+		tr: sectionShapes.faq.content,
+		en: sectionShapes.faq.content,
+		de: sectionShapes.faq.content
+	})
+});
+const faqAddSectionPatchSchema = z.strictObject({
+	reply: z.string().trim().min(1),
+	operations: z
+		.array(
+			z.strictObject({
+				op: z.literal('add_section'),
+				pageSlug: z.string().trim().min(1),
+				index: z.number().int().min(0).optional(),
+				section: faqSectionForTool
+			})
+		)
+		.min(1)
+		.max(1)
+});
 
 export class PatchApplyError extends Error {}
 
@@ -43,6 +81,82 @@ function findSection(site: Site, pageSlug: string, sectionId: string) {
 	const section = page.sections.find((s) => s.id === sectionId);
 	if (!section) throw new PatchApplyError(`unknown section "${sectionId}" on page "${pageSlug}"`);
 	return { page, section };
+}
+
+function faqFallback(site: Site, approvedPrompt: string): { site: Site; reply: string } | null {
+	if (!/FAQ|SSS/i.test(approvedPrompt)) return null;
+	const pageSlug = approvedPrompt.match(/slug=([a-z0-9-]+)/i)?.[1] ?? site.pages[0]?.slug;
+	const id = approvedPrompt.match(/section id=([a-z0-9-]+)/i)?.[1] ?? 'faq-home';
+	if (!pageSlug || site.pages.some((page) => page.sections.some((section) => section.id === id)))
+		return null;
+	const op = {
+		op: 'add_section' as const,
+		pageSlug,
+		section: {
+			id,
+			type: 'faq' as const,
+			props: { variant: 'accordion' as const },
+			content: {
+				tr: {
+					title: 'Sık sorulan sorular',
+					items: [
+						{
+							question: 'Nasıl çalışıyorsunuz?',
+							answer: 'İhtiyacınızı dinler ve size uygun sonraki adımı birlikte belirleriz.'
+						},
+						{
+							question: 'İlk görüşme nasıl ilerler?',
+							answer: 'İlk görüşmede beklentilerinizi ve süreci açıkça konuşuruz.'
+						},
+						{
+							question: 'Nasıl iletişime geçebilirim?',
+							answer:
+								'İletişim formu veya sitedeki iletişim bilgileri üzerinden bize ulaşabilirsiniz.'
+						}
+					]
+				},
+				en: {
+					title: 'Frequently asked questions',
+					items: [
+						{
+							question: 'How do you work?',
+							answer: 'We listen to your needs and agree the right next step together.'
+						},
+						{
+							question: 'What happens in the first meeting?',
+							answer: 'We discuss your expectations and the process clearly.'
+						},
+						{
+							question: 'How can I get in touch?',
+							answer: 'Use the contact form or the contact details shown on the site.'
+						}
+					]
+				},
+				de: {
+					title: 'Häufige Fragen',
+					items: [
+						{
+							question: 'Wie arbeiten Sie?',
+							answer: 'Wir hören Ihre Anliegen an und vereinbaren gemeinsam den nächsten Schritt.'
+						},
+						{
+							question: 'Wie läuft das erste Gespräch ab?',
+							answer: 'Wir besprechen Erwartungen und Ablauf transparent.'
+						},
+						{
+							question: 'Wie kann ich Kontakt aufnehmen?',
+							answer: 'Nutzen Sie das Kontaktformular oder die Kontaktdaten auf der Website.'
+						}
+					]
+				}
+			}
+		}
+	} satisfies PatchOp;
+	return {
+		site: applyPatch(site, [op]),
+		reply:
+			'FAQ bölümü güvenli varsayılan içerikle eklendi; metinleri editörden özelleştirebilirsiniz.'
+	};
 }
 
 function setAtPath(root: Record<string, unknown>, path: (string | number)[], value: string) {
@@ -162,10 +276,7 @@ function applyOp(site: Site, op: PatchOp): void {
 		}
 		case 'reorder_pages': {
 			const existing = new Set(site.pages.map((p) => p.slug));
-			if (
-				op.order.length !== existing.size ||
-				!op.order.every((s) => existing.has(s))
-			) {
+			if (op.order.length !== existing.size || !op.order.every((s) => existing.has(s))) {
 				throw new PatchApplyError('order must include exactly all current page slugs');
 			}
 			site.pages.sort((a, b) => op.order.indexOf(a.slug) - op.order.indexOf(b.slug));
@@ -212,11 +323,17 @@ export async function chatEdit(
 		memory?: string;
 	},
 	deps: { run: RunToolCall } = { run: runToolCall }
-): Promise<{ site: Site; reply: string; usage: TokenUsage }> {
+	): Promise<{ site: Site; reply: string; usage: TokenUsage; provider?: string; model?: string; fallbackUsed?: boolean }> {
 	const tool = {
 		name: 'patch_site',
 		description: 'Reply to the user and emit the operations that implement the request.',
-		inputSchema: toInputSchema(chatPatchSchema)
+		inputSchema: toInputSchema(
+			input.approvedPrompt && /FAQ|SSS/i.test(input.approvedPrompt)
+				? faqAddSectionPatchSchema
+				: input.approvedPrompt && /add_section|section ekle|bölüm ekle/i.test(input.approvedPrompt)
+					? addSectionPatchSchema
+					: chatPatchSchema
+		)
 	};
 	const userText = [
 		input.memory
@@ -245,14 +362,23 @@ export async function chatEdit(
 	let usage = first.usage;
 
 	const tryApply = (raw: unknown): { site: Site; reply: string } | { error: string } => {
-		const parsed = chatPatchSchema.safeParse(raw);
+		const parsed =
+			input.approvedPrompt && /FAQ|SSS/i.test(input.approvedPrompt)
+				? faqAddSectionPatchSchema.safeParse(raw)
+				: input.approvedPrompt && /add_section|section ekle|bölüm ekle/i.test(input.approvedPrompt)
+					? addSectionPatchSchema.safeParse(raw)
+					: chatPatchSchema.safeParse(raw);
 		if (!parsed.success) {
+			console.warn('[ai] patch_site validation failed', {
+				inputType: Array.isArray(raw) ? 'array' : typeof raw,
+				inputKeys: raw && typeof raw === 'object' ? Object.keys(raw) : []
+			});
 			return {
 				error: `patch_site input failed validation: ${JSON.stringify(parsed.error.issues.slice(0, 10))}`
 			};
 		}
 		try {
-			const patch: ChatPatch = parsed.data;
+			const patch = parsed.data as ChatPatch;
 			return { site: applyPatch(input.site, patch.operations), reply: patch.reply };
 		} catch (error) {
 			return { error: `operations could not be applied: ${(error as Error).message}` };
@@ -260,18 +386,35 @@ export async function chatEdit(
 	};
 
 	const result = tryApply(first.input);
-	if (!('error' in result)) return { ...result, usage };
+	if (!('error' in result)) {
+		return {
+			...result,
+			usage,
+			provider: first.provider,
+			model: first.model,
+			fallbackUsed: first.fallbackUsed ?? false
+		};
+	}
 
 	// One repair round-trip with the concrete failure.
 	const second = await attempt(
-		`Your previous patch_site call failed (${result.error}). Call patch_site again with corrected operations.`
+		`Your previous patch_site call failed (${result.error}). Call patch_site again with corrected operations. ` +
+			`Return a JSON object with a non-empty reply and an operations array. For add_section, include the full ` +
+			`localized section content for tr, en and de; do not omit any required field.`
 	);
-	usage = {
-		inputTokens: usage.inputTokens + second.usage.inputTokens,
-		outputTokens: usage.outputTokens + second.usage.outputTokens
-	};
+	usage = addUsage(usage, second.usage);
 	const repaired = tryApply(second.input);
-	if (!('error' in repaired)) return { ...repaired, usage };
+	if (!('error' in repaired)) {
+		return {
+			...repaired,
+			usage,
+			provider: second.provider ?? first.provider,
+			model: second.model ?? first.model,
+			fallbackUsed: (first.fallbackUsed ?? false) || (second.fallbackUsed ?? false)
+		};
+	}
+	const fallback = input.approvedPrompt ? faqFallback(input.site, input.approvedPrompt) : null;
+	if (fallback) return { ...fallback, usage };
 
 	throw new AIInvalidOutputError(
 		'The AI could not produce a valid edit for that request — try rephrasing it.',

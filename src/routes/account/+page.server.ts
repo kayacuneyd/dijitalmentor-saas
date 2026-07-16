@@ -13,6 +13,7 @@ import {
 import { listSitesByOwner } from '$lib/server/db/repo';
 import { countSubmissions } from '$lib/server/db/contact';
 import { getDomainForSite } from '$lib/server/domains';
+import { conversionSummary } from '$lib/server/siteAnalytics';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -21,7 +22,8 @@ export const load: PageServerLoad = ({ locals }) => {
 		...site,
 		canExport: locals.user!.isAdmin || hasActiveSiteSubscription(site.id, locals.user!.id),
 		domain: getDomainForSite(site.id),
-		messageCount: countSubmissions(site.id)
+		messageCount: countSubmissions(site.id),
+		conversions: conversionSummary(site.id)
 	}));
 	return {
 		user: locals.user,

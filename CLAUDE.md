@@ -76,5 +76,7 @@ delivery, and off-site backups; Porkbun/Stripe/payment settings remain intention
 the preview-only beta.
 R2-backed image uploads are live in the editor (`src/lib/server/media.ts`, media API, migration v6);
 the richer media library/thumbnails remain backlog. Other backlog: gatekeeper Phase 2 (top-up, human
-help, budget dot), per-tenant SQLite split. Product v2 direction is captured in
-`docs/PRODUCT_VISION_V2.md`.
+help, budget dot), per-tenant SQLite split. Faz 6 privacy-safe tenant conversion aggregation and
+page-level SEO metadata are live; Faz 7 recovery procedure is in `docs/DISASTER_RECOVERY_RUNBOOK.md`.
+The active post-beta plan is `docs/specs/2026-07-16-gelistirme-ve-urunlestirme-plani.md`.
+Product v2 direction is captured in `docs/PRODUCT_VISION_V2.md`.

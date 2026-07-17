@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rasterize static/favicon.svg into the PWA icon set (static/icons/) using the
+ * Rasterize static/logo.svg into the PWA icon set (static/icons/) using the
  * playwright-core chromium already installed for the verify skill — no sharp/
  * resvg dependency. Run once and commit the PNGs; rerun after brand changes.
  *
@@ -16,7 +16,7 @@ const outDir = join(root, 'static', 'icons');
 const executablePath =
 	process.env.CHROMIUM_PATH || '/root/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome';
 
-const svg = await readFile(join(root, 'static', 'favicon.svg'), 'utf8');
+const svg = await readFile(join(root, 'static', 'logo.svg'), 'utf8');
 const svgData = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 
 /** Transparent-background targets keep the SVG's own rounded rect; full-bleed

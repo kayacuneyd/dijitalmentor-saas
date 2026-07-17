@@ -553,7 +553,7 @@
 	path="/"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(), webSiteJsonLd(locale), softwareJsonLd(locale, copy.description)]}
+	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl), softwareJsonLd(locale, copy.description)]}
 />
 
 <PublicShell {locale} currentPath="/" userEmail={data.user?.email ?? null} label="saaskaya.com">

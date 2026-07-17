@@ -53,7 +53,7 @@
 	path="/blog"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(), webSiteJsonLd(locale)]}
+	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl)]}
 />
 
 <PublicShell

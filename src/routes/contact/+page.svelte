@@ -102,7 +102,7 @@
 		name: copy.title,
 		url: absoluteUrl(locale, '/contact'),
 		description: copy.description,
-		mainEntity: organizationJsonLd()
+			mainEntity: organizationJsonLd(data.platformBranding?.logoUrl)
 	});
 </script>
 
@@ -111,7 +111,7 @@
 	path="/contact"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(), contactJsonLd]}
+	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), contactJsonLd]}
 />
 
 <PublicShell

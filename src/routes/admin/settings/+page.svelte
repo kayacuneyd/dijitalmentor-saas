@@ -87,6 +87,10 @@
 		</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
+	{:else if form?.brandingSaved}
+		<div class="sk-alert sk-alert-success">Branding updated: {form.brandingSaved}.</div>
+	{:else if form?.brandingReset}
+		<div class="sk-alert sk-alert-success">Branding reset: {form.brandingReset}.</div>
 	{/if}
 
 	<section class="grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
@@ -197,6 +201,45 @@
 			</div>
 		</AppCard>
 	</section>
+
+	<AppCard class="p-4">
+		<div class="flex flex-col gap-4">
+			<div>
+				<h2 class="text-base font-semibold">Platform branding</h2>
+				<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+					Upload the platform logo or icon without changing code. SVG files are checked for unsafe content;
+					PNG, JPEG, GIF and WebP files are normalized before storage.
+				</p>
+			</div>
+			<div class="grid gap-4 md:grid-cols-2">
+				{#each [
+					{ target: 'logo', label: 'Main logo', url: data.branding.logoUrl },
+					{ target: 'icon', label: 'Favicon / app icon', url: data.branding.iconUrl }
+				] as asset (asset.target)}
+					<div class="rounded-[var(--sk-radius)] border border-[var(--sk-line)] p-3">
+						<div class="flex items-center gap-3">
+							<div class="flex size-16 items-center justify-center overflow-hidden rounded-[10px] bg-[var(--sk-shell)]">
+								<img src={asset.url} alt={asset.label} class="size-full object-contain" />
+							</div>
+							<div>
+								<p class="text-sm font-semibold">{asset.label}</p>
+								<p class="sk-mono mt-1 text-[10px] text-[var(--sk-faint)]">v{data.branding.version}</p>
+							</div>
+						</div>
+						<form method="POST" action="?/uploadBranding" enctype="multipart/form-data" use:enhance class="mt-3 flex flex-wrap items-center gap-2">
+							<input type="hidden" name="target" value={asset.target} />
+							<input name="file" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/gif,image/webp" class="file-input file-input-sm w-full max-w-xs" />
+							<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Upload</button>
+						</form>
+						<form method="POST" action="?/resetBranding" use:enhance class="mt-2">
+							<input type="hidden" name="target" value={asset.target} />
+							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Use committed default</button>
+						</form>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</AppCard>
 
 	<section class="grid gap-4 xl:grid-cols-[188px_1fr]">
 		<aside class="xl:sticky xl:top-4 xl:self-start">

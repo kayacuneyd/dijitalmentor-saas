@@ -38,7 +38,7 @@
 		inLanguage: locale,
 		url: absoluteUrl(locale, `/blog/${post.slug}`),
 		image: seoImage,
-		publisher: organizationJsonLd(),
+		publisher: organizationJsonLd(data.platformBranding?.logoUrl),
 		author: {
 			'@type': 'Person',
 			name: post.authorName,
@@ -79,7 +79,7 @@
 	description={post.seoDescription[locale] || post.description[locale]}
 	type="article"
 	image={seoImage}
-	jsonLd={[organizationJsonLd(), postJsonLd, breadcrumbJsonLd]}
+	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), postJsonLd, breadcrumbJsonLd]}
 />
 
 <PublicShell

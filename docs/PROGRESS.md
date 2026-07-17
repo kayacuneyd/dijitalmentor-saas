@@ -3962,3 +3962,19 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Kullanıcı kararı: yeni API key, OAuth kaydı veya müşteri tarafında teknik provider kurulumu gerektiren özellikler talep oluşmadan uygulanmayacak.
 - Scholar/GitHub canlı importu, canlı metrikler, portal/form, belge akışı ve sertifika PDF'i backlog'da tutuldu; mevcut manuel link-out, R2, JSON export ve anonim analytics kapsamı korunuyor.
 - Spec'e dış servis/token politikası eklendi. Böylece kullanılmayacak entegrasyonlar için kod, secret ve bakım yükü oluşturulmayacak.
+
+## 2026-07-17 — Yeni arı logusunun proje geneline uygulanması
+
+- Kullanıcının sağladığı `static/logo.svg` tek marka kaynağı yapıldı; app favicon, apple-touch-icon, `BrandMark`, admin shell, public footer ve Organization JSON-LD artık bu dosyayı kullanıyor.
+- Eski `brand-logo.png`, `brand-icon.png`, `logo.png`, `icon.png`, Svelte favicon dosyaları ve eski favicon türevleri kaldırıldı. PWA PNG ikonları yeni SVG’den yeniden üretildi; üretim scripti de artık `static/logo.svg` okuyor.
+- Karar: kare hexagon/arılı logo, ileride animasyon eklenebilecek tek görsel kimlik noktası olarak korundu; metin markası gereken yerlerde erişilebilir `saaskaya` yazısı SVG’nin yanında tutuldu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run test` 91 dosya geçti / 2 skip, 637 test geçti / 11 skip; `npm run build` başarılı; eski marka dosyası/referans taraması temiz.
+
+## 2026-07-17 — Owner panelinden platform branding yönetimi
+
+- `/admin/settings` içine platform branding alanı eklendi: ana logo ve favicon/app icon yükleme, önizleme, committed default'a dönme.
+- `src/lib/server/branding.ts` app settings üzerinde aktif asset URL/version bilgisini yönetiyor; R2 yükleme, cache-busting, eski object için best-effort cleanup ve fallback olarak `/logo.svg` sağlıyor.
+- SVG yüklemeleri script, foreignObject, event handler, javascript URL, external CSS import ve benzeri içeriklere karşı reddediliyor; raster yüklemeleri mevcut medya pipeline'ında normalize ediliyor.
+- Runtime branding layout, header/footer/admin, favicon, manifest ve Organization JSON-LD'ye bağlandı. Tenant host'ları platform branding çözümlemesinden hariç tutuldu.
+- Doğrulama: branding security testi 3/3, `npm run check` 0 hata/0 uyarı, production build başarılı, local `/` → `/en` 307, `/logo.svg` 200, manifest güncel dynamic icon döndürüyor, `/admin/settings` auth olmadan `/login`'e 303 yönlendiriyor.
+- Tam test paketi 639/651 geçti; mevcut `src/routes/api/onboarding/finish/server.test.ts` içindeki dietitian-kit testi branding değişikliğinden bağımsız olarak 400 beklenirken 200 beklediği için başarısız kaldı. Bu hata bu görev kapsamında değiştirilmedi.

@@ -1,6 +1,7 @@
 import type { LayoutServerLoad } from './$types';
 import { getSetting } from '$lib/server/config';
 import { getMessageOverrides } from '$lib/server/messageOverrides';
+import { getPlatformBranding } from '$lib/server/branding';
 
 function gaMeasurementId(): string | null {
 	const value = getSetting('GA_MEASUREMENT_ID')?.trim();
@@ -17,5 +18,6 @@ export const load: LayoutServerLoad = ({ locals }) => ({
 	// saaskaya's own chrome — skip the lookup entirely there.
 	messageOverrides: locals.isTenantHost ? {} : getMessageOverrides(locals.locale),
 	gaMeasurementId: gaMeasurementId(),
-	googleSiteVerification: getSetting('GOOGLE_SITE_VERIFICATION')?.trim() || null
+	googleSiteVerification: getSetting('GOOGLE_SITE_VERIFICATION')?.trim() || null,
+	platformBranding: locals.isTenantHost ? null : getPlatformBranding()
 });

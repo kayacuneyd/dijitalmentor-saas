@@ -1,5 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { getPlatformBranding } from '$lib/server/branding';
 
 /**
  * Web app manifest for the SaaS app only. Tenant hosts never reach this route
@@ -9,6 +10,7 @@ import type { RequestHandler } from './$types';
  */
 export const GET: RequestHandler = ({ locals }) => {
 	if (locals.isTenantHost) error(404, 'Not found');
+	const branding = getPlatformBranding();
 	return json(
 		{
 			name: 'saaskaya',
@@ -21,9 +23,7 @@ export const GET: RequestHandler = ({ locals }) => {
 			background_color: '#ece7dd',
 			theme_color: '#ece7dd',
 			icons: [
-				{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-				{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-				{ src: '/icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+				{ src: branding.iconUrl, sizes: 'any', type: branding.iconMime }
 			]
 		},
 		{ headers: { 'content-type': 'application/manifest+json' } }

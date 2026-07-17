@@ -20,11 +20,13 @@ import {
 import { listRecentErrors, resolveError, unresolvedErrorCount } from '$lib/server/error-log';
 import { listRequestProbes } from '$lib/server/requestProbes';
 import { serverTranslator } from '$lib/server/messageOverrides';
+import { getPlatformBranding, resetPlatformBranding, uploadPlatformBranding } from '$lib/server/branding';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
 	requireAdmin(locals);
 	return {
+		branding: getPlatformBranding(),
 		settings: SETTING_DEFS.map((def) => ({
 			...def,
 			display: maskValue(getSetting(def.key), def.secret),
@@ -73,6 +75,35 @@ export const actions: Actions = {
 			return fail(400, { message: t('admin.settings.unknownSetting') });
 		}
 		return { cleared: key };
+	},
+	uploadBranding: async ({ request, locals }) => {
+		requireAdmin(locals);
+		const form = await request.formData();
+		const target = String(form.get('target') ?? '');
+		const upload = form.get('file');
+		if (target !== 'logo' && target !== 'icon')
+			return fail(400, { message: 'Choose a valid branding target.' });
+		if (!(upload instanceof File) || upload.size === 0)
+			return fail(400, { message: 'Choose a logo file first.' });
+		try {
+			await uploadPlatformBranding({
+				target,
+				fileName: upload.name,
+				mimeType: upload.type,
+				bytes: new Uint8Array(await upload.arrayBuffer())
+			});
+			return { brandingSaved: target };
+		} catch (error) {
+			return fail(400, { message: error instanceof Error ? error.message : 'Branding upload failed.' });
+		}
+	},
+	resetBranding: async ({ request, locals }) => {
+		requireAdmin(locals);
+		const target = String((await request.formData()).get('target') ?? '');
+		if (target !== 'logo' && target !== 'icon')
+			return fail(400, { message: 'Choose a valid branding target.' });
+		resetPlatformBranding(target);
+		return { brandingReset: target };
 	},
 	resolveError: async ({ request, locals }) => {
 		requireAdmin(locals);

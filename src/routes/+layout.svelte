@@ -32,8 +32,8 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="/icon.png" type="image/png" />
-	<link rel="apple-touch-icon" href="/icon.png" />
+	<link rel="icon" href={data.platformBranding?.iconUrl ?? '/logo.svg'} type={data.platformBranding?.iconMime ?? 'image/svg+xml'} />
+	<link rel="apple-touch-icon" href={data.platformBranding?.iconUrl ?? '/logo.svg'} />
 	{#if !data.isTenantHost}
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="theme-color" content="#ece7dd" />

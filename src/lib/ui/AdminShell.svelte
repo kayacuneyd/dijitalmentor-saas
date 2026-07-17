@@ -74,6 +74,7 @@
 	}
 
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
+	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
 </script>
 
 {#snippet localeSwitcher()}
@@ -91,7 +92,7 @@
 						<span
 							class="flex size-8 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]"
 						>
-							<img src="/brand-icon.png" alt="saaskaya" class="size-full object-contain" />
+							<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
 						</span>
 						>
 						<span>

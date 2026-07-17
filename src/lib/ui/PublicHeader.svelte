@@ -105,7 +105,7 @@
 		</nav>
 
 		<div class="hidden flex-wrap items-center gap-2 lg:flex">
-			<LanguageSwitcher {locale} />
+			<LanguageSwitcher {locale} variant="dropdown" />
 			{#if userEmail}
 				<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">{labels.dashboard}</a>
 			{:else}

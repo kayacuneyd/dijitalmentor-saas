@@ -938,6 +938,78 @@ body:has(dialog[data-editor-dock][open]) {
 	box-shadow: 0 12px 32px rgb(23 22 20 / 0.12);
 }
 
+/* Shared collapsible workspace shell used by admin and customer panels. */
+.panel-sidebar {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	z-index: 50;
+	display: flex;
+	width: min(19rem, 84vw);
+	overflow-y: auto;
+	border-color: var(--sk-line);
+	box-shadow: 0 24px 60px rgb(23 22 20 / 0.18);
+	transition: transform 180ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.panel-sidebar-link {
+	display: flex;
+	min-height: 2.75rem;
+	align-items: center;
+	gap: 0.625rem;
+	border-radius: 8px;
+	padding: 0.625rem 0.75rem;
+	font-size: 0.875rem;
+	transition: background-color 150ms ease, color 150ms ease;
+}
+
+.panel-sidebar-icon {
+	display: inline-flex;
+	width: 1rem;
+	flex: 0 0 1rem;
+	align-items: center;
+	justify-content: center;
+}
+
+@media (min-width: 1024px) {
+	.panel-sidebar {
+		position: relative;
+		top: auto;
+		bottom: auto;
+		left: auto;
+		right: auto;
+		z-index: auto;
+		width: auto;
+		min-width: 0;
+		box-shadow: none;
+		transform: none !important;
+		transition: none;
+	}
+
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-label,
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-eyebrow,
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar > div > div:first-child a span:not(:first-child) {
+		display: none;
+	}
+
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-link {
+		justify-content: center;
+		padding-inline: 0.5rem;
+	}
+
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-icon {
+		width: 1.25rem;
+		flex-basis: 1.25rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.panel-sidebar,
+	.panel-sidebar-link {
+		transition: none;
+	}
+}
+
 /* Comfortable touch targets on coarse pointers without changing desktop density.
    The 16px input floor also stops iOS Safari's focus auto-zoom. */
 @media (pointer: coarse) {

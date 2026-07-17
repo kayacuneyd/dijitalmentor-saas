@@ -3990,3 +3990,20 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Branding ayarlarına marka adı ve `showWordmark` tercihi eklendi. Owner, `/admin/settings` içinden logo yanında metnin gösterilip gösterilmeyeceğini ve metni değiştirebiliyor.
 - Tercih public `BrandMark`, footer ve admin shell'e merkezi `platformBranding` verisiyle bağlandı; fallback `saaskaya` + görünür wordmark olarak korundu.
 - Doğrulama: `npm run check` 0 hata/0 uyarı; branding testleri 3/3; production build başarılı; `git diff --check` temiz.
+
+## 2026-07-17 — Public lang switcher hizalaması
+
+- Public header desktop görünümünde varsayılan pill lang switcher yerine editörde kullanılan DaisyUI esintili `dropdown` varyantı kullanıldı.
+- Mobil header zaten aynı varyantı kullandığı için desktop ve mobil public navigasyon artık aynı lang switcher davranışına sahip.
+- URL locale geçişi, bayraklar, aktif dil durumu ve dokunmatik menü davranışı değiştirilmedi.
+- Doğrulama: `npm run check` başarılı; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `git diff --check` temiz. İlk doğrulama denemesinde komuta ikinci kez `--run` eklenmesi Vitest CLI hatası üretti; doğru `npm run test` komutuyla tekrarlandı.
+
+## 2026-07-17 — Ortak panel layout ve collapsible sidebar
+
+- Admin ve kullanıcı panellerinin ortak chrome, başlık alanı, içerik yüzeyi ve sidebar davranışı `PanelShell` + `PanelSidebar` bileşenlerinde birleştirildi.
+- Admin sidebar solda; dashboard, account ve account/support alt sayfaları kullanıcı sidebar’ını sağda kullanıyor. Admin ve kullanıcı navigasyonları ayrı tutuldu.
+- Desktop’ta sidebar 232px ↔ 72px arasında toggle ediliyor; mobilde ilgili taraftan drawer olarak açılıyor, backdrop/Escape-safe kapanış ve route sonrası otomatik kapanış uygulanıyor.
+- Sidebar tercihi `localStorage` ile admin ve kullanıcı panelleri için ayrı ayrı hatırlanıyor. Dar görünümde ikon tooltip’leri ve aria etiketleri korunuyor.
+- `PageShell` ve `AdminShell` mevcut route içeriklerini koruyarak ortak kabuğa taşındı; yeni uygulama route’u veya veri/schema değişikliği yapılmadı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run build` başarılı; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `git diff --check` temiz.
+- Yerel route smoke: `/` 307 locale yönlendirmesi; `/dashboard`, `/account`, `/account/support` ve `/admin` auth olmadan beklenen 303 login yönlendirmesi döndürdü.

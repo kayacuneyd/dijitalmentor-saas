@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
-	import AppCanvasShell from './AppCanvasShell.svelte';
-	import LanguageSwitcher from './LanguageSwitcher.svelte';
+	import { getTranslate } from '$lib/i18n/context';
+	import PanelShell from './PanelShell.svelte';
 	import { uiIcons } from './icons';
+	import type { PanelNavItem } from './PanelSidebar.svelte';
 
 	let {
 		children,
-		kicker,
+		kicker: _kicker,
 		title,
 		description,
 		backHref,
@@ -29,39 +30,35 @@
 		actions?: import('svelte').Snippet;
 	}>();
 
+	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
+	const currentPath = $derived(page.url.pathname);
+
+	const userItems = $derived(
+		[
+			{ href: '/dashboard', label: t('dashboard.title'), icon: uiIcons.home(16) },
+			{ href: '/new', label: t('dashboard.nav.newSite'), icon: uiIcons.plus(16) },
+			{ href: '/account', label: t('dashboard.nav.account'), icon: uiIcons.lock(16) },
+			{ href: '/account/support', label: t('account.supportLink'), icon: uiIcons.message(16) },
+			...(page.data.user?.isAdmin
+				? [{ href: '/admin', label: t('dashboard.nav.admin'), icon: uiIcons.settings(16) }]
+				: [])
+		].map((item) => ({ ...item, active: currentPath === item.href || currentPath.startsWith(`${item.href}/`) })) as PanelNavItem[]
+	);
 </script>
 
-{#snippet localeSwitcher()}
-	<LanguageSwitcher {locale} variant="cookie" />
-{/snippet}
-
-<AppCanvasShell label={canvasLabel} max={canvasMax} right={localeSwitcher}>
-	<div class="mx-auto flex w-full {max} flex-col gap-6">
-		<header class="flex flex-wrap items-start justify-between gap-4">
-			<div class="min-w-0">
-				{#if backHref}
-					<a
-						href={backHref}
-						class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
-						>{@html uiIcons.arrowLeft(14)}{backLabel}</a
-					>
-				{/if}
-				{#if kicker}
-					<div class="sk-mono mt-5 text-[10.5px] text-[var(--sk-faint)]">{kicker}</div>
-				{/if}
-				<h1 class="sk-display mt-2 text-4xl leading-none sm:text-[42px]">{title}</h1>
-				{#if description}
-					<p class="mt-3 max-w-2xl text-sm leading-6 text-[var(--sk-muted)] sm:text-[15px]">
-						{description}
-					</p>
-				{/if}
-			</div>
-			{#if actions}
-				<div class="flex flex-wrap justify-end gap-2">{@render actions()}</div>
-			{/if}
-		</header>
-
-		{@render children()}
-	</div>
-</AppCanvasShell>
+<PanelShell
+	{children}
+	{title}
+	{description}
+	{backHref}
+	{backLabel}
+	{max}
+	{canvasMax}
+	{canvasLabel}
+	{actions}
+	items={userItems}
+	sidebarLabel={locale === 'tr' ? 'Kullanıcı paneli' : locale === 'de' ? 'Benutzerbereich' : 'User panel'}
+	sidebarPosition="right"
+	storageKey="saaskaya.user.sidebar"
+/>

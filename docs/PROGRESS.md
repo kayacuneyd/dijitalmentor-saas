@@ -3978,3 +3978,9 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Runtime branding layout, header/footer/admin, favicon, manifest ve Organization JSON-LD'ye bağlandı. Tenant host'ları platform branding çözümlemesinden hariç tutuldu.
 - Doğrulama: branding security testi 3/3, `npm run check` 0 hata/0 uyarı, production build başarılı, local `/` → `/en` 307, `/logo.svg` 200, manifest güncel dynamic icon döndürüyor, `/admin/settings` auth olmadan `/login`'e 303 yönlendiriyor.
 - Tam test paketi 639/651 geçti; mevcut `src/routes/api/onboarding/finish/server.test.ts` içindeki dietitian-kit testi branding değişikliğinden bağımsız olarak 400 beklenirken 200 beklediği için başarısız kaldı. Bu hata bu görev kapsamında değiştirilmedi.
+
+## 2026-07-17 — Onboarding kit testinin deploy blokajı düzeltildi
+
+- Root cause: `/api/onboarding/finish/server.test.ts`, deterministik route testi olmasına rağmen gerçek onboarding AI guard'ını çağırıyordu. Guard, `Online seçenek` gibi geçerli bir cevabı arada `off_topic` reddediyor; son cevap kaydedilmediği için finish endpoint'i 400 dönüyordu.
+- Çözüm: Testte `$lib/server/ai/onboardingGuard` mock'landı ve tüm cevaplar için `onTopic: true` sabitlendi. Production onboarding guard davranışı değiştirilmedi; yalnızca testin dış servis/model bağımlılığı kaldırıldı.
+- Doğrulama: hedef onboarding finish testi 11/11; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `npm run check` 0 hata/0 uyarı; production build ve `git diff --check` başarılı.

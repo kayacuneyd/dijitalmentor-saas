@@ -1,12 +1,20 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+
+vi.mock('$lib/server/ai/onboardingGuard', () => ({ classifyOnboardingAnswer: vi.fn() }));
+
 import { POST } from './+server';
 import { POST as answerPOST } from '../answer/+server';
+import { classifyOnboardingAnswer } from '$lib/server/ai/onboardingGuard';
 import { PENDING_COOKIE, getPendingByToken } from '$lib/server/onboarding/session';
 import { clearSetting, setSetting } from '$lib/server/config';
 
 // These route tests exercise the deterministic onboarding flow, not live model
 // availability. Empty DB settings intentionally override developer .env keys.
 beforeAll(() => {
+	vi.mocked(classifyOnboardingAnswer).mockResolvedValue({
+		result: { onTopic: true },
+		usage: { inputTokens: 0, outputTokens: 0 }
+	});
 	setSetting('DEEPSEEK_API_KEY', '');
 	setSetting('GROQ_API_KEY', '');
 });

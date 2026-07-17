@@ -29,18 +29,11 @@
 		onCloseMobile: () => void;
 	} = $props();
 
-	const sideClass = $derived(position === 'right' ? 'right-0 border-l' : 'left-0 border-r');
-	const mobilePositionClass = $derived('translate-x-0');
-	const orderClass = $derived(position === 'right' ? 'lg:order-2' : 'lg:order-0');
 </script>
 
 <aside
 		{id}
-		class="panel-sidebar {orderClass} {sideClass} {mobileOpen
-		? mobilePositionClass
-		: position === 'right'
-			? 'translate-x-full'
-			: '-translate-x-full'}"
+		class="panel-sidebar panel-sidebar--{position} {mobileOpen ? 'panel-sidebar--open' : 'panel-sidebar--closed'}"
 		data-collapsed={collapsed}
 		aria-label={label}
 	>

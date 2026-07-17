@@ -4007,3 +4007,9 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - `PageShell` ve `AdminShell` mevcut route içeriklerini koruyarak ortak kabuğa taşındı; yeni uygulama route’u veya veri/schema değişikliği yapılmadı.
 - Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run build` başarılı; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `git diff --check` temiz.
 - Yerel route smoke: `/` 307 locale yönlendirmesi; `/dashboard`, `/account`, `/account/support` ve `/admin` auth olmadan beklenen 303 login yönlendirmesi döndürdü.
+
+## 2026-07-17 — Sidebar görünürlük hatası düzeltildi
+
+- Root cause: `PanelSidebar` mobil transform, yön ve grid order davranışını dinamik Tailwind sınıflarıyla (`translate-x-*`, `lg:order-*`) üretiyordu; bu sınıflar production CSS’e güvenilir biçimde girmediği için toggle yalnızca ana grid genişliğini değiştiriyor, sidebar görünür bir panel olarak çalışmıyordu.
+- Çözüm: Sidebar yönü, açık/kapalı durumu ve desktop grid kolonu statik `.panel-sidebar--left/right/open/closed` CSS sınıflarına taşındı. Admin solda, kullanıcı paneli sağda görünür; mobil drawer transform ve visibility state’leri deterministik hale geldi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run build` başarılı; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `git diff --check` temiz.

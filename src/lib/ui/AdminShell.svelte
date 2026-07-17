@@ -49,12 +49,12 @@
 </script>
 
 {#snippet brand()}
-	<a href="/dashboard" class="flex min-w-0 items-center gap-2 text-[var(--sk-ink)]">
+	<a href="/dashboard" class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]">
 		<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]">
 			<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
 		</span>
 		{#if showWordmark}
-			<span class="min-w-0">
+			<span class="panel-sidebar-brand-copy min-w-0">
 				<span class="block truncate text-sm font-semibold leading-none">{brandName}</span>
 				<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]">{t('admin.chrome.console')}</span>
 			</span>

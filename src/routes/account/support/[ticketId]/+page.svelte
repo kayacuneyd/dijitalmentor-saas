@@ -33,7 +33,6 @@
 	description="{categoryLabel(data.ticket.category)} · {t('account.support.detail.openedOn', {
 		date: new Date(data.ticket.createdAt).toLocaleDateString()
 	})}"
-	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
 	{#snippet actions()}

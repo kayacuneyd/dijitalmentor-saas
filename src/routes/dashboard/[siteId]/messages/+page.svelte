@@ -17,7 +17,6 @@
 	backLabel="dashboard"
 	title={t('dashboard.messages.title')}
 	description={t('dashboard.messages.description', { name: data.siteName })}
-	max="max-w-5xl"
 	canvasLabel="saaskaya.app / messages"
 >
 	{#if data.submissions.length === 0}

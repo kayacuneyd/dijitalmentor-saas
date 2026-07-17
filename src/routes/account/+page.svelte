@@ -26,7 +26,6 @@
 	backLabel="dashboard"
 	title={t('account.profile.title')}
 	description={data.user.email}
-	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
 	{#snippet actions()}

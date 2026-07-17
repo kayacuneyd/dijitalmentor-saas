@@ -1034,8 +1034,13 @@ body:has(dialog[data-editor-dock][open]) {
 
 	.panel-sidebar[data-collapsed='true'] .panel-sidebar-label,
 	.panel-sidebar[data-collapsed='true'] .panel-sidebar-eyebrow,
-	.panel-sidebar[data-collapsed='true'] .panel-sidebar > div > div:first-child a span:not(:first-child) {
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-brand-copy {
 		display: none;
+	}
+
+	.panel-sidebar[data-collapsed='true'] .panel-sidebar-brand {
+		width: 100%;
+		justify-content: center;
 	}
 
 	.panel-sidebar[data-collapsed='true'] .panel-sidebar-link {

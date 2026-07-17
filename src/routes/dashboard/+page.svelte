@@ -49,8 +49,6 @@
 	backHref="/"
 	title={t('dashboard.title')}
 	description={data.user.email}
-	max="max-w-7xl"
-	canvasMax="max-w-[92rem]"
 	canvasLabel="saaskaya.app / panel"
 >
 	{#snippet actions()}

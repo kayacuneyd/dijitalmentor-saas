@@ -31,7 +31,6 @@
 	backLabel="account"
 	title={t('account.support.title')}
 	description={t('account.support.description')}
-	max="max-w-5xl"
 	canvasLabel="saaskaya.app / account"
 >
 	{#if form?.message}

@@ -75,6 +75,8 @@
 
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
+	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
+	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 </script>
 
 {#snippet localeSwitcher()}
@@ -95,12 +97,12 @@
 							<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
 						</span>
 						>
-						<span>
-							<span class="block text-sm font-semibold leading-none">saaskaya</span>
+						{#if showWordmark}<span>
+							<span class="block text-sm font-semibold leading-none">{brandName}</span>
 							<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]"
 								>{t('admin.chrome.console')}</span
 							>
-						</span>
+						</span>{/if}
 					</a>
 				</div>
 				<nav

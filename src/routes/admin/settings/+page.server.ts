@@ -20,7 +20,12 @@ import {
 import { listRecentErrors, resolveError, unresolvedErrorCount } from '$lib/server/error-log';
 import { listRequestProbes } from '$lib/server/requestProbes';
 import { serverTranslator } from '$lib/server/messageOverrides';
-import { getPlatformBranding, resetPlatformBranding, uploadPlatformBranding } from '$lib/server/branding';
+import {
+	getPlatformBranding,
+	resetPlatformBranding,
+	saveBrandingPreferences,
+	uploadPlatformBranding
+} from '$lib/server/branding';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -104,6 +109,19 @@ export const actions: Actions = {
 			return fail(400, { message: 'Choose a valid branding target.' });
 		resetPlatformBranding(target);
 		return { brandingReset: target };
+	},
+	saveBrandingPreferences: async ({ request, locals }) => {
+		requireAdmin(locals);
+		const form = await request.formData();
+		try {
+			saveBrandingPreferences({
+				brandName: String(form.get('brandName') ?? ''),
+				showWordmark: form.get('showWordmark') === 'on'
+			});
+			return { brandingPreferencesSaved: true };
+		} catch (error) {
+			return fail(400, { message: error instanceof Error ? error.message : 'Branding preferences failed.' });
+		}
 	},
 	resolveError: async ({ request, locals }) => {
 		requireAdmin(locals);

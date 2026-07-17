@@ -5,6 +5,8 @@
 	let { locale }: { locale: Locale } = $props();
 	const l = (path: string) => withLocale(locale, path);
 	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
+	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
+	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 
 	const copy = $derived(
 		{
@@ -124,7 +126,7 @@
 		<div>
 			<div class="flex items-center gap-3">
 				<img src={logoUrl} alt="saaskaya" class="size-10 rounded-[9px] object-contain" />
-				<span class="text-lg font-semibold tracking-[-0.02em]">saaskaya</span>
+				{#if showWordmark}<span class="text-lg font-semibold tracking-[-0.02em]">{brandName}</span>{/if}
 			</div>
 			<p class="mt-3 max-w-xs text-sm leading-6 text-[var(--sk-muted)]">{copy.tagline}</p>
 			<p class="mt-2 text-xs text-[var(--sk-faint)]">{copy.location}</p>

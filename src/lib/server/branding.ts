@@ -11,6 +11,8 @@ const ICON_URL_KEY = 'PLATFORM_ICON_URL';
 const ICON_OBJECT_KEY = 'PLATFORM_ICON_OBJECT_KEY';
 const ICON_MIME_KEY = 'PLATFORM_ICON_MIME';
 const BRAND_VERSION_KEY = 'PLATFORM_BRAND_VERSION';
+const BRAND_NAME_KEY = 'PLATFORM_BRAND_NAME';
+const SHOW_WORDMARK_KEY = 'PLATFORM_SHOW_WORDMARK';
 
 export const DEFAULT_LOGO_URL = '/logo.svg';
 
@@ -18,6 +20,8 @@ export type PlatformBranding = {
 	logoUrl: string;
 	iconUrl: string;
 	iconMime: string;
+	brandName: string;
+	showWordmark: boolean;
 	version: number;
 };
 
@@ -38,8 +42,19 @@ export function getPlatformBranding(): PlatformBranding {
 		logoUrl: versionedUrl(readSetting(LOGO_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
 		iconUrl: versionedUrl(readSetting(ICON_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
 		iconMime: readSetting(ICON_MIME_KEY) || 'image/svg+xml',
+		brandName: readSetting(BRAND_NAME_KEY) || 'saaskaya',
+		showWordmark: readSetting(SHOW_WORDMARK_KEY) !== '0',
 		version: safeVersion
 	};
+}
+
+export function saveBrandingPreferences(input: { brandName: string; showWordmark: boolean }): PlatformBranding {
+	const brandName = input.brandName.trim().slice(0, 80);
+	if (!brandName) throw new Error('Brand name is required.');
+	setSetting(BRAND_NAME_KEY, brandName);
+	setSetting(SHOW_WORDMARK_KEY, input.showWordmark ? '1' : '0');
+	setSetting(BRAND_VERSION_KEY, String(getPlatformBranding().version + 1));
+	return getPlatformBranding();
 }
 
 function setSetting(key: string, value: string): void {

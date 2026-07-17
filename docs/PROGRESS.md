@@ -3984,3 +3984,9 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Root cause: `/api/onboarding/finish/server.test.ts`, deterministik route testi olmasına rağmen gerçek onboarding AI guard'ını çağırıyordu. Guard, `Online seçenek` gibi geçerli bir cevabı arada `off_topic` reddediyor; son cevap kaydedilmediği için finish endpoint'i 400 dönüyordu.
 - Çözüm: Testte `$lib/server/ai/onboardingGuard` mock'landı ve tüm cevaplar için `onTopic: true` sabitlendi. Production onboarding guard davranışı değiştirilmedi; yalnızca testin dış servis/model bağımlılığı kaldırıldı.
 - Doğrulama: hedef onboarding finish testi 11/11; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `npm run check` 0 hata/0 uyarı; production build ve `git diff --check` başarılı.
+
+## 2026-07-17 — Owner branding wordmark kontrolü
+
+- Branding ayarlarına marka adı ve `showWordmark` tercihi eklendi. Owner, `/admin/settings` içinden logo yanında metnin gösterilip gösterilmeyeceğini ve metni değiştirebiliyor.
+- Tercih public `BrandMark`, footer ve admin shell'e merkezi `platformBranding` verisiyle bağlandı; fallback `saaskaya` + görünür wordmark olarak korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; branding testleri 3/3; production build başarılı; `git diff --check` temiz.

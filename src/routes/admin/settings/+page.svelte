@@ -91,6 +91,8 @@
 		<div class="sk-alert sk-alert-success">Branding updated: {form.brandingSaved}.</div>
 	{:else if form?.brandingReset}
 		<div class="sk-alert sk-alert-success">Branding reset: {form.brandingReset}.</div>
+	{:else if form?.brandingPreferencesSaved}
+		<div class="sk-alert sk-alert-success">Branding preferences saved.</div>
 	{/if}
 
 	<section class="grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
@@ -238,6 +240,17 @@
 					</div>
 				{/each}
 			</div>
+			<form method="POST" action="?/saveBrandingPreferences" use:enhance class="grid gap-3 border-t border-[var(--sk-line)] pt-4 md:grid-cols-[minmax(220px,1fr)_auto_auto] md:items-end">
+				<label class="form-control">
+					<span class="mb-1 text-xs font-medium">Brand name</span>
+					<input name="brandName" value={data.branding.brandName} maxlength="80" class="sk-input" />
+				</label>
+				<label class="flex items-center gap-2 pb-2 text-sm">
+					<input name="showWordmark" type="checkbox" class="checkbox checkbox-sm" checked={data.branding.showWordmark} />
+					Show beside logo
+				</label>
+				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Save preferences</button>
+			</form>
 		</div>
 	</AppCard>
 

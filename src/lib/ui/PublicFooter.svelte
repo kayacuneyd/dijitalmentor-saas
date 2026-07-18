@@ -4,7 +4,9 @@
 
 	let { locale }: { locale: Locale } = $props();
 	const l = (path: string) => withLocale(locale, path);
-	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
+	const logoUrl = $derived(
+		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
+	);
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 

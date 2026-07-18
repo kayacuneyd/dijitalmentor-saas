@@ -22,6 +22,7 @@ import { listRequestProbes } from '$lib/server/requestProbes';
 import { serverTranslator } from '$lib/server/messageOverrides';
 import {
 	getPlatformBranding,
+	isBrandAssetTarget,
 	resetPlatformBranding,
 	saveBrandingPreferences,
 	uploadPlatformBranding
@@ -86,7 +87,7 @@ export const actions: Actions = {
 		const form = await request.formData();
 		const target = String(form.get('target') ?? '');
 		const upload = form.get('file');
-		if (target !== 'logo' && target !== 'icon')
+		if (!isBrandAssetTarget(target))
 			return fail(400, { message: 'Choose a valid branding target.' });
 		if (!(upload instanceof File) || upload.size === 0)
 			return fail(400, { message: 'Choose a logo file first.' });
@@ -107,7 +108,7 @@ export const actions: Actions = {
 	resetBranding: async ({ request, locals }) => {
 		requireAdmin(locals);
 		const target = String((await request.formData()).get('target') ?? '');
-		if (target !== 'logo' && target !== 'icon')
+		if (!isBrandAssetTarget(target))
 			return fail(400, { message: 'Choose a valid branding target.' });
 		resetPlatformBranding(target);
 		return { brandingReset: target };

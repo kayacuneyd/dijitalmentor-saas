@@ -45,10 +45,12 @@ pm2 save`; restarting by process name alone can preserve stale environment value
   `src/lib/server/media.ts`, and indexes them in migration v6 `media_assets`. Runtime R2 credentials
   are operator-managed under the `Media` group in `/admin/settings`; never expose them to browser
   code.
-- 2026-07-18: The platform brand mark and mascot are the transparent ink bee in `static/logo.svg`
-  and `static/mascot-bee.svg`, derived from the owner-supplied source SVG. Mascot usage rules live in
-  `design.md`: use it sparingly for orientation/help/completion and let transparent areas inherit
-  the warm paper/shell token instead of hard-coding white.
+- 2026-07-18: The default platform logo is the complete transparent network + bee composition in
+  `static/do-more-with-less-download-free-ebook.svg`; the standalone ink bee in
+  `static/mascot-bee.svg` is the mascot, not the logo. Admin `/admin/settings` manages logo, icon and
+  mascot as three independent branding targets. Mascot usage rules live in `design.md`: use it
+  sparingly for orientation/help/completion and let transparent areas inherit the warm paper/shell
+  token instead of hard-coding white.
 - 2026-07-08: Beta AI routing defaults to Groq `llama-3.3-70b-versatile` for Layer 1 and DeepSeek
   `deepseek-v4-flash` / `deepseek-v4-pro` for Layer 2. Keys and overrides are in the
   `/admin/settings` `AI Providers` group. `src/lib/server/ai/llm.ts` is the provider seam; every

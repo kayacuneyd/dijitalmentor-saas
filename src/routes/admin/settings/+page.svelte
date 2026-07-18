@@ -55,6 +55,11 @@
 	const requestProbeTotal = $derived(
 		data.requestProbes.reduce((total, probe) => total + probe.count, 0)
 	);
+	const brandingAssets = $derived([
+		{ target: 'logo', label: 'Main logo', url: data.branding.logoUrl },
+		{ target: 'icon', label: 'Favicon / app icon', url: data.branding.iconUrl },
+		{ target: 'mascot', label: 'Mascot', url: data.branding.mascotUrl }
+	]);
 </script>
 
 <svelte:head>
@@ -210,12 +215,12 @@
 			<div>
 				<h2 class="text-base font-semibold">Platform branding</h2>
 				<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
-					Upload the platform logo or icon without changing code. SVG files are checked for unsafe
-					content; PNG, JPEG, GIF and WebP files are normalized before storage.
+					Manage the platform logo, icon and mascot without changing code. SVG files are checked
+					for unsafe content; PNG, JPEG, GIF and WebP files are normalized before storage.
 				</p>
 			</div>
-			<div class="grid gap-4 md:grid-cols-2">
-				{#each [{ target: 'logo', label: 'Main logo', url: data.branding.logoUrl }, { target: 'icon', label: 'Favicon / app icon', url: data.branding.iconUrl }] as asset (asset.target)}
+			<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+				{#each brandingAssets as asset (asset.target)}
 					<div class="rounded-[var(--sk-radius)] border border-[var(--sk-line)] p-3">
 						<div class="flex items-center gap-3">
 							<div

@@ -29,7 +29,9 @@
 	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 	const currentPath = $derived(page.url.pathname);
-	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
+	const logoUrl = $derived(
+		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
+	);
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 

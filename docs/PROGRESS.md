@@ -4527,3 +4527,10 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Added reusable `MascotBee.svelte` and placed the mascot at the landing page’s guided-start and completion CTA moments. Transparent wing/stripe areas inherit the existing warm paper/shell tokens.
 - Recorded mascot restraint and color behavior in `design.md`; added the durable upload/brand decisions to `docs/project-memory.md`.
 - Verification: focused media/branding/API tests pass (3 files / 10 tests); `npm run check` passes with 0 errors/warnings; production build succeeds. Local `/tr` returned 200, both SVG assets returned as `image/svg+xml`, and responsive browser checks at 320, 375, 414, 768 and 1440px found no horizontal overflow or console errors.
+
+## 2026-07-18 — Logo and mascot role correction
+
+- Corrected the brand roles: the complete transparent network + bee composition in `static/do-more-with-less-download-free-ebook.svg` is now the default platform logo and favicon; the standalone bee in `static/mascot-bee.svg` remains the mascot only.
+- Added `mascotUrl` as a first-class platform branding setting. The platform owner can independently upload or reset Main logo, Favicon / app icon and Mascot from `/admin/settings`; mascot components consume the managed URL immediately through shared layout data.
+- Updated every shared platform-logo fallback (public header/footer, app shell, admin shell and document icons) so non-tenant surfaces consistently use the complete supplied composition.
+- Verification: branding/media/API tests pass (3 files / 11 tests); `npm run check` passes with 0 errors/warnings. Authenticated admin browser QA at 375 and 1440px loaded all three distinct assets with no overflow or console errors, and the mascot reset action returned HTTP 200. Public browser QA at 320, 375, 414, 768 and 1440px confirmed the full-composition logo, two standalone mascot usages, no broken eager images, no overflow and no console errors.

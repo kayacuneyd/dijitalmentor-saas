@@ -11,16 +11,35 @@ const LOGO_OBJECT_KEY = 'PLATFORM_LOGO_OBJECT_KEY';
 const ICON_URL_KEY = 'PLATFORM_ICON_URL';
 const ICON_OBJECT_KEY = 'PLATFORM_ICON_OBJECT_KEY';
 const ICON_MIME_KEY = 'PLATFORM_ICON_MIME';
+const MASCOT_URL_KEY = 'PLATFORM_MASCOT_URL';
+const MASCOT_OBJECT_KEY = 'PLATFORM_MASCOT_OBJECT_KEY';
 const BRAND_VERSION_KEY = 'PLATFORM_BRAND_VERSION';
 const BRAND_NAME_KEY = 'PLATFORM_BRAND_NAME';
 const SHOW_WORDMARK_KEY = 'PLATFORM_SHOW_WORDMARK';
 
-export const DEFAULT_LOGO_URL = '/logo.svg';
+export const DEFAULT_LOGO_URL = '/do-more-with-less-download-free-ebook.svg';
+export const DEFAULT_MASCOT_URL = '/mascot-bee.svg';
+
+export type BrandAssetTarget = 'logo' | 'icon' | 'mascot';
+
+const BRAND_ASSET_SETTINGS: Record<
+	BrandAssetTarget,
+	{ urlKey: string; objectKey: string; defaultUrl: string }
+> = {
+	logo: { urlKey: LOGO_URL_KEY, objectKey: LOGO_OBJECT_KEY, defaultUrl: DEFAULT_LOGO_URL },
+	icon: { urlKey: ICON_URL_KEY, objectKey: ICON_OBJECT_KEY, defaultUrl: DEFAULT_LOGO_URL },
+	mascot: {
+		urlKey: MASCOT_URL_KEY,
+		objectKey: MASCOT_OBJECT_KEY,
+		defaultUrl: DEFAULT_MASCOT_URL
+	}
+};
 
 export type PlatformBranding = {
 	logoUrl: string;
 	iconUrl: string;
 	iconMime: string;
+	mascotUrl: string;
 	brandName: string;
 	showWordmark: boolean;
 	version: number;
@@ -43,6 +62,7 @@ export function getPlatformBranding(): PlatformBranding {
 		logoUrl: versionedUrl(readSetting(LOGO_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
 		iconUrl: versionedUrl(readSetting(ICON_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
 		iconMime: readSetting(ICON_MIME_KEY) || 'image/svg+xml',
+		mascotUrl: versionedUrl(readSetting(MASCOT_URL_KEY) || DEFAULT_MASCOT_URL, safeVersion),
 		brandName: readSetting(BRAND_NAME_KEY) || 'saaskaya',
 		showWordmark: readSetting(SHOW_WORDMARK_KEY) !== '0',
 		version: safeVersion
@@ -115,18 +135,17 @@ async function storeBrandAsset(input: { fileName: string; mimeType: string; byte
 }
 
 export async function uploadPlatformBranding(input: {
-	target: 'logo' | 'icon';
+	target: BrandAssetTarget;
 	fileName: string;
 	mimeType: string;
 	bytes: Uint8Array;
 }): Promise<PlatformBranding> {
 	const stored = await storeBrandAsset(input);
-	const urlKey = input.target === 'logo' ? LOGO_URL_KEY : ICON_URL_KEY;
-	const objectKeyKey = input.target === 'logo' ? LOGO_OBJECT_KEY : ICON_OBJECT_KEY;
-	const oldObjectKey = readSetting(objectKeyKey);
+	const settings = BRAND_ASSET_SETTINGS[input.target];
+	const oldObjectKey = readSetting(settings.objectKey);
 	const nextVersion = getPlatformBranding().version + 1;
-	setSetting(urlKey, stored.url);
-	setSetting(objectKeyKey, stored.objectKey);
+	setSetting(settings.urlKey, stored.url);
+	setSetting(settings.objectKey, stored.objectKey);
 	if (input.target === 'icon') setSetting(ICON_MIME_KEY, stored.mimeType);
 	setSetting(BRAND_VERSION_KEY, String(nextVersion));
 
@@ -143,12 +162,15 @@ export async function uploadPlatformBranding(input: {
 	return getPlatformBranding();
 }
 
-export function resetPlatformBranding(target: 'logo' | 'icon'): PlatformBranding {
-	const urlKey = target === 'logo' ? LOGO_URL_KEY : ICON_URL_KEY;
-	const objectKeyKey = target === 'logo' ? LOGO_OBJECT_KEY : ICON_OBJECT_KEY;
-	setSetting(urlKey, DEFAULT_LOGO_URL);
-	setSetting(objectKeyKey, '');
+export function resetPlatformBranding(target: BrandAssetTarget): PlatformBranding {
+	const settings = BRAND_ASSET_SETTINGS[target];
+	setSetting(settings.urlKey, settings.defaultUrl);
+	setSetting(settings.objectKey, '');
 	if (target === 'icon') setSetting(ICON_MIME_KEY, 'image/svg+xml');
 	setSetting(BRAND_VERSION_KEY, String(getPlatformBranding().version + 1));
 	return getPlatformBranding();
+}
+
+export function isBrandAssetTarget(value: string): value is BrandAssetTarget {
+	return value === 'logo' || value === 'icon' || value === 'mascot';
 }

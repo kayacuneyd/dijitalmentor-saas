@@ -15,7 +15,9 @@
 	}>();
 
 	const logoSize = $derived(compact ? 'size-8' : 'size-10');
-	const logoUrl = $derived(page.data.platformBranding?.logoUrl ?? '/logo.svg');
+	const logoUrl = $derived(
+		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
+	);
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(wordmark ?? page.data.platformBranding?.showWordmark ?? true);
 </script>

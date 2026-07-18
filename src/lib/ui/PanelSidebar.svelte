@@ -56,7 +56,7 @@
 	data-collapsed={collapsed}
 	aria-label={label}
 >
-	<div class="flex min-h-full flex-col bg-[var(--sk-shell)]">
+	<div class="flex min-h-full w-full min-w-0 flex-col bg-[var(--sk-shell)]">
 		<div
 			class="flex min-h-[4.25rem] items-center justify-between border-b border-[var(--sk-line)] p-3"
 		>
@@ -87,7 +87,7 @@
 			</button>
 		</div>
 
-		<nav class="flex flex-1 flex-col gap-1 p-2" aria-label={label}>
+		<nav class="flex w-full min-w-0 flex-1 flex-col gap-1 p-2" aria-label={label}>
 			{#each items as item (item.href)}
 				{@const Icon = item.icon}
 				{#if item.dividerBefore}

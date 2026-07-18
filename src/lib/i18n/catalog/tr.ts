@@ -639,12 +639,36 @@ export const tr = {
 		},
 		control: {
 			overview: 'Genel bakış',
+			media: 'Medya kütüphanesi',
 			identity: 'Kimlik',
 			domain: 'Alan adı ve tarife',
 			preview: 'Site önizlemesi',
 			status: 'Durum ve tarife',
 			quickActions: 'Hızlı işlemler',
 			dangerZone: 'Tehlikeli işlemler'
+		},
+		media: {
+			title: 'Medya kütüphanesi',
+			description:
+				'Bu siteye yüklenen görselleri inceleyin, URL’lerini kopyalayın veya artık gerekli olmayan dosyaları kaldırın.',
+			upload: 'Görsel yükle',
+			uploading: 'Yükleniyor…',
+			refresh: 'Yenile',
+			usage: '{used} / {limit} kullanılıyor',
+			openEditor: 'Görseli editörde kullan',
+			loading: 'Medya yükleniyor…',
+			empty: 'Henüz yüklenmiş görsel yok',
+			emptyHelp: 'Kütüphaneyi oluşturmak için JPG, PNG, GIF veya WebP yükleyin.',
+			copyUrl: 'URL’yi kopyala',
+			copied: 'Kopyalandı',
+			delete: 'Sil',
+			confirmDelete: '{name} silinsin mi? Bu işlem dosyayı depodan da kaldırır.',
+			uploaded: '{name} yüklendi.',
+			deleted: '{name} silindi.',
+			loadFailed: 'Medya kütüphanesi yüklenemedi.',
+			uploadFailed: 'Yükleme başarısız oldu.',
+			deleteFailed: 'Görsel silinemedi.',
+			copyFailed: 'Görsel URL’si kopyalanamadı.'
 		},
 		meta: {
 			publicUrl: 'Public URL: {handle}.saaskaya.com',

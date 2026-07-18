@@ -41,6 +41,11 @@ describe('site media API', () => {
 			locals: { user }
 		} as never);
 		expect(response.status).toBe(200);
-		await expect(response.json()).resolves.toMatchObject({ ok: true, assets: [] });
+		await expect(response.json()).resolves.toMatchObject({
+			ok: true,
+			assets: [],
+			usageBytes: 0,
+			limitBytes: expect.any(Number)
+		});
 	});
 });

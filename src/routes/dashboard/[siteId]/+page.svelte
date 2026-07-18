@@ -16,12 +16,14 @@
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import SitePreviewThumb from '$lib/ui/SitePreviewThumb.svelte';
 	import { getTranslate } from '$lib/i18n/context';
+	import MediaLibrary from './MediaLibrary.svelte';
 
 	let { data, form } = $props();
 	const t = getTranslate();
-	let section = $state<'overview' | 'identity' | 'domain'>('overview');
+	let section = $state<'overview' | 'media' | 'identity' | 'domain'>('overview');
 	const sections = [
 		{ id: 'overview', label: t('dashboard.control.overview') },
+		{ id: 'media', label: t('dashboard.control.media') },
 		{ id: 'identity', label: t('dashboard.control.identity') },
 		{ id: 'domain', label: t('dashboard.control.domain') }
 	] as const;
@@ -171,6 +173,8 @@
 				</AppCard>
 			</div>
 		</div>
+	{:else if section === 'media'}
+		<MediaLibrary siteId={data.site.id} />
 	{:else if section === 'identity'}
 		<AppCard class="max-w-2xl">
 			<h2 class="mb-5 font-semibold">{t('dashboard.identity.title')}</h2>

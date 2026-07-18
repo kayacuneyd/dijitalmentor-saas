@@ -643,12 +643,36 @@ export const en = {
 		},
 		control: {
 			overview: 'Overview',
+			media: 'Media library',
 			identity: 'Identity',
 			domain: 'Domain & plan',
 			preview: 'Site preview',
 			status: 'Status & plan',
 			quickActions: 'Quick actions',
 			dangerZone: 'Danger zone'
+		},
+		media: {
+			title: 'Media library',
+			description:
+				'Review the images uploaded for this site, copy their URLs or remove files you no longer need.',
+			upload: 'Upload image',
+			uploading: 'Uploading…',
+			refresh: 'Refresh',
+			usage: '{used} of {limit} used',
+			openEditor: 'Use an image in the editor',
+			loading: 'Loading media…',
+			empty: 'No uploaded images yet',
+			emptyHelp: 'Upload a JPG, PNG, GIF or WebP image to start building your library.',
+			copyUrl: 'Copy URL',
+			copied: 'Copied',
+			delete: 'Delete',
+			confirmDelete: 'Delete {name}? This also removes it from storage.',
+			uploaded: '{name} uploaded.',
+			deleted: '{name} deleted.',
+			loadFailed: 'Media library could not be loaded.',
+			uploadFailed: 'Upload failed.',
+			deleteFailed: 'The image could not be deleted.',
+			copyFailed: 'The image URL could not be copied.'
 		},
 		meta: {
 			publicUrl: 'Public URL: {handle}.saaskaya.com',

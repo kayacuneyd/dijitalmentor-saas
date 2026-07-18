@@ -650,12 +650,36 @@ export const de = {
 		},
 		control: {
 			overview: 'Übersicht',
+			media: 'Mediathek',
 			identity: 'Identität',
 			domain: 'Domain & Tarif',
 			preview: 'Website-Vorschau',
 			status: 'Status & Tarif',
 			quickActions: 'Schnellaktionen',
 			dangerZone: 'Gefahrenbereich'
+		},
+		media: {
+			title: 'Mediathek',
+			description:
+				'Hochgeladene Bilder dieser Website prüfen, URLs kopieren oder nicht mehr benötigte Dateien entfernen.',
+			upload: 'Bild hochladen',
+			uploading: 'Wird hochgeladen…',
+			refresh: 'Aktualisieren',
+			usage: '{used} von {limit} verwendet',
+			openEditor: 'Bild im Editor verwenden',
+			loading: 'Medien werden geladen…',
+			empty: 'Noch keine Bilder hochgeladen',
+			emptyHelp: 'Lade ein JPG-, PNG-, GIF- oder WebP-Bild hoch, um deine Mediathek zu starten.',
+			copyUrl: 'URL kopieren',
+			copied: 'Kopiert',
+			delete: 'Löschen',
+			confirmDelete: '{name} löschen? Die Datei wird auch aus dem Speicher entfernt.',
+			uploaded: '{name} hochgeladen.',
+			deleted: '{name} gelöscht.',
+			loadFailed: 'Die Mediathek konnte nicht geladen werden.',
+			uploadFailed: 'Upload fehlgeschlagen.',
+			deleteFailed: 'Das Bild konnte nicht gelöscht werden.',
+			copyFailed: 'Die Bild-URL konnte nicht kopiert werden.'
 		},
 		meta: {
 			publicUrl: 'Öffentliche URL: {handle}.saaskaya.com',

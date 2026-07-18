@@ -27,7 +27,12 @@ function guard(locals: App.Locals, siteId: string): Response | null {
 export const GET: RequestHandler = ({ params, locals }) => {
 	const denied = guard(locals, params.siteId);
 	if (denied) return denied;
-	return json({ ok: true, assets: listMedia(params.siteId) });
+	return json({
+		ok: true,
+		assets: listMedia(params.siteId),
+		usageBytes: siteMediaUsage(params.siteId),
+		limitBytes: siteMediaLimit(locals.user?.id)
+	});
 };
 
 export const POST: RequestHandler = async ({ params, request, locals }) => {

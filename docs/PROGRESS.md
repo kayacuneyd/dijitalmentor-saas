@@ -3,6 +3,23 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Açık panel sidebar yüzey genişliği kök neden düzeltmesi
+
+Önceki sidebar düzeltmesi masaüstü `aside` öğesini 232 px grid kolonuna genişletmişti; ancak `aside`
+yatay flex container olduğu için iç yüzey `width:auto` ile menü içeriğinin max-content genişliğine
+daralmaya devam ediyordu. Sonuçta grid kolonu sağa uzanıyor fakat shell arka planı ve nav linkleri
+kolonu doldurmuyordu.
+
+`PanelSidebar` iç yüzeyi ve nav `w-full min-w-0`, linkler de açıkça `width:100%; min-width:0` yapıldı.
+Böylece açık durumda yüzey/linkler 232 px track'i eksiksiz dolduruyor; kapalı durumda aynı kurallar 72 px
+rail'e uygulanarak mevcut doğru ikon hizası korunuyor.
+
+Doğrulama: PanelSidebar bağımsız Svelte compile 0 uyarı; hedef dosyalarda Prettier başarılı; headless
+Chromium geometri testi açıkta `232 → 231 → 231 → 215` (track → border içi yüzey → nav → 8 px gutter'lı
+link), kapalıda `72 → 71 → 71 → 55` ölçtü. `npm run check`, bu değişiklikten bağımsız ve eşzamanlı
+`MediaLibrary.svelte` çalışmasındaki eksik icon exportu/i18n anahtarları nedeniyle 23 hatada duruyor;
+sidebar dosyasında tanı yok.
+
 ## 2026-07-18 — EUR fiyatları için Türkiye ziyaretçisine günlük TRY tahmini
 
 Ödeme para birimi EUR olarak bırakıldı; pricing ve dashboard ekranlarına Türkiye sinyali bulunan
@@ -4494,3 +4511,11 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Browser QA at 1853×1000 confirmed the open dock at 416px with a 1437px preview, Preview Focus at the full 1853px, working iframe section selection and no horizontal overflow. Public preview checks passed at 320, 375, 414 and 768px; the authenticated mobile editor also remained at the 375px viewport width.
 - Errors resolved: initial type-check found optional contact email passed to a required section template and non-semantic drag/click handlers; a safe fallback plus list/button semantics fixed the root causes. The first authenticated browser run reached profile onboarding because it used a new QA identity; reusing the existing operator identity enabled editor QA without changing production auth behavior. Flowbite’s actual exports are `FileCopyOutline` and `BarsOutline`, so the initially assumed icon names were corrected.
 - Verification: `npm run check` passes with 0 errors/warnings; focused section-operation tests pass; `npm test` passes with 94 files / 648 tests (2 files / 11 tests skipped); `npm run build` and `npm run lint` complete successfully; `git diff --check` is clean.
+
+## 2026-07-18 — Owner media library
+
+- Added a site-scoped Media library tab to the owner control center. Owners can view thumbnails, inspect filename/type/size, upload supported images, copy a CDN URL, refresh the list and delete an asset with explicit confirmation.
+- Extended the existing media API response with usage and plan limit bytes so the owner sees quota context next to the library. Existing owner/site authorization, rate limits, image validation, R2 storage and deletion cleanup remain the source of truth.
+- Kept the editor’s contextual image picker intact; the owner library links directly back to the editor for assigning a selected image to a controlled block field. No raw HTML/CSS or arbitrary media placement was introduced.
+- Localized the new owner surface in Turkish, English and German and used Flowbite icons for upload, image, copy and delete actions.
+- Verification: `npm run check` passes with 0 errors/warnings; media API tests pass (3 tests); `npm run lint` passes; production build completed successfully. A later full-suite invocation was terminated by the runner with SIGTERM before Vitest reported results; no application assertion failure was emitted, so the focused API suite remains the deterministic verification for this change.

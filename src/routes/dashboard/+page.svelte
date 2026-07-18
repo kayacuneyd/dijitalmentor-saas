@@ -71,7 +71,7 @@
 		</div>
 	{/snippet}
 
-	<AppCard class="p-4 sm:p-5">
+	<section class="dashboard-brief p-4 sm:p-5">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div>
 				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{t('dashboard.plan.label')}</div>
@@ -93,7 +93,7 @@
 				</form>
 			</div>
 		</div>
-	</AppCard>
+	</section>
 
 	{#if form?.published}
 		<div class="sk-alert sk-alert-success">
@@ -143,19 +143,21 @@
 			</div>
 		</AppCard>
 	{:else}
-		<ul class="flex flex-col gap-3">
+		<ul class="dashboard-site-list flex flex-col gap-3">
 			{#each data.sites as site (site.id)}
-				<li class="sk-shell p-5">
-					<div class="flex flex-col gap-4 sm:flex-row sm:gap-5">
+				<li class="dashboard-site sk-shell p-5">
+					<div
+						class="dashboard-site__layout grid gap-5 lg:grid-cols-[minmax(220px,0.55fr)_minmax(0,1.45fr)]"
+					>
 						<a
 							href="/editor/{site.id}"
-							class="block shrink-0 sm:w-56"
+							class="dashboard-site__preview block shrink-0"
 							aria-label={t('dashboard.card.editorAria', { name: site.siteName })}
 						>
 							<SitePreviewThumb siteId={site.id} title={site.siteName} />
 						</a>
-						<div class="flex min-w-0 flex-1 flex-col gap-4">
-							<div class="flex flex-wrap items-start justify-between gap-3">
+						<div class="dashboard-site__workarea flex min-w-0 flex-col gap-4">
+							<div class="dashboard-site__header flex flex-wrap items-start justify-between gap-3">
 								<div class="min-w-0">
 									<div class="flex min-w-0 flex-wrap items-center gap-2">
 										<span class="size-2.5 rounded-sm bg-[#171614]/80"></span>
@@ -188,7 +190,9 @@
 								{/if}
 							</div>
 
-							<div class="rounded-[10px] border border-[var(--sk-line)] bg-[#171614]/[0.025] p-3">
+							<div
+								class="dashboard-module dashboard-module--identity rounded-[10px] border border-[var(--sk-line)] bg-[#171614]/[0.025] p-3"
+							>
 								<form
 									method="POST"
 									action="?/updateIdentity"
@@ -251,7 +255,7 @@
 							</div>
 
 							<div
-								class="flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--sk-line)] p-3 text-sm"
+								class="dashboard-module dashboard-module--billing flex flex-wrap items-center justify-between gap-3 rounded-[10px] border border-[var(--sk-line)] p-3 text-sm"
 							>
 								<div>
 									<p class="font-semibold">
@@ -296,7 +300,7 @@
 								{/if}
 							</div>
 
-							<div class="flex flex-wrap items-center gap-2">
+							<div class="dashboard-site__actions flex flex-wrap items-center gap-2">
 								<FlowbiteButton href="/editor/{site.id}" variant="primary" size="sm"
 									>{t('dashboard.actionsRow.edit')}</FlowbiteButton
 								>
@@ -451,7 +455,9 @@
 								</div>
 							{/if}
 
-							<div class="flex flex-col gap-2 border-t border-[var(--sk-line)] pt-4">
+							<div
+								class="dashboard-module dashboard-module--domain flex flex-col gap-2 border-t border-[var(--sk-line)] pt-4"
+							>
 								{#if site.domain}
 									<div class="flex flex-wrap items-center gap-2 text-sm">
 										<span class="text-[var(--sk-muted)]">{t('dashboard.domain.label')}</span>

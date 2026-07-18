@@ -232,13 +232,21 @@
 	flush
 >
 	<div
-		class="flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
+		class="editor-workbench flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
 	>
 		<!-- Top bar: only the viewport switcher stays permanently visible. Everything
 		     else (locale, status, publish, overflow menu, tabs, checklist, quality
 		     control) lives inside the FAB-triggered EditorDock below, so the preview
 		     stays clean by default at every viewport. -->
-		<div class="flex shrink-0 items-center gap-2 border-b border-[var(--sk-line)] px-3 py-2">
+		<div
+			class="editor-workbench__toolbar flex shrink-0 items-center justify-between gap-3 border-b border-[var(--sk-line)] px-3 py-2"
+		>
+			<div class="editor-workbench__label">
+				<span class="sk-mono text-[9px] text-[var(--sk-faint)]">preview workbench</span>
+				<span class="hidden text-xs text-[var(--sk-muted)] sm:inline"
+					>{store.site.settings.siteName}</span
+				>
+			</div>
 			<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
 				{#each viewports as vp (vp.id)}
 					<FlowbiteButton
@@ -255,7 +263,7 @@
 			</div>
 		</div>
 
-		<div class="flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
+		<div class="editor-workbench__body flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
 			<EditorDock bind:open={dockOpen}>
 				<button
 					type="button"
@@ -539,7 +547,7 @@
 			</EditorDock>
 
 			<!-- Preview: always visible, at every viewport — the dock floats above it. -->
-			<section class="flex min-h-0 w-full min-w-0 flex-1 flex-col">
+			<section class="editor-workbench__preview flex min-h-0 w-full min-w-0 flex-1 flex-col">
 				{#if publishNotice}
 					<div
 						class="border-b px-4 py-3 text-sm {publishNotice.tone === 'success'
@@ -586,7 +594,7 @@
 					class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] p-2 sm:p-4 lg:p-6"
 				>
 					<div
-						class="relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
+						class="editor-workbench__canvas relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
 						style="width: {viewport.width}; max-width: 100%;"
 					>
 						<iframe

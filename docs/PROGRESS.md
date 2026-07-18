@@ -4377,3 +4377,42 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Domain/TLS: `http://saaskaya.com` returns 301 to HTTPS; HTTPS certificate subject is `saaskaya.com` with `*.saaskaya.com` SAN; HTTPS response includes HSTS.
 - Public routes: key marketing/auth/onboarding routes returned successfully; `/robots.txt` and `/sitemap.xml` returned 200; title and description metadata present on checked public routes.
 - Not exercised: authenticated mutation flows, real email delivery, payments, uploads and the post-deploy smoke of this exact un-deployed working tree. Run the read-only smoke again immediately after deployment.
+
+## 2026-07-18 — Visual redesign system locked
+
+- Created root [`design.md`](../../design.md) as the locked visual and structural source of truth for platform redesign work.
+- Locked the four macrostructure families: Atelier Index, Preview Workbench, Guided Brief and Operations Ledger/Queue → detail.
+- Preserved the approved brand brief, existing token roles, Flowbite-as-infrastructure decision and tenant renderer boundary.
+- No dashboard, editor or admin production code was changed in this step; implementation begins with the dashboard prototype after this system lock.
+
+## 2026-07-18 — Dashboard Atelier Index prototype
+
+- Began the visual recomposition phase with the dashboard only.
+- Reframed the plan summary as a workspace brief surface and changed site items into a preview-rail + work-area composition.
+- Added dashboard-specific visual roles for identity, billing, domain and action modules so they no longer carry equal card weight.
+- Preserved all existing dashboard data, server actions, billing/domain branches, publish flows, delete confirmation and navigation behavior.
+- Verification: `npm run check` passed with 0 errors/warnings; `npm run test` passed with 92 files / 640 tests; `npm run build` completed successfully; `git diff --check` is clean.
+
+## 2026-07-18 — Editor Preview Workbench prototype
+
+- Reframed the editor canvas with an explicit workbench identity, viewport toolbar and separated preview stage.
+- Added visual hierarchy between the editing dock, preview surface and workbench context without changing iframe messaging, autosave, draft editing or publish behavior.
+- Verification: `npm run check` passed with 0 errors/warnings; `npm run build` completed successfully; `git diff --check` is clean.
+
+## 2026-07-18 — Admin Operations Ledger prototype
+
+- Reframed the admin overview as an operations ledger: alerts, metric rail, trend analysis, signup queue, observations and activity stream now have distinct visual roles.
+- Preserved all admin data loading, links and actions; this is a composition change only.
+
+## 2026-07-18 — Creative recomposition verification
+
+- Completed the approved platform-only recomposition pass for Dashboard / Atelier Index, Editor / Preview Workbench and Admin / Operations Ledger.
+- Confirmed the shared state language remains present for focus-visible, hover, disabled, loading, error and empty states; tenant-generated websites remain outside this redesign boundary.
+- Verification: `npm run check` passed with 0 errors/warnings; `npm run lint` passed; `npm run test` passed with 92 files / 640 tests; `npm run build` completed successfully; `git diff --check` is clean.
+- Deployment note: after publishing this working tree, run the existing read-only production smoke again; authenticated mutations, payments, uploads and email delivery remain outside this read-only gate.
+
+## 2026-07-18 — Recomposition mobile audit
+
+- Ran the mobile audit against `/dashboard`, `/editor/seed-law` and `/admin` at 320×700, 375×812 and 768×900.
+- No horizontal overflow or console errors were found; the protected routes redirected to `/en/login`, so authenticated visual screenshots still require a valid test session after deployment.
+- Audit artifacts: `/tmp/saaskaya-recomposition-audit-20260718`.

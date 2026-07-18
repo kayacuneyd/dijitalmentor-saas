@@ -3,6 +3,7 @@
 	import { tick } from 'svelte';
 	import type { Locale } from '$lib/i18n';
 	import { withLocale } from '$lib/i18n';
+	import MascotBee from '$lib/ui/MascotBee.svelte';
 	import {
 		ArrowRightOutline,
 		CloseOutline,
@@ -260,13 +261,16 @@
 			aria-label={String(t.open)}
 			onclick={() => persistMinimized(false)}
 		>
-			<MessagesOutline size="sm" />
+			<MascotBee size="xs" label="" />
 			<span>{String(t.title)}</span>
 		</button>
 	{:else}
 		<div class="sk-assistant-shell">
 			<div class="sk-assistant-head">
-				<span class="sk-assistant-title">{String(t.title)}</span>
+				<div class="sk-assistant-heading">
+					<MascotBee size="xs" label="" />
+					<span class="sk-assistant-title">{String(t.title)}</span>
+				</div>
 				<div class="sk-assistant-controls">
 					<button
 						type="button"

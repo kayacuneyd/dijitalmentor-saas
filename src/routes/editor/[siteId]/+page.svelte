@@ -9,6 +9,7 @@
 	import SettingsTab from './SettingsTab.svelte';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import EditorDock from '$lib/ui/EditorDock.svelte';
+	import MascotBee from '$lib/ui/MascotBee.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteBadge from '$lib/ui/primitives/FlowbiteBadge.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
@@ -712,9 +713,14 @@
 							: 'border-red-200 bg-red-50 text-red-900'}"
 					>
 						<div class="flex flex-wrap items-center justify-between gap-3">
-							<div>
-								<div class="font-semibold">{publishNotice.title}</div>
-								<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
+							<div class="flex min-w-0 items-start gap-3">
+								{#if publishNotice.tone === 'success'}
+									<MascotBee size="sm" label="" animate="celebrate" />
+								{/if}
+								<div>
+									<div class="font-semibold">{publishNotice.title}</div>
+									<p class="mt-0.5 text-xs leading-5 opacity-80">{publishNotice.message}</p>
+								</div>
 							</div>
 							{#if publishNotice.tone === 'success'}
 								<div class="flex flex-wrap items-start gap-2">

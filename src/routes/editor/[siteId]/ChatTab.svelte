@@ -3,6 +3,7 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import type { ChatMessageRow } from '$lib/server/chatLog';
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
+	import MascotBee from '$lib/ui/MascotBee.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import { ArrowRightOutline } from 'flowbite-svelte-icons';
@@ -330,10 +331,7 @@
 				{t('editor.chat.contextLabel', { page: currentPageName })}
 			</p>
 		</div>
-		<span
-			class="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--sk-ink)] font-[var(--font-display)] text-sm text-[var(--sk-paper)]"
-			aria-hidden="true">s</span
-		>
+		<MascotBee size="xs" label="" />
 	</div>
 
 	<div

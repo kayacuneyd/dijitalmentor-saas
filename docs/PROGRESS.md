@@ -3,6 +3,13 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Maskotun asistan ve başarı anlarındaki marka rolü
+
+- Yönetilebilir `MascotBee` bileşenine `guide` ve `celebrate` olmak üzere kısa, tek seferlik hareketler eklendi. Hareketler yalnızca `transform` ve `opacity` kullanır; `prefers-reduced-motion: reduce` altında tamamen kapanır.
+- Owner panelinin yönettiği `mascotUrl` artık editör asistan başlığında ve herkese açık saaskaya asistanının hem daraltılmış düğmesinde hem sohbet başlığında kullanılıyor. Böylece owner maskotu değiştirdiğinde tüm bu yüzeyler aynı varlığı anında gösterir.
+- Onboarding brief tamamlandığında maskot sakin bir yönlendirme hareketiyle, başarılı yayın bildiriminde ise kısa bir kutlama hareketiyle görünür. Normal durumlarda maskot statiktir; dekoratif olarak çoğaltılmadı.
+- Doğrulama: `npm run check` ve `npm run build` başarılı; production preview `/tr` 320, 375, 414, 768 ve 1440 px'te yatay taşma ya da konsol hatası vermedi. Açık/daraltılmış asistan durumları maskotu doğru yüzeyde gösterdi; reduced-motion ortamında hareket `none` olarak hesaplandı.
+
 ## 2026-07-18 — Açık panel sidebar yüzey genişliği kök neden düzeltmesi
 
 Önceki sidebar düzeltmesi masaüstü `aside` öğesini 232 px grid kolonuna genişletmişti; ancak `aside`

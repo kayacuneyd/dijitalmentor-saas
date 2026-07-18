@@ -18,6 +18,7 @@
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import MascotBee from '$lib/ui/MascotBee.svelte';
 	import {
 		ArrowLeftOutline,
 		ArrowRightOutline,
@@ -766,7 +767,10 @@
 					</ChatBubble>
 				{:else if !active && !current && !busy}
 					<ChatBubble role="assistant">
-						{copy.done}
+						<div class="mb-2 flex items-center gap-2">
+							<MascotBee size="sm" label="" animate="guide" />
+							<span class="font-semibold">{copy.done}</span>
+						</div>
 						{#if !data.user}{copy.doneSignedOut}{:else}{copy.doneSignedIn}{/if}
 						<div
 							class="mt-3 border-t border-[rgba(23,22,20,.08)] pt-3 text-xs leading-5 text-[var(--sk-muted)]"

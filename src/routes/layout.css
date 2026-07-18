@@ -965,6 +965,13 @@ select {
 	color: var(--sk-faint);
 }
 
+.sk-assistant-heading {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 0.45rem;
+}
+
 .sk-assistant-controls {
 	display: flex;
 	align-items: center;

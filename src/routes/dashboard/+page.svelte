@@ -101,11 +101,9 @@
 					{t('dashboard.plan.description')}
 				</p>
 			</div>
-			<form method="POST" action="/api/billing/topup">
-				<FlowbiteButton type="submit" variant="ghost" size="sm">
-					{t('dashboard.plan.buyCredits')}
-				</FlowbiteButton>
-			</form>
+			<FlowbiteButton href="/account/topup" variant="ghost" size="sm">
+				{t('dashboard.plan.buyCredits')}
+			</FlowbiteButton>
 		</div>
 
 		{#if data.sites.length === 0}

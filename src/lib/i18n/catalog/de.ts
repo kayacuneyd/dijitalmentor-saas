@@ -50,6 +50,19 @@ export const de = {
 			edits: 'Bearbeitungen',
 			generations: 'Website-Generierungen'
 		},
+		topup: {
+			title: 'AI-Guthaben hinzufügen',
+			description: 'Füge bei Bedarf weiteres AI-Guthaben hinzu.',
+			eyebrow: 'Einmaliges Guthabenpaket',
+			packTitle: 'Setze deine Arbeit ohne Unterbrechung fort.',
+			packDescription: 'Das Paket wird nach bestätigter Zahlung einmalig deinem Konto hinzugefügt.',
+			edits: 'AI-Bearbeitungen',
+			generations: 'Website-Generierung',
+			continue: 'Weiter zur Zahlung',
+			unavailable:
+				'AI-Guthaben-Zahlungen sind noch nicht verfügbar. Sobald sie bereit sind, kannst du sicher von dieser Seite aus fortfahren.',
+			note: 'Die Zahlung wird beim Anbieter verarbeitet; Guthaben wird nur einmal vergeben.'
+		},
 		profile: {
 			title: 'Profil',
 			description:
@@ -669,7 +682,8 @@ export const de = {
 			openEditor: 'Bild im Editor verwenden',
 			loading: 'Medien werden geladen…',
 			empty: 'Noch keine Bilder hochgeladen',
-			emptyHelp: 'Lade ein SVG-, JPG-, PNG-, GIF- oder WebP-Bild hoch, um deine Mediathek zu starten.',
+			emptyHelp:
+				'Lade ein SVG-, JPG-, PNG-, GIF- oder WebP-Bild hoch, um deine Mediathek zu starten.',
 			copyUrl: 'URL kopieren',
 			copied: 'Kopiert',
 			delete: 'Löschen',

@@ -50,6 +50,19 @@ export const tr = {
 			edits: 'Düzenlemeler',
 			generations: 'Site üretimleri'
 		},
+		topup: {
+			title: 'AI kredisi ekle',
+			description: 'Kullanımına gerektiğinde ek AI kredisi ekle.',
+			eyebrow: 'Tek seferlik kredi paketi',
+			packTitle: 'Çalışmana kaldığın yerden devam et.',
+			packDescription: 'Paket hesabına ödeme onaylandıktan sonra bir kez eklenir.',
+			edits: 'AI düzenlemesi',
+			generations: 'Site üretimi',
+			continue: 'Ödemeye devam et',
+			unavailable:
+				'AI kredi ödemesi henüz etkin değil. Hazır olduğunda bu sayfadan güvenle devam edebilirsin.',
+			note: 'Ödeme sağlayıcısı ödeme sayfasında işlenir; kredi yalnızca bir kez tanımlanır.'
+		},
 		profile: {
 			title: 'Profil',
 			description: 'Hesabın magic-link ile giriş kullanıyor. Şifre saklanmıyor.',

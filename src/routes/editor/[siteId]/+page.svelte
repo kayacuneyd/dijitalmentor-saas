@@ -283,7 +283,6 @@
 		activeTab === tab
 			? 'bg-[var(--sk-ink)] text-[var(--sk-paper)]'
 			: 'text-[var(--sk-muted)] hover:bg-white/70';
-	const ActiveTabIcon = $derived(tabIcons[activeTab]);
 
 	function goToChecklistItem(item: CompletionChecklistItem) {
 		activeTab = item.tab;
@@ -491,14 +490,14 @@
 
 				<div
 					role="tablist"
-					class="mx-3 mt-3 hidden shrink-0 grid-cols-2 gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:grid"
+					class="mx-3 mt-3 flex shrink-0 items-center gap-1 overflow-x-auto rounded-[var(--sk-radius-sm)] border border-[var(--sk-line)] bg-[var(--sk-shell)] p-1"
 				>
 					{#each primaryTabs as tab (tab)}
 						{@const TabIcon = tabIcons[tab]}
 						<button
 							role="tab"
 							aria-selected={activeTab === tab}
-							class="flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-2 py-2 text-xs font-medium transition-[background-color,color] {tabClass(
+							class="flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-[7px] px-2.5 py-1.5 text-xs font-medium transition-[background-color,color] {tabClass(
 								tab
 							)}"
 							onclick={() => (activeTab = tab)}
@@ -507,60 +506,32 @@
 							{t(tabLabelKeys[tab])}
 						</button>
 					{/each}
+					<details class="relative shrink-0">
+						<summary
+							class="flex min-h-9 cursor-pointer list-none items-center justify-center rounded-[7px] px-2 text-xs font-medium text-[var(--sk-muted)] hover:bg-[var(--sk-card)] [&::-webkit-details-marker]:hidden"
+							aria-label={t('editor.shell.moreTools')}
+						>
+							<span aria-hidden="true">•••</span>
+						</summary>
+						<div
+							class="absolute right-0 z-20 mt-1 grid w-52 grid-cols-1 gap-1 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-1.5 shadow-[var(--sk-shadow-lg)]"
+						>
+							{#each secondaryTabs as tab (tab)}
+								{@const TabIcon = tabIcons[tab]}
+								<button
+									type="button"
+									class="flex min-h-9 items-center gap-2 rounded-[7px] px-2.5 py-1.5 text-left text-xs {tabClass(
+										tab
+									)}"
+									onclick={() => (activeTab = tab)}
+								>
+									<TabIcon size="sm" />
+									{t(tabLabelKeys[tab])}
+								</button>
+							{/each}
+						</div>
+					</details>
 				</div>
-				<details class="relative mx-3 mt-2 hidden shrink-0 sm:block">
-					<summary
-						class="flex min-h-9 cursor-pointer list-none items-center justify-between rounded-[var(--sk-radius-sm)] px-3 text-xs font-medium text-[var(--sk-muted)] hover:bg-[var(--sk-shell)] [&::-webkit-details-marker]:hidden"
-					>
-						<span>{t('editor.shell.moreTools')}</span>
-						<span aria-hidden="true">⌄</span>
-					</summary>
-					<div
-						class="absolute right-0 left-0 z-20 mt-1 grid grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-[var(--sk-shadow-lg)]"
-					>
-						{#each secondaryTabs as tab (tab)}
-							{@const TabIcon = tabIcons[tab]}
-							<button
-								type="button"
-								class="flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-2 py-2 text-xs {tabClass(
-									tab
-								)}"
-								onclick={() => (activeTab = tab)}
-							>
-								<TabIcon size="sm" />
-								{t(tabLabelKeys[tab])}
-							</button>
-						{/each}
-					</div>
-				</details>
-				<details class="relative mx-3 mt-3 sm:hidden">
-					<summary
-						class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-[10px] bg-[var(--sk-shell)] px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden"
-					>
-						<span class="flex items-center gap-2">
-							<ActiveTabIcon size="sm" />
-							{t(tabLabelKeys[activeTab])}
-						</span>
-						<span aria-hidden="true">⌄</span>
-					</summary>
-					<div
-						class="absolute left-0 right-0 z-20 mt-1 grid grid-cols-2 gap-1 rounded-[12px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
-					>
-						{#each tabs as tab (tab)}
-							{@const TabIcon = tabIcons[tab]}
-							<button
-								type="button"
-								class="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm {tabClass(
-									tab
-								)}"
-								onclick={() => (activeTab = tab)}
-							>
-								<TabIcon size="sm" />
-								{t(tabLabelKeys[tab])}
-							</button>
-						{/each}
-					</div>
-				</details>
 
 				<div class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-4">
 					<details

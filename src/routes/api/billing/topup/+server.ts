@@ -18,3 +18,7 @@ export const POST: RequestHandler = async ({ locals, url }) => {
 		throw cause;
 	}
 };
+
+/** A browser navigation belongs on the account surface; this endpoint only starts
+ * checkout and must not expose a raw JSON error as a customer-facing page. */
+export const GET: RequestHandler = () => redirect(303, '/account/topup');

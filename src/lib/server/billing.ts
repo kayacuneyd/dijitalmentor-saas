@@ -52,6 +52,15 @@ export function billingConfigured(): boolean {
 	return billingProvider() === 'creem' ? creemConfigured() : stripeConfigured();
 }
 
+/** The account top-up surface needs the one-time product as well as the provider
+ * credentials. Keep this separate from subscription billing configuration. */
+export function aiTopupConfigured(): boolean {
+	if (billingProvider() === 'creem') {
+		return Boolean(getSetting('CREEM_API_KEY') && getSetting('CREEM_AI_TOPUP_PRODUCT_ID'));
+	}
+	return Boolean(getSetting('STRIPE_SECRET_KEY') && getSetting('STRIPE_AI_TOPUP_PRICE_ID'));
+}
+
 export async function createCheckoutSession(input: {
 	userId: string;
 	email: string;

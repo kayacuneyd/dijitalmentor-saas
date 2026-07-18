@@ -52,6 +52,19 @@ export const en = {
 			edits: 'Edits',
 			generations: 'Site generations'
 		},
+		topup: {
+			title: 'Add AI credits',
+			description: 'Add AI credits whenever you need more room to work.',
+			eyebrow: 'One-time credit pack',
+			packTitle: 'Continue where you left off.',
+			packDescription: 'The pack is added to your account once payment is confirmed.',
+			edits: 'AI edits',
+			generations: 'Site generation',
+			continue: 'Continue to payment',
+			unavailable:
+				'AI credit payments are not available yet. You can safely continue from this page once they are ready.',
+			note: 'Payment is processed by the provider; credits are granted only once.'
+		},
 		profile: {
 			title: 'Profile',
 			description: 'Your account uses magic-link sign-in. No password is stored.',

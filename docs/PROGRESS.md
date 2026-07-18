@@ -3,6 +3,13 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Editor araç yoğunluğu, AI top-up yüzeyi ve ortak 404
+
+- Editör rail’i, viewport breakpoint’ine göre kart-grid’e dönüşen araç düzeninden çıkarıldı. Birincil araçlar artık dar rail’de de kompakt yatay şeritte kalır; ikincil araçlar küçük bir overflow menüsünde toplanır.
+- Ham checkout endpoint’i yerine giriş gerektiren `/account/topup` sayfası eklendi. Ödeme yapılandırılmadığında kullanıcıya açıklayıcı bir durum gösterilir; endpoint’e GET isteği bu sayfaya yönlenir. POST checkout ve webhook idempotency davranışı korunur.
+- Kök `+error.svelte`, Flowbite 404 blok düzenini SaasKaya logo/renk/i18n bağlamına uyarladı. Böylece bulunamayan rotalar artık ortak, yönlendirici hata yüzeyi kullanır.
+- Doğrulama: `npm run check` 0 hata/uyarıyla, ilgili Vitest dosyaları 36 testle geçti. Preview'da `/api/billing/topup` 303 ile `/account/topup` sayfasına, yetkisiz top-up sayfası güvenle `/login`e yönlendi; bilinmeyen rota 404 döndü ve 320–1440 px aralığında yatay taşma göstermedi.
+
 ## 2026-07-18 — Ana logo ve maskot yüzeyleri ayrıştırıldı
 
 - 46×48 px navbar rozeti ve public footer yeniden owner yönetimli ana nöral ağ + arı kompozisyonunu kullanıyor. Bu, marka tanınırlığını ana işaret etrafında toplar.

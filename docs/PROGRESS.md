@@ -3,6 +3,12 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Arı odaklı compact logo sistemi
+
+- Tam ağ + arı kompozisyonu ana logo olarak korundu. Küçük marka yüzeyleri (public/app header, footer, admin/user panel rail ve favicon) için owner yönetimli app icon kullanılıyor; varsayılan `static/logo.svg` içindeki büyütülmüş standalone arıdır.
+- Owner `/admin/settings` içindeki “Main logo” ve “Favicon / app icon” alanlarını bağımsız güncellemeye devam eder. Böylece ana marka kompozisyonu korunurken küçük ölçülerde arı net biçimde okunur.
+- Admin ve kullanıcı panel rail rozetlerinin yüzeyi mevcut kırık beyaz `--sk-paper` tokenına çevrildi; koyu çizgili arı kontrastını kaybetmez.
+
 ## 2026-07-18 — Maskotun asistan ve başarı anlarındaki marka rolü
 
 - Yönetilebilir `MascotBee` bileşenine `guide` ve `celebrate` olmak üzere kısa, tek seferlik hareketler eklendi. Hareketler yalnızca `transform` ve `opacity` kullanır; `prefers-reduced-motion: reduce` altında tamamen kapanır.

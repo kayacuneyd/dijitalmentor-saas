@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
 	assertSafeSvg,
+	DEFAULT_ICON_URL,
 	DEFAULT_LOGO_URL,
 	DEFAULT_MASCOT_URL,
 	isBrandAssetTarget
 } from './branding';
 
 describe('platform branding SVG validation', () => {
-	it('keeps the full supplied composition as logo and the bee as mascot', () => {
+	it('keeps the full supplied composition as logo and promotes the bee for compact identity', () => {
 		expect(DEFAULT_LOGO_URL).toBe('/do-more-with-less-download-free-ebook.svg');
+		expect(DEFAULT_ICON_URL).toBe('/logo.svg');
 		expect(DEFAULT_MASCOT_URL).toBe('/mascot-bee.svg');
 		expect(['logo', 'icon', 'mascot'].every(isBrandAssetTarget)).toBe(true);
 		expect(isBrandAssetTarget('banner')).toBe(false);

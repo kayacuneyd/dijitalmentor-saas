@@ -38,13 +38,10 @@
 <svelte:head>
 	<link
 		rel="icon"
-		href={data.platformBranding?.iconUrl ?? '/do-more-with-less-download-free-ebook.svg'}
+		href={data.platformBranding?.iconUrl ?? '/logo.svg'}
 		type={data.platformBranding?.iconMime ?? 'image/svg+xml'}
 	/>
-	<link
-		rel="apple-touch-icon"
-		href={data.platformBranding?.iconUrl ?? '/do-more-with-less-download-free-ebook.svg'}
-	/>
+	<link rel="apple-touch-icon" href={data.platformBranding?.iconUrl ?? '/logo.svg'} />
 	{#if !data.isTenantHost}
 		<link rel="manifest" href="/manifest.webmanifest" />
 		<meta name="theme-color" content="#ece7dd" />

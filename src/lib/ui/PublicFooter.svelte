@@ -4,9 +4,7 @@
 
 	let { locale }: { locale: Locale } = $props();
 	const l = (path: string) => withLocale(locale, path);
-	const logoUrl = $derived(
-		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
-	);
+	const iconUrl = $derived(page.data.platformBranding?.iconUrl ?? '/logo.svg');
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 
@@ -127,7 +125,7 @@
 	<div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_2.8fr]">
 		<div>
 			<div class="flex items-center gap-3">
-				<img src={logoUrl} alt="saaskaya" class="size-10 rounded-[9px] object-contain" />
+				<img src={iconUrl} alt="saaskaya" class="size-10 rounded-[9px] object-contain" />
 				{#if showWordmark}<span class="text-lg font-semibold tracking-[-0.02em]">{brandName}</span
 					>{/if}
 			</div>

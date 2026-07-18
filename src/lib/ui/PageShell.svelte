@@ -29,9 +29,7 @@
 	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 	const currentPath = $derived(page.url.pathname);
-	const logoUrl = $derived(
-		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
-	);
+	const iconUrl = $derived(page.data.platformBranding?.iconUrl ?? '/logo.svg');
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 
@@ -57,9 +55,9 @@
 		class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]"
 	>
 		<span
-			class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]"
+			class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--sk-line)] bg-[var(--sk-paper)]"
 		>
-			<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
+			<img src={iconUrl} alt="saaskaya" class="size-full object-contain" />
 		</span>
 		{#if showWordmark}
 			<span class="panel-sidebar-brand-copy min-w-0">

@@ -18,6 +18,7 @@ const BRAND_NAME_KEY = 'PLATFORM_BRAND_NAME';
 const SHOW_WORDMARK_KEY = 'PLATFORM_SHOW_WORDMARK';
 
 export const DEFAULT_LOGO_URL = '/do-more-with-less-download-free-ebook.svg';
+export const DEFAULT_ICON_URL = '/logo.svg';
 export const DEFAULT_MASCOT_URL = '/mascot-bee.svg';
 
 export type BrandAssetTarget = 'logo' | 'icon' | 'mascot';
@@ -27,7 +28,7 @@ const BRAND_ASSET_SETTINGS: Record<
 	{ urlKey: string; objectKey: string; defaultUrl: string }
 > = {
 	logo: { urlKey: LOGO_URL_KEY, objectKey: LOGO_OBJECT_KEY, defaultUrl: DEFAULT_LOGO_URL },
-	icon: { urlKey: ICON_URL_KEY, objectKey: ICON_OBJECT_KEY, defaultUrl: DEFAULT_LOGO_URL },
+	icon: { urlKey: ICON_URL_KEY, objectKey: ICON_OBJECT_KEY, defaultUrl: DEFAULT_ICON_URL },
 	mascot: {
 		urlKey: MASCOT_URL_KEY,
 		objectKey: MASCOT_OBJECT_KEY,
@@ -60,7 +61,7 @@ export function getPlatformBranding(): PlatformBranding {
 	const safeVersion = Number.isFinite(version) && version > 0 ? version : 1;
 	return {
 		logoUrl: versionedUrl(readSetting(LOGO_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
-		iconUrl: versionedUrl(readSetting(ICON_URL_KEY) || DEFAULT_LOGO_URL, safeVersion),
+		iconUrl: versionedUrl(readSetting(ICON_URL_KEY) || DEFAULT_ICON_URL, safeVersion),
 		iconMime: readSetting(ICON_MIME_KEY) || 'image/svg+xml',
 		mascotUrl: versionedUrl(readSetting(MASCOT_URL_KEY) || DEFAULT_MASCOT_URL, safeVersion),
 		brandName: readSetting(BRAND_NAME_KEY) || 'saaskaya',

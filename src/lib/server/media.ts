@@ -6,6 +6,7 @@ import { getSetting } from '$lib/server/config';
 import { db } from '$lib/server/db';
 import { mediaAssets } from '$lib/server/db/schema';
 import { planTierForUser } from '$lib/server/plan';
+import { assertSafeSvg } from '$lib/server/svg';
 
 export const MAX_MEDIA_BYTES = 8 * 1024 * 1024;
 export const FREE_SITE_MEDIA_BYTES = 20 * 1024 * 1024;
@@ -58,6 +59,14 @@ const IMAGE_TYPES = {
 
 type ImageMime = keyof typeof IMAGE_TYPES;
 type StoredImage = { bytes: Uint8Array; mimeType: ImageMime; extension: string };
+type StoredMedia = StoredImage | { bytes: Uint8Array; mimeType: 'image/svg+xml'; extension: 'svg' };
+
+export class MediaValidationError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'MediaValidationError';
+	}
+}
 
 export function r2Config() {
 	const endpoint = getSetting('R2_ENDPOINT');
@@ -86,9 +95,27 @@ export function validateImage(bytes: Uint8Array, mimeType: string): ImageMime {
 	const type = mimeType.toLowerCase() as ImageMime;
 	const definition = IMAGE_TYPES[type];
 	if (!definition || !definition.matches(bytes)) {
-		throw new Error('Upload a valid JPEG, PNG, GIF, or WebP image.');
+		throw new MediaValidationError('Upload a valid JPEG, PNG, GIF, WebP, or SVG image.');
 	}
 	return type;
+}
+
+export async function prepareStoredMedia(
+	bytes: Uint8Array,
+	mimeType: string,
+	fileName: string
+): Promise<StoredMedia> {
+	const extension = fileName.toLowerCase().split('.').pop();
+	if (mimeType.toLowerCase() === 'image/svg+xml' || extension === 'svg') {
+		const safeSvg = assertSafeSvg(bytes);
+		return {
+			bytes: new TextEncoder().encode(safeSvg),
+			mimeType: 'image/svg+xml',
+			extension: 'svg'
+		};
+	}
+
+	return prepareStoredImage(bytes, validateImage(bytes, mimeType));
 }
 
 export function imageExtension(mime: ImageMime): string {
@@ -163,8 +190,7 @@ export async function uploadMedia(input: {
 	mimeType: string;
 	bytes: Uint8Array;
 }) {
-	const mimeType = validateImage(input.bytes, input.mimeType);
-	const stored = await prepareStoredImage(input.bytes, mimeType);
+	const stored = await prepareStoredMedia(input.bytes, input.mimeType, input.fileName);
 	const config = r2Config();
 	const id = randomUUID();
 	const objectKey = `sites/${input.siteId}/${id}.${stored.extension}`;

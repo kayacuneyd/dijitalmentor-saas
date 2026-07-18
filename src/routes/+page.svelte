@@ -3,6 +3,7 @@
 	import FlowAnimation from '$lib/ui/FlowAnimation.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import MascotBee from '$lib/ui/MascotBee.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
@@ -659,9 +660,12 @@
 
 	<MarketingSection class="mt-8">
 		<div class="sk-soft flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-			<div>
-				<h2 class="text-lg font-semibold">{copy.midCtaTitle}</h2>
-				<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">{copy.midCtaBody}</p>
+			<div class="flex min-w-0 items-center gap-4">
+				<MascotBee size="sm" label="" class="hidden sm:inline-flex" />
+				<div>
+					<h2 class="text-lg font-semibold">{copy.midCtaTitle}</h2>
+					<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">{copy.midCtaBody}</p>
+				</div>
 			</div>
 			<FlowbiteButton href={l('/beta')} variant="primary" class="shrink-0"
 				>{copy.midCtaAction}</FlowbiteButton
@@ -903,6 +907,7 @@
 	<!-- Final CTA -->
 	<MarketingSection class="mt-12 pb-12">
 		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
+			<MascotBee size="md" label="SaasKaya bee mascot" />
 			<h2 class="sk-display text-2xl">{copy.finalTitle}</h2>
 			<p class="max-w-md text-sm text-[var(--sk-muted)]">
 				{copy.finalBody}

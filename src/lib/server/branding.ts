@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import { appSettings } from '$lib/server/db/schema';
 import { prepareStoredImage, r2Client, r2Config, validateImage } from '$lib/server/media';
+import { assertSafeSvg as validateSvg } from '$lib/server/svg';
 
 const LOGO_URL_KEY = 'PLATFORM_LOGO_URL';
 const LOGO_OBJECT_KEY = 'PLATFORM_LOGO_OBJECT_KEY';
@@ -77,21 +78,7 @@ function safeFileName(fileName: string): string {
 }
 
 export function assertSafeSvg(bytes: Uint8Array): string {
-	if (bytes.byteLength > 1_048_576) throw new Error('SVG must be 1 MB or smaller.');
-	const svg = new TextDecoder()
-		.decode(bytes)
-		.replace(/^\uFEFF/, '')
-		.trim();
-	if (!/^<svg(?:\s|>)/i.test(svg) || !/<\/svg>\s*$/i.test(svg)) {
-		throw new Error('Upload a valid SVG logo.');
-	}
-	if (
-		/<\s*(script|foreignObject|iframe|object|embed)\b/i.test(svg) ||
-		/\bon[a-z]+\s*=|javascript\s*:|data\s*:\s*text\/html|url\s*\(\s*https?:|@import/i.test(svg)
-	) {
-		throw new Error('This SVG contains unsupported or unsafe content.');
-	}
-	return svg;
+	return validateSvg(bytes);
 }
 
 async function storeBrandAsset(input: { fileName: string; mimeType: string; bytes: Uint8Array }) {

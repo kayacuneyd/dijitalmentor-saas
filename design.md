@@ -21,6 +21,10 @@ generic SaaS dashboard.
 - Motion: short transform/opacity transitions only; reduced-motion fallback is
   opacity-only or no motion
 - Decoration: none unless it improves orientation or hierarchy
+- Mascot: the transparent ink bee is a quiet workshop guide. Use it only at
+  orientation, help or completion moments; never tile it as ambient decoration.
+  Its transparent wing and stripe spaces inherit the surrounding warm
+  `--sk-paper` / `--sk-shell` tone instead of using hard-coded white.
 
 ## Macrostructure families
 

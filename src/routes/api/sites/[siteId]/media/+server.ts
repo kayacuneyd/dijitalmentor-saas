@@ -5,10 +5,12 @@ import {
 	listMedia,
 	deleteMediaAsset,
 	MAX_MEDIA_BYTES,
+	MediaValidationError,
 	siteMediaLimit,
 	siteMediaUsage,
 	uploadMedia
 } from '$lib/server/media';
+import { SvgValidationError } from '$lib/server/svg';
 import type { RequestHandler } from './$types';
 
 function guard(locals: App.Locals, siteId: string): Response | null {
@@ -78,7 +80,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({ ok: true, asset }, { status: 201 });
 	} catch (cause) {
 		const message = cause instanceof Error ? cause.message : 'Upload failed.';
-		const clientError = message.startsWith('Upload a valid');
+		const clientError =
+			cause instanceof MediaValidationError || cause instanceof SvgValidationError;
 		console.error('[media] upload failed', { siteId: params.siteId, message });
 		return json(
 			{ ok: false, message: clientError ? message : 'Media storage is unavailable.' },

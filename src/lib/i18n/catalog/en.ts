@@ -662,7 +662,7 @@ export const en = {
 			openEditor: 'Use an image in the editor',
 			loading: 'Loading media…',
 			empty: 'No uploaded images yet',
-			emptyHelp: 'Upload a JPG, PNG, GIF or WebP image to start building your library.',
+			emptyHelp: 'Upload an SVG, JPG, PNG, GIF or WebP image to start building your library.',
 			copyUrl: 'Copy URL',
 			copied: 'Copied',
 			delete: 'Delete',

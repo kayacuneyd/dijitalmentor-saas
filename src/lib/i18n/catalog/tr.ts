@@ -658,7 +658,7 @@ export const tr = {
 			openEditor: 'Görseli editörde kullan',
 			loading: 'Medya yükleniyor…',
 			empty: 'Henüz yüklenmiş görsel yok',
-			emptyHelp: 'Kütüphaneyi oluşturmak için JPG, PNG, GIF veya WebP yükleyin.',
+			emptyHelp: 'Kütüphaneyi oluşturmak için SVG, JPG, PNG, GIF veya WebP yükleyin.',
 			copyUrl: 'URL’yi kopyala',
 			copied: 'Kopyalandı',
 			delete: 'Sil',

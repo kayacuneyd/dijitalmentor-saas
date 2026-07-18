@@ -669,7 +669,7 @@ export const de = {
 			openEditor: 'Bild im Editor verwenden',
 			loading: 'Medien werden geladen…',
 			empty: 'Noch keine Bilder hochgeladen',
-			emptyHelp: 'Lade ein JPG-, PNG-, GIF- oder WebP-Bild hoch, um deine Mediathek zu starten.',
+			emptyHelp: 'Lade ein SVG-, JPG-, PNG-, GIF- oder WebP-Bild hoch, um deine Mediathek zu starten.',
 			copyUrl: 'URL kopieren',
 			copied: 'Kopiert',
 			delete: 'Löschen',

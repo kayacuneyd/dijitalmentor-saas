@@ -122,7 +122,7 @@
 				{uploading ? t('dashboard.media.uploading') : t('dashboard.media.upload')}
 				<input
 					type="file"
-					accept="image/jpeg,image/png,image/gif,image/webp"
+					accept=".svg,image/svg+xml,image/jpeg,image/png,image/gif,image/webp"
 					class="sr-only"
 					onchange={upload}
 					disabled={uploading}

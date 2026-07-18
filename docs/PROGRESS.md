@@ -4519,3 +4519,11 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Kept the editor’s contextual image picker intact; the owner library links directly back to the editor for assigning a selected image to a controlled block field. No raw HTML/CSS or arbitrary media placement was introduced.
 - Localized the new owner surface in Turkish, English and German and used Flowbite icons for upload, image, copy and delete actions.
 - Verification: `npm run check` passes with 0 errors/warnings; media API tests pass (3 tests); `npm run lint` passes; production build completed successfully. A later full-suite invocation was terminated by the runner with SIGTERM before Vitest reported results; no application assertion failure was emitted, so the focused API suite remains the deterministic verification for this change.
+
+## 2026-07-18 — Safe SVG media and bee identity
+
+- Extended owner/editor media uploads to accept SVG alongside JPEG, PNG, GIF and WebP. SVG remains vector-native and is capped at 1 MB; active content, nested documents, data URLs and remote resources are rejected before R2 storage.
+- Extracted the bee from `static/do-more-with-less-download-free-ebook.svg` into compact, transparent `static/logo.svg` and `static/mascot-bee.svg` assets. The original white background and embedded base64 artwork are not carried into the live logo.
+- Added reusable `MascotBee.svelte` and placed the mascot at the landing page’s guided-start and completion CTA moments. Transparent wing/stripe areas inherit the existing warm paper/shell tokens.
+- Recorded mascot restraint and color behavior in `design.md`; added the durable upload/brand decisions to `docs/project-memory.md`.
+- Verification: focused media/branding/API tests pass (3 files / 10 tests); `npm run check` passes with 0 errors/warnings; production build succeeds. Local `/tr` returned 200, both SVG assets returned as `image/svg+xml`, and responsive browser checks at 320, 375, 414, 768 and 1440px found no horizontal overflow or console errors.

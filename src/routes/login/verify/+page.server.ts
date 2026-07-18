@@ -15,10 +15,10 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = ({ url, cookies, locals }) => {
 	const token = url.searchParams.get('token');
 	const email = token ? consumeLoginToken(token) : null;
-	if (!email) return { failed: true };
+	if (!email) return { failed: true, locale: locals.locale };
 	// Re-check the beta gate at click time — an invite may have been revoked after
 	// the link was sent (the token is already consumed above, so it can't be reused).
-	if (!isBetaAllowed(email)) return { failed: true };
+	if (!isBetaAllowed(email)) return { failed: true, locale: locals.locale };
 
 	const user = getOrCreateUser(email);
 	setSessionCookie(cookies, createSession(user.id));

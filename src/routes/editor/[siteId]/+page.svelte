@@ -22,8 +22,10 @@
 	import { previewSitePath, publicSitePath } from '$lib/siteUrls';
 	import { needsCustomPublicHandle, validatePublicHandle } from '$lib/publicHandle';
 	import { uiIcons } from '$lib/ui/icons';
+	import { getTranslate } from '$lib/i18n/context';
 
 	let { data } = $props();
+	const t = getTranslate();
 
 	// The store deliberately captures the load-time draft once; it is the source of
 	// truth for this editing session (server data never changes underneath it).
@@ -31,29 +33,31 @@
 	const store = new DraftStore(data.site);
 
 	const tabs = ['Chat', 'Content', 'Theme', 'Pages', 'Languages', 'Settings'] as const;
-	let activeTab = $state<(typeof tabs)[number]>('Content');
-	const tabLabels: Record<(typeof tabs)[number], string> = {
-		Chat: 'Chat',
-		Content: 'Content',
-		Theme: 'Theme',
-		Pages: 'Pages',
-		Languages: 'Languages',
-		Settings: 'Settings'
-	};
+	const primaryTabs = ['Chat', 'Content', 'Pages'] as const;
+	const secondaryTabs = ['Theme', 'Languages', 'Settings'] as const;
+	let activeTab = $state<(typeof tabs)[number]>('Chat');
+	const tabLabelKeys = {
+		Chat: 'editor.shell.assistant',
+		Content: 'editor.shell.fineTune',
+		Theme: 'editor.shell.theme',
+		Pages: 'editor.shell.pages',
+		Languages: 'editor.shell.languages',
+		Settings: 'editor.shell.settings'
+	} as const;
 	const localeLabels = { tr: 'Türkçe', en: 'English', de: 'Deutsch' } as const;
 
 	const viewports = [
-		{ id: 'mobile', label: 'Mobile', width: '375px' },
-		{ id: 'tablet', label: 'Tablet', width: '768px' },
-		{ id: 'desktop', label: 'Desktop', width: '100%' }
+		{ id: 'mobile', labelKey: 'editor.shell.mobile', width: '375px' },
+		{ id: 'tablet', labelKey: 'editor.shell.tablet', width: '768px' },
+		{ id: 'desktop', labelKey: 'editor.shell.desktop', width: '100%' }
 	] as const;
 	let viewport = $state<(typeof viewports)[number]>(viewports[2]);
 
-	/** All editing controls (tabs, checklist, quality control, locale/status/publish,
-	 *  the "..." menu) live behind this FAB-triggered dock; the preview iframe below
-	 *  stays mounted and visible at all times regardless of dock state. */
-	let dockOpen = $state(false);
+	/** The editor rail is open by default because conversation is the primary
+	 *  workspace. Closing it creates a focused preview without unmounting the iframe. */
+	let dockOpen = $state(true);
 	let checklistOpen = $state(false);
+	let localeMenuOpen = $state(false);
 
 	let iframeEl = $state<HTMLIFrameElement>();
 	const previewSrc = $derived(
@@ -133,6 +137,15 @@
 	]);
 	const canPublish = $derived(quality.canPublish && !publishIdentityMissing);
 	const hasUnpublishedChanges = $derived(store.status !== 'saved');
+	const draftStatus = $derived(
+		store.status === 'saving'
+			? t('editor.shell.savingDraft')
+			: store.status === 'error'
+				? t('editor.shell.saveError')
+				: hasUnpublishedChanges
+					? t('editor.shell.unsavedDraft')
+					: t('editor.shell.savedDraft')
+	);
 
 	async function saveNow() {
 		saveNotice = null;
@@ -212,7 +225,9 @@
 	}
 
 	const tabClass = (tab: (typeof tabs)[number]) =>
-		activeTab === tab ? 'bg-[#171614] text-[#f3ecdd]' : 'text-[var(--sk-muted)] hover:bg-white/70';
+		activeTab === tab
+			? 'bg-[var(--sk-ink)] text-[var(--sk-paper)]'
+			: 'text-[var(--sk-muted)] hover:bg-white/70';
 
 	function goToChecklistItem(item: CompletionChecklistItem) {
 		activeTab = item.tab;
@@ -221,7 +236,7 @@
 </script>
 
 <svelte:head>
-	<title>Editor · {store.site.settings.siteName}</title>
+	<title>{t('editor.shell.title')} · {store.site.settings.siteName}</title>
 </svelte:head>
 
 <AppCanvasShell
@@ -234,174 +249,218 @@
 	<div
 		class="editor-workbench flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
 	>
-		<!-- Top bar: only the viewport switcher stays permanently visible. Everything
-		     else (locale, status, publish, overflow menu, tabs, checklist, quality
-		     control) lives inside the FAB-triggered EditorDock below, so the preview
-		     stays clean by default at every viewport. -->
+		<!-- Persistent workbench bar: navigation, draft truth, preview size and the
+		     single live-site action stay visible while the rail changes modes. -->
 		<div
-			class="editor-workbench__toolbar flex shrink-0 items-center justify-between gap-3 border-b border-[var(--sk-line)] px-3 py-2"
+			class="editor-workbench__toolbar flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--sk-line)] px-3 py-2"
 		>
-			<div class="editor-workbench__label">
-				<span class="sk-mono text-[9px] text-[var(--sk-faint)]">preview workbench</span>
-				<span class="hidden text-xs text-[var(--sk-muted)] sm:inline"
-					>{store.site.settings.siteName}</span
+			<div class="flex min-w-0 items-center gap-2">
+				<FlowbiteButton
+					href="/dashboard"
+					variant="ghost"
+					size="sm"
+					class="shrink-0"
+					aria-label={t('editor.shell.dashboard')}
 				>
+					{@html uiIcons.arrowLeft(13)}
+					<span class="hidden sm:inline">{t('editor.shell.dashboard')}</span>
+				</FlowbiteButton>
+				<div class="min-w-0">
+					<div class="truncate text-sm font-semibold">{store.site.settings.siteName}</div>
+					<div class="flex items-center gap-1.5 text-[10px] text-[var(--sk-muted)]">
+						<span
+							class="size-1.5 rounded-full {store.status === 'error'
+								? 'bg-[var(--sk-error)]'
+								: store.status === 'saved'
+									? 'bg-[var(--sk-accent)]'
+									: 'bg-[var(--sk-warn-ink)]'}"
+						></span>
+						<span>{draftStatus}</span>
+					</div>
+				</div>
 			</div>
-			<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
-				{#each viewports as vp (vp.id)}
+
+			<div class="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
+				<div class="hidden gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:flex">
+					{#each viewports as vp (vp.id)}
+						<FlowbiteButton
+							variant={viewport.id === vp.id ? 'primary' : 'ghost'}
+							size="sm"
+							onclick={() => (viewport = vp)}
+							aria-label={t(vp.labelKey)}
+							aria-pressed={viewport.id === vp.id}
+							title={t(vp.labelKey)}
+						>
+							{@html viewportIcons[vp.id]}
+						</FlowbiteButton>
+					{/each}
+				</div>
+
+				<div class="dropdown dropdown-end">
 					<FlowbiteButton
-						variant={viewport.id === vp.id ? 'primary' : 'ghost'}
+						variant="ghost"
 						size="sm"
-						onclick={() => (viewport = vp)}
-						aria-label={vp.label}
-						aria-pressed={viewport.id === vp.id}
-						title={vp.label}
+						class="gap-1 !px-2 text-[10px] font-bold"
+						aria-label={t('editor.shell.editLocale')}
+						aria-haspopup="menu"
+						aria-expanded={localeMenuOpen}
+						onclick={() => (localeMenuOpen = !localeMenuOpen)}
 					>
-						{@html viewportIcons[vp.id]}
+						<span>{store.editLocale.toUpperCase()}</span>
 					</FlowbiteButton>
-				{/each}
+					{#if localeMenuOpen}
+						<div class="sk-editor-dropdown-content right-0">
+							<ul class="menu menu-sm w-full" role="menu">
+								{#each store.site.locales as locale (locale)}
+									<li>
+										<button
+											role="menuitemradio"
+											aria-checked={store.editLocale === locale}
+											class:menu-active={store.editLocale === locale}
+											onclick={() => {
+												store.editLocale = locale;
+												localeMenuOpen = false;
+											}}
+										>
+											{@html flagSvgs[locale]}
+											<span class="font-sans">{localeLabels[locale]}</span>
+										</button>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+				</div>
+
+				<FlowbiteButton
+					variant="primary"
+					size="sm"
+					onclick={publish}
+					disabled={publishing}
+					loading={publishing}
+					title={canPublish
+						? publishedVersion
+							? t('editor.shell.republish')
+							: t('editor.shell.publish')
+						: t('editor.shell.resolvePublish')}
+				>
+					{#if !canPublish}
+						{t('editor.shell.resolvePublish')}
+					{:else if publishedVersion}
+						{t('editor.shell.republish')}
+					{:else}
+						{t('editor.shell.publish')}
+					{/if}
+				</FlowbiteButton>
 			</div>
 		</div>
 
 		<div class="editor-workbench__body flex min-h-0 flex-1 overflow-visible lg:overflow-hidden">
-			<EditorDock bind:open={dockOpen}>
+			<EditorDock
+				bind:open={dockOpen}
+				label={t('editor.shell.openPanel')}
+				closeLabel={t('editor.shell.closePanel')}
+			>
 				<button
 					type="button"
-					class="absolute right-3 top-3 z-20 inline-flex size-9 items-center justify-center rounded-full border border-[var(--sk-line-strong)] bg-[var(--sk-card)] text-[var(--sk-ink)] shadow-md transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(23_22_20/.24)]"
-					aria-label="Paneli kapat"
+					class="absolute top-3 right-3 z-20 inline-flex size-9 items-center justify-center rounded-full border border-[var(--sk-line-strong)] bg-[var(--sk-card)] text-[var(--sk-ink)] transition-[background-color] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sk-focus)]"
+					aria-label={t('editor.shell.closePanel')}
 					onclick={() => (dockOpen = false)}
 				>
 					{@html uiIcons.x(16)}
 				</button>
 				<header
-					class="flex shrink-0 flex-col gap-1 border-b border-[var(--sk-line)] py-2 pr-14 pl-4"
+					class="flex shrink-0 items-center justify-between border-b border-[var(--sk-line)] py-3 pr-14 pl-4"
 				>
-					<div class="flex min-w-0 flex-wrap items-center justify-between gap-2">
-						<FlowbiteButton
-							href="/dashboard"
-							variant="ghost"
-							size="sm"
-							class="shrink-0"
-							aria-label="saaskaya dashboard"
-						>
-							{@html uiIcons.arrowLeft(13)} Dashboard
-						</FlowbiteButton>
-						<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-							<FlowbiteButton
-								variant="primary"
-								size="sm"
-								onclick={publish}
-								disabled={publishing}
-								loading={publishing}
-								title={canPublish ? 'Publish' : 'Publish engelini görmek için tıkla'}
-							>
-								{#if !canPublish}
-									Yayın engelini çöz
-								{:else if publishedVersion}
-									Republish
-								{:else}
-									Publish
-								{/if}
-							</FlowbiteButton>
-							<details class="relative">
-								<summary
-									class="sk-disclosure-trigger cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
-									aria-label="Diğer işlemler"
-								>
-									⋯
-								</summary>
-								<div
-									class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
-								>
-									<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
-										{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
-										{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
-									</div>
-									<button
-										type="button"
-										class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
-										onclick={saveNow}
-									>
-										Save now
-									</button>
-									<a
-										href={savedPreviewSrc}
-										target="_blank"
-										class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
-									>
-										Saved preview {@html uiIcons.external(13)}
-									</a>
-								</div>
-							</details>
-							<div class="dropdown dropdown-end">
-								<FlowbiteButton
-									tabindex="0"
-									variant="ghost"
-									size="sm"
-									class="gap-1 !px-1.5 text-[10px] font-bold"
-									aria-label="Düzenleme dili"
-								>
-									<svg
-										class="text-base-content/70 size-3.5"
-										xmlns="http://www.w3.org/2000/svg"
-										viewBox="0 0 24 24"
-										><path
-											stroke-linejoin="round"
-											stroke-linecap="round"
-											stroke-width="2"
-											fill="none"
-											stroke="currentColor"
-											d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
-										/></svg
-									>
-									<span>{store.editLocale.toUpperCase()}</span>
-								</FlowbiteButton>
-								<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-								<div tabindex="0" class="sk-editor-dropdown-content">
-									<ul class="menu menu-sm w-full">
-										{#each store.site.locales as locale (locale)}
-											<li>
-												<button
-													class:menu-active={store.editLocale === locale}
-													onclick={() => (store.editLocale = locale)}
-												>
-													{@html flagSvgs[locale]}
-													<span class="font-sans">{localeLabels[locale]}</span>
-												</button>
-											</li>
-										{/each}
-									</ul>
-								</div>
-							</div>
-						</div>
+					<div class="min-w-0">
+						<p class="sk-mono text-[9px] text-[var(--sk-faint)]">
+							{t('editor.shell.workbench')}
+						</p>
+						<h1 class="mt-1 truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 					</div>
-					<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
+					<details class="relative">
+						<summary
+							class="sk-disclosure-trigger cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
+							aria-label={t('editor.shell.moreTools')}
+						>
+							⋯
+						</summary>
+						<div
+							class="absolute right-0 z-30 mt-1 flex w-60 flex-col gap-1 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-[var(--sk-shadow-lg)]"
+						>
+							<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
+								{publishedVersion
+									? t('editor.shell.publishedVersion', { version: publishedVersion })
+									: t('editor.shell.notPublished')} · {draftStatus}
+							</div>
+							<button
+								type="button"
+								class="w-full rounded-[var(--sk-radius-sm)] px-2 py-2 text-left text-sm hover:bg-[var(--sk-shell)] focus-visible:outline-2 focus-visible:outline-[var(--sk-focus)]"
+								onclick={saveNow}
+							>
+								{t('editor.shell.saveNow')}
+							</button>
+							<a
+								href={savedPreviewSrc}
+								target="_blank"
+								class="flex items-center justify-between rounded-[var(--sk-radius-sm)] px-2 py-2 text-sm hover:bg-[var(--sk-shell)] focus-visible:outline-2 focus-visible:outline-[var(--sk-focus)]"
+							>
+								{t('editor.shell.savedPreview')}
+								{@html uiIcons.external(13)}
+							</a>
+						</div>
+					</details>
 				</header>
 
 				<div
 					role="tablist"
-					class="m-3 hidden shrink-0 grid-cols-3 gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1 sm:grid"
+					class="mx-3 mt-3 hidden shrink-0 grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:grid"
 				>
-					{#each tabs as tab (tab)}
+					{#each primaryTabs as tab (tab)}
 						<button
 							role="tab"
-							class="flex flex-col items-center gap-1 rounded-[7px] px-2 py-2 text-[10px] font-medium transition {tabClass(
+							aria-selected={activeTab === tab}
+							class="flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-2 py-2 text-xs font-medium transition-[background-color,color] {tabClass(
 								tab
 							)}"
 							onclick={() => (activeTab = tab)}
 						>
 							{@html tabIcons[tab]}
-							{tab}
+							{t(tabLabelKeys[tab])}
 						</button>
 					{/each}
 				</div>
+				<details class="relative mx-3 mt-2 hidden shrink-0 sm:block">
+					<summary
+						class="flex min-h-9 cursor-pointer list-none items-center justify-between rounded-[var(--sk-radius-sm)] px-3 text-xs font-medium text-[var(--sk-muted)] hover:bg-[var(--sk-shell)] [&::-webkit-details-marker]:hidden"
+					>
+						<span>{t('editor.shell.moreTools')}</span>
+						<span aria-hidden="true">⌄</span>
+					</summary>
+					<div
+						class="absolute right-0 left-0 z-20 mt-1 grid grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-[var(--sk-shadow-lg)]"
+					>
+						{#each secondaryTabs as tab (tab)}
+							<button
+								type="button"
+								class="flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-2 py-2 text-xs {tabClass(
+									tab
+								)}"
+								onclick={() => (activeTab = tab)}
+							>
+								{@html tabIcons[tab]}
+								{t(tabLabelKeys[tab])}
+							</button>
+						{/each}
+					</div>
+				</details>
 				<details class="relative mx-3 mt-3 sm:hidden">
 					<summary
 						class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-[10px] bg-[var(--sk-shell)] px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden"
 					>
 						<span class="flex items-center gap-2">
 							{@html tabIcons[activeTab]}
-							{tabLabels[activeTab]}
+							{t(tabLabelKeys[activeTab])}
 						</span>
 						<span aria-hidden="true">⌄</span>
 					</summary>
@@ -417,7 +476,7 @@
 								onclick={() => (activeTab = tab)}
 							>
 								{@html tabIcons[tab]}
-								{tabLabels[tab]}
+								{t(tabLabelKeys[tab])}
 							</button>
 						{/each}
 					</div>
@@ -433,7 +492,7 @@
 						>
 							<div class="min-w-0">
 								<div class="flex flex-wrap items-center gap-1.5">
-									<FlowbiteBadge tone="neutral">Checklist</FlowbiteBadge>
+									<FlowbiteBadge tone="neutral">{t('editor.shell.checklist')}</FlowbiteBadge>
 									<FlowbiteBadge tone="neutral">
 										{checklist.filter((item) => item.complete).length}/{checklist.length}
 									</FlowbiteBadge>
@@ -442,7 +501,7 @@
 								<p class="mt-1 truncate text-xs text-[var(--sk-muted)]">{nextAction.helper}</p>
 							</div>
 							<span class="sk-mono shrink-0 text-[10px] text-[var(--sk-faint)]">
-								{checklistOpen ? 'Gizle' : 'Detay'}
+								{checklistOpen ? t('editor.shell.hide') : t('editor.shell.details')}
 							</span>
 						</summary>
 						<FlowbiteButton
@@ -452,7 +511,7 @@
 							class="mt-3 shrink-0"
 							onclick={() => goToChecklistItem(nextAction)}
 						>
-							Aç
+							{t('editor.shell.open')}
 						</FlowbiteButton>
 						<div class="mt-3 flex flex-col gap-2">
 							{#each checklist as item (item.id)}
@@ -483,22 +542,30 @@
 							<div class="min-w-0">
 								<div class="flex flex-wrap items-center gap-1.5">
 									<FlowbiteBadge tone={canPublish ? 'success' : 'error'}>
-										{canPublish ? 'Publish OK' : 'Blocked'}
+										{canPublish ? t('editor.shell.publishReady') : t('editor.shell.publishBlocked')}
 									</FlowbiteBadge>
 									{#if publishBlockers.length}
-										<FlowbiteBadge tone="error">{publishBlockers.length} engel</FlowbiteBadge>
+										<FlowbiteBadge tone="error"
+											>{t('editor.shell.blockerCount', {
+												count: publishBlockers.length
+											})}</FlowbiteBadge
+										>
 									{/if}
 									{#if quality.warnings.length}
-										<FlowbiteBadge tone="warning">{quality.warnings.length} uyarı</FlowbiteBadge>
+										<FlowbiteBadge tone="warning"
+											>{t('editor.shell.warningCount', {
+												count: quality.warnings.length
+											})}</FlowbiteBadge
+										>
 									{/if}
 									<span class="truncate text-xs font-semibold">
 										{publishBlockers[0]?.message ??
 											quality.warnings[0]?.message ??
-											'Yayın için kritik engel yok'}
+											t('editor.shell.noBlockers')}
 									</span>
 								</div>
 								<p class="mt-1 truncate text-xs opacity-75">
-									Detayları görmek için aç; yalnızca kritik engeller publish'i durdurur.
+									{t('editor.shell.qualityHelp')}
 								</p>
 							</div>
 						</summary>
@@ -601,7 +668,7 @@
 							bind:this={iframeEl}
 							src={previewSrc}
 							onload={sendDraft}
-							title="Site preview"
+							title={t('editor.shell.previewTitle')}
 							class="h-full w-full"
 						></iframe>
 					</div>

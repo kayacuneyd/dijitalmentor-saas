@@ -4416,3 +4416,14 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Ran the mobile audit against `/dashboard`, `/editor/seed-law` and `/admin` at 320×700, 375×812 and 768×900.
 - No horizontal overflow or console errors were found; the protected routes redirected to `/en/login`, so authenticated visual screenshots still require a valid test session after deployment.
 - Audit artifacts: `/tmp/saaskaya-recomposition-audit-20260718`.
+
+## 2026-07-18 — Editor and standalone login design closeout
+
+- Rebuilt the editor as the locked Preview Workbench: persistent draft/publish/locale/viewport controls, a non-overlapping desktop assistant rail, a focused mobile editor sheet, clearer primary/secondary tool hierarchy and a bottom-anchored chat composer.
+- Localized the new editor chrome and assistant guidance in Turkish, English and German while preserving the Site schema, iframe bridge, autosave, publishing and fixed tenant component boundary.
+- Rebuilt standalone login as the Guided Brief: explicit product context, persistent field labels and helper/error states, branded language-aware entry, clearer magic-link success/next steps and 44×44px minimum touch targets.
+- Reworked invalid/expired login verification into a localized recovery surface and kept the verified-token redirect behavior unchanged.
+- Added an explicit `wordmark` override to `BrandMark` for trust-critical auth surfaces; operator-configured behavior remains the default elsewhere.
+- Authenticated browser QA used a disposable SQLite database and development magic link. Initial QA attempts remained on the dashboard because the development link opens a new tab and the test waited on the original page; navigating the generated link in the same browser page resolved the root cause. The final editor run confirmed a 416px desktop rail, 974px visible preview, zero overflow and zero console errors; mobile open/closed states were visually checked.
+- Public auth QA passed at 320, 375, 414, 768 and 1440px across Turkish, English and German login plus the verification failure route. Final 320px audit reports no overflow, console errors, small inputs or undersized hit areas. Artifacts: `/tmp/saaskaya-editor-login-redesign-final`.
+- Verification: `npm run check` passed with 0 errors/warnings; `npm run lint` passed; `npm run test` passed; `npm run build` completed successfully; `git diff --check` is clean.

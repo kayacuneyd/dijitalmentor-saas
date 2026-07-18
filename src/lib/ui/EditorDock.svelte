@@ -1,25 +1,25 @@
 <script lang="ts">
-	/** FAB-triggered floating control panel for the editor. Sunum katmanı: iş
-	 *  mantığı (activeTab, store, checklist, publish, vb.) tamamen çağıran
-	 *  +page.svelte'de kalır; bu bileşen sadece aç/kapa + konumlandırmayı yönetir. */
+	/** Responsive editor workspace rail. It participates in desktop layout so it
+	 *  never hides the preview; on narrow screens the same surface becomes a
+	 *  modal sheet. Business state remains in the calling route. */
 	let {
 		open = $bindable(false),
 		label = 'Editör kontrolleri',
+		closeLabel = label,
 		children
 	}: {
 		open?: boolean;
 		label?: string;
+		closeLabel?: string;
 		children: import('svelte').Snippet;
 	} = $props();
-
-	let dialogEl: HTMLDialogElement | undefined = $state();
-
-	$effect(() => {
-		if (!dialogEl) return;
-		if (open && !dialogEl.open) dialogEl.showModal();
-		else if (!open && dialogEl.open) dialogEl.close();
-	});
 </script>
+
+<svelte:window
+	onkeydown={(event) => {
+		if (event.key === 'Escape' && open) open = false;
+	}}
+/>
 
 <button
 	type="button"
@@ -32,18 +32,24 @@
 	s
 </button>
 
-<dialog
+{#if open}
+	<button
+		type="button"
+		class="sk-editor-dock-backdrop"
+		aria-label={closeLabel}
+		onclick={() => (open = false)}
+	></button>
+{/if}
+
+<aside
 	id="editor-dock"
 	data-editor-dock
 	class="sk-editor-dock"
 	aria-label={label}
-	bind:this={dialogEl}
-	onclose={() => (open = false)}
-	onclick={(event) => {
-		if (event.target === dialogEl) open = false;
-	}}
+	aria-hidden={!open}
+	data-open={open ? 'true' : 'false'}
 >
 	<div class="flex min-h-0 flex-1 flex-col">
 		{@render children()}
 	</div>
-</dialog>
+</aside>

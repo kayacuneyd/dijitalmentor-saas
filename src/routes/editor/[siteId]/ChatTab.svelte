@@ -35,23 +35,23 @@
 	const defaultPromptNotes: PromptNote[] = [
 		{
 			id: 'clarity',
-			title: 'Clearer copy',
-			text: 'Rewrite the page copy to be clearer, warmer, and easier to scan.'
+			title: t('editor.chat.promptClarityTitle'),
+			text: t('editor.chat.promptClarityText')
 		},
 		{
 			id: 'spacing',
-			title: 'More breathing room',
-			text: 'Give the main sections more breathing room and make the page feel calmer.'
+			title: t('editor.chat.promptSpacingTitle'),
+			text: t('editor.chat.promptSpacingText')
 		},
 		{
 			id: 'trust',
-			title: 'Build trust',
-			text: 'Make the page feel more trustworthy for a first-time visitor without inventing claims.'
+			title: t('editor.chat.promptTrustTitle'),
+			text: t('editor.chat.promptTrustText')
 		},
 		{
 			id: 'mobile',
-			title: 'Mobile polish',
-			text: 'Improve the mobile reading flow and make every important action easy to find.'
+			title: t('editor.chat.promptMobileTitle'),
+			text: t('editor.chat.promptMobileText')
 		}
 	];
 	let promptNotes = $state<PromptNote[]>(defaultPromptNotes);
@@ -88,10 +88,19 @@
 	function addPrompt() {
 		const text = newPrompt.trim();
 		if (!text) return;
-		promptNotes.push({ id: `custom-${Date.now()}`, title: 'My prompt', text });
+		promptNotes.push({
+			id: `custom-${Date.now()}`,
+			title: t('editor.chat.promptCustomTitle'),
+			text
+		});
 		newPrompt = '';
 		persistPromptNotes();
 	}
+
+	const currentPageName = $derived(
+		store.site.pages.find((page) => page.slug === store.currentSlug)?.title[store.editLocale] ??
+			store.currentSlug
+	);
 
 	const riskCopy: Record<Proposal['riskLevel'], string> = {
 		low: t('editor.chat.riskLow'),
@@ -311,9 +320,24 @@
 	}
 </script>
 
-<div class="flex h-full flex-col gap-3">
+<div class="flex h-full min-h-0 flex-col">
 	<div
-		class="shrink-0 rounded-[12px] border border-[#e4d7bb] bg-[#f8edc9] p-3 shadow-[2px_3px_0_rgb(23_22_20/.08)] rotate-[-.35deg]"
+		class="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--sk-line)] pb-3"
+	>
+		<div class="min-w-0">
+			<p class="text-sm font-semibold">{t('editor.shell.assistant')}</p>
+			<p class="truncate text-xs text-[var(--sk-muted)]">
+				{t('editor.chat.contextLabel', { page: currentPageName })}
+			</p>
+		</div>
+		<span
+			class="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--sk-ink)] font-[var(--font-display)] text-sm text-[var(--sk-paper)]"
+			aria-hidden="true">s</span
+		>
+	</div>
+
+	<div
+		class="my-3 shrink-0 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line)] bg-[var(--sk-shell)] p-3"
 	>
 		<button
 			type="button"
@@ -322,22 +346,26 @@
 			aria-expanded={showPromptNotes}
 		>
 			<span
-				><span class="text-sm font-semibold">Prompt notes</span><span
-					class="ml-2 text-xs text-black/55">copy-ready ideas</span
+				><span class="text-sm font-semibold">{t('editor.chat.promptNotes')}</span><span
+					class="ml-2 text-xs text-[var(--sk-muted)]">{t('editor.chat.promptNotesHelp')}</span
 				></span
 			>
-			<span class="text-xs text-black/55">{showPromptNotes ? 'Hide' : 'Open'}</span>
+			<span class="text-xs text-[var(--sk-muted)]"
+				>{showPromptNotes
+					? t('editor.chat.promptNotesHide')
+					: t('editor.chat.promptNotesOpen')}</span
+			>
 		</button>
 		{#if showPromptNotes}
 			<div class="mt-3 grid gap-2 sm:grid-cols-2">
 				{#each promptNotes as note (note.id)}
 					<button
 						type="button"
-						class="rounded-[9px] border border-[#e2d2a8] bg-[#fff8df] p-2.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
+						class="rounded-[var(--sk-radius-sm)] border border-[var(--sk-line)] bg-[var(--sk-card)] p-2.5 text-left transition-[border-color,background-color] hover:border-[var(--sk-line-strong)] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sk-focus)]"
 						onclick={() => usePrompt(note.text)}
 					>
 						<span class="block text-xs font-semibold">{note.title}</span>
-						<span class="mt-1 block line-clamp-2 text-[11px] leading-4 text-black/60"
+						<span class="mt-1 block line-clamp-2 text-[11px] leading-4 text-[var(--sk-muted)]"
 							>{note.text}</span
 						>
 					</button>
@@ -351,17 +379,20 @@
 				}}
 			>
 				<input
-					class="sk-input min-w-0 flex-1 bg-[#fff8df] text-xs"
+					class="sk-input min-w-0 flex-1 text-xs"
 					bind:value={newPrompt}
-					placeholder="Save your own prompt..."
+					placeholder={t('editor.chat.promptSavePlaceholder')}
 				/>
 				<FlowbiteButton variant="ghost" size="sm" type="submit" disabled={!newPrompt.trim()}
-					>Save</FlowbiteButton
+					>{t('editor.chat.promptSave')}</FlowbiteButton
 				>
 			</form>
 		{/if}
 	</div>
-	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
+	<div
+		bind:this={transcriptEl}
+		class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto pr-1 pb-3"
+	>
 		{#if messages.length === 0}
 			<ChatBubble role="assistant">
 				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]"
@@ -432,34 +463,36 @@
 		{/if}
 	</div>
 
-	<form
-		class="flex gap-2"
-		onsubmit={(e) => {
-			e.preventDefault();
-			send();
-		}}
-	>
-		<input
-			type="text"
-			class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
-			placeholder={t('editor.chat.inputPlaceholder')}
-			bind:value={input}
-			enterkeyhint="send"
-			onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
-			disabled={busy || proposal !== null}
-		/>
-		<FlowbiteButton
-			type="submit"
-			variant="primary"
-			size="sm"
-			disabled={busy || proposal !== null || !input.trim()}
-			loading={busy}
+	<div class="shrink-0 border-t border-[var(--sk-line)] pt-3">
+		<form
+			class="flex gap-2"
+			onsubmit={(e) => {
+				e.preventDefault();
+				send();
+			}}
 		>
-			{t('editor.chat.send')}
-		</FlowbiteButton>
-	</form>
+			<input
+				type="text"
+				class="sk-input min-h-11 flex-1 py-2 text-base sm:text-sm"
+				placeholder={t('editor.chat.inputPlaceholder')}
+				bind:value={input}
+				enterkeyhint="send"
+				onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
+				disabled={busy || proposal !== null}
+			/>
+			<FlowbiteButton
+				type="submit"
+				variant="primary"
+				size="sm"
+				disabled={busy || proposal !== null || !input.trim()}
+				loading={busy}
+			>
+				{t('editor.chat.send')}
+			</FlowbiteButton>
+		</form>
 
-	<p class="text-xs leading-5 text-[var(--sk-faint)]">
-		{t('editor.chat.freeEditsNote')}
-	</p>
+		<p class="mt-2 text-[11px] leading-4 text-[var(--sk-faint)]">
+			{t('editor.chat.freeEditsNote')}
+		</p>
+	</div>
 </div>

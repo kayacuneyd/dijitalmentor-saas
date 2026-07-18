@@ -4,6 +4,10 @@
 @source '../../node_modules/flowbite-svelte/dist';
 @source '../../node_modules/flowbite-svelte-icons/dist';
 
+/* Hallmark · genre: modern-minimal/editorial · tone: assured, calm, specific
+   · anchor: teal · macrostructures: Preview Workbench + Guided Brief
+   · design-system: design.md · pre-emit critique: P5 H5 E5 S5 R5 V4
+   · contrast: pass (40–41) · slop: pass (42–49) · mobile: pass (34, 49–57) */
 :root {
 	--sk-ink: #171614;
 	--sk-muted: rgb(23 22 20 / 0.62);
@@ -1233,14 +1237,14 @@ body:has(dialog[data-nav][open]) {
 	}
 }
 
-/* Editor control dock (EditorDock): a FAB bottom-left that opens a floating
-   control/settings/chat panel. Native <dialog> for top-layer stacking + free
-   Esc/backdrop-close, same base pattern as .sk-mobile-nav above — fullscreen
-   sheet on narrow viewports, bounded floating card above the FAB from `sm:` up. */
+/* Hallmark · genre: modern-minimal/editorial · macrostructure: Preview Workbench
+   · design-system: design.md · designed-as-app */
+/* Editor control rail: it is part of the desktop workbench grid and becomes a
+   modal task sheet only on narrow screens. The preview is never covered on desktop. */
 .sk-editor-fab {
 	position: fixed;
-	bottom: 1rem;
-	left: 1rem;
+	right: 1rem;
+	bottom: calc(1rem + env(safe-area-inset-bottom));
 	z-index: 40;
 	display: flex;
 	height: 2.75rem;
@@ -1248,40 +1252,55 @@ body:has(dialog[data-nav][open]) {
 	align-items: center;
 	justify-content: center;
 	border-radius: 9999px;
-	background: #171614;
-	color: #f3ecdd;
+	border: 1px solid var(--sk-line-strong);
+	background: var(--sk-ink);
+	color: var(--sk-paper);
 	font-family: var(--font-display);
 	font-size: 22px;
 	padding-bottom: 2px;
-	box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.45);
+	box-shadow: var(--sk-shadow-lg);
 	transition: transform 0.15s ease;
+}
+
+.sk-editor-fab[aria-expanded='true'] {
+	display: none;
 }
 
 .sk-editor-fab:hover {
 	transform: translateY(-1px);
 }
 
-dialog.sk-editor-dock {
-	margin: 0;
-	padding: 0;
-	width: 100vw;
-	max-width: 100vw;
+.sk-editor-fab:focus-visible {
+	outline: 2px solid var(--sk-focus);
+	outline-offset: 3px;
+}
+
+.sk-editor-dock-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 48;
+	border: 0;
+	background: rgb(23 22 20 / 0.42);
+}
+
+.sk-editor-dock {
+	position: fixed;
+	inset: 0;
+	z-index: 49;
+	display: none;
+	width: 100%;
+	max-width: 100%;
 	height: 100dvh;
 	max-height: 100dvh;
-	border: none;
-	border-radius: 0;
+	border: 0;
 	background: var(--sk-card);
 	color: var(--sk-ink);
 	overflow: hidden;
 }
 
-dialog.sk-editor-dock[open] {
+.sk-editor-dock[data-open='true'] {
 	display: flex;
 	flex-direction: column;
-}
-
-dialog.sk-editor-dock::backdrop {
-	background: rgb(23 22 20 / 0.4);
 }
 
 .editor-workbench {
@@ -1313,32 +1332,41 @@ dialog.sk-editor-dock::backdrop {
 	box-shadow: var(--sk-shadow-lg);
 }
 
-body:has(dialog[data-editor-dock][open]) {
+body:has(.sk-editor-dock[data-open='true']) {
 	overflow: hidden;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-	dialog.sk-editor-dock[open] {
+	.sk-editor-dock[data-open='true'] {
 		animation: sk-nav-in 0.18s ease-out;
 	}
 }
 
-@media (min-width: 640px) {
-	dialog.sk-editor-dock {
-		top: auto;
+@media (min-width: 1024px) {
+	.sk-editor-fab {
 		right: auto;
 		left: 1rem;
-		bottom: 5rem;
-		width: min(26rem, calc(100vw - 2rem));
-		max-width: min(26rem, calc(100vw - 2rem));
-		height: calc(100dvh - 7rem);
-		max-height: calc(100dvh - 7rem);
-		border-radius: 16px;
-		box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.45);
 	}
 
-	dialog.sk-editor-dock::backdrop {
-		background: transparent;
+	.sk-editor-dock-backdrop {
+		display: none;
+	}
+
+	.sk-editor-dock {
+		position: relative;
+		inset: auto;
+		z-index: 1;
+		width: min(26rem, 34vw);
+		max-width: min(26rem, 34vw);
+		height: auto;
+		max-height: none;
+		flex: 0 0 min(26rem, 34vw);
+		border-right: 1px solid var(--sk-line-strong);
+		box-shadow: none;
+	}
+
+	body:has(.sk-editor-dock[data-open='true']) {
+		overflow: auto;
 	}
 }
 

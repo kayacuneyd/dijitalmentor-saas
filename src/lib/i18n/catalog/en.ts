@@ -115,6 +115,7 @@ export const en = {
 			workbench: 'Preview workbench',
 			preview: 'Live preview',
 			assistant: 'Assistant',
+			structure: 'Structure',
 			fineTune: 'Fine-tune',
 			pages: 'Pages',
 			theme: 'Theme',
@@ -123,6 +124,8 @@ export const en = {
 			moreTools: 'More tools',
 			closePanel: 'Close editor panel',
 			openPanel: 'Open editor panel',
+			focusPreview: 'Focus preview',
+			showEditor: 'Show editor',
 			dashboard: 'Dashboard',
 			editLocale: 'Editing language',
 			publish: 'Publish site',
@@ -170,6 +173,45 @@ export const en = {
 			clients: 'Client logos',
 			video: 'Video',
 			collection: 'Collection'
+		},
+		structure: {
+			title: 'Page structure',
+			description:
+				'Select, reorder or add controlled sections. Click a section in the preview to select it here.',
+			undo: 'Undo structure change',
+			redo: 'Redo structure change',
+			addSection: 'Add section',
+			moveUp: 'Move section up',
+			moveDown: 'Move section down',
+			duplicate: 'Duplicate section',
+			delete: 'Delete',
+			deleteConfirm: 'Delete the {name} section?',
+			cancel: 'Cancel',
+			selected: 'Selected section',
+			editContent: 'Edit content'
+		},
+		sectionStyle: {
+			title: 'Section design',
+			description: 'Adjust this section visually without leaving the controlled design system.',
+			layout: 'Layout',
+			contentWidth: 'Content width',
+			verticalPadding: 'Vertical padding',
+			verticalMargin: 'Vertical margin',
+			sectionHeight: 'Section height',
+			backgroundColor: 'Background color',
+			themeDefault: 'Theme default',
+			reset: 'Reset',
+			fullWidth: 'Full width',
+			boxed: 'Boxed',
+			full: 'Full',
+			wide: 'Wide',
+			narrow: 'Narrow',
+			compact: 'Compact',
+			standard: 'Standard',
+			spacious: 'Spacious',
+			none: 'None',
+			contentBased: 'Content based',
+			tall: 'Tall'
 		},
 		settings: {
 			siteNameLabel: 'Site name',
@@ -294,6 +336,14 @@ export const en = {
 			fonts: 'Fonts',
 			cornerRadius: 'Corner radius',
 			heroTitleSize: 'Hero title size',
+			siteCanvas: 'Site content width',
+			siteCanvasHelp:
+				'Sections stay full-bleed; this controls the readable width of their inner content.',
+			canvasWidths: {
+				narrow: 'Narrow',
+				wide: 'Wide',
+				full: 'Expanded'
+			},
 			heroTitleSizes: {
 				compact: 'Compact',
 				standard: 'Standard',
@@ -330,6 +380,8 @@ export const en = {
 	},
 	admin: {
 		nav: {
+			dashboard: 'Back to dashboard',
+			exit: 'Exit',
 			overview: 'Overview',
 			gtm: 'GTM',
 			customers: 'Customers',

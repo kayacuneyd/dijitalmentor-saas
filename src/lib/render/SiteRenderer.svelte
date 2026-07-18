@@ -50,7 +50,10 @@
 		hrefFor = () => '#',
 		localeHrefFor,
 		mode = 'preview',
-		contactState = 'idle'
+		contactState = 'idle',
+		editorSelectable = false,
+		selectedSectionId,
+		onSectionSelect
 	}: {
 		site: Site;
 		page: Page;
@@ -59,6 +62,9 @@
 		localeHrefFor?: (locale: Locale) => string;
 		mode?: RenderContext['mode'];
 		contactState?: RenderContext['contactState'];
+		editorSelectable?: boolean;
+		selectedSectionId?: string | null;
+		onSectionSelect?: (sectionId: string) => void;
 	} = $props();
 
 	setRenderContext({
@@ -76,36 +82,14 @@
 	const appHost = env.PUBLIC_APP_HOST || 'localhost:5173';
 
 	const layout = $derived(site.layout ?? DEFAULT_LAYOUT);
-	const containerClass = $derived(
-		layout.container.width === 'narrow'
-			? 'max-w-4xl'
-			: layout.container.width === 'full'
-				? 'max-w-none'
-				: 'max-w-6xl'
-	);
-	const spacingClass = $derived(
-		layout.sectionSpacing === 'tight'
-			? 'space-y-6'
-			: layout.sectionSpacing === 'loose'
-				? 'space-y-20'
-				: 'space-y-12'
-	);
+	const containerClass = $derived(`site-container-${layout.container.width}`);
 
 	const integrations = $derived(site.settings.integrations ?? []);
 	const isMobileHidden = (section: Page['sections'][number]) =>
 		!!(section.props as Record<string, unknown>).hideOnMobile;
 	const sectionStyle = (section: Page['sections'][number]) => {
 		const style = normalizedSectionStyle(section.style);
-		return [
-			`--sk-section-layout:${style.layout}`,
-			style.backgroundColor ? `--sk-section-bg:${style.backgroundColor}` : '',
-			`--sk-section-py:${style.paddingY}`,
-			`--sk-section-my:${style.marginY}`,
-			`--sk-section-min-height:${style.minHeight}`,
-			`--sk-section-content:${style.contentWidth}`
-		]
-			.filter(Boolean)
-			.join(';');
+		return style.backgroundColor ? `--sk-section-bg:${style.backgroundColor}` : '';
 	};
 
 	// Cookie consent — only relevant in public mode with analytics or consent setting
@@ -156,19 +140,40 @@
 </script>
 
 <div
-	class="site-root bg-base-100 text-base-content min-h-screen overflow-x-hidden"
+	class="site-root {containerClass} bg-base-100 text-base-content min-h-screen overflow-x-clip"
 	style={themeStyle(site.theme)}
 >
 	<SiteHeader {site} {locale} activeSlug={page.slug} {hrefFor} {localeHrefFor} {layout} />
 
-	<main class="{containerClass} mx-auto w-full {spacingClass}">
+	<main class="w-full">
 		{#each page.sections as section, i (`${section.id}-${i}`)}
 			{@const Block = blockFor(section)}
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
 				class="section-frame {sectionStyleClasses(section.style)}"
 				class:bg-custom={Boolean(section.style?.backgroundColor)}
+				class:section-frame-editor={editorSelectable}
+				class:section-frame-selected={editorSelectable && selectedSectionId === section.id}
 				style={sectionStyle(section)}
 				class:hidden-mobile={isMobileHidden(section)}
+				data-section-id={section.id}
+				onclick={(event) => {
+					if (!editorSelectable) return;
+					event.preventDefault();
+					event.stopPropagation();
+					onSectionSelect?.(section.id);
+				}}
+				onkeydown={(event) => {
+					if (
+						!editorSelectable ||
+						event.currentTarget !== event.target ||
+						(event.key !== 'Enter' && event.key !== ' ')
+					) {
+						return;
+					}
+					event.preventDefault();
+					onSectionSelect?.(section.id);
+				}}
 			>
 				<Block
 					sectionId={section.id}
@@ -215,7 +220,14 @@
 
 <style>
 	.site-root {
+		--site-content-wide: 72rem;
 		font-family: var(--font-body);
+	}
+	.site-root.site-container-narrow {
+		--site-content-wide: 56rem;
+	}
+	.site-root.site-container-full {
+		--site-content-wide: 80rem;
 	}
 	.site-root :global(:is(h1, h2, h3, h4)) {
 		font-family: var(--font-heading);
@@ -225,6 +237,19 @@
 	}
 	.section-frame {
 		--sk-section-bg: transparent;
+		position: relative;
+		outline: 2px solid transparent;
+		outline-offset: -2px;
+	}
+	.section-frame-editor {
+		cursor: pointer;
+	}
+	.section-frame-editor:hover {
+		outline-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+	}
+	.section-frame-editor:focus-visible,
+	.section-frame-selected {
+		outline-color: var(--color-primary);
 	}
 	.section-frame :global(section) {
 		--sk-section-py: 5rem;
@@ -271,13 +296,15 @@
 		max-width: 48rem;
 	}
 	.section-frame.section-content-wide :global(section) > :global(.mx-auto) {
-		max-width: 72rem;
+		max-width: var(--site-content-wide);
 	}
 	.section-frame.section-content-full :global(section) > :global(.mx-auto) {
 		max-width: none;
 	}
+	.section-frame.section-layout-boxed {
+		padding-inline: 1rem;
+	}
 	.section-frame.section-layout-boxed :global(section) {
-		margin-inline: 1rem;
 		border-radius: var(--radius-box);
 	}
 	.hidden-mobile {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { DraftStore } from '$lib/stores/draft.svelte';
-	import type { Theme } from '$lib/schema/site';
+	import { DEFAULT_LAYOUT, type Layout, type Theme } from '$lib/schema/site';
 	import { themePresets } from '$lib/presets';
 	import { getTranslate } from '$lib/i18n/context';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
@@ -13,6 +13,7 @@
 	const colorKeys = ['primary', 'secondary', 'accent'] as const;
 	const radii: Theme['radius'][] = ['none', 'sm', 'md', 'lg', 'full'];
 	const heroTitleSizes = ['compact', 'standard', 'large'] as const;
+	const containerWidths: Layout['container']['width'][] = ['narrow', 'wide', 'full'];
 
 	function applyPreset(preset: Theme['preset']) {
 		store.update((site) => {
@@ -58,6 +59,37 @@
 						/>
 					</span>
 				</label>
+			{/each}
+		</div>
+	</fieldset>
+
+	<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
+		<legend class="px-1 text-xs font-medium">{t('editor.theme.siteCanvas')}</legend>
+		<p class="mb-3 text-[11px] leading-4 text-[var(--sk-muted)]">
+			{t('editor.theme.siteCanvasHelp')}
+		</p>
+		<div class="grid grid-cols-3 gap-1" role="group" aria-label={t('editor.theme.siteCanvas')}>
+			{#each containerWidths as width}
+				<button
+					type="button"
+					class="min-h-10 rounded-md border px-2 text-xs font-medium"
+					class:border-[var(--sk-accent)]={(store.site.layout?.container.width ??
+						DEFAULT_LAYOUT.container.width) === width}
+					class:bg-[var(--sk-accent-soft)]={(store.site.layout?.container.width ??
+						DEFAULT_LAYOUT.container.width) === width}
+					class:border-[var(--sk-line)]={(store.site.layout?.container.width ??
+						DEFAULT_LAYOUT.container.width) !== width}
+					onclick={() =>
+						store.update(
+							(site) => {
+								site.layout = structuredClone(site.layout ?? DEFAULT_LAYOUT);
+								site.layout.container.width = width;
+							},
+							{ history: true }
+						)}
+				>
+					{t(`editor.theme.canvasWidths.${width}`)}
+				</button>
 			{/each}
 		</div>
 	</fieldset>

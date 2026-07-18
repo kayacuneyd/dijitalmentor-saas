@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { OpenSidebarOutline } from 'flowbite-svelte-icons';
+
 	/** Responsive editor workspace rail. It participates in desktop layout so it
 	 *  never hides the preview; on narrow screens the same surface becomes a
 	 *  modal sheet. Business state remains in the calling route. */
@@ -29,7 +31,7 @@
 	aria-label={label}
 	onclick={() => (open = !open)}
 >
-	s
+	<OpenSidebarOutline size="sm" />
 </button>
 
 {#if open}

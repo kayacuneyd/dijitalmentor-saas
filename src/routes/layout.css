@@ -1253,15 +1253,10 @@ body:has(dialog[data-nav][open]) {
 	font-size: 22px;
 	padding-bottom: 2px;
 	box-shadow: var(--sk-shadow-lg);
-	transition: transform 0.15s ease;
 }
 
 .sk-editor-fab[aria-expanded='true'] {
 	display: none;
-}
-
-.sk-editor-fab:hover {
-	transform: translateY(-1px);
 }
 
 .sk-editor-fab:focus-visible {
@@ -1338,8 +1333,7 @@ body:has(.sk-editor-dock[data-open='true']) {
 
 @media (min-width: 1024px) {
 	.sk-editor-fab {
-		right: auto;
-		left: 1rem;
+		display: none;
 	}
 
 	.sk-editor-dock-backdrop {
@@ -1463,7 +1457,7 @@ body:has(.sk-editor-dock[data-open='true']) {
 		top: auto;
 		bottom: auto;
 		z-index: auto;
-		width: auto;
+		width: 100%;
 		min-width: 0;
 		box-shadow: none;
 		transform: none;

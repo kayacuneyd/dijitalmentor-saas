@@ -115,6 +115,7 @@ export const de = {
 			workbench: 'Vorschau-Arbeitsbereich',
 			preview: 'Live-Vorschau',
 			assistant: 'Assistent',
+			structure: 'Struktur',
 			fineTune: 'Feinabstimmung',
 			pages: 'Seiten',
 			theme: 'Design',
@@ -123,6 +124,8 @@ export const de = {
 			moreTools: 'Weitere Werkzeuge',
 			closePanel: 'Editorbereich schließen',
 			openPanel: 'Editorbereich öffnen',
+			focusPreview: 'Vorschau fokussieren',
+			showEditor: 'Editor anzeigen',
 			dashboard: 'Übersicht',
 			editLocale: 'Bearbeitungssprache',
 			publish: 'Website veröffentlichen',
@@ -170,6 +173,45 @@ export const de = {
 			clients: 'Kundenlogos',
 			video: 'Video',
 			collection: 'Sammlung'
+		},
+		structure: {
+			title: 'Seitenstruktur',
+			description:
+				'Kontrollierte Abschnitte auswählen, sortieren oder hinzufügen. Klicke einen Abschnitt in der Vorschau an.',
+			undo: 'Strukturänderung rückgängig machen',
+			redo: 'Strukturänderung wiederholen',
+			addSection: 'Abschnitt hinzufügen',
+			moveUp: 'Abschnitt nach oben',
+			moveDown: 'Abschnitt nach unten',
+			duplicate: 'Abschnitt duplizieren',
+			delete: 'Löschen',
+			deleteConfirm: 'Abschnitt {name} löschen?',
+			cancel: 'Abbrechen',
+			selected: 'Ausgewählter Abschnitt',
+			editContent: 'Inhalt bearbeiten'
+		},
+		sectionStyle: {
+			title: 'Abschnittsdesign',
+			description: 'Diesen Abschnitt visuell innerhalb des kontrollierten Designsystems anpassen.',
+			layout: 'Layout',
+			contentWidth: 'Inhaltsbreite',
+			verticalPadding: 'Vertikaler Innenabstand',
+			verticalMargin: 'Vertikaler Außenabstand',
+			sectionHeight: 'Abschnittshöhe',
+			backgroundColor: 'Hintergrundfarbe',
+			themeDefault: 'Theme-Standard',
+			reset: 'Zurücksetzen',
+			fullWidth: 'Volle Breite',
+			boxed: 'Begrenzt',
+			full: 'Voll',
+			wide: 'Breit',
+			narrow: 'Schmal',
+			compact: 'Kompakt',
+			standard: 'Standard',
+			spacious: 'Großzügig',
+			none: 'Keiner',
+			contentBased: 'Inhaltsbasiert',
+			tall: 'Hoch'
 		},
 		settings: {
 			siteNameLabel: 'Website-Name',
@@ -297,6 +339,14 @@ export const de = {
 			fonts: 'Schriftarten',
 			cornerRadius: 'Eckenradius',
 			heroTitleSize: 'Größe der Hero-Überschrift',
+			siteCanvas: 'Breite des Website-Inhalts',
+			siteCanvasHelp:
+				'Abschnittshintergründe bleiben bildschirmbreit; diese Einstellung steuert die lesbare Inhaltsbreite.',
+			canvasWidths: {
+				narrow: 'Schmal',
+				wide: 'Breit',
+				full: 'Erweitert'
+			},
 			heroTitleSizes: {
 				compact: 'Kompakt',
 				standard: 'Standard',
@@ -333,6 +383,8 @@ export const de = {
 	},
 	admin: {
 		nav: {
+			dashboard: 'Zurück zum Dashboard',
+			exit: 'Zurück',
 			overview: 'Übersicht',
 			gtm: 'GTM',
 			customers: 'Kunden',

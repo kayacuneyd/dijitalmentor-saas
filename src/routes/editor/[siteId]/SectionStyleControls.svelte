@@ -3,6 +3,9 @@
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
+	import { getTranslate } from '$lib/i18n/context';
+
+	const t = getTranslate();
 
 	let {
 		style,
@@ -27,14 +30,13 @@
 </script>
 
 <fieldset class="mb-4 rounded-[10px] border border-[var(--sk-line)] bg-white p-3">
-	<legend class="px-1 text-xs font-semibold">Section design</legend>
+	<legend class="px-1 text-xs font-semibold">{t('editor.sectionStyle.title')}</legend>
 	<p class="mb-3 text-[11px] leading-4 text-[var(--sk-muted)]">
-		Change this section without asking the AI. Full width is the default for a cleaner, modern
-		canvas.
+		{t('editor.sectionStyle.description')}
 	</p>
 	<div class="grid grid-cols-2 gap-3">
 		<label class="sk-field-stack col-span-2 sm:col-span-1">
-			<span class="mb-1 text-xs">Layout</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.layout')}</span>
 			<FlowbiteSelect
 				class="w-full"
 				size="sm"
@@ -42,12 +44,12 @@
 				onchange={(e: Event) =>
 					update('layout', (e.currentTarget as HTMLSelectElement).value as SectionStyle['layout'])}
 			>
-				<option value="full">Full width</option>
-				<option value="boxed">Boxed</option>
+				<option value="full">{t('editor.sectionStyle.fullWidth')}</option>
+				<option value="boxed">{t('editor.sectionStyle.boxed')}</option>
 			</FlowbiteSelect>
 		</label>
 		<label class="sk-field-stack col-span-2 sm:col-span-1">
-			<span class="mb-1 text-xs">Content width</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.contentWidth')}</span>
 			<FlowbiteSelect
 				class="w-full"
 				size="sm"
@@ -58,13 +60,13 @@
 						(e.currentTarget as HTMLSelectElement).value as SectionStyle['contentWidth']
 					)}
 			>
-				<option value="full">Full</option>
-				<option value="wide">Wide</option>
-				<option value="narrow">Narrow</option>
+				<option value="full">{t('editor.sectionStyle.full')}</option>
+				<option value="wide">{t('editor.sectionStyle.wide')}</option>
+				<option value="narrow">{t('editor.sectionStyle.narrow')}</option>
 			</FlowbiteSelect>
 		</label>
 		<label class="sk-field-stack">
-			<span class="mb-1 text-xs">Vertical padding</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.verticalPadding')}</span>
 			<FlowbiteSelect
 				class="w-full"
 				size="sm"
@@ -75,13 +77,13 @@
 						(e.currentTarget as HTMLSelectElement).value as SectionStyle['paddingY']
 					)}
 			>
-				<option value="compact">Compact</option>
-				<option value="standard">Standard</option>
-				<option value="spacious">Spacious</option>
+				<option value="compact">{t('editor.sectionStyle.compact')}</option>
+				<option value="standard">{t('editor.sectionStyle.standard')}</option>
+				<option value="spacious">{t('editor.sectionStyle.spacious')}</option>
 			</FlowbiteSelect>
 		</label>
 		<label class="sk-field-stack">
-			<span class="mb-1 text-xs">Vertical margin</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.verticalMargin')}</span>
 			<FlowbiteSelect
 				class="w-full"
 				size="sm"
@@ -92,14 +94,14 @@
 						(e.currentTarget as HTMLSelectElement).value as SectionStyle['marginY']
 					)}
 			>
-				<option value="none">None</option>
-				<option value="compact">Compact</option>
-				<option value="standard">Standard</option>
-				<option value="spacious">Spacious</option>
+				<option value="none">{t('editor.sectionStyle.none')}</option>
+				<option value="compact">{t('editor.sectionStyle.compact')}</option>
+				<option value="standard">{t('editor.sectionStyle.standard')}</option>
+				<option value="spacious">{t('editor.sectionStyle.spacious')}</option>
 			</FlowbiteSelect>
 		</label>
 		<label class="sk-field-stack">
-			<span class="mb-1 text-xs">Section height</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.sectionHeight')}</span>
 			<FlowbiteSelect
 				class="w-full"
 				size="sm"
@@ -110,35 +112,36 @@
 						(e.currentTarget as HTMLSelectElement).value as SectionStyle['minHeight']
 					)}
 			>
-				<option value="auto">Content based</option>
-				<option value="compact">Compact</option>
-				<option value="standard">Standard</option>
-				<option value="tall">Tall</option>
+				<option value="auto">{t('editor.sectionStyle.contentBased')}</option>
+				<option value="compact">{t('editor.sectionStyle.compact')}</option>
+				<option value="standard">{t('editor.sectionStyle.standard')}</option>
+				<option value="tall">{t('editor.sectionStyle.tall')}</option>
 			</FlowbiteSelect>
 		</label>
 		<label class="sk-field-stack col-span-2">
-			<span class="mb-1 text-xs">Background color</span>
+			<span class="mb-1 text-xs">{t('editor.sectionStyle.backgroundColor')}</span>
 			<div class="flex gap-2">
 				<input
 					type="color"
 					class="h-8 w-10 cursor-pointer rounded border border-[var(--sk-line)] bg-white p-0.5"
 					value={style.backgroundColor ?? '#ffffff'}
 					oninput={(e) => updateBackground(e.currentTarget.value)}
-					aria-label="Background color"
+					aria-label={t('editor.sectionStyle.backgroundColor')}
 				/>
 				<FlowbiteInput
 					type="text"
 					size="sm"
 					class="min-w-0 flex-1 font-mono"
 					value={style.backgroundColor ?? ''}
-					placeholder="Theme default"
+					placeholder={t('editor.sectionStyle.themeDefault')}
 					oninput={(e: Event) => updateBackground((e.currentTarget as HTMLInputElement).value)}
 				/>
 				<FlowbiteButton
 					type="button"
 					variant="ghost"
 					size="sm"
-					onclick={() => update('backgroundColor', undefined)}>Reset</FlowbiteButton
+					onclick={() => update('backgroundColor', undefined)}
+					>{t('editor.sectionStyle.reset')}</FlowbiteButton
 				>
 			</div>
 		</label>

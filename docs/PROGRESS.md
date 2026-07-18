@@ -3,6 +3,31 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — EUR fiyatları için Türkiye ziyaretçisine günlük TRY tahmini
+
+Ödeme para birimi EUR olarak bırakıldı; pricing ve dashboard ekranlarına Türkiye sinyali bulunan
+ziyaretçiler için yalnızca bilgilendirici yaklaşık TRY karşılığı eklendi. EUR/TRY günlük ECB XML’inden
+server-side okunuyor ve 24 saat process cache’inde tutuluyor. ECB erişilemezse mevcut cache kullanılıyor;
+cache yoksa TRY satırı gizlenip EUR fiyatı normal şekilde gösteriliyor.
+
+Gösterim locale (`tr`), `CF-IPCountry`/`X-Country-Code` veya `Accept-Language` üzerinden açılıyor.
+Aylık/yıllık/domain tutarları en yakın TL’ye yuvarlanıyor; kur tarihi, referans kaynağı ve ödemenin EUR
+olarak alınacağı açıkça gösteriliyor. Hesaplama, kaynak fiyat sabitlerini değiştirmiyor.
+
+Yeni modül: `src/lib/server/exchangeRates.ts`; 5 unit test ile XML parse, cache, güvenli fallback,
+Türkiye sinyali ve hesaplama doğrulandı.
+
+## 2026-07-18 — Panel sidebar açık/kapalı hizalama düzeltmesi
+
+PanelShell içeriği `mx-auto` ile ortalandığı için sağ sidebar açıldığında ana içerik bloğu sola kayıyor,
+sidebar grid hücresini tam doldurmadığı için de açık durumda sağ tarafta yüzey/geometri uyumsuzluğu
+oluşuyordu. İçerik wrapper'ı sol başlangıç çizgisini koruyacak şekilde `mr-auto` yapıldı; masaüstünde
+sidebar `width: 100%` ile kendi `72px/232px` grid kolonunu tam dolduruyor.
+
+Karar: Sidebar durumları arasında içerik sol hizası sabit kalacak; yalnızca sağ kullanılabilir alan
+sidebar genişliği kadar değişecek. Bu, başlık, plan satırı ve site aksiyonlarının iki durumda aynı grid
+ritminde kalmasını sağlar.
+
 ## 2026-07-16 — Section style değişikliklerinin preview/publish akışı
 
 Editördeki section layout, content width, padding, margin, min-height ve background kontrolleri
@@ -4439,3 +4464,33 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Migrated platform navigation, buttons, editor tabs, viewport controls, onboarding professions and status affordances to `flowbite-svelte-icons`; flags, charts, QR/data visuals and intentional illustrations remain outside the icon migration.
 - Preserved destructive-action safety by requiring the exact site name before deletion and redirecting to the dashboard after success.
 - Verification: `npm run check` passed with 0 errors/warnings; focused schema/theme tests passed (8 tests); `npm run test` passed with 92 files / 641 tests (2 files / 11 tests skipped); `npm run build` and `npm run lint` completed successfully; `git diff --check` is clean.
+
+## 2026-07-18 — Admin → dashboard return navigation
+
+- Added a persistent, localized “Back to dashboard” utility link at the bottom of the shared admin sidebar.
+- Separated the return action from admin destinations with a quiet divider and reused the Flowbite back-arrow icon.
+
+## 2026-07-18 — Editor preview and tenant canvas width diagnosis
+
+- Reviewed `docs/screenshots/check/image.png` and `image-2.png`; no production code changed.
+- Identified two independent constraints: the editor is capped at 96rem while its open dock consumes up to 26rem, and the tenant renderer wraps every section in a 72rem `main`, preventing nominally full-width section surfaces from reaching the viewport.
+- Recommended an edge-to-edge desktop editor with an explicit Preview Focus mode; browser Fullscreen API should remain an optional secondary action.
+- Planned a renderer correction that separates full-bleed section surfaces from bounded inner content, keeps prose readable, exposes the existing narrow/wide/full layout presets to owners and removes duplicated vertical-spacing sources.
+
+## 2026-07-18 — Schema-safe visual structure editing assessment
+
+- Confirmed that the current Content tab exposes section content and style controls but does not provide visual section selection, drag reordering or fixed-block insertion.
+- Recommended a Visual Structure mode: preview-to-outline selection, keyboard-accessible section reordering, fixed block-library insertion, schema-backed layout variants and undo/redo.
+- Explicitly rejected free-form pixel positioning because it would break the fixed Site schema, responsive behavior and multilingual content contract.
+
+## 2026-07-18 — Full-width preview and schema-safe visual structure editor
+
+- Removed the editor’s 96rem outer cap and browser-like wrapper. Desktop preview now uses the full remaining viewport, while the explicit Preview Focus control collapses the dock and expands the canvas to the complete app viewport; tablet and mobile device-width frames remain available.
+- Reworked tenant rendering into full-bleed section frames with bounded inner content. Site owners can choose narrow, wide or expanded content width in Theme without constraining section backgrounds to a centered column.
+- Added the localized Structure workspace for preview-to-outline selection, drag/drop and Alt+Arrow reordering, fixed-library section insertion, duplication, guarded deletion, per-section layout controls and 30-step undo/redo.
+- Kept every visual mutation inside the Zod `Site` schema and fixed block registry. No arbitrary HTML, CSS or pixel positioning is generated.
+- Added direct-add templates for Hero, About, Services, Process, FAQ, CTA, Contact, Booking, Collection and Footer, with complete TR/EN/DE placeholder content; all templates are covered by whole-site schema tests.
+- Standardized the new controls on Flowbite icons, replaced the editor dock letter glyph with a Flowbite sidebar icon and localized structure, canvas-width and section-style controls in Turkish, English and German.
+- Browser QA at 1853×1000 confirmed the open dock at 416px with a 1437px preview, Preview Focus at the full 1853px, working iframe section selection and no horizontal overflow. Public preview checks passed at 320, 375, 414 and 768px; the authenticated mobile editor also remained at the 375px viewport width.
+- Errors resolved: initial type-check found optional contact email passed to a required section template and non-semantic drag/click handlers; a safe fallback plus list/button semantics fixed the root causes. The first authenticated browser run reached profile onboarding because it used a new QA identity; reusing the existing operator identity enabled editor QA without changing production auth behavior. Flowbite’s actual exports are `FileCopyOutline` and `BarsOutline`, so the initially assumed icon names were corrected.
+- Verification: `npm run check` passes with 0 errors/warnings; focused section-operation tests pass; `npm test` passes with 94 files / 648 tests (2 files / 11 tests skipped); `npm run build` and `npm run lint` complete successfully; `git diff --check` is clean.

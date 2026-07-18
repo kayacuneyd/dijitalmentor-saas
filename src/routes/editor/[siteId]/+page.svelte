@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { DraftStore } from '$lib/stores/draft.svelte';
 	import ChatTab from './ChatTab.svelte';
+	import StructureTab from './StructureTab.svelte';
 	import ContentTab from './ContentTab.svelte';
 	import ThemeTab from './ThemeTab.svelte';
 	import PagesTab from './PagesTab.svelte';
@@ -24,9 +25,12 @@
 	import {
 		ArrowLeftOutline,
 		ArrowUpRightFromSquareOutline,
-		CloseOutline
+		CloseOutline,
+		CompressOutline,
+		ExpandOutline
 	} from 'flowbite-svelte-icons';
 	import { getTranslate } from '$lib/i18n/context';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 	const t = getTranslate();
@@ -36,12 +40,13 @@
 	// svelte-ignore state_referenced_locally
 	const store = new DraftStore(data.site);
 
-	const tabs = ['Chat', 'Content', 'Theme', 'Pages', 'Languages', 'Settings'] as const;
-	const primaryTabs = ['Chat', 'Content', 'Pages'] as const;
+	const tabs = ['Chat', 'Structure', 'Content', 'Theme', 'Pages', 'Languages', 'Settings'] as const;
+	const primaryTabs = ['Chat', 'Structure', 'Content', 'Pages'] as const;
 	const secondaryTabs = ['Theme', 'Languages', 'Settings'] as const;
 	let activeTab = $state<(typeof tabs)[number]>('Chat');
 	const tabLabelKeys = {
 		Chat: 'editor.shell.assistant',
+		Structure: 'editor.shell.structure',
 		Content: 'editor.shell.fineTune',
 		Theme: 'editor.shell.theme',
 		Pages: 'editor.shell.pages',
@@ -62,6 +67,7 @@
 	let dockOpen = $state(true);
 	let checklistOpen = $state(false);
 	let localeMenuOpen = $state(false);
+	let selectedSectionId = $state<string | null>(store.currentPage.sections[0]?.id ?? null);
 
 	let iframeEl = $state<HTMLIFrameElement>();
 	const previewSrc = $derived(
@@ -77,7 +83,51 @@
 			{ type: 'saaskaya:draft', site: $state.snapshot(store.site) },
 			window.location.origin
 		);
+		sendEditorState();
 	}
+
+	function sendEditorState() {
+		if (typeof window === 'undefined') return;
+		iframeEl?.contentWindow?.postMessage(
+			{
+				type: 'saaskaya:editor-state',
+				structureMode: activeTab === 'Structure',
+				selectedSectionId
+			},
+			window.location.origin
+		);
+	}
+
+	onMount(() => {
+		const handlePreviewMessage = (event: MessageEvent) => {
+			if (
+				event.origin !== window.location.origin ||
+				event.source !== iframeEl?.contentWindow ||
+				event.data?.type !== 'saaskaya:section-select' ||
+				typeof event.data.sectionId !== 'string'
+			) {
+				return;
+			}
+			selectedSectionId = event.data.sectionId;
+			activeTab = 'Structure';
+			dockOpen = true;
+		};
+		window.addEventListener('message', handlePreviewMessage);
+		return () => window.removeEventListener('message', handlePreviewMessage);
+	});
+
+	$effect(() => {
+		activeTab;
+		selectedSectionId;
+		store.currentSlug;
+		sendEditorState();
+	});
+	$effect(() => {
+		const sections = store.currentPage.sections;
+		if (!sections.some((section) => section.id === selectedSectionId)) {
+			selectedSectionId = sections[0]?.id ?? null;
+		}
+	});
 	store.onChange(sendDraft);
 
 	// Deliberate initial-value capture, like the store above: publish state for THIS
@@ -246,13 +296,15 @@
 
 <AppCanvasShell
 	label={`saaskaya.app / editor / ${store.site.id}`}
-	max="max-w-[96rem]"
-	minHeight="h-[calc(100dvh-1rem)] sm:h-[calc(100svh-2.5rem)]"
+	max="max-w-none"
+	minHeight="h-dvh"
 	contentClass=""
 	flush
+	edgeToEdge
+	chrome={false}
 >
 	<div
-		class="editor-workbench flex min-h-[calc(100dvh-4.25rem)] flex-col overflow-visible bg-[var(--sk-card)] text-[var(--sk-ink)] lg:h-full lg:min-h-0 lg:overflow-hidden"
+		class="editor-workbench flex h-dvh min-h-dvh flex-col overflow-hidden bg-[var(--sk-card)] text-[var(--sk-ink)]"
 	>
 		<!-- Persistent workbench bar: navigation, draft truth, preview size and the
 		     single live-site action stay visible while the rail changes modes. -->
@@ -301,6 +353,24 @@
 						</FlowbiteButton>
 					{/each}
 				</div>
+
+				<FlowbiteButton
+					variant="ghost"
+					size="sm"
+					onclick={() => (dockOpen = !dockOpen)}
+					aria-label={dockOpen ? t('editor.shell.focusPreview') : t('editor.shell.showEditor')}
+					aria-pressed={!dockOpen}
+					title={dockOpen ? t('editor.shell.focusPreview') : t('editor.shell.showEditor')}
+				>
+					{#if dockOpen}
+						<ExpandOutline size="sm" />
+					{:else}
+						<CompressOutline size="sm" />
+					{/if}
+					<span class="hidden xl:inline">
+						{dockOpen ? t('editor.shell.focusPreview') : t('editor.shell.showEditor')}
+					</span>
+				</FlowbiteButton>
 
 				<div class="dropdown dropdown-end">
 					<FlowbiteButton
@@ -420,7 +490,7 @@
 
 				<div
 					role="tablist"
-					class="mx-3 mt-3 hidden shrink-0 grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:grid"
+					class="mx-3 mt-3 hidden shrink-0 grid-cols-2 gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:grid"
 				>
 					{#each primaryTabs as tab (tab)}
 						{@const TabIcon = tabIcons[tab]}
@@ -600,8 +670,18 @@
 					<div class={activeTab === 'Chat' ? 'min-h-[22rem] flex-1 overflow-hidden' : ''}>
 						{#if activeTab === 'Chat'}
 							<ChatTab {store} history={data.chatHistory} />
+						{:else if activeTab === 'Structure'}
+							<StructureTab
+								{store}
+								{selectedSectionId}
+								onselect={(sectionId) => (selectedSectionId = sectionId)}
+								onedit={(sectionId) => {
+									selectedSectionId = sectionId;
+									activeTab = 'Content';
+								}}
+							/>
 						{:else if activeTab === 'Content'}
-							<ContentTab {store} />
+							<ContentTab {store} {selectedSectionId} />
 						{:else if activeTab === 'Theme'}
 							<ThemeTab {store} />
 						{:else if activeTab === 'Pages'}
@@ -668,10 +748,16 @@
 				{/if}
 
 				<div
-					class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] p-2 sm:p-4 lg:p-6"
+					class="flex min-h-0 flex-1 justify-center overflow-auto bg-[var(--sk-shell)] {viewport.id ===
+					'desktop'
+						? 'p-0'
+						: 'p-2 sm:p-4'}"
 				>
 					<div
-						class="editor-workbench__canvas relative h-full overflow-hidden rounded-[14px] border border-[var(--sk-line)] bg-white shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)] transition-[width] duration-200"
+						class="editor-workbench__canvas relative h-full overflow-hidden bg-white {viewport.id ===
+						'desktop'
+							? ''
+							: 'rounded-[14px] border border-[var(--sk-line)] shadow-[0_24px_60px_-30px_rgba(0,0,0,.35)]'}"
 						style="width: {viewport.width}; max-width: 100%;"
 					>
 						<iframe

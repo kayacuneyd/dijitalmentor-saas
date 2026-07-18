@@ -113,6 +113,7 @@ export const tr = {
 			workbench: 'Canlı önizleme çalışma alanı',
 			preview: 'Canlı önizleme',
 			assistant: 'Asistan',
+			structure: 'Yapı',
 			fineTune: 'İnce ayar',
 			pages: 'Sayfalar',
 			theme: 'Tema',
@@ -121,6 +122,8 @@ export const tr = {
 			moreTools: 'Diğer araçlar',
 			closePanel: 'Editör panelini kapat',
 			openPanel: 'Editör panelini aç',
+			focusPreview: 'Önizlemeye odaklan',
+			showEditor: 'Editörü göster',
 			dashboard: 'Panel',
 			editLocale: 'Düzenleme dili',
 			publish: 'Siteyi yayınla',
@@ -168,6 +171,45 @@ export const tr = {
 			clients: 'Referans logoları',
 			video: 'Video',
 			collection: 'Koleksiyon'
+		},
+		structure: {
+			title: 'Sayfa yapısı',
+			description:
+				'Kontrollü bölümleri seç, sırala veya ekle. Önizlemedeki bir bölüme tıklayarak burada seçebilirsin.',
+			undo: 'Yapı değişikliğini geri al',
+			redo: 'Yapı değişikliğini yinele',
+			addSection: 'Bölüm ekle',
+			moveUp: 'Bölümü yukarı taşı',
+			moveDown: 'Bölümü aşağı taşı',
+			duplicate: 'Bölümü çoğalt',
+			delete: 'Sil',
+			deleteConfirm: '{name} bölümü silinsin mi?',
+			cancel: 'Vazgeç',
+			selected: 'Seçili bölüm',
+			editContent: 'İçeriği düzenle'
+		},
+		sectionStyle: {
+			title: 'Bölüm tasarımı',
+			description: 'Kontrollü tasarım sisteminden çıkmadan bu bölümü görsel olarak düzenle.',
+			layout: 'Yerleşim',
+			contentWidth: 'İçerik genişliği',
+			verticalPadding: 'Dikey iç boşluk',
+			verticalMargin: 'Dikey dış boşluk',
+			sectionHeight: 'Bölüm yüksekliği',
+			backgroundColor: 'Arka plan rengi',
+			themeDefault: 'Tema varsayılanı',
+			reset: 'Sıfırla',
+			fullWidth: 'Tam genişlik',
+			boxed: 'Kutulu',
+			full: 'Tam',
+			wide: 'Geniş',
+			narrow: 'Dar',
+			compact: 'Kompakt',
+			standard: 'Standart',
+			spacious: 'Ferah',
+			none: 'Yok',
+			contentBased: 'İçeriğe göre',
+			tall: 'Yüksek'
 		},
 		settings: {
 			siteNameLabel: 'Site adı',
@@ -291,6 +333,14 @@ export const tr = {
 			fonts: 'Yazı tipleri',
 			cornerRadius: 'Köşe yuvarlaklığı',
 			heroTitleSize: 'Ana başlık boyutu',
+			siteCanvas: 'Site içerik genişliği',
+			siteCanvasHelp:
+				'Bölüm arka planları tam genişlikte kalır; bu ayar içeriğin okunabilir genişliğini belirler.',
+			canvasWidths: {
+				narrow: 'Dar',
+				wide: 'Geniş',
+				full: 'Genişletilmiş'
+			},
 			heroTitleSizes: {
 				compact: 'Kompakt',
 				standard: 'Standart',
@@ -327,6 +377,8 @@ export const tr = {
 	},
 	admin: {
 		nav: {
+			dashboard: 'Kullanıcı paneline dön',
+			exit: 'Çıkış',
 			overview: 'Genel bakış',
 			gtm: 'GTM',
 			customers: 'Müşteriler',

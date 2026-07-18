@@ -32,6 +32,9 @@ export class DraftStore {
 	#listeners = new Set<(site: Site) => void>();
 	#tracker = new SaveTracker();
 	#inflight: Promise<boolean> | null = null;
+	#undoStack: Site[] = [];
+	#redoStack: Site[] = [];
+	historyVersion = $state(0);
 
 	constructor(initial: Site) {
 		this.site = initial;
@@ -44,8 +47,48 @@ export class DraftStore {
 	}
 
 	/** Apply a mutation to the draft, notify the preview, and schedule autosave. */
-	update(mutate: (site: Site) => void) {
+	update(mutate: (site: Site) => void, options: { history?: boolean } = {}) {
+		if (options.history) {
+			this.#undoStack.push(structuredClone($state.snapshot(this.site)));
+			if (this.#undoStack.length > 30) this.#undoStack.shift();
+			this.#redoStack = [];
+			this.historyVersion += 1;
+		}
 		mutate(this.site);
+		this.#markDirty();
+	}
+
+	get canUndo() {
+		this.historyVersion;
+		return this.#undoStack.length > 0;
+	}
+
+	get canRedo() {
+		this.historyVersion;
+		return this.#redoStack.length > 0;
+	}
+
+	undo(): boolean {
+		const previous = this.#undoStack.pop();
+		if (!previous) return false;
+		this.#redoStack.push(structuredClone($state.snapshot(this.site)));
+		this.site = previous;
+		this.historyVersion += 1;
+		this.#markDirty();
+		return true;
+	}
+
+	redo(): boolean {
+		const next = this.#redoStack.pop();
+		if (!next) return false;
+		this.#undoStack.push(structuredClone($state.snapshot(this.site)));
+		this.site = next;
+		this.historyVersion += 1;
+		this.#markDirty();
+		return true;
+	}
+
+	#markDirty() {
 		this.status = 'dirty';
 		this.lastSaveError = null;
 		this.#tracker.markEdited();
@@ -64,6 +107,9 @@ export class DraftStore {
 	replace(site: Site) {
 		clearTimeout(this.#saveTimer);
 		this.site = site;
+		this.#undoStack = [];
+		this.#redoStack = [];
+		this.historyVersion += 1;
 		if (!site.pages.some((p) => p.slug === this.currentSlug)) {
 			this.currentSlug = site.pages[0].slug;
 		}

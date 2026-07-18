@@ -52,10 +52,13 @@ import {
 import { getSetting } from '$lib/server/config';
 import { assertCanPublishFreeSite, SiteQuotaError } from '$lib/server/siteQuota';
 import { serverTranslator } from '$lib/server/messageOverrides';
+import { getEurTryRate, shouldShowTry, tryAmounts } from '$lib/server/exchangeRates';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = ({ locals, url }) => {
+export const load: PageServerLoad = async ({ locals, url, request }) => {
 	if (!locals.user) redirect(303, '/login');
+	const showTry = shouldShowTry(locals.locale, request.headers);
+	const tryEstimate = tryAmounts(showTry ? await getEurTryRate() : null);
 	const reservations = listReservationsByUser(locals.user.id);
 	const sites = listSitesByOwner(locals.user.id).map((site) => {
 		const reservation = reservations.find((r) => r.siteId === site.id && r.status !== 'cancelled');
@@ -83,6 +86,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 		porkbunConfigured: porkbunConfigured(),
 		proSitePriceEur: PRO_SITE_PRICE_EUR_MONTHLY,
 		proSiteYearlyPriceEur: PRO_SITE_PRICE_EUR_YEARLY,
+		tryEstimate,
 		payment: {
 			mode: paymentMode(),
 			iban: getSetting('BANK_IBAN') ?? '',

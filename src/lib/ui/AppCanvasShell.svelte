@@ -8,7 +8,8 @@
 		left,
 		right,
 		flush = false,
-		chrome = true
+		chrome = true,
+		edgeToEdge = false
 	} = $props<{
 		children: import('svelte').Snippet;
 		label?: string;
@@ -19,11 +20,16 @@
 		right?: import('svelte').Snippet;
 		flush?: boolean;
 		chrome?: boolean;
+		edgeToEdge?: boolean;
 	}>();
 </script>
 
 <main class="sk-page">
-	<section class="mx-auto flex min-h-screen w-full {max} flex-col px-2 py-2 sm:px-6 sm:py-6">
+	<section
+		class="mx-auto flex min-h-screen w-full {max} flex-col {edgeToEdge
+			? ''
+			: 'px-2 py-2 sm:px-6 sm:py-6'}"
+	>
 		{#if chrome}
 			<div class="sk-shell flex {minHeight} flex-col overflow-hidden">
 				<div

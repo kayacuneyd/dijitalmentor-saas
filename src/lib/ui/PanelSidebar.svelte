@@ -8,6 +8,7 @@
 		icon: PlatformIcon;
 		eyebrow?: string;
 		active?: boolean;
+		dividerBefore?: boolean;
 	};
 
 	let {
@@ -89,6 +90,9 @@
 		<nav class="flex flex-1 flex-col gap-1 p-2" aria-label={label}>
 			{#each items as item (item.href)}
 				{@const Icon = item.icon}
+				{#if item.dividerBefore}
+					<div class="mx-2 my-2 border-t border-[var(--sk-line)]" aria-hidden="true"></div>
+				{/if}
 				<a
 					href={item.href}
 					onclick={onCloseMobile}

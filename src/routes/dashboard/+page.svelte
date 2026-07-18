@@ -26,6 +26,19 @@
 			month: 'short',
 			year: 'numeric'
 		});
+	const formatTry = (amount: number) =>
+		new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(amount);
+	const tryLabels = $derived(
+		{
+			en: { approx: 'approx.', rate: 'Daily ECB reference rate', paidIn: 'Payment is in EUR' },
+			tr: {
+				approx: 'yaklaşık',
+				rate: 'Günlük ECB referans kuru',
+				paidIn: 'Ödeme EUR olarak alınır'
+			},
+			de: { approx: 'ca.', rate: 'Täglicher EZB-Referenzkurs', paidIn: 'Zahlung erfolgt in EUR' }
+		}[locale]
+	);
 </script>
 
 <svelte:head>
@@ -71,6 +84,19 @@
 						· {t('dashboard.plan.priceSuffix', { price: data.proSitePriceEur })}
 					</span>
 				</p>
+				{#if data.tryEstimate}
+					<p class="mt-1 text-xs text-[var(--sk-muted)]">
+						{tryLabels.approx} ₺{formatTry(data.tryEstimate.monthly)} / {locale === 'tr'
+							? 'ay'
+							: locale === 'de'
+								? 'Monat'
+								: 'mo'} ·
+						{tryLabels.paidIn}
+					</p>
+					<p class="text-[10px] text-[var(--sk-faint)]">
+						{tryLabels.rate} · {data.tryEstimate.asOf}
+					</p>
+				{/if}
 				<p class="mt-1 max-w-2xl text-xs leading-5 text-[var(--sk-muted)]">
 					{t('dashboard.plan.description')}
 				</p>

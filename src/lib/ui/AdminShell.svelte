@@ -90,6 +90,13 @@
 				label: t('admin.nav.settings'),
 				eyebrow: 'System',
 				icon: uiIcons.settings
+			},
+			{
+				href: '/dashboard',
+				label: t('admin.nav.dashboard'),
+				eyebrow: t('admin.nav.exit'),
+				icon: uiIcons.arrowLeft,
+				dividerBefore: true
 			}
 		].map((item) => ({
 			...item,

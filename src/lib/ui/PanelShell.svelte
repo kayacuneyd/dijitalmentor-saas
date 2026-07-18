@@ -162,7 +162,7 @@
 		/>
 
 		<section class="min-w-0 bg-[#fbfaf7] {contentPlacement}">
-			<div class="mx-auto flex w-full {max} flex-col gap-5 p-4 sm:p-5 lg:p-6">
+			<div class="mr-auto flex w-full {max} flex-col gap-5 p-4 sm:p-5 lg:p-6">
 				<header
 					class="flex flex-col gap-3 border-b border-[var(--sk-line)] pb-4 md:flex-row md:items-start md:justify-between"
 				>

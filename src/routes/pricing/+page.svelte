@@ -12,6 +12,25 @@
 	let { data } = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
+	const tryLabels = $derived(
+		{
+			en: { approx: 'approx.', rate: 'Daily ECB reference rate', paidIn: 'Payment is in EUR' },
+			tr: {
+				approx: 'yaklaşık',
+				rate: 'Günlük ECB referans kuru',
+				paidIn: 'Ödeme EUR olarak alınır'
+			},
+			de: { approx: 'ca.', rate: 'Täglicher EZB-Referenzkurs', paidIn: 'Zahlung erfolgt in EUR' }
+		}[locale]
+	);
+	const formatTry = (amount: number) =>
+		new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(amount);
+	const formatRateDate = (date: string) =>
+		new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : locale === 'de' ? 'de-DE' : 'en-US', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric'
+		}).format(new Date(`${date}T12:00:00Z`));
 
 	const baseCopy = $derived(
 		{
@@ -397,6 +416,15 @@
 							<span class="text-sm text-[var(--sk-faint)]">{plan.period}</span>
 						{/if}
 					</div>
+					{#if data.tryEstimate && plan.name !== 'Free'}
+						{@const amount = plan.highlight ? data.tryEstimate.yearly : data.tryEstimate.monthly}
+						<div class="mt-1 text-xs text-[var(--sk-muted)]">
+							{tryLabels.approx} ₺{formatTry(amount)}{plan.period}
+						</div>
+						<div class="mt-1 text-[10px] leading-4 text-[var(--sk-faint)]">
+							{tryLabels.rate} · {formatRateDate(data.tryEstimate.asOf)} · {tryLabels.paidIn}
+						</div>
+					{/if}
 					<ul class="mt-4 flex flex-1 flex-col gap-1.5">
 						{#each plan.features as f (f)}
 							<li class="flex items-start gap-2 text-xs text-[var(--sk-muted)]">

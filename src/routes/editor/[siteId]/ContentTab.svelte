@@ -12,7 +12,13 @@
 	const t = getTranslate();
 	const sectionLabel = (type: string) => t(`editor.blocks.${type}` as CatalogKey);
 
-	let { store }: { store: DraftStore } = $props();
+	let {
+		store,
+		selectedSectionId = null
+	}: {
+		store: DraftStore;
+		selectedSectionId?: string | null;
+	} = $props();
 </script>
 
 <div class="flex flex-col gap-4">
@@ -35,7 +41,7 @@
 	</p>
 
 	{#each store.currentPage.sections as section, i (`${section.id}-${i}`)}
-		<details class="sk-editor-collapse">
+		<details class="sk-editor-collapse" open={selectedSectionId === section.id}>
 			<summary class="min-h-0 cursor-pointer list-none py-3 text-sm font-semibold">
 				{sectionLabel(section.type)}
 				<span class="ml-1 text-xs font-normal text-[var(--sk-faint)]">#{section.id}</span>

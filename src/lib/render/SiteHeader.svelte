@@ -22,6 +22,13 @@
 	const navVariant = $derived(layout?.nav?.variant ?? 'inline');
 	const mobileBreakpoint = $derived(layout?.nav?.mobileBreakpoint ?? 'lg');
 	const sticky = $derived(layout?.nav?.sticky ?? true);
+	const headerContainerClass = $derived(
+		layout?.container?.width === 'narrow'
+			? 'max-w-4xl'
+			: layout?.container?.width === 'full'
+				? 'max-w-7xl'
+				: 'max-w-6xl'
+	);
 
 	// Show desktop nav only above the mobile breakpoint
 	const breakpointClass = $derived(
@@ -60,7 +67,9 @@
 </script>
 
 <header class={headerClass}>
-	<div class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-4">
+	<div
+		class="mx-auto flex w-full {headerContainerClass} flex-wrap items-center justify-between gap-3 px-5 py-4"
+	>
 		<a
 			href={hrefFor(site.pages[0].slug)}
 			class="text-primary text-lg font-bold tracking-normal no-underline"

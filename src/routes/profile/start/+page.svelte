@@ -5,7 +5,8 @@
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import { ArrowRightOutline, HomeOutline } from 'flowbite-svelte-icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
@@ -63,21 +64,19 @@
 </svelte:head>
 
 <AppCanvasShell label="saaskaya.app / beta profile">
+	{#snippet left()}
+		<BrandMark href={l('/')} compact wordmark />
+	{/snippet}
 	{#snippet right()}
 		<FlowbiteButton href={l('/')} variant="secondary" size="sm"
-			>{@html uiIcons.home(14)}{copy.home}</FlowbiteButton
+			><HomeOutline size="xs" />{copy.home}</FlowbiteButton
 		>
 		<LanguageSwitcher {locale} />
 	{/snippet}
 
 	<div class="mx-auto grid w-full max-w-3xl gap-6 md:grid-cols-[0.85fr_1fr] md:items-center">
 		<div>
-			<a
-				href={l('/')}
-				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
-				>{@html uiIcons.arrowLeft(14)}saaskaya</a
-			>
-			<h1 class="sk-display mt-4 text-4xl leading-tight">{copy.h1}</h1>
+			<h1 class="sk-display text-4xl leading-tight">{copy.h1}</h1>
 			<p class="mt-4 text-sm leading-6 text-[var(--sk-muted)]">{copy.body}</p>
 		</div>
 
@@ -148,7 +147,7 @@
 				>
 					{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 					{copy.submit}
-					{#if !busy}{@html uiIcons.arrowRight(16)}{/if}
+					{#if !busy}<ArrowRightOutline size="sm" />{/if}
 				</FlowbiteButton>
 			</form>
 		</AppCard>

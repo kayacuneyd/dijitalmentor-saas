@@ -3,7 +3,12 @@
 	import { tick } from 'svelte';
 	import type { Locale } from '$lib/i18n';
 	import { withLocale } from '$lib/i18n';
-	import { uiIcons } from '$lib/ui/icons';
+	import {
+		ArrowRightOutline,
+		CloseOutline,
+		MessagesOutline,
+		MinusOutline
+	} from 'flowbite-svelte-icons';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
@@ -255,7 +260,7 @@
 			aria-label={String(t.open)}
 			onclick={() => persistMinimized(false)}
 		>
-			{@html uiIcons.message(16)}
+			<MessagesOutline size="sm" />
 			<span>{String(t.title)}</span>
 		</button>
 	{:else}
@@ -268,10 +273,10 @@
 						aria-label={String(t.minimize)}
 						onclick={() => persistMinimized(true)}
 					>
-						{@html uiIcons.minus(14)}
+						<MinusOutline size="xs" />
 					</button>
 					<button type="button" aria-label={String(t.close)} onclick={() => persistMinimized(true)}>
-						{@html uiIcons.x(14)}
+						<CloseOutline size="xs" />
 					</button>
 				</div>
 			</div>
@@ -351,7 +356,7 @@
 					aria-label={String(t.send)}
 					disabled={busy || !input.trim()}
 				>
-					{@html uiIcons.arrowRight(16)}
+					<ArrowRightOutline size="sm" />
 				</button>
 			</form>
 		</div>

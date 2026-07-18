@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { LOCALES, localeNames, stripLocale, withLocale, type Locale } from '$lib/i18n';
 	import { flagSvgs } from '$lib/ui/flags';
+	import { AngleDownOutline } from 'flowbite-svelte-icons';
 
 	let { locale, variant = 'pills' }: { locale: Locale; variant?: 'pills' | 'dropdown' | 'cookie' } =
 		$props();
@@ -58,17 +59,7 @@
 		>
 			{@html flagSvgs[locale]}
 			<span>{locale.toUpperCase()}</span>
-			<svg
-				aria-hidden="true"
-				viewBox="0 0 24 24"
-				width="12"
-				height="12"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg
-			>
+			<AngleDownOutline size="xs" />
 		</summary>
 		<nav class="sk-lang-menu" aria-label="Language">
 			{#each LOCALES as item (item)}

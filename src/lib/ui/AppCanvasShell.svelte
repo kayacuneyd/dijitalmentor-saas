@@ -5,6 +5,7 @@
 		max = 'max-w-6xl',
 		minHeight = 'min-h-[calc(100svh-2.5rem)]',
 		contentClass = 'px-5 py-8 sm:px-10 sm:py-12',
+		left,
 		right,
 		flush = false,
 		chrome = true
@@ -14,6 +15,7 @@
 		max?: string;
 		minHeight?: string;
 		contentClass?: string;
+		left?: import('svelte').Snippet;
 		right?: import('svelte').Snippet;
 		flush?: boolean;
 		chrome?: boolean;
@@ -27,9 +29,13 @@
 				<div
 					class="flex shrink-0 items-center gap-3 border-b border-[var(--sk-line)] bg-[var(--sk-shell)] px-4 py-3"
 				>
-					<div class="sk-browser-dots hidden gap-1.5 sm:flex" aria-hidden="true">
-						<span></span><span></span><span></span>
-					</div>
+					{#if left}
+						<div class="flex min-w-0 shrink-0 items-center">{@render left()}</div>
+					{:else}
+						<div class="sk-browser-dots hidden gap-1.5 sm:flex" aria-hidden="true">
+							<span></span><span></span><span></span>
+						</div>
+					{/if}
 					<div
 						class="sk-mono min-w-0 flex-1 truncate text-center text-[11px] text-[var(--sk-faint)]"
 					>

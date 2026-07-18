@@ -295,7 +295,13 @@ export const de = {
 			nichePreset: 'Branchen-Vorlage',
 			brandColors: 'Markenfarben',
 			fonts: 'Schriftarten',
-			cornerRadius: 'Eckenradius'
+			cornerRadius: 'Eckenradius',
+			heroTitleSize: 'Größe der Hero-Überschrift',
+			heroTitleSizes: {
+				compact: 'Kompakt',
+				standard: 'Standard',
+				large: 'Groß'
+			}
 		},
 		imageUpload: {
 			uploading: 'Wird hochgeladen…',
@@ -553,7 +559,8 @@ export const de = {
 			priceSuffix: '{price}€/Monat / veröffentlichte Website',
 			description:
 				'Jede Website hat ihren eigenen Pro-Status. Eine eigene Domain und der vollständige Export sind nur für diese Website freigeschaltet.',
-			billingNote: 'Die Zahlung wird über die jeweilige Website-Karte gestartet.'
+			billingNote: 'Die Zahlung wird über die jeweilige Website-Karte gestartet.',
+			buyCredits: 'Erstellungsguthaben kaufen'
 		},
 		alerts: {
 			published: '{name} ist live — herzlichen Glückwunsch!',
@@ -582,10 +589,21 @@ export const de = {
 			planFree: 'Free-Website'
 		},
 		identity: {
+			title: 'Website-Identität',
 			siteName: 'Website-Name',
 			subdomain: 'Subdomain',
+			publicHandle: 'Öffentliche Adresse',
 			contactEmail: 'Kontakt-E-Mail',
 			save: 'Speichern'
+		},
+		control: {
+			overview: 'Übersicht',
+			identity: 'Identität',
+			domain: 'Domain & Tarif',
+			preview: 'Website-Vorschau',
+			status: 'Status & Tarif',
+			quickActions: 'Schnellaktionen',
+			dangerZone: 'Gefahrenbereich'
 		},
 		meta: {
 			publicUrl: 'Öffentliche URL: {handle}.saaskaya.com',
@@ -605,6 +623,8 @@ export const de = {
 		actionsRow: {
 			edit: 'Bearbeiten',
 			preview: 'Vorschau',
+			manage: 'Verwalten',
+			live: 'Live-Website',
 			openLive: 'Live-Website öffnen',
 			unpublish: 'Offline nehmen',
 			prepareForLaunch: 'Für den Start vorbereiten',
@@ -625,11 +645,24 @@ export const de = {
 			cancel: 'Abbrechen'
 		},
 		domain: {
+			title: 'Eigene Domain',
+			description:
+				'Verbinde eine Domain, nachdem ihr DNS auf SaasKaya zeigt. Eigene Domains werden pro Pro-Website freigeschaltet.',
+			connected: 'Diese Domain ist mit der Website verbunden.',
+			detach: 'Domain trennen',
+			domainLabel: 'Domain',
+			connect: 'Domain verbinden',
 			label: 'Domain:',
 			active: 'Aktiv',
 			remove: 'Entfernen',
 			forwardTo: '{local}@{domain} → {dest}',
 			forwardPendingVerification: ' · E-Mail-Verifizierung ausstehend'
+		},
+		delete: {
+			description:
+				'Beim Löschen werden die Website, ihre Versionen, Nachrichten und die Domain-Verbindung dauerhaft entfernt.',
+			typeName: 'Gib zur Bestätigung „{name}“ ein',
+			confirm: 'Website dauerhaft löschen'
 		},
 		reservation: {
 			label: 'Domain-Reservierung:',

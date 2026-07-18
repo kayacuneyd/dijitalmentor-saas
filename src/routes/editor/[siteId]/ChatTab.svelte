@@ -5,7 +5,7 @@
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import { getTranslate } from '$lib/i18n/context';
 
 	const t = getTranslate();
@@ -414,7 +414,7 @@
 				onclick={forceSend}
 			>
 				{t('editor.chat.forceSendPrompt')}
-				{@html uiIcons.arrowRight(14)}
+				<ArrowRightOutline size="xs" />
 			</FlowbiteButton>
 		{/if}
 

@@ -289,7 +289,13 @@ export const tr = {
 			nichePreset: 'Niş şablonu',
 			brandColors: 'Marka renkleri',
 			fonts: 'Yazı tipleri',
-			cornerRadius: 'Köşe yuvarlaklığı'
+			cornerRadius: 'Köşe yuvarlaklığı',
+			heroTitleSize: 'Ana başlık boyutu',
+			heroTitleSizes: {
+				compact: 'Kompakt',
+				standard: 'Standart',
+				large: 'Büyük'
+			}
 		},
 		imageUpload: {
 			uploading: 'Yükleniyor…',
@@ -544,7 +550,8 @@ export const tr = {
 			priceSuffix: '{price}€/ay / yayınlanan site',
 			description:
 				'Her web sitesi kendi Pro durumuna sahiptir. Kendi domaini ve tam export sadece ilgili Pro site için açılır.',
-			billingNote: 'Ödeme ilgili site kartından başlatılır.'
+			billingNote: 'Ödeme ilgili site kartından başlatılır.',
+			buyCredits: 'Üretim kredisi satın al'
 		},
 		alerts: {
 			published: '{name} yayında — tebrikler!',
@@ -571,10 +578,21 @@ export const tr = {
 			planFree: 'Free site'
 		},
 		identity: {
+			title: 'Site kimliği',
 			siteName: 'Site adı',
 			subdomain: 'Subdomain',
+			publicHandle: 'Genel adres',
 			contactEmail: 'İletişim e-postası',
 			save: 'Kaydet'
+		},
+		control: {
+			overview: 'Genel bakış',
+			identity: 'Kimlik',
+			domain: 'Alan adı ve tarife',
+			preview: 'Site önizlemesi',
+			status: 'Durum ve tarife',
+			quickActions: 'Hızlı işlemler',
+			dangerZone: 'Tehlikeli işlemler'
 		},
 		meta: {
 			publicUrl: 'Public URL: {handle}.saaskaya.com',
@@ -594,6 +612,8 @@ export const tr = {
 		actionsRow: {
 			edit: 'Düzenle',
 			preview: 'Önizle',
+			manage: 'Yönet',
+			live: 'Canlı site',
 			openLive: 'Canlı siteyi aç',
 			unpublish: 'Yayından kaldır',
 			prepareForLaunch: 'Yayına hazırla',
@@ -614,11 +634,24 @@ export const tr = {
 			cancel: 'Vazgeç'
 		},
 		domain: {
+			title: 'Özel alan adı',
+			description:
+				'DNS kayıtları SaasKaya’yı gösterdikten sonra alan adını bağlayın. Özel alan adı her Pro site için ayrı açılır.',
+			connected: 'Bu alan adı siteye bağlı.',
+			detach: 'Alan adını ayır',
+			domainLabel: 'Alan adı',
+			connect: 'Alan adını bağla',
 			label: 'Domain:',
 			active: 'Aktif',
 			remove: 'Kaldır',
 			forwardTo: '{local}@{domain} → {dest}',
 			forwardPendingVerification: ' · e-posta doğrulaması bekleniyor'
+		},
+		delete: {
+			description:
+				'Silme işlemi siteyi, sürümlerini, mesajlarını ve alan adı bağlantısını kalıcı olarak kaldırır.',
+			typeName: 'Onaylamak için “{name}” yazın',
+			confirm: 'Siteyi kalıcı olarak sil'
 		},
 		reservation: {
 			label: 'Domain rezervasyonu:',

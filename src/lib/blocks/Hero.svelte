@@ -20,7 +20,7 @@
 		>
 			<div class="max-w-xl">
 				<h1
-					class="text-primary text-[clamp(2rem,8vw,3.75rem)] leading-[1.05] font-bold text-balance break-words"
+					class="text-primary text-[clamp(2rem,8vw,var(--hero-title-left-max))] leading-[1.05] font-bold text-balance break-words"
 				>
 					{content.headline}
 				</h1>
@@ -66,7 +66,7 @@
 		>
 			<div class="w-full max-w-3xl">
 				<h1
-					class="text-[clamp(2.25rem,10vw,4.75rem)] leading-[1.02] font-bold text-balance break-words {hasImageBackground
+					class="text-[clamp(2.25rem,10vw,var(--hero-title-centered-max))] leading-[1.02] font-bold text-balance break-words {hasImageBackground
 						? 'text-neutral-content drop-shadow-sm'
 						: 'text-primary'}"
 				>

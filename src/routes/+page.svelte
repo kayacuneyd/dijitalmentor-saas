@@ -7,7 +7,15 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import {
+		ArrowRightOutline,
+		CheckOutline,
+		GlobeOutline,
+		MessagesOutline,
+		PenOutline,
+		ShieldCheckOutline,
+		WandMagicSparklesOutline
+	} from 'flowbite-svelte-icons';
 	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
@@ -538,13 +546,7 @@
 	const heroTrust = $derived(copy.heroTrust.map(([title, desc]) => ({ title, desc })));
 	const problemItems = $derived(copy.problemItems);
 
-	// Anlat / Üret / Düzenle / Yayınla — one stroke icon per step (index-aligned).
-	const stepIconPaths = [
-		'M8 10h8M8 14h5M21 12a9 9 0 1 1-4.2-7.6L21 3l-1.2 4.4A8.96 8.96 0 0 1 21 12Z',
-		'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15Z',
-		'M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3ZM13.5 6.5l3 3',
-		'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3.5 9h17M3.5 15h17M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18'
-	];
+	const stepIcons = [MessagesOutline, WandMagicSparklesOutline, PenOutline, GlobeOutline];
 </script>
 
 <SeoHead
@@ -573,7 +575,7 @@
 			</p>
 			<div class="flex flex-wrap items-center gap-3">
 				<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-					>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
+					>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
 				>
 				<FlowbiteButton href="#ornekler" variant="secondary" size="lg"
 					>{copy.examples}</FlowbiteButton
@@ -586,19 +588,7 @@
 			<div class="mt-1 grid w-full gap-3 sm:grid-cols-2">
 				{#each heroTrust as card (card.title)}
 					<div class="flex min-h-24 items-start gap-2.5 border-t border-[var(--sk-line)] pt-3">
-						<svg
-							class="mt-0.5 size-4 shrink-0 text-[var(--sk-ink)]"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.8"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							aria-hidden="true"
-						>
-							<path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3Z" />
-							<path d="M9 12l2 2 4-4" />
-						</svg>
+						<ShieldCheckOutline size="sm" class="mt-0.5 shrink-0 text-[var(--sk-ink)]" />
 						<div>
 							<h3 class="text-[13px] font-semibold">{card.title}</h3>
 							<p class="mt-0.5 text-xs leading-4 text-[var(--sk-muted)]">{card.desc}</p>
@@ -630,18 +620,7 @@
 							class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(47,111,106,.12)] text-[var(--sk-ink)]"
 							aria-hidden="true"
 						>
-							<svg
-								viewBox="0 0 24 24"
-								width="13"
-								height="13"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="M20 6 9 17l-5-5" />
-							</svg>
+							<CheckOutline size="xs" />
 						</span>
 						<span class="min-w-0">
 							<span class="block text-sm font-semibold leading-5 text-[var(--sk-ink)]">
@@ -662,20 +641,10 @@
 		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.process}</div>
 		<div class="mt-4 grid gap-4 sm:grid-cols-4">
 			{#each steps as step, i (step.n)}
+				{@const StepIcon = stepIcons[i]}
 				<div class="sk-card p-4">
 					<div class="flex items-center justify-between">
-						<svg
-							class="size-5 text-[var(--sk-ink)]"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.8"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							aria-hidden="true"
-						>
-							<path d={stepIconPaths[i]} />
-						</svg>
+						<StepIcon size="md" class="text-[var(--sk-ink)]" />
 						<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
 							{copy.stepLabel}
 							{step.n}
@@ -874,7 +843,7 @@
 			</a>
 		</div>
 		<FlowbiteButton href={l('/pricing')} variant="ghost" size="sm" class="mt-4"
-			>{copy.allFeatures}{@html uiIcons.arrowRight(14)}</FlowbiteButton
+			>{copy.allFeatures}<ArrowRightOutline size="xs" /></FlowbiteButton
 		>
 	</MarketingSection>
 
@@ -939,7 +908,7 @@
 				{copy.finalBody}
 			</p>
 			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-				>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
+				>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
 			>
 		</div>
 	</MarketingSection>

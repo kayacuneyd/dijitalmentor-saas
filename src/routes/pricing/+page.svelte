@@ -5,7 +5,7 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
@@ -368,7 +368,7 @@
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-				>{copy.cta}{@html uiIcons.arrowRight(16)}</FlowbiteButton
+				>{copy.cta}<ArrowRightOutline size="sm" /></FlowbiteButton
 			>
 			<FlowbiteButton href="#pricing-faq" variant="secondary" size="lg"
 				>{copy.faqLabel}</FlowbiteButton
@@ -445,7 +445,7 @@
 		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
 			<p class="text-sm text-[var(--sk-muted)]">{copy.ctaText}</p>
 			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-				>{copy.cta}{@html uiIcons.arrowRight(16)}</FlowbiteButton
+				>{copy.cta}<ArrowRightOutline size="sm" /></FlowbiteButton
 			>
 		</div>
 	</MarketingSection>

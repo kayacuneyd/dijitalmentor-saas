@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import type { Layout, Locale, Site } from '$lib/schema/site';
-	import { uiIcons } from '$lib/ui/icons';
+	import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
 
 	let {
 		site,
@@ -140,7 +140,7 @@
 				aria-label="Open menu"
 				onclick={openMenu}
 			>
-				{@html uiIcons.menu(18)}
+				<BarsOutline size="sm" />
 			</button>
 		{/if}
 	</div>
@@ -174,7 +174,7 @@
 				aria-label="Close menu"
 				onclick={closeMenu}
 			>
-				{@html uiIcons.x(18)}
+				<CloseOutline size="sm" />
 			</button>
 		</div>
 

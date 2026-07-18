@@ -35,12 +35,12 @@
 
 	const userItems = $derived(
 		[
-			{ href: '/dashboard', label: t('dashboard.title'), icon: uiIcons.home(16) },
-			{ href: '/new', label: t('dashboard.nav.newSite'), icon: uiIcons.plus(16) },
-			{ href: '/account', label: t('dashboard.nav.account'), icon: uiIcons.user(16) },
-			{ href: '/account/support', label: t('account.supportLink'), icon: uiIcons.message(16) },
+			{ href: '/dashboard', label: t('dashboard.title'), icon: uiIcons.home },
+			{ href: '/new', label: t('dashboard.nav.newSite'), icon: uiIcons.plus },
+			{ href: '/account', label: t('dashboard.nav.account'), icon: uiIcons.user },
+			{ href: '/account/support', label: t('account.supportLink'), icon: uiIcons.message },
 			...(page.data.user?.isAdmin
-				? [{ href: '/admin', label: t('dashboard.nav.admin'), icon: uiIcons.settings(16) }]
+				? [{ href: '/admin', label: t('dashboard.nav.admin'), icon: uiIcons.settings }]
 				: [])
 		].map((item) => ({
 			...item,

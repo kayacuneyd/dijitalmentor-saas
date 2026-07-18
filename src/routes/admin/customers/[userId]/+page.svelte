@@ -5,7 +5,7 @@
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowUpRightFromSquareOutline } from 'flowbite-svelte-icons';
 
 	let { data, form } = $props();
 	const c = $derived(data.customer);
@@ -293,7 +293,7 @@
 									{/if}
 									{#if site.publishedVersion}
 										<FlowbiteButton href={liveUrl(site)} target="_blank" variant="ghost" size="sm">
-											Live {@html uiIcons.external(13)}
+											Live <ArrowUpRightFromSquareOutline size="xs" />
 										</FlowbiteButton>
 										<form method="POST" action="?/unpublish" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />

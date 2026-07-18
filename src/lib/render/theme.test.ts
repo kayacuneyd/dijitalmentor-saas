@@ -32,11 +32,22 @@ describe('themeStyle', () => {
 			'--color-base-content',
 			'--radius-box',
 			'--font-heading',
-			'--font-body'
+			'--font-body',
+			'--hero-title-left-max',
+			'--hero-title-centered-max'
 		]) {
 			expect(style).toContain(v);
 		}
 		expect(style).toContain(theme.colors.primary);
 		expect(style).toContain(theme.fonts.heading);
+	});
+
+	it('maps the three owner-controlled hero title presets to bounded CSS variables', () => {
+		expect(themeStyle({ ...themePresets.psych, heroTitleSize: 'compact' })).toContain(
+			'--hero-title-left-max: 3rem'
+		);
+		expect(themeStyle({ ...themePresets.psych, heroTitleSize: 'large' })).toContain(
+			'--hero-title-centered-max: 5.5rem'
+		);
 	});
 });

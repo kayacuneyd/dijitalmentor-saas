@@ -45,6 +45,12 @@ export function themeStyle(theme: Theme): string {
 	const base = colors.base ?? '#ffffff';
 	const neutral = colors.neutral ?? '#1f2937';
 	const r = RADIUS[radius];
+	const heroTitleSizes = {
+		compact: { left: '3rem', centered: '3.75rem' },
+		standard: { left: '3.75rem', centered: '4.75rem' },
+		large: { left: '4.5rem', centered: '5.5rem' }
+	} as const;
+	const hero = heroTitleSizes[theme.heroTitleSize ?? 'standard'];
 	const vars: Record<string, string> = {
 		'--color-primary': colors.primary,
 		'--color-primary-content': contrastColor(colors.primary),
@@ -62,7 +68,9 @@ export function themeStyle(theme: Theme): string {
 		'--radius-field': r.field,
 		'--radius-selector': r.selector,
 		'--font-heading': `'${fonts.heading}', serif`,
-		'--font-body': `'${fonts.body}', sans-serif`
+		'--font-body': `'${fonts.body}', sans-serif`,
+		'--hero-title-left-max': hero.left,
+		'--hero-title-centered-max': hero.centered
 	};
 	return Object.entries(vars)
 		.map(([k, v]) => `${k}: ${v}`)

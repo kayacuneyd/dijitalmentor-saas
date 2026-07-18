@@ -283,7 +283,8 @@ export const patchOpSchema = z.discriminatedUnion('op', [
 			preset: themeSchema.shape.preset.optional(),
 			colors: themeSchema.shape.colors.partial().optional(),
 			fonts: themeSchema.shape.fonts.partial().optional(),
-			radius: themeSchema.shape.radius.optional()
+			radius: themeSchema.shape.radius.optional(),
+			heroTitleSize: themeSchema.shape.heroTitleSize
 		})
 	}),
 	z.strictObject({

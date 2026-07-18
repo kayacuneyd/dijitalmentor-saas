@@ -3,7 +3,7 @@
 	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { LockOutline } from 'flowbite-svelte-icons';
 
 	let { form } = $props();
 	let busy = $state(false);
@@ -67,7 +67,7 @@
 						disabled={busy}
 					>
 						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
-						{#if !busy}{@html uiIcons.lock(16)}{/if}
+						{#if !busy}<LockOutline size="sm" />{/if}
 						Onayla
 					</FlowbiteButton>
 				</form>
@@ -104,7 +104,7 @@
 						disabled={busy}
 					>
 						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
-						{#if !busy}{@html uiIcons.lock(16)}{/if}
+						{#if !busy}<LockOutline size="sm" />{/if}
 						Giriş yap
 					</FlowbiteButton>
 				</form>

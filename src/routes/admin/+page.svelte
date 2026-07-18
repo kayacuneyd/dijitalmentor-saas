@@ -84,16 +84,18 @@
 			</AppCard>
 		</section>
 
-		<section class="admin-trend-grid grid gap-3 xl:grid-cols-[1.2fr_0.8fr]">
-			<AppCard class="admin-trends p-4">
-				<div class="grid gap-5 lg:grid-cols-2">
-					<div class="flex-1">
+		<section
+			class="admin-trend-grid grid min-w-0 gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]"
+		>
+			<AppCard class="admin-trends min-w-0 p-4">
+				<div class="grid min-w-0 gap-5 2xl:grid-cols-2">
+					<div class="min-w-0">
 						<h2 class="font-semibold">Kayıt trendi (6 ay)</h2>
 						<div class="mt-3">
 							<Sparkline points={data.signupTrend} />
 						</div>
 					</div>
-					<div class="flex-1">
+					<div class="min-w-0">
 						<h2 class="font-semibold">AI harcama trendi (6 ay)</h2>
 						<div class="mt-3">
 							<Sparkline points={data.aiSpendTrend} format={(v) => `$${v.toFixed(2)}`} />
@@ -102,7 +104,7 @@
 				</div>
 			</AppCard>
 
-			<AppCard class="admin-queue p-4">
+			<AppCard class="admin-queue min-w-0 p-4">
 				<div class="flex flex-col gap-3">
 					<h2 class="font-semibold">Son kayıtlar</h2>
 					{#if data.recentSignups.length === 0}

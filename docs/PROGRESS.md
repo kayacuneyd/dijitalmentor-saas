@@ -4427,3 +4427,15 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Authenticated browser QA used a disposable SQLite database and development magic link. Initial QA attempts remained on the dashboard because the development link opens a new tab and the test waited on the original page; navigating the generated link in the same browser page resolved the root cause. The final editor run confirmed a 416px desktop rail, 974px visible preview, zero overflow and zero console errors; mobile open/closed states were visually checked.
 - Public auth QA passed at 320, 375, 414, 768 and 1440px across Turkish, English and German login plus the verification failure route. Final 320px audit reports no overflow, console errors, small inputs or undersized hit areas. Artifacts: `/tmp/saaskaya-editor-login-redesign-final`.
 - Verification: `npm run check` passed with 0 errors/warnings; `npm run lint` passed; `npm run test` passed; `npm run build` completed successfully; `git diff --check` is clean.
+
+## 2026-07-18 — Dashboard, Guided Brief and platform UI improvement implementation
+
+- Rebuilt the customer dashboard as a compact website index and moved per-site identity, plan, publishing, export, domain and deletion controls into a dedicated `/dashboard/[siteId]` control center. Pro status and checkout remain explicitly site-scoped.
+- Corrected the right-side panel shell so its expanded and collapsed tracks stay anchored to the right edge and grow inward; the brand now remains visible in the shared chrome regardless of the saved sidebar state.
+- Removed the decorative `dashboard-brief::before` dot and redundant in-content “back to saaskaya” links. Standalone flows now use the persistent branded chrome; true route-level back actions remain labelled controls.
+- Reframed `/new` as a wider Guided Brief with a compact context rail, a larger working area and responsive profession grids instead of a narrow stacked card/carousel wall.
+- Added `theme.heroTitleSize` with `compact`, `standard` and `large` safe presets. The editor exposes the control and the tenant Hero consumes bounded CSS variables without permitting arbitrary CSS.
+- Fixed admin overview clipping with zero-minimum grid tracks and `min-width: 0` containment; Flowbite was not the cause of the original intrinsic-width overflow.
+- Migrated platform navigation, buttons, editor tabs, viewport controls, onboarding professions and status affordances to `flowbite-svelte-icons`; flags, charts, QR/data visuals and intentional illustrations remain outside the icon migration.
+- Preserved destructive-action safety by requiring the exact site name before deletion and redirecting to the dashboard after success.
+- Verification: `npm run check` passed with 0 errors/warnings; focused schema/theme tests passed (8 tests); `npm run test` passed with 92 files / 641 tests (2 files / 11 tests skipped); `npm run build` and `npm run lint` completed successfully; `git diff --check` is clean.

@@ -3,7 +3,7 @@
 	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let {
@@ -129,7 +129,7 @@
 				aria-label={labels.menu}
 				onclick={openMenu}
 			>
-				{@html uiIcons.menu(18)}
+				<BarsOutline size="sm" />
 			</button>
 		</div>
 	</div>
@@ -155,7 +155,7 @@
 			aria-label={labels.close}
 			onclick={closeMenu}
 		>
-			{@html uiIcons.x(18)}
+			<CloseOutline size="sm" />
 		</button>
 	</div>
 

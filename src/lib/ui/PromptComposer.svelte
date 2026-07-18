@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { withLocale, type Locale } from '$lib/i18n';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 
 	let {
 		locale,
@@ -55,6 +55,6 @@
 	<label class="sr-only" for="hero-prompt">{copy.label}</label>
 	<input id="hero-prompt" bind:value={prompt} placeholder={copy.placeholder} autocomplete="off" />
 	<button type="submit" aria-label={copy.send}>
-		{@html uiIcons.arrowRight(18)}
+		<ArrowRightOutline size="sm" />
 	</button>
 </form>

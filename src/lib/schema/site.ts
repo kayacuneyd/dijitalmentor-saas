@@ -433,7 +433,8 @@ export const themeSchema = z.strictObject({
 		base: hexColor.optional()
 	}),
 	fonts: z.strictObject({ heading: nonEmpty, body: nonEmpty }),
-	radius: z.enum(['none', 'sm', 'md', 'lg', 'full']).default('md')
+	radius: z.enum(['none', 'sm', 'md', 'lg', 'full']).default('md'),
+	heroTitleSize: z.enum(['compact', 'standard', 'large']).optional()
 });
 export type Theme = z.infer<typeof themeSchema>;
 

@@ -5,7 +5,7 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline } from 'flowbite-svelte-icons';
 	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 	import type { PageProps } from './$types';
@@ -130,7 +130,7 @@
 			</div>
 			<div class="flex flex-wrap gap-3">
 				<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-					>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
+					>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
 				>
 				<FlowbiteButton href={l('/pricing')} variant="secondary" size="lg"
 					>{copy.pricing}</FlowbiteButton

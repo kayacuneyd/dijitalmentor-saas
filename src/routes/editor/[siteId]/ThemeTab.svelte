@@ -12,6 +12,7 @@
 
 	const colorKeys = ['primary', 'secondary', 'accent'] as const;
 	const radii: Theme['radius'][] = ['none', 'sm', 'md', 'lg', 'full'];
+	const heroTitleSizes = ['compact', 'standard', 'large'] as const;
 
 	function applyPreset(preset: Theme['preset']) {
 		store.update((site) => {
@@ -102,4 +103,25 @@
 			{/each}
 		</FlowbiteSelect>
 	</label>
+
+	<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
+		<legend class="px-1 text-xs font-medium">{t('editor.theme.heroTitleSize')}</legend>
+		<div class="grid grid-cols-3 gap-1" role="group" aria-label={t('editor.theme.heroTitleSize')}>
+			{#each heroTitleSizes as size}
+				<button
+					type="button"
+					class="min-h-10 rounded-md border px-2 text-xs font-medium"
+					class:border-[var(--sk-accent)]={(store.site.theme.heroTitleSize ?? 'standard') === size}
+					class:bg-[var(--sk-accent-soft)]={(store.site.theme.heroTitleSize ?? 'standard') === size}
+					class:border-[var(--sk-line)]={(store.site.theme.heroTitleSize ?? 'standard') !== size}
+					onclick={() =>
+						store.update((site) => {
+							site.theme.heroTitleSize = size;
+						})}
+				>
+					{t(`editor.theme.heroTitleSizes.${size}`)}
+				</button>
+			{/each}
+		</div>
+	</fieldset>
 </div>

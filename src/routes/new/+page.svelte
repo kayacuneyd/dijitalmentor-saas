@@ -17,12 +17,31 @@
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import {
+		ArrowLeftOutline,
+		ArrowRightOutline,
+		BrainOutline,
+		BriefcaseOutline,
+		BuildingOutline,
+		HeartOutline,
+		ScaleBalancedOutline,
+		WandMagicSparklesOutline
+	} from 'flowbite-svelte-icons';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	const locale: Locale = $derived(data.locale);
 	const l = (path: string) => withLocale(locale, path);
+	const nicheIcons = {
+		psych: BrainOutline,
+		law: ScaleBalancedOutline,
+		dental: HeartOutline,
+		dietitian: HeartOutline,
+		real_estate: BuildingOutline,
+		beauty: WandMagicSparklesOutline,
+		unsupported: BriefcaseOutline
+	};
 	const copy = $derived(
 		{
 			en: {
@@ -449,20 +468,6 @@
 		flowComplete ? 100 : Math.round((answeredCount / Math.max(totalSteps, 1)) * 100)
 	);
 
-	const nicheIconPaths: Record<string, string> = {
-		psych: 'M5 21c0-9.5 4.5-14.5 14-16-.8 9.5-5.5 14.2-14 16ZM5 21c3.5-5.5 7.5-9 12-11',
-		law: 'M12 3v18M4 7h16M6.5 7l-3.5 6.5a3.8 3.8 0 0 0 7 0L6.5 7ZM17.5 7 14 13.5a3.8 3.8 0 0 0 7 0L17.5 7ZM8 21h8',
-		dental:
-			'M12 5.5C10.5 4 8.8 3 7.2 3 4.7 3 3 5 3 7.5c0 4 2 6.6 3 10.1.4 1.4 1 2.4 2 2.4s1.4-1 1.6-2.4c.3-1.9.7-3.1 2.4-3.1s2.1 1.2 2.4 3.1c.2 1.4.6 2.4 1.6 2.4s1.6-1 2-2.4c1-3.5 3-6.1 3-10.1C21 5 19.3 3 16.8 3c-1.6 0-3.3 1-4.8 2.5Z',
-		dietitian:
-			'M12 21c-3.8-2.6-6-5.8-6-9.5C6 7.9 8.3 5 12 5s6 2.9 6 6.5c0 3.7-2.2 6.9-6 9.5ZM12 5V3M8 8c2.8 0 5.2 2 5.8 4.8',
-		real_estate: 'M3 11l9-7 9 7M5 10.5V21h14V10.5M9 21v-6h6v6',
-		beauty:
-			'M12 3c1.6 3 3.8 5.2 7 6-3.2.8-5.4 3-7 6-1.6-3-3.8-5.2-7-6 3.2-.8 5.4-3 7-6ZM6 15c.7 1.4 1.7 2.4 3 3-1.3.6-2.3 1.6-3 3-.7-1.4-1.7-2.4-3-3 1.3-.6 2.3-1.6 3-3Z',
-		unsupported:
-			'M12 3l7 4v5c0 4.2-2.8 7.8-7 9-4.2-1.2-7-4.8-7-9V7l7-4ZM9.5 9.5a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 17h.01'
-	};
-
 	$effect(() => {
 		active;
 		textValue = '';
@@ -646,19 +651,17 @@
 </svelte:head>
 
 <AppCanvasShell label={copy.label}>
+	{#snippet left()}
+		<BrandMark href={l('/')} compact wordmark />
+	{/snippet}
 	{#snippet right()}
 		<FlowbiteButton href={l('/')} variant="secondary" size="sm">{copy.home}</FlowbiteButton>
 		<LanguageSwitcher {locale} variant="dropdown" />
 	{/snippet}
 
-	<div class="mx-auto flex w-full max-w-2xl flex-col gap-5 sm:gap-8">
-		<div class="pt-2">
-			<a
-				href={l('/')}
-				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
-				>{@html uiIcons.arrowLeft(14)}{copy.back}</a
-			>
-			<h1 class="sk-display mt-3 text-4xl leading-none sm:text-[42px]">{copy.h1}</h1>
+	<div class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10">
+		<aside class="pt-2 lg:sticky lg:top-6 lg:self-start">
+			<h1 class="sk-display text-3xl leading-none sm:text-[36px]">{copy.h1}</h1>
 			<p class="mt-3 text-[15px] leading-6 text-[var(--sk-muted)]">
 				{copy.intro}
 			</p>
@@ -690,7 +693,7 @@
 						onclick={() => submitAnswer('niche', data.preselectedNiche)}
 					>
 						{copy.campaignCta}
-						{@html uiIcons.arrowRight(14)}
+						<ArrowRightOutline size="xs" />
 					</FlowbiteButton>
 				</div>
 			{/if}
@@ -708,7 +711,7 @@
 					</p>
 				</div>
 			{/if}
-		</div>
+		</aside>
 
 		<AppCard class="flex flex-col gap-3 p-4 sm:p-8">
 			<div class="flex flex-col gap-1.5">
@@ -719,10 +722,7 @@
 					<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{progressPct}%</span>
 				</div>
 				<div class="h-1.5 w-full overflow-hidden rounded-full bg-[#171614]/10">
-					<div
-						class="h-full rounded-full bg-[var(--sk-ink)] transition-all duration-300"
-						style="width: {progressPct}%"
-					></div>
+					<div class="h-full rounded-full bg-[var(--sk-ink)]" style="width: {progressPct}%"></div>
 				</div>
 			</div>
 
@@ -824,7 +824,7 @@
 							disabled={busy}
 							onclick={() => (useRaw = false)}
 						>
-							{@html uiIcons.arrowLeft(14)}
+							<ArrowLeftOutline size="xs" />
 							{copy.backToQuestions}
 						</FlowbiteButton>
 					</div>
@@ -858,31 +858,17 @@
 					{/each}
 				</div>
 			{:else if active?.id === 'niche'}
-				<div
-					class="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 sm:pb-0"
-				>
+				<div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
 					{#each activeDisplay?.options ?? [] as option (option.value)}
+						{@const NicheIcon =
+							nicheIcons[option.value as keyof typeof nicheIcons] ?? BriefcaseOutline}
 						<button
 							type="button"
-							class="sk-card flex h-full min-w-[78%] snap-start flex-col items-start gap-1.5 p-4 text-left transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] sm:min-w-0"
+							class="sk-card flex h-full min-w-0 flex-col items-start gap-1.5 p-4 text-left hover:border-[rgba(23,22,20,.28)]"
 							disabled={busy}
 							onclick={() => submitAnswer(active!.id, option.value)}
 						>
-							<svg
-								class="size-6 text-[var(--sk-ink)]"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="1.6"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								aria-hidden="true"
-							>
-								<path
-									d={nicheIconPaths[option.value] ??
-										'M12 3l2.6 6.4L21 12l-6.4 2.6L12 21l-2.6-6.4L3 12l6.4-2.6L12 3Z'}
-								/>
-							</svg>
+							<NicheIcon size="md" class="text-[var(--sk-ink)]" />
 							<span class="text-sm font-semibold text-[var(--sk-ink)]">{option.label}</span>
 							<span class="text-xs leading-5 text-[var(--sk-muted)]">
 								{copy.nicheDescriptions[option.value] ?? ''}
@@ -1073,7 +1059,7 @@
 					onclick={() => (useRaw = true)}
 				>
 					{copy.rawToggle}
-					{@html uiIcons.arrowRight(14)}
+					<ArrowRightOutline size="xs" />
 				</FlowbiteButton>
 			{/if}
 

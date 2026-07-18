@@ -525,17 +525,6 @@ select {
 	background: var(--sk-paper);
 }
 
-.dashboard-brief::before {
-	position: absolute;
-	top: 0.8rem;
-	left: -4px;
-	height: 0.5rem;
-	width: 0.5rem;
-	border-radius: 999px;
-	background: var(--sk-accent);
-	content: '';
-}
-
 .dashboard-site-list {
 	margin-top: 0.5rem;
 }
@@ -622,7 +611,12 @@ select {
 .admin-queue,
 .admin-observation,
 .admin-activity {
+	min-width: 0;
 	box-shadow: none;
+}
+
+.admin-ledger > * {
+	min-width: 0;
 }
 
 .admin-trends {
@@ -1397,6 +1391,10 @@ body:has(.sk-editor-dock[data-open='true']) {
 }
 
 /* Shared collapsible workspace shell used by admin and customer panels. */
+.panel-shell-grid {
+	transition: grid-template-columns 180ms var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
 .panel-sidebar {
 	position: fixed;
 	top: 0;
@@ -1515,6 +1513,7 @@ body:has(.sk-editor-dock[data-open='true']) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.panel-shell-grid,
 	.panel-sidebar,
 	.panel-sidebar-link {
 		transition: none;

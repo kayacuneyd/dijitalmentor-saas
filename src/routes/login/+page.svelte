@@ -6,7 +6,7 @@
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline, EnvelopeOutline, HomeOutline } from 'flowbite-svelte-icons';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
@@ -111,7 +111,7 @@
 			<BrandMark href={l('/')} compact wordmark />
 			<div class="flex items-center gap-2">
 				<FlowbiteButton href={l('/')} variant="secondary" size="sm">
-					{@html uiIcons.home(14)}<span class="hidden sm:inline">{copy.home}</span>
+					<HomeOutline size="xs" /><span class="hidden sm:inline">{copy.home}</span>
 				</FlowbiteButton>
 				<LanguageSwitcher {locale} variant="dropdown" />
 			</div>
@@ -153,7 +153,7 @@
 						<div class="flex items-start gap-3">
 							<span
 								class="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--sk-success-bg)] text-[var(--sk-success-ink)]"
-								>{@html uiIcons.mail(16)}</span
+								><EnvelopeOutline size="sm" /></span
 							>
 							<div>
 								<p class="font-semibold">{copy.sent}</p>
@@ -169,7 +169,7 @@
 								<span class="sk-mono block text-[10.5px] text-[var(--sk-faint)]">{copy.dev}</span>
 								<a
 									class="sk-link inline-flex items-center gap-1.5 break-all font-medium"
-									href={form.devEchoLink}>{copy.open}{@html uiIcons.arrowRight(14)}</a
+									href={form.devEchoLink}>{copy.open}<ArrowRightOutline size="xs" /></a
 								>
 							</div>
 						{/if}
@@ -218,7 +218,7 @@
 								loading={busy}
 								disabled={busy}
 							>
-								{#if !busy}{@html uiIcons.mail(16)}{/if}
+								{#if !busy}<EnvelopeOutline size="sm" />{/if}
 								{copy.submit}
 							</FlowbiteButton>
 						</form>

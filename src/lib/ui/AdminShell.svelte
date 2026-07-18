@@ -30,66 +30,66 @@
 
 	const nav = $derived(
 		[
-			{ href: '/admin', label: t('admin.nav.overview'), eyebrow: 'Ops', icon: uiIcons.home(16) },
+			{ href: '/admin', label: t('admin.nav.overview'), eyebrow: 'Ops', icon: uiIcons.home },
 			{
 				href: '/admin/gtm',
 				label: t('admin.nav.gtm'),
 				eyebrow: 'Growth',
-				icon: uiIcons.arrowRight(16)
+				icon: uiIcons.chart
 			},
 			{
 				href: '/admin/customers',
 				label: t('admin.nav.customers'),
 				eyebrow: 'CRM',
-				icon: uiIcons.lock(16)
+				icon: uiIcons.user
 			},
 			{
 				href: '/admin/inbox',
 				label: t('admin.nav.inbox'),
 				eyebrow: 'Public',
-				icon: uiIcons.mail(16)
+				icon: uiIcons.inbox
 			},
 			{
 				href: '/admin/blog',
 				label: t('admin.nav.blog'),
 				eyebrow: 'Content',
-				icon: uiIcons.external(16)
+				icon: uiIcons.file
 			},
 			{
 				href: '/admin/copy',
 				label: t('admin.nav.copy'),
 				eyebrow: 'Content',
-				icon: uiIcons.edit(16)
+				icon: uiIcons.edit
 			},
 			{
 				href: '/admin/messages',
 				label: t('admin.nav.messages'),
 				eyebrow: 'i18n',
-				icon: uiIcons.message(16)
+				icon: uiIcons.message
 			},
 			{
 				href: '/admin/share',
 				label: t('admin.nav.share'),
 				eyebrow: 'Growth',
-				icon: uiIcons.arrowRight(16)
+				icon: uiIcons.share
 			},
 			{
 				href: '/admin/support',
 				label: t('admin.nav.support'),
 				eyebrow: 'Help',
-				icon: uiIcons.message(16)
+				icon: uiIcons.message
 			},
 			{
 				href: '/admin/invites',
 				label: t('admin.nav.invites'),
 				eyebrow: 'Access',
-				icon: uiIcons.plus(16)
+				icon: uiIcons.plus
 			},
 			{
 				href: '/admin/settings',
 				label: t('admin.nav.settings'),
 				eyebrow: 'System',
-				icon: uiIcons.settings(16)
+				icon: uiIcons.settings
 			}
 		].map((item) => ({
 			...item,

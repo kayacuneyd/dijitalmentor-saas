@@ -292,7 +292,13 @@ export const en = {
 			nichePreset: 'Niche preset',
 			brandColors: 'Brand colors',
 			fonts: 'Fonts',
-			cornerRadius: 'Corner radius'
+			cornerRadius: 'Corner radius',
+			heroTitleSize: 'Hero title size',
+			heroTitleSizes: {
+				compact: 'Compact',
+				standard: 'Standard',
+				large: 'Large'
+			}
 		},
 		imageUpload: {
 			uploading: 'Uploading…',
@@ -546,7 +552,8 @@ export const en = {
 			priceSuffix: '{price}€/mo / published site',
 			description:
 				'Each website has its own Pro status. A custom domain and full export only unlock for that site.',
-			billingNote: 'Billing starts from the relevant site card.'
+			billingNote: 'Billing starts from the relevant site card.',
+			buyCredits: 'Buy creation credits'
 		},
 		alerts: {
 			published: '{name} is live — congratulations!',
@@ -575,10 +582,21 @@ export const en = {
 			planFree: 'Free site'
 		},
 		identity: {
+			title: 'Site identity',
 			siteName: 'Site name',
 			subdomain: 'Subdomain',
+			publicHandle: 'Public handle',
 			contactEmail: 'Contact email',
 			save: 'Save'
+		},
+		control: {
+			overview: 'Overview',
+			identity: 'Identity',
+			domain: 'Domain & plan',
+			preview: 'Site preview',
+			status: 'Status & plan',
+			quickActions: 'Quick actions',
+			dangerZone: 'Danger zone'
 		},
 		meta: {
 			publicUrl: 'Public URL: {handle}.saaskaya.com',
@@ -598,6 +616,8 @@ export const en = {
 		actionsRow: {
 			edit: 'Edit',
 			preview: 'Preview',
+			manage: 'Manage',
+			live: 'Live site',
 			openLive: 'Open live site',
 			unpublish: 'Unpublish',
 			prepareForLaunch: 'Prepare for launch',
@@ -618,11 +638,24 @@ export const en = {
 			cancel: 'Cancel'
 		},
 		domain: {
+			title: 'Custom domain',
+			description:
+				'Connect a domain after its DNS points to SaasKaya. Custom domains are enabled per Pro site.',
+			connected: 'This domain is connected to the site.',
+			detach: 'Disconnect domain',
+			domainLabel: 'Domain',
+			connect: 'Connect domain',
 			label: 'Domain:',
 			active: 'Active',
 			remove: 'Remove',
 			forwardTo: '{local}@{domain} → {dest}',
 			forwardPendingVerification: ' · email verification pending'
+		},
+		delete: {
+			description:
+				'Deleting removes the site, its versions, messages and domain connection permanently.',
+			typeName: 'Type “{name}” to confirm',
+			confirm: 'Delete site permanently'
 		},
 		reservation: {
 			label: 'Domain reservation:',

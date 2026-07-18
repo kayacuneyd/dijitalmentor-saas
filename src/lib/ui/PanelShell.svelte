@@ -7,7 +7,7 @@
 	import FlowbiteButton from './primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
 	import PanelSidebar, { type PanelNavItem } from './PanelSidebar.svelte';
-	import { uiIcons } from './icons';
+	import { BarsOutline, ArrowLeftOutline } from 'flowbite-svelte-icons';
 
 	let {
 		children,
@@ -105,28 +105,39 @@
 				? 'lg:grid-cols-[minmax(0,1fr)_72px]'
 				: 'lg:grid-cols-[minmax(0,1fr)_232px]'
 	);
+	const contentPlacement = $derived(
+		sidebarPosition === 'left' ? 'lg:col-start-2 lg:row-start-1' : 'lg:col-start-1 lg:row-start-1'
+	);
 </script>
+
+{#snippet chromeLeft()}
+	{#if brand}
+		{@render brand()}
+	{:else}
+		<span class="sk-mono text-[10px] text-[var(--sk-faint)]">saaskaya.app</span>
+	{/if}
+{/snippet}
 
 {#snippet chromeRight()}
 	<div class="flex items-center gap-2">
 		<FlowbiteButton
 			variant="secondary"
 			size="sm"
-			class="size-9 !p-0"
+			class="size-11 !p-0 lg:hidden"
 			aria-expanded={mobileOpen || !collapsed}
 			aria-controls="panel-sidebar"
 			aria-label={mobileOpen ? labels.close : collapsed ? labels.expand : labels.collapse}
 			onclick={toggleSidebar}
 		>
-			{@html uiIcons.menu(16)}
+			<BarsOutline size="sm" />
 		</FlowbiteButton>
 		<LanguageSwitcher {locale} variant="cookie" />
 	</div>
 {/snippet}
 
-<AppCanvasShell label={canvasLabel} max={canvasMax} right={chromeRight}>
+<AppCanvasShell label={canvasLabel} max={canvasMax} left={chromeLeft} right={chromeRight} flush>
 	<div
-		class="relative grid min-h-[calc(100svh-7rem)] gap-0 overflow-hidden rounded-[var(--sk-radius)] border border-[var(--sk-line)] bg-[var(--sk-card)] {gridClass}"
+		class="panel-shell-grid relative grid min-h-[calc(100svh-4.5rem)] gap-0 overflow-hidden bg-[var(--sk-card)] {gridClass}"
 	>
 		{#if mobileOpen}
 			<button
@@ -145,9 +156,12 @@
 			position={sidebarPosition}
 			{brand}
 			onCloseMobile={() => (mobileOpen = false)}
+			onToggleDesktop={() => (collapsed = !collapsed)}
+			collapseLabel={labels.collapse}
+			expandLabel={labels.expand}
 		/>
 
-		<section class="min-w-0 bg-[#fbfaf7] lg:order-1">
+		<section class="min-w-0 bg-[#fbfaf7] {contentPlacement}">
 			<div class="mx-auto flex w-full {max} flex-col gap-5 p-4 sm:p-5 lg:p-6">
 				<header
 					class="flex flex-col gap-3 border-b border-[var(--sk-line)] pb-4 md:flex-row md:items-start md:justify-between"
@@ -156,9 +170,9 @@
 						{#if backHref}
 							<a
 								href={backHref}
-								class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
+								class="inline-flex min-h-11 items-center gap-1.5 rounded-[var(--sk-radius-sm)] px-2 text-sm font-medium text-[var(--sk-muted)] hover:bg-[var(--sk-shell)] hover:text-[var(--sk-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sk-focus)]"
 							>
-								{@html uiIcons.arrowLeft(14)}{backLabel}
+								<ArrowLeftOutline size="sm" />{backLabel}
 							</a>
 						{/if}
 						<div class="sk-mono mt-2 text-[10px] text-[var(--sk-faint)]">saaskaya.app</div>

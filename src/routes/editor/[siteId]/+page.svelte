@@ -21,7 +21,11 @@
 	import { flagSvgs } from '$lib/ui/flags';
 	import { previewSitePath, publicSitePath } from '$lib/siteUrls';
 	import { needsCustomPublicHandle, validatePublicHandle } from '$lib/publicHandle';
-	import { uiIcons } from '$lib/ui/icons';
+	import {
+		ArrowLeftOutline,
+		ArrowUpRightFromSquareOutline,
+		CloseOutline
+	} from 'flowbite-svelte-icons';
 	import { getTranslate } from '$lib/i18n/context';
 
 	let { data } = $props();
@@ -228,6 +232,7 @@
 		activeTab === tab
 			? 'bg-[var(--sk-ink)] text-[var(--sk-paper)]'
 			: 'text-[var(--sk-muted)] hover:bg-white/70';
+	const ActiveTabIcon = $derived(tabIcons[activeTab]);
 
 	function goToChecklistItem(item: CompletionChecklistItem) {
 		activeTab = item.tab;
@@ -262,7 +267,7 @@
 					class="shrink-0"
 					aria-label={t('editor.shell.dashboard')}
 				>
-					{@html uiIcons.arrowLeft(13)}
+					<ArrowLeftOutline size="xs" />
 					<span class="hidden sm:inline">{t('editor.shell.dashboard')}</span>
 				</FlowbiteButton>
 				<div class="min-w-0">
@@ -283,6 +288,7 @@
 			<div class="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
 				<div class="hidden gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:flex">
 					{#each viewports as vp (vp.id)}
+						{@const ViewportIcon = viewportIcons[vp.id]}
 						<FlowbiteButton
 							variant={viewport.id === vp.id ? 'primary' : 'ghost'}
 							size="sm"
@@ -291,7 +297,7 @@
 							aria-pressed={viewport.id === vp.id}
 							title={t(vp.labelKey)}
 						>
-							{@html viewportIcons[vp.id]}
+							<ViewportIcon size="sm" />
 						</FlowbiteButton>
 					{/each}
 				</div>
@@ -367,7 +373,7 @@
 					aria-label={t('editor.shell.closePanel')}
 					onclick={() => (dockOpen = false)}
 				>
-					{@html uiIcons.x(16)}
+					<CloseOutline size="sm" />
 				</button>
 				<header
 					class="flex shrink-0 items-center justify-between border-b border-[var(--sk-line)] py-3 pr-14 pl-4"
@@ -406,7 +412,7 @@
 								class="flex items-center justify-between rounded-[var(--sk-radius-sm)] px-2 py-2 text-sm hover:bg-[var(--sk-shell)] focus-visible:outline-2 focus-visible:outline-[var(--sk-focus)]"
 							>
 								{t('editor.shell.savedPreview')}
-								{@html uiIcons.external(13)}
+								<ArrowUpRightFromSquareOutline size="xs" />
 							</a>
 						</div>
 					</details>
@@ -417,6 +423,7 @@
 					class="mx-3 mt-3 hidden shrink-0 grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] bg-[var(--sk-shell)] p-1 sm:grid"
 				>
 					{#each primaryTabs as tab (tab)}
+						{@const TabIcon = tabIcons[tab]}
 						<button
 							role="tab"
 							aria-selected={activeTab === tab}
@@ -425,7 +432,7 @@
 							)}"
 							onclick={() => (activeTab = tab)}
 						>
-							{@html tabIcons[tab]}
+							<TabIcon size="sm" />
 							{t(tabLabelKeys[tab])}
 						</button>
 					{/each}
@@ -441,6 +448,7 @@
 						class="absolute right-0 left-0 z-20 mt-1 grid grid-cols-3 gap-1 rounded-[var(--sk-radius-sm)] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-[var(--sk-shadow-lg)]"
 					>
 						{#each secondaryTabs as tab (tab)}
+							{@const TabIcon = tabIcons[tab]}
 							<button
 								type="button"
 								class="flex min-h-11 items-center justify-center gap-2 rounded-[7px] px-2 py-2 text-xs {tabClass(
@@ -448,7 +456,7 @@
 								)}"
 								onclick={() => (activeTab = tab)}
 							>
-								{@html tabIcons[tab]}
+								<TabIcon size="sm" />
 								{t(tabLabelKeys[tab])}
 							</button>
 						{/each}
@@ -459,7 +467,7 @@
 						class="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-[10px] bg-[var(--sk-shell)] px-3 text-sm font-semibold [&::-webkit-details-marker]:hidden"
 					>
 						<span class="flex items-center gap-2">
-							{@html tabIcons[activeTab]}
+							<ActiveTabIcon size="sm" />
 							{t(tabLabelKeys[activeTab])}
 						</span>
 						<span aria-hidden="true">⌄</span>
@@ -468,6 +476,7 @@
 						class="absolute left-0 right-0 z-20 mt-1 grid grid-cols-2 gap-1 rounded-[12px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
 					>
 						{#each tabs as tab (tab)}
+							{@const TabIcon = tabIcons[tab]}
 							<button
 								type="button"
 								class="flex items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm {tabClass(
@@ -475,7 +484,7 @@
 								)}"
 								onclick={() => (activeTab = tab)}
 							>
-								{@html tabIcons[tab]}
+								<TabIcon size="sm" />
 								{t(tabLabelKeys[tab])}
 							</button>
 						{/each}
@@ -515,13 +524,14 @@
 						</FlowbiteButton>
 						<div class="mt-3 flex flex-col gap-2">
 							{#each checklist as item (item.id)}
+								{@const StateIcon = item.complete ? checkCircleIcon : emptyCircleIcon}
 								<button
 									type="button"
 									class="flex items-start gap-2 rounded-[10px] px-2 py-1.5 text-left text-xs transition hover:bg-[var(--sk-shell)]"
 									onclick={() => goToChecklistItem(item)}
 								>
 									<span class="mt-0.5 shrink-0 {item.complete ? '' : 'text-amber-700'}">
-										{@html item.complete ? checkCircleIcon() : emptyCircleIcon()}
+										<StateIcon size="xs" />
 									</span>
 									<span class={item.complete ? 'text-[var(--sk-muted)]' : 'text-[var(--sk-ink)]'}>
 										{item.label}
@@ -634,7 +644,7 @@
 										variant="secondary"
 										size="sm"
 									>
-										Canlı siteyi aç {@html uiIcons.external(13)}
+										Canlı siteyi aç <ArrowUpRightFromSquareOutline size="xs" />
 									</FlowbiteButton>
 									<ShareStoryButton
 										siteName={store.site.settings.siteName}

@@ -6,7 +6,7 @@
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
-	import { uiIcons } from '$lib/ui/icons';
+	import { ArrowRightOutline, HomeOutline } from 'flowbite-svelte-icons';
 	import { mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
@@ -86,23 +86,20 @@
 </svelte:head>
 
 <AppCanvasShell label="saaskaya.app / beta">
+	{#snippet left()}
+		<BrandMark href={l('/')} compact wordmark />
+	{/snippet}
 	{#snippet right()}
 		<FlowbiteButton href={l('/')} variant="secondary" size="sm"
-			>{@html uiIcons.home(14)}{copy.home}</FlowbiteButton
+			><HomeOutline size="xs" />{copy.home}</FlowbiteButton
 		>
 		<LanguageSwitcher {locale} />
 	{/snippet}
 
 	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">
 		<div>
-			<a
-				href={l('/')}
-				class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
-				>{@html uiIcons.arrowLeft(14)}saaskaya</a
-			>
-			<div class="mt-5"><BrandMark /></div>
 			<div
-				class="mt-5 inline-flex rounded-full bg-[rgba(47,111,106,.1)] px-3 py-1 text-xs font-medium text-[#2f6f6a]"
+				class="inline-flex rounded-full bg-[rgba(47,111,106,.1)] px-3 py-1 text-xs font-medium text-[#2f6f6a]"
 			>
 				{copy.badge}
 			</div>
@@ -126,7 +123,7 @@
 							<span class="sk-mono block text-[10.5px] text-[var(--sk-faint)]">{copy.dev}</span>
 							<a
 								class="sk-link inline-flex items-center gap-1.5 break-all font-medium"
-								href={form.devEchoLink}>{copy.open}{@html uiIcons.arrowRight(14)}</a
+								href={form.devEchoLink}>{copy.open}<ArrowRightOutline size="xs" /></a
 							>
 						</div>
 					{/if}
@@ -168,7 +165,7 @@
 					>
 						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 						{copy.submit}
-						{#if !busy}{@html uiIcons.arrowRight(16)}{/if}
+						{#if !busy}<ArrowRightOutline size="sm" />{/if}
 					</FlowbiteButton>
 				</form>
 			{/if}

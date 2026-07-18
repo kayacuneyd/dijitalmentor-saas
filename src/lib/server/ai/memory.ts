@@ -162,7 +162,12 @@ export function seedMemoryFromOnboarding(
 		.filter((q) => keysToCapture.has(q.id))
 		.map((q): string | null => {
 			const value = answers[q.id];
-			if (value == null || (typeof value === 'string' && value.trim() === '') || (Array.isArray(value) && value.length === 0)) return null;
+			if (
+				value == null ||
+				(typeof value === 'string' && value.trim() === '') ||
+				(Array.isArray(value) && value.length === 0)
+			)
+				return null;
 			return `**${q.prompt}** ${formatOnboardingValue(q, value)}`;
 		})
 		.filter(Boolean) as string[];
@@ -176,7 +181,7 @@ export function seedMemoryFromOnboarding(
 		'## Onboarding answers',
 		...pairs,
 		'',
-		'## Changes',
+		'## Changes'
 	].join('\n');
 
 	const now = Date.now();

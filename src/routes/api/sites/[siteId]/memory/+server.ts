@@ -13,7 +13,12 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		return json({ ok: false, message: 'Site owner only.' }, { status: locals.user ? 403 : 401 });
 	}
 	const memory = getSiteMemory(params.siteId);
-	return json({ ok: true, memory: memory ? { content: memory.content, version: memory.version, updatedAt: memory.updatedAt } : null });
+	return json({
+		ok: true,
+		memory: memory
+			? { content: memory.content, version: memory.version, updatedAt: memory.updatedAt }
+			: null
+	});
 };
 
 const putSchema = z.object({ content: z.string().max(10000) });

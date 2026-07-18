@@ -2,6 +2,9 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import type { Locale } from '$lib/schema/site';
 	import { getTranslate } from '$lib/i18n/context';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteBadge from '$lib/ui/primitives/FlowbiteBadge.svelte';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
 
 	const t = getTranslate();
 
@@ -9,34 +12,33 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<fieldset class="border-base-300 rounded-field border p-3">
+	<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
 		<legend class="px-1 text-xs font-medium">{t('editor.languages.editingLocaleLegend')}</legend>
-		<div class="join w-full">
+		<div class="flex w-full gap-1">
 			{#each store.site.locales as locale (locale)}
-				<button
-					class="join-item btn btn-sm grow {store.editLocale === locale
-						? 'btn-primary'
-						: 'btn-ghost'}"
+				<FlowbiteButton
+					variant={store.editLocale === locale ? 'primary' : 'ghost'}
+					size="sm"
+					class="grow"
 					onclick={() => (store.editLocale = locale)}
 				>
 					{locale.toUpperCase()}
-				</button>
+				</FlowbiteButton>
 			{/each}
 		</div>
-		<p class="text-base-content/50 mt-2 text-xs">
+		<p class="mt-2 text-xs text-[var(--sk-muted)]">
 			{t('editor.languages.editingLocaleHelp')}
 		</p>
 	</fieldset>
 
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium"
-			>{t('editor.languages.defaultLocaleLabel')}</span
-		>
-		<select
-			class="select select-sm w-full"
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.languages.defaultLocaleLabel')}</span>
+		<FlowbiteSelect
+			class="w-full"
+			size="sm"
 			value={store.site.defaultLocale}
-			onchange={(e) => {
-				const next = e.currentTarget.value as Locale;
+			onchange={(e: Event) => {
+				const next = (e.currentTarget as HTMLSelectElement).value as Locale;
 				store.update((site) => {
 					site.defaultLocale = next;
 				});
@@ -45,17 +47,17 @@
 			{#each store.site.locales as locale (locale)}
 				<option value={locale}>{locale.toUpperCase()}</option>
 			{/each}
-		</select>
+		</FlowbiteSelect>
 	</label>
 
 	<div>
 		<span class="text-xs font-medium">{t('editor.languages.enabledLocalesLabel')}</span>
 		<div class="mt-1 flex gap-2">
 			{#each store.site.locales as locale (locale)}
-				<span class="badge badge-outline">{locale.toUpperCase()}</span>
+				<FlowbiteBadge tone="neutral">{locale.toUpperCase()}</FlowbiteBadge>
 			{/each}
 		</div>
-		<p class="text-base-content/50 mt-2 text-xs">
+		<p class="mt-2 text-xs text-[var(--sk-muted)]">
 			{t('editor.languages.enabledLocalesHelp')}
 		</p>
 	</div>

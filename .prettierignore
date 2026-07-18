@@ -8,5 +8,6 @@ bun.lockb
 # Miscellaneous
 /static/
 /drizzle/
+.agents/
 docs/Saaskaya WaaS Landing Page/
 docs/animation/

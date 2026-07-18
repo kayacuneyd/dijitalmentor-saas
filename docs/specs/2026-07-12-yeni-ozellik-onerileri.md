@@ -50,11 +50,11 @@ v3 (PREMIUM) — AI Voice Agent
 
 ## 1. Mevcut Durum ve Sınırlar
 
-| Ne var | Ne yok |
-|---|---|
-| `featureKits: string[]` (örn: `['booking-request', 'whatsapp-cta']`) | Bu string'leri render'a bağlayan bir katman |
-| 14 sabit blok tipi (hero, booking, contact, cta, faq...) | Harici servis entegrasyonu (Calendly linki, WhatsApp, ödeme linki) |
-| Her kit `createProfessionSite()` ile Zod-valid Site üretiyor | Meslek grubuna göre otomatik entegrasyon seçimi |
+| Ne var                                                               | Ne yok                                                             |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `featureKits: string[]` (örn: `['booking-request', 'whatsapp-cta']`) | Bu string'leri render'a bağlayan bir katman                        |
+| 14 sabit blok tipi (hero, booking, contact, cta, faq...)             | Harici servis entegrasyonu (Calendly linki, WhatsApp, ödeme linki) |
+| Her kit `createProfessionSite()` ile Zod-valid Site üretiyor         | Meslek grubuna göre otomatik entegrasyon seçimi                    |
 
 ---
 
@@ -68,17 +68,17 @@ sorunu demektir ve "1 dakikada bağla" vaadini aynen taşır.
 
 ```typescript
 type IntegrationType =
-  | 'booking-external'  // Calendly/Cal.com randevu sayfası LİNKİ
-  | 'whatsapp-order'    // E.164 telefon → render'da wa.me linki üretilir
-  | 'payment-link'      // Iyzico/PayTR/Stripe Payment Link
-  | 'social-link'       // Instagram/TikTok/YouTube PROFİL butonu (feed embed değil)
-  | 'video-consult'     // Zoom/Google Meet linki
-  | 'menu-digital';     // Dijital menü / fiyat listesi linki
+	| 'booking-external' // Calendly/Cal.com randevu sayfası LİNKİ
+	| 'whatsapp-order' // E.164 telefon → render'da wa.me linki üretilir
+	| 'payment-link' // Iyzico/PayTR/Stripe Payment Link
+	| 'social-link' // Instagram/TikTok/YouTube PROFİL butonu (feed embed değil)
+	| 'video-consult' // Zoom/Google Meet linki
+	| 'menu-digital'; // Dijital menü / fiyat listesi linki
 ```
 
 ### v1.5'e ertelenenler
 
-- **Leaflet harita:** Contact bloğundaki adres → otomatik harita (OSM tiles, kendi proxy'mizden). 
+- **Leaflet harita:** Contact bloğundaki adres → otomatik harita (OSM tiles, kendi proxy'mizden).
   Google Maps kullanılmayacak — açık kaynak, çerez yok, trafik bize.
 - **Kendi booking sistemi:** Slot tanımlama + form verisi DB'ye + admin listesi. v1'de sadece Calendly link-out.
 - **social-feed, newsletter:** click-to-load facade deseniyle — ayrı spec.
@@ -102,17 +102,30 @@ Jenerik enjeksiyon motoru yok. Her blok kendi ilgilendiği türü `settings.inte
 ### Schema (`src/lib/schema/site.ts` → `siteSettingsSchema`)
 
 ```typescript
-integrations: z.array(z.strictObject({
-  type: z.enum(['booking-external', 'whatsapp-order', 'payment-link',
-                'social-link', 'video-consult', 'menu-digital']),
-  enabled: z.boolean(),
-  // whatsapp-order İÇİN: url yerine phone (E.164). Diğerleri için url.
-  phone: z.string().regex(/^\+[1-9]\d{6,14}$/).optional(),
-  url: z.string().url().optional(),
-  label: localized(nonEmpty).optional()
-})
-  .superRefine(integrationTargetCheck) // tür↔alan tutarlılığı + domain allowlist
-).max(8).optional()
+integrations: z.array(
+	z
+		.strictObject({
+			type: z.enum([
+				'booking-external',
+				'whatsapp-order',
+				'payment-link',
+				'social-link',
+				'video-consult',
+				'menu-digital'
+			]),
+			enabled: z.boolean(),
+			// whatsapp-order İÇİN: url yerine phone (E.164). Diğerleri için url.
+			phone: z
+				.string()
+				.regex(/^\+[1-9]\d{6,14}$/)
+				.optional(),
+			url: z.string().url().optional(),
+			label: localized(nonEmpty).optional()
+		})
+		.superRefine(integrationTargetCheck) // tür↔alan tutarlılığı + domain allowlist
+)
+	.max(8)
+	.optional();
 ```
 
 `src/lib/kits/integrations.ts` içerir: tür tanımları, tür başına domain allowlist,
@@ -122,8 +135,8 @@ tür→varsayılan label sözlüğü ve `wa.me` link üretici yardımcı.
 
 ## 4. Güvenlik
 
-1. **Tür başına domain allowlist:** `booking-external` → `calendly.com`, `cal.com`; 
-   `payment-link` → `iyzico`/`paytr`/`stripe` link alanları; `social-link` → 
+1. **Tür başına domain allowlist:** `booking-external` → `calendly.com`, `cal.com`;
+   `payment-link` → `iyzico`/`paytr`/`stripe` link alanları; `social-link` →
    `instagram.com`, `tiktok.com`, `youtube.com`; `video-consult` → `zoom.us`, `meet.google.com`.
 2. **WhatsApp = telefon, URL değil:** kullanıcıdan E.164 numara alınır; `wa.me/{num}?text=`
    linkini render üretir.
@@ -135,21 +148,21 @@ tür→varsayılan label sözlüğü ve `wa.me` link üretici yardımcı.
 
 ## 5. Meslek Grubu → Default Entegrasyon Matrisi (v1)
 
-| Meslek Grubu | Varsayılan Entegrasyonlar | Hangi Bloğa Yansır |
-|---|---|---|
-| **Praxis (fizyoterapi, psikolog, diş hekimi, diyetisyen)** | `booking-external` | `Booking` → href |
-| | `whatsapp-order` (danışma/randevu) | `Cta`/`Footer` butonu |
-| **Evden satış (el işi, butik pasta, takı)** | `whatsapp-order` (sipariş al) | `Cta` → floating WhatsApp |
-| | `payment-link` (Iyzico/PayTR) | `Pricing` altında ödeme butonu |
-| | `social-link` (Instagram profil) | `Gallery` yanında profil butonu |
-| **Influencer / içerik üreticisi** | `payment-link` | `Cta` → öne çıkan link |
-| | `social-link` (Instagram/TikTok/YouTube) | `Hero`/`Contact` buton grubu |
-| **Emlak danışmanı** | `whatsapp-order` (portföy sor) | `Cta` |
-| | `social-link` | `Contact` |
-| **Avukat / mali müşavir** | `booking-external` | `Booking` |
-| **Güzellik salonu / kuaför** | `booking-external` | `Booking` |
-| | `whatsapp-order` | `Cta` |
-| | `social-link` (Instagram portföy) | `Gallery` yanı |
+| Meslek Grubu                                               | Varsayılan Entegrasyonlar                | Hangi Bloğa Yansır              |
+| ---------------------------------------------------------- | ---------------------------------------- | ------------------------------- |
+| **Praxis (fizyoterapi, psikolog, diş hekimi, diyetisyen)** | `booking-external`                       | `Booking` → href                |
+|                                                            | `whatsapp-order` (danışma/randevu)       | `Cta`/`Footer` butonu           |
+| **Evden satış (el işi, butik pasta, takı)**                | `whatsapp-order` (sipariş al)            | `Cta` → floating WhatsApp       |
+|                                                            | `payment-link` (Iyzico/PayTR)            | `Pricing` altında ödeme butonu  |
+|                                                            | `social-link` (Instagram profil)         | `Gallery` yanında profil butonu |
+| **Influencer / içerik üreticisi**                          | `payment-link`                           | `Cta` → öne çıkan link          |
+|                                                            | `social-link` (Instagram/TikTok/YouTube) | `Hero`/`Contact` buton grubu    |
+| **Emlak danışmanı**                                        | `whatsapp-order` (portföy sor)           | `Cta`                           |
+|                                                            | `social-link`                            | `Contact`                       |
+| **Avukat / mali müşavir**                                  | `booking-external`                       | `Booking`                       |
+| **Güzellik salonu / kuaför**                               | `booking-external`                       | `Booking`                       |
+|                                                            | `whatsapp-order`                         | `Cta`                           |
+|                                                            | `social-link` (Instagram portföy)        | `Gallery` yanı                  |
 
 > **Not:** Adres bilgisi `Contact` bloğunun `props.address` alanında zaten var. v1'de düz metin
 > olarak gösterilir. v1.5'te bu adres Leaflet harita facade'ine beslenir.
@@ -163,10 +176,9 @@ Mevcut bloklar değişmez; ilgili blok `settings.integrations`'tan kendi türün
 ```svelte
 <!-- Booking.svelte içinde -->
 {#if bookingIntegration?.enabled && bookingIntegration.url}
-  <a href={bookingIntegration.url} target="_blank" rel="noopener nofollow"
-     class="btn-primary">
-    {bookingIntegration.label?.[locale] ?? content[locale].buttonLabel}
-  </a>
+	<a href={bookingIntegration.url} target="_blank" rel="noopener nofollow" class="btn-primary">
+		{bookingIntegration.label?.[locale] ?? content[locale].buttonLabel}
+	</a>
 {/if}
 ```
 
@@ -196,6 +208,7 @@ bir slot'a) eklenir.
 ## 9. Uygulama Adımları (v1)
 
 ### Faz 1: Sözlük + schema
+
 1. `src/lib/kits/integrations.ts` — 6 entegrasyon tipi, domain allowlist, default label'lar,
    `wa.me` üretici.
 2. `src/lib/schema/site.ts` — `siteSettingsSchema.integrations` + `superRefine`
@@ -203,13 +216,16 @@ bir slot'a) eklenir.
 3. `ProfessionKitConfig.featureKits: string[]` → `IntegrationType[]`
 
 ### Faz 2: Kit → site üretimi
+
 4. `createProfessionSite()` kit default'larını `settings.integrations`'a yazar.
 
 ### Faz 3: Blok tarafı
+
 5. `Booking/Cta/Contact/Pricing/Footer` bloklarında entegrasyon okuma.
 6. WhatsApp floating butonu (global slot).
 
 ### Faz 4: Yüzeyler
+
 7. Onboarding'e niş bazlı opsiyonel entegrasyon soruları.
 8. Editör Settings → "Entegrasyonlar" kartı.
 9. `siteQualityCheck` uyarıları + plan gating.

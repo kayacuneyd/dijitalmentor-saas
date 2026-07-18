@@ -2,7 +2,12 @@
 	import type { BlockProps } from '$lib/blocks/registry';
 	import { getSiteIntegration, type Integration } from '$lib/render/context';
 
-	let { sectionId, props, content, integrations }: BlockProps<'booking'> & { integrations?: Integration[] } = $props();
+	let {
+		sectionId,
+		props,
+		content,
+		integrations
+	}: BlockProps<'booking'> & { integrations?: Integration[] } = $props();
 
 	const variant = $derived(props.variant ?? 'inline');
 	const title = $derived(content.title);

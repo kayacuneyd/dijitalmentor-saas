@@ -122,11 +122,11 @@ export const tr = {
 			booking: 'Randevu',
 			credentials: 'Yetkinlikler',
 			team: 'Ekip',
-			footer: 'Footer'
-			,stats: 'İstatistikler'
-			,clients: 'Referans logoları'
-			,video: 'Video'
-			,collection: 'Koleksiyon'
+			footer: 'Footer',
+			stats: 'İstatistikler',
+			clients: 'Referans logoları',
+			video: 'Video',
+			collection: 'Koleksiyon'
 		},
 		settings: {
 			siteNameLabel: 'Site adı',

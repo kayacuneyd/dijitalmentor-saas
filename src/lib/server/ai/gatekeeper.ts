@@ -73,7 +73,13 @@ Examples:
 export async function gateMessage(
 	input: { site: Site; message: string; history?: ChatTurn[]; memory?: string },
 	deps: { run: RunToolCall } = { run: runToolCall }
-): Promise<{ gate: GateResult; usage: TokenUsage; provider?: string; model?: string; fallbackUsed?: boolean }> {
+): Promise<{
+	gate: GateResult;
+	usage: TokenUsage;
+	provider?: string;
+	model?: string;
+	fallbackUsed?: boolean;
+}> {
 	const tool = {
 		name: 'gate_message',
 		description: 'Classify the user message and, for edits, distill the request and its risk.',
@@ -84,7 +90,9 @@ export async function gateMessage(
 		.map((turn) => `${turn.role}: ${turn.text}`)
 		.join('\n');
 	const userText = [
-		input.memory ? `Design memory (user preferences & prior decisions — ALWAYS respect these):\n${input.memory}` : '',
+		input.memory
+			? `Design memory (user preferences & prior decisions — ALWAYS respect these):\n${input.memory}`
+			: '',
 		siteOutline(input.site),
 		history ? `Recent conversation:\n${history}` : '',
 		`User message:\n${input.message}`

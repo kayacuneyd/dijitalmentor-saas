@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -24,8 +25,8 @@
 >
 	{#snippet actions()}
 		<form method="POST" action="?/create" use:enhance>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
-				>{t('admin.blog.newPost')}</button
+			<FlowbiteButton type="submit" variant="primary" size="sm"
+				>{t('admin.blog.newPost')}</FlowbiteButton
 			>
 		</form>
 	{/snippet}
@@ -81,7 +82,8 @@
 					{t('admin.blog.updateExisting')}
 				</label>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-secondary">{t('admin.blog.importJson')}</button>
+			<FlowbiteButton type="submit" variant="secondary">{t('admin.blog.importJson')}</FlowbiteButton
+			>
 		</form>
 	</AppCard>
 
@@ -89,7 +91,9 @@
 		<div class="flex flex-col gap-3">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<h2 class="text-lg font-semibold">{t('admin.blog.posts', { count: data.posts.length })}</h2>
-				<a href="/blog" class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.blog.publicBlog')}</a>
+				<FlowbiteButton href="/blog" variant="secondary" size="sm"
+					>{t('admin.blog.publicBlog')}</FlowbiteButton
+				>
 			</div>
 
 			{#if data.posts.length === 0}
@@ -116,11 +120,11 @@
 								<p class="mt-1 text-xs text-[var(--sk-faint)]">/{post.slug}</p>
 							</div>
 							<div class="flex shrink-0 gap-2">
-								<a href={`/blog/${post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm"
-									>{t('admin.blog.open')}</a
+								<FlowbiteButton href={`/blog/${post.slug}`} variant="secondary" size="sm"
+									>{t('admin.blog.open')}</FlowbiteButton
 								>
-								<a href={`/admin/blog/${post.id}`} class="sk-btn sk-btn-primary sk-btn-sm"
-									>{t('admin.blog.edit')}</a
+								<FlowbiteButton href={`/admin/blog/${post.id}`} variant="primary" size="sm"
+									>{t('admin.blog.edit')}</FlowbiteButton
 								>
 							</div>
 						</li>

@@ -9,7 +9,7 @@ If a request conflicts with a principle here, **stop and flag it** before procee
    shared by the AI generator, the editor, and the renderer. All TypeScript types are inferred from it.
    Change the schema in one place; everything else follows.
 
-2. **AI fills the schema — never writes executable/rendered tenant code.** Generation uses 
+2. **AI fills the schema — never writes executable/rendered tenant code.** Generation uses
    provider-agnostic **tool-use** constrained to the schema (currently Groq gatekeeper + DeepSeek
    Layer 2; the `runToolCall` seam supports provider rotation). Every AI output is validated with
    `siteSchema.safeParse`; invalid output is repaired (one round-trip) or rejected — **it is never
@@ -55,7 +55,8 @@ local publish`, on a **seed tenant**, with **no auth, no billing, no domains**. 
 until this loop is real and impressive.
 
 ✅ **Delivered.** M0–M6 complete, V2.0 SaaS UI live, V2.2 two-layer AI gatekeeper live, beta launch
-+ hybrid onboarding live. See `docs/PROGRESS.md`.
+
+- hybrid onboarding live. See `docs/PROGRESS.md`.
 
 ## Amendments
 

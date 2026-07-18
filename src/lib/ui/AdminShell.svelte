@@ -31,16 +31,66 @@
 	const nav = $derived(
 		[
 			{ href: '/admin', label: t('admin.nav.overview'), eyebrow: 'Ops', icon: uiIcons.home(16) },
-			{ href: '/admin/gtm', label: t('admin.nav.gtm'), eyebrow: 'Growth', icon: uiIcons.arrowRight(16) },
-			{ href: '/admin/customers', label: t('admin.nav.customers'), eyebrow: 'CRM', icon: uiIcons.lock(16) },
-			{ href: '/admin/inbox', label: t('admin.nav.inbox'), eyebrow: 'Public', icon: uiIcons.mail(16) },
-			{ href: '/admin/blog', label: t('admin.nav.blog'), eyebrow: 'Content', icon: uiIcons.external(16) },
-			{ href: '/admin/copy', label: t('admin.nav.copy'), eyebrow: 'Content', icon: uiIcons.edit(16) },
-			{ href: '/admin/messages', label: t('admin.nav.messages'), eyebrow: 'i18n', icon: uiIcons.message(16) },
-			{ href: '/admin/share', label: t('admin.nav.share'), eyebrow: 'Growth', icon: uiIcons.arrowRight(16) },
-			{ href: '/admin/support', label: t('admin.nav.support'), eyebrow: 'Help', icon: uiIcons.message(16) },
-			{ href: '/admin/invites', label: t('admin.nav.invites'), eyebrow: 'Access', icon: uiIcons.plus(16) },
-			{ href: '/admin/settings', label: t('admin.nav.settings'), eyebrow: 'System', icon: uiIcons.settings(16) }
+			{
+				href: '/admin/gtm',
+				label: t('admin.nav.gtm'),
+				eyebrow: 'Growth',
+				icon: uiIcons.arrowRight(16)
+			},
+			{
+				href: '/admin/customers',
+				label: t('admin.nav.customers'),
+				eyebrow: 'CRM',
+				icon: uiIcons.lock(16)
+			},
+			{
+				href: '/admin/inbox',
+				label: t('admin.nav.inbox'),
+				eyebrow: 'Public',
+				icon: uiIcons.mail(16)
+			},
+			{
+				href: '/admin/blog',
+				label: t('admin.nav.blog'),
+				eyebrow: 'Content',
+				icon: uiIcons.external(16)
+			},
+			{
+				href: '/admin/copy',
+				label: t('admin.nav.copy'),
+				eyebrow: 'Content',
+				icon: uiIcons.edit(16)
+			},
+			{
+				href: '/admin/messages',
+				label: t('admin.nav.messages'),
+				eyebrow: 'i18n',
+				icon: uiIcons.message(16)
+			},
+			{
+				href: '/admin/share',
+				label: t('admin.nav.share'),
+				eyebrow: 'Growth',
+				icon: uiIcons.arrowRight(16)
+			},
+			{
+				href: '/admin/support',
+				label: t('admin.nav.support'),
+				eyebrow: 'Help',
+				icon: uiIcons.message(16)
+			},
+			{
+				href: '/admin/invites',
+				label: t('admin.nav.invites'),
+				eyebrow: 'Access',
+				icon: uiIcons.plus(16)
+			},
+			{
+				href: '/admin/settings',
+				label: t('admin.nav.settings'),
+				eyebrow: 'System',
+				icon: uiIcons.settings(16)
+			}
 		].map((item) => ({
 			...item,
 			active: active === item.href || (item.href !== '/admin' && active.startsWith(`${item.href}/`))
@@ -49,14 +99,21 @@
 </script>
 
 {#snippet brand()}
-	<a href="/dashboard" class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]">
-		<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]">
+	<a
+		href="/dashboard"
+		class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]"
+	>
+		<span
+			class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]"
+		>
 			<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
 		</span>
 		{#if showWordmark}
 			<span class="panel-sidebar-brand-copy min-w-0">
 				<span class="block truncate text-sm font-semibold leading-none">{brandName}</span>
-				<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]">{t('admin.chrome.console')}</span>
+				<span class="sk-mono mt-1 block text-[9px] text-[var(--sk-faint)]"
+					>{t('admin.chrome.console')}</span
+				>
 			</span>
 		{/if}
 	</a>
@@ -67,7 +124,7 @@
 	{title}
 	{description}
 	{actions}
-	max={max}
+	{max}
 	canvasMax="max-w-[92rem]"
 	canvasLabel="saaskaya.app / admin"
 	items={nav}

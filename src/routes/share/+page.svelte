@@ -2,6 +2,7 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import { canShareFiles, shareStory } from '$lib/share/webShare';
 	import { withLocale, type Locale } from '$lib/i18n';
 
@@ -159,16 +160,18 @@
 			<p class="mt-3 max-w-xl text-[15px] leading-7 text-[var(--sk-muted)]">{copy.lead}</p>
 
 			<div class="mt-6 flex flex-col gap-3">
-				<button
-					type="button"
-					class="sk-btn sk-btn-primary sk-btn-lg w-full sm:w-auto"
+				<FlowbiteButton
+					variant="primary"
+					size="lg"
+					class="w-full sm:w-auto"
 					onclick={share}
 					disabled={busy}
+					loading={busy}
 					data-testid="share-button"
 				>
-					{#if busy}<span class="loading loading-spinner loading-sm"></span>{copy.preparing}
+					{#if busy}{copy.preparing}
 					{:else}{copy.share}{/if}
-				</button>
+				</FlowbiteButton>
 
 				{#if copiedToast}
 					<div class="sk-alert sk-alert-success text-sm" data-testid="copied-toast">
@@ -184,13 +187,15 @@
 								<li>{i + 1}. {step}</li>
 							{/each}
 						</ol>
-						<a
+						<FlowbiteButton
 							href={assetPath(featured.id)}
 							download={featured.fileName}
-							class="sk-btn sk-btn-secondary sk-btn-sm mt-3"
+							variant="secondary"
+							size="sm"
+							class="mt-3"
 						>
 							{copy.download}
-						</a>
+						</FlowbiteButton>
 					</div>
 				{/if}
 			</div>
@@ -202,9 +207,9 @@
 					<div class="w-28 shrink-0 overflow-hidden rounded-[10px] border border-[var(--sk-line)]">
 						{@html data.qrSvg}
 					</div>
-					<button type="button" class="sk-btn sk-btn-secondary sk-btn-sm" onclick={copyLink}>
+					<FlowbiteButton type="button" variant="secondary" size="sm" onclick={copyLink}>
 						{copy.copyLink}
-					</button>
+					</FlowbiteButton>
 				</div>
 			</div>
 

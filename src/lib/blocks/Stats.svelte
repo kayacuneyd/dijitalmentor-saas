@@ -23,10 +23,7 @@
 		{#if content.intro}
 			<p class="mx-auto mb-10 max-w-xl text-center text-base opacity-75">{content.intro}</p>
 		{/if}
-		<div
-			class="grid gap-6"
-			style="grid-template-columns: repeat({cols}, minmax(0, 1fr))"
-		>
+		<div class="grid gap-6" style="grid-template-columns: repeat({cols}, minmax(0, 1fr))">
 			{#each content.items as item (item.label)}
 				<div class="rounded-xl border bg-base-100 p-6 text-center shadow-sm">
 					{#if item.icon}

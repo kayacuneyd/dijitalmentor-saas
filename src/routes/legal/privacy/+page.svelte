@@ -15,15 +15,15 @@
 <LegalShell title={titles[locale]}>
 	{#if locale === 'en'}
 		<p class="sk-callout">
-			<strong>Beta notice:</strong> saaskaya is currently in closed beta. This policy applies to
-			beta participants and may be updated before the paid public launch.
+			<strong>Beta notice:</strong> saaskaya is currently in closed beta. This policy applies to beta
+			participants and may be updated before the paid public launch.
 		</p>
 
 		<h2>1. Who Processes Your Data</h2>
 		<p>
 			saaskaya ("we", "the platform") is an AI-assisted website platform. This privacy policy
-			applies to the platform itself, run at saaskaya.com — not to the sites our customers
-			publish. Privacy policies for customer sites are the site owner's responsibility.
+			applies to the platform itself, run at saaskaya.com — not to the sites our customers publish.
+			Privacy policies for customer sites are the site owner's responsibility.
 		</p>
 
 		<h2>2. Personal Data We Process</h2>
@@ -66,7 +66,10 @@
 
 		<h2>5. Data Retention</h2>
 		<ul>
-			<li>Account and site data: for as long as the account is active + 30 days after a deletion request</li>
+			<li>
+				Account and site data: for as long as the account is active + 30 days after a deletion
+				request
+			</li>
 			<li>Contact-form messages: until the site owner deletes them</li>
 			<li>Logs: 90 days</li>
 			<li>Backups: 14-day rolling window (deleted data survives in backups for a while)</li>
@@ -75,25 +78,27 @@
 		<h2>6. Sharing With Third Parties</h2>
 		<ul>
 			<li>
-				<strong>AI providers:</strong> your site description and chat messages are sent to
-				DeepSeek/Anthropic for processing (KVKK/GDPR-compliant transfer)
+				<strong>AI providers:</strong> your site description and chat messages are sent to DeepSeek/Anthropic
+				for processing (KVKK/GDPR-compliant transfer)
 			</li>
 			<li>
-				<strong>Creem:</strong> handles checkout, tax/invoicing, and payment processing as
-				Merchant of Record/payment facilitator for subscriptions and digital-product payments.
-				Card data is never stored on saaskaya servers.
+				<strong>Creem:</strong> handles checkout, tax/invoicing, and payment processing as Merchant of
+				Record/payment facilitator for subscriptions and digital-product payments. Card data is never
+				stored on saaskaya servers.
 			</li>
 			<li>
-				<strong>Stripe:</strong> may be used for payment processing in legacy/transition flows
-				where Stripe is the active payment provider. Card data is never stored on saaskaya servers.
+				<strong>Stripe:</strong> may be used for payment processing in legacy/transition flows where Stripe
+				is the active payment provider. Card data is never stored on saaskaya servers.
 			</li>
 			<li><strong>Cloudflare R2:</strong> images you upload</li>
 			<li><strong>Resend/SMTP:</strong> transactional email (magic link, notifications)</li>
-			<li><strong>Domain registrars (Porkbun/NameSilo):</strong> WHOIS data for domain registration</li>
+			<li>
+				<strong>Domain registrars (Porkbun/NameSilo):</strong> WHOIS data for domain registration
+			</li>
 		</ul>
 		<p>
-			Your data is only processed for the purposes listed here; it is not sold to third parties
-			for marketing purposes.
+			Your data is only processed for the purposes listed here; it is not sold to third parties for
+			marketing purposes.
 		</p>
 
 		<h2>7. Your Rights (KVKK Art. 11)</h2>
@@ -142,14 +147,13 @@
 
 		<p class="sk-callout">
 			<strong>Legal review:</strong> this text is an operational draft. Professional legal/accounting
-			sign-off for Germany, Turkey, and target sales countries should be obtained before the paid
-			public launch.
+			sign-off for Germany, Turkey, and target sales countries should be obtained before the paid public
+			launch.
 		</p>
 	{:else if locale === 'de'}
 		<p class="sk-callout">
-			<strong>Beta-Hinweis:</strong> saaskaya befindet sich derzeit in der geschlossenen Beta. Diese
-			Richtlinie gilt für Beta-Teilnehmer und kann vor dem kostenpflichtigen öffentlichen Start
-			aktualisiert werden.
+			<strong>Beta-Hinweis:</strong> saaskaya befindet sich derzeit in der geschlossenen Beta. Diese Richtlinie
+			gilt für Beta-Teilnehmer und kann vor dem kostenpflichtigen öffentlichen Start aktualisiert werden.
 		</p>
 
 		<h2>1. Wer verarbeitet deine Daten</h2>
@@ -200,31 +204,37 @@
 
 		<h2>5. Speicherdauer</h2>
 		<ul>
-			<li>Konto- und Website-Daten: solange das Konto aktiv ist + 30 Tage nach einer Löschanfrage</li>
+			<li>
+				Konto- und Website-Daten: solange das Konto aktiv ist + 30 Tage nach einer Löschanfrage
+			</li>
 			<li>Kontaktformular-Nachrichten: bis der Website-Inhaber sie löscht</li>
 			<li>Protokolle: 90 Tage</li>
-			<li>Backups: rollierendes 14-Tage-Fenster (gelöschte Daten bleiben eine Zeit lang in Backups erhalten)</li>
+			<li>
+				Backups: rollierendes 14-Tage-Fenster (gelöschte Daten bleiben eine Zeit lang in Backups
+				erhalten)
+			</li>
 		</ul>
 
 		<h2>6. Weitergabe an Dritte</h2>
 		<ul>
 			<li>
-				<strong>KI-Anbieter:</strong> Deine Website-Beschreibung und Chat-Nachrichten werden zur
-				Verarbeitung an DeepSeek/Anthropic gesendet (KVKK-/DSGVO-konforme Übermittlung)
+				<strong>KI-Anbieter:</strong> Deine Website-Beschreibung und Chat-Nachrichten werden zur Verarbeitung
+				an DeepSeek/Anthropic gesendet (KVKK-/DSGVO-konforme Übermittlung)
 			</li>
 			<li>
-				<strong>Creem:</strong> übernimmt als Merchant of Record/Zahlungsdienstleister für Abos und
-				Zahlungen digitaler Produkte Checkout, Steuer/Rechnungsstellung und Zahlungsabwicklung.
-				Kartendaten werden nie auf saaskaya-Servern gespeichert.
+				<strong>Creem:</strong> übernimmt als Merchant of Record/Zahlungsdienstleister für Abos und Zahlungen
+				digitaler Produkte Checkout, Steuer/Rechnungsstellung und Zahlungsabwicklung. Kartendaten werden
+				nie auf saaskaya-Servern gespeichert.
 			</li>
 			<li>
-				<strong>Stripe:</strong> kann in älteren/Übergangs-Abläufen zur Zahlungsabwicklung
-				verwendet werden, wenn Stripe der aktive Zahlungsanbieter ist. Kartendaten werden nie auf
-				saaskaya-Servern gespeichert.
+				<strong>Stripe:</strong> kann in älteren/Übergangs-Abläufen zur Zahlungsabwicklung verwendet werden,
+				wenn Stripe der aktive Zahlungsanbieter ist. Kartendaten werden nie auf saaskaya-Servern gespeichert.
 			</li>
 			<li><strong>Cloudflare R2:</strong> von dir hochgeladene Bilder</li>
 			<li><strong>Resend/SMTP:</strong> transaktionale E-Mails (Magic-Link, Benachrichtigungen)</li>
-			<li><strong>Domain-Registrare (Porkbun/NameSilo):</strong> WHOIS-Daten für die Domain-Registrierung</li>
+			<li>
+				<strong>Domain-Registrare (Porkbun/NameSilo):</strong> WHOIS-Daten für die Domain-Registrierung
+			</li>
 		</ul>
 		<p>
 			Deine Daten werden ausschließlich für die hier genannten Zwecke verarbeitet; sie werden nicht
@@ -239,30 +249,43 @@
 			<li>Berichtigung unvollständiger/fehlerhafter Daten verlangen</li>
 			<li>Löschung oder Vernichtung verlangen</li>
 			<li>Verlangen, dass Dritte, an die deine Daten weitergegeben wurden, informiert werden</li>
-			<li>Einer für dich nachteiligen Entscheidung widersprechen, die ausschließlich auf automatisierter Analyse beruht</li>
+			<li>
+				Einer für dich nachteiligen Entscheidung widersprechen, die ausschließlich auf
+				automatisierter Analyse beruht
+			</li>
 		</ul>
 		<p>
-			Zur Ausübung dieser Rechte schreibe an <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>.
-			Anfragen werden innerhalb von 30 Tagen beantwortet.
+			Zur Ausübung dieser Rechte schreibe an <a href="mailto:destek@saaskaya.com"
+				>destek@saaskaya.com</a
+			>. Anfragen werden innerhalb von 30 Tagen beantwortet.
 		</p>
 
 		<h2>8. Cookies</h2>
 		<ul>
 			<li><strong>Sitzungscookie (sk_session):</strong> hält dich angemeldet, 7 Tage</li>
-			<li>Analyse-Cookies: derzeit keine (bei Einführung wird eine separate Einwilligung eingeholt)</li>
+			<li>
+				Analyse-Cookies: derzeit keine (bei Einführung wird eine separate Einwilligung eingeholt)
+			</li>
 			<li>Marketing-Cookies: keine</li>
 		</ul>
 
 		<h2>9. Datensicherheit</h2>
 		<ul>
-			<li>Daten werden in einer SQLite-Datenbank auf dem Root-only-Server des Betreibers gespeichert</li>
+			<li>
+				Daten werden in einer SQLite-Datenbank auf dem Root-only-Server des Betreibers gespeichert
+			</li>
 			<li>HTTPS/TLS ist verpflichtend (automatische Weiterleitung von HTTP)</li>
-			<li>API-Schlüssel liegen im Klartext in der Datenbank, der Server ist jedoch physisch geschützt</li>
+			<li>
+				API-Schlüssel liegen im Klartext in der Datenbank, der Server ist jedoch physisch geschützt
+			</li>
 			<li>Es werden nächtliche Backups erstellt; eine externe Kopie ist optional</li>
 		</ul>
 
 		<h2>10. Kinder</h2>
-		<p>saaskaya richtet sich nicht an Personen unter 18 Jahren. Wir verarbeiten wissentlich keine Daten von Kindern.</p>
+		<p>
+			saaskaya richtet sich nicht an Personen unter 18 Jahren. Wir verarbeiten wissentlich keine
+			Daten von Kindern.
+		</p>
 
 		<h2>11. Änderungen</h2>
 		<p>
@@ -276,9 +299,9 @@
 		</p>
 
 		<p class="sk-callout">
-			<strong>Rechtliche Prüfung:</strong> Dieser Text ist ein operativer Entwurf. Vor dem
-			kostenpflichtigen öffentlichen Start sollte eine professionelle rechtliche/steuerliche
-			Prüfung für Deutschland, die Türkei und weitere Zielverkaufsländer eingeholt werden.
+			<strong>Rechtliche Prüfung:</strong> Dieser Text ist ein operativer Entwurf. Vor dem kostenpflichtigen
+			öffentlichen Start sollte eine professionelle rechtliche/steuerliche Prüfung für Deutschland, die
+			Türkei und weitere Zielverkaufsländer eingeholt werden.
 		</p>
 	{:else}
 		<p class="sk-callout">
@@ -290,7 +313,8 @@
 		<p>
 			saaskaya ("biz", "platform") bir AI destekli web sitesi platformudur. Bu gizlilik politikası,
 			saaskaya.com adresinde yürütülen platformun kendisi için geçerlidir — müşterilerimizin
-			yayınladığı siteler için değil. Müşteri sitelerinin gizlilik politikaları site sahibine aittir.
+			yayınladığı siteler için değil. Müşteri sitelerinin gizlilik politikaları site sahibine
+			aittir.
 		</p>
 
 		<h2>2. İşlenen Kişisel Veriler</h2>
@@ -356,7 +380,9 @@
 			</li>
 			<li><strong>Cloudflare R2:</strong> yüklediğiniz görseller</li>
 			<li><strong>Resend/SMTP:</strong> transactional e-posta (magic link, bildirimler)</li>
-			<li><strong>Domain kayıtçıları (Porkbun/NameSilo):</strong> domain tescil için WHOIS verisi</li>
+			<li>
+				<strong>Domain kayıtçıları (Porkbun/NameSilo):</strong> domain tescil için WHOIS verisi
+			</li>
 		</ul>
 		<p>
 			Verileriniz yalnızca bu listelenen amaçlar için işlenir; pazarlama amacıyla üçüncü taraflara

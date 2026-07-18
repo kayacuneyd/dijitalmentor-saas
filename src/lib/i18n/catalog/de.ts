@@ -124,11 +124,11 @@ export const de = {
 			booking: 'Terminbuchung',
 			credentials: 'Qualifikationen',
 			team: 'Team',
-			footer: 'Footer'
-			,stats: 'Statistiken'
-			,clients: 'Kundenlogos'
-			,video: 'Video'
-			,collection: 'Sammlung'
+			footer: 'Footer',
+			stats: 'Statistiken',
+			clients: 'Kundenlogos',
+			video: 'Video',
+			collection: 'Sammlung'
 		},
 		settings: {
 			siteNameLabel: 'Website-Name',
@@ -137,7 +137,8 @@ export const de = {
 				'Wähle vor deiner ersten Veröffentlichung eine lesbare Adresse statt der Website-ID.',
 			publicSubdomainRenameNotice:
 				'Nach der Veröffentlichung kannst du diese Adresse einmal ändern. Die alte Adresse bleibt als Alias aktiv.',
-			publicSubdomainRenameUsed: 'Die einmalige Subdomain-Änderung nach der Veröffentlichung wurde bereits verwendet.',
+			publicSubdomainRenameUsed:
+				'Die einmalige Subdomain-Änderung nach der Veröffentlichung wurde bereits verwendet.',
 			contactEmailLabel: 'Kontakt-E-Mail',
 			saveIdentity: 'Veröffentlichungsinfo speichern',
 			flushFailed:

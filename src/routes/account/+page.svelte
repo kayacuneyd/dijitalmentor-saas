@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
@@ -29,11 +30,11 @@
 	canvasLabel="saaskaya.app / account"
 >
 	{#snippet actions()}
-		<a href="/account/support" class="sk-btn sk-btn-secondary sk-btn-sm"
-			>{t('account.supportLink')}</a
+		<FlowbiteButton href="/account/support" variant="secondary" size="sm"
+			>{t('account.supportLink')}</FlowbiteButton
 		>
 		<form method="POST" action="/logout">
-			<button type="submit" class="sk-btn sk-btn-ghost">{t('account.signOut')}</button>
+			<FlowbiteButton type="submit" variant="ghost">{t('account.signOut')}</FlowbiteButton>
 		</form>
 	{/snippet}
 
@@ -89,13 +90,13 @@
 			<div class="flex flex-wrap gap-2">
 				{#if data.subscription.state !== 'active' && data.billingConfigured}
 					<form method="POST" action="/api/billing/checkout">
-						<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
-							>{t('account.plan.upgrade')}</button
+						<FlowbiteButton type="submit" variant="primary" size="sm"
+							>{t('account.plan.upgrade')}</FlowbiteButton
 						>
 					</form>
 				{/if}
-				<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm"
-					>{t('account.plan.manageSites')}</a
+				<FlowbiteButton href="/dashboard" variant="secondary" size="sm"
+					>{t('account.plan.manageSites')}</FlowbiteButton
 				>
 			</div>
 		</div>
@@ -112,8 +113,14 @@
 					<li class="rounded-[10px] border border-[var(--sk-line)] p-3">
 						<p class="truncate text-sm font-medium">{site.siteName}</p>
 						<div class="mt-2 flex gap-4 text-xs text-[var(--sk-muted)]">
-							<span>İletişim: {site.conversions.find((item) => item.event === 'contact_submitted')?.count ?? 0}</span>
-							<span>CTA: {site.conversions.find((item) => item.event === 'cta_clicked')?.count ?? 0}</span>
+							<span
+								>İletişim: {site.conversions.find((item) => item.event === 'contact_submitted')
+									?.count ?? 0}</span
+							>
+							<span
+								>CTA: {site.conversions.find((item) => item.event === 'cta_clicked')?.count ??
+									0}</span
+							>
 						</div>
 					</li>
 				{/each}
@@ -199,13 +206,14 @@
 								</p>
 							</div>
 							{#if site.canExport}
-								<a
+								<FlowbiteButton
 									href="/api/sites/{site.id}/export"
-									class="sk-btn sk-btn-secondary sk-btn-sm"
+									variant="secondary"
+									size="sm"
 									download
 								>
 									{t('account.exports.export')}
-								</a>
+								</FlowbiteButton>
 							{:else}
 								<span class="text-xs text-[var(--sk-faint)]"
 									>{t('account.exports.proRequired')}</span
@@ -224,9 +232,9 @@
 			<p class="text-sm leading-6 text-[var(--sk-muted)]">
 				{t('account.deletion.description')}
 			</p>
-			<a href="mailto:admin@saaskaya.com" class="sk-btn sk-btn-secondary sk-btn-sm w-fit">
+			<FlowbiteButton href="mailto:admin@saaskaya.com" variant="secondary" size="sm" class="w-fit">
 				{t('account.deletion.request')}
-			</a>
+			</FlowbiteButton>
 		</div>
 	</AppCard>
 </PageShell>

@@ -21,6 +21,7 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
+		"@fontsource/aleo": "^5.2.7",
 		"@sveltejs/adapter-node": "^5.5.4",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
@@ -31,6 +32,9 @@
 		"daisyui": "^5.6.13",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
+		"flowbite": "^4.0.2",
+		"flowbite-svelte": "^1.33.1",
+		"flowbite-svelte-icons": "^3.1.0",
 		"playwright-core": "^1.61.1",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",

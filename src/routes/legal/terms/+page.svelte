@@ -15,19 +15,21 @@
 <LegalShell title={titles[locale]}>
 	{#if locale === 'en'}
 		<p class="sk-callout">
-			<strong>Beta notice:</strong> saaskaya is currently in closed beta. These terms are for beta
-			participants and may be updated before the paid public launch.
+			<strong>Beta notice:</strong> saaskaya is currently in closed beta. These terms are for beta participants
+			and may be updated before the paid public launch.
 		</p>
 
 		<h2>1. Parties</h2>
 		<p>
-			These terms ("Terms") are the agreement between the operator of the saaskaya platform and
-			the user who creates an account on the platform ("You", "User"). Creating an account means
-			you accept these Terms.
+			These terms ("Terms") are the agreement between the operator of the saaskaya platform and the
+			user who creates an account on the platform ("You", "User"). Creating an account means you
+			accept these Terms.
 		</p>
 
 		<h2>2. Nature of the Service</h2>
-		<p>saaskaya is an AI-assisted website creation and publishing platform. The service includes:</p>
+		<p>
+			saaskaya is an AI-assisted website creation and publishing platform. The service includes:
+		</p>
 		<ul>
 			<li>AI-generated site content from your text description</li>
 			<li>Site editing through chat</li>
@@ -53,16 +55,16 @@
 		<h2>4. Plans and Limits</h2>
 		<p>
 			Plan limits (AI credits, pages, media, languages, domains) are listed on the
-			<a href="/pricing">pricing page</a> and may be updated by the operator. Limits are enforced
-			server-side. Exceeding a limit may require a plan upgrade or purchasing additional credits.
+			<a href="/pricing">pricing page</a> and may be updated by the operator. Limits are enforced server-side.
+			Exceeding a limit may require a plan upgrade or purchasing additional credits.
 		</p>
 
 		<h2>5. Payment</h2>
 		<ul>
 			<li>
-				The primary payment provider for Pro/Premium subscriptions is Creem. Where applicable,
-				Creem acts as Merchant of Record/payment facilitator for checkout, tax/invoicing, and
-				payment processing.
+				The primary payment provider for Pro/Premium subscriptions is Creem. Where applicable, Creem
+				acts as Merchant of Record/payment facilitator for checkout, tax/invoicing, and payment
+				processing.
 			</li>
 			<li>
 				Stripe may be used as a transition/fallback provider or for legacy payment records. The
@@ -71,13 +73,19 @@
 			<li>Domain purchases can be made via the payment provider or bank transfer</li>
 			<li>Domain registration only happens after payment is confirmed (non-refundable)</li>
 			<li>Paid features remain active until the end of the current billing period</li>
-			<li>Refund and withdrawal terms are on the <a href="/legal/refund">Cancellation and Refunds page</a></li>
+			<li>
+				Refund and withdrawal terms are on the <a href="/legal/refund"
+					>Cancellation and Refunds page</a
+				>
+			</li>
 		</ul>
 
 		<h2>6. Your Responsibilities</h2>
 		<ul>
 			<li>You are responsible for the accuracy and legal compliance of your site content</li>
-			<li>The <a href="/legal/disclaimer">professional disclaimer</a> applies to professional content</li>
+			<li>
+				The <a href="/legal/disclaimer">professional disclaimer</a> applies to professional content
+			</li>
 			<li>Do not publish unlawful, defamatory, infringing, or misleading content</li>
 			<li>Compliance with health/legal advertising regulations is your responsibility</li>
 			<li>You are advised to review AI output before publishing</li>
@@ -101,14 +109,21 @@
 		<h2>9. Domains</h2>
 		<ul>
 			<li>A domain belongs to you after registration (per ICANN rules)</li>
-			<li>On monthly Pro, a managed .com domain service may be offered for an additional yearly fee</li>
-			<li>On yearly Pro, one standard .com domain is included as long as the yearly plan stays active</li>
+			<li>
+				On monthly Pro, a managed .com domain service may be offered for an additional yearly fee
+			</li>
+			<li>
+				On yearly Pro, one standard .com domain is included as long as the yearly plan stays active
+			</li>
 			<li>Premium domains, non-.com extensions, and additional domains are handled separately</li>
 			<li>
 				Email service is forwarding, not a mailbox — e.g. messages to info@domain.com can be
 				forwarded to your verified existing email address
 			</li>
-			<li>On subscription cancellation, the domain stays active for a 30-day grace period, then is detached</li>
+			<li>
+				On subscription cancellation, the domain stays active for a 30-day grace period, then is
+				detached
+			</li>
 			<li>Domain transfer-out is always possible (through the registrar)</li>
 		</ul>
 
@@ -116,7 +131,10 @@
 		<ul>
 			<li>You own your site content</li>
 			<li>You can export your data at any time (dashboard → Export)</li>
-			<li>On an account deletion request, your data is removed within 30 days (survives in backups for a while)</li>
+			<li>
+				On an account deletion request, your data is removed within 30 days (survives in backups for
+				a while)
+			</li>
 			<li>saaskaya may collect anonymous usage data to improve the platform</li>
 		</ul>
 
@@ -137,15 +155,19 @@
 
 		<h2>13. Limitation of Liability</h2>
 		<p>
-			The operator is not liable for indirect, incidental, consequential, or punitive damages.
-			Total liability does not exceed the amount charged to the user in the last 12 months.
+			The operator is not liable for indirect, incidental, consequential, or punitive damages. Total
+			liability does not exceed the amount charged to the user in the last 12 months.
 		</p>
 
 		<h2>14. Termination</h2>
 		<ul>
 			<li>You may delete your account at any time</li>
-			<li>The operator may suspend an account for breach of these Terms, abuse, or legal obligation</li>
-			<li>On termination, your site content is deleted after 30 days (except the domain grace period)</li>
+			<li>
+				The operator may suspend an account for breach of these Terms, abuse, or legal obligation
+			</li>
+			<li>
+				On termination, your site content is deleted after 30 days (except the domain grace period)
+			</li>
 		</ul>
 
 		<h2>15. Dispute Resolution</h2>
@@ -170,16 +192,16 @@
 		</p>
 
 		<p class="sk-callout">
-			<strong>Legal review:</strong> these terms are an operational draft updated for the Creem
-			Merchant of Record decision. They should not be treated as "paid public launch approved"
-			without professional sign-off on German business/income tax, sales into Turkey, consumer
-			rights, and distance-selling rules.
+			<strong>Legal review:</strong> these terms are an operational draft updated for the Creem Merchant
+			of Record decision. They should not be treated as "paid public launch approved" without professional
+			sign-off on German business/income tax, sales into Turkey, consumer rights, and distance-selling
+			rules.
 		</p>
 	{:else if locale === 'de'}
 		<p class="sk-callout">
-			<strong>Beta-Hinweis:</strong> saaskaya befindet sich derzeit in der geschlossenen Beta. Diese
-			Bedingungen gelten für Beta-Teilnehmer und können vor dem kostenpflichtigen öffentlichen Start
-			aktualisiert werden.
+			<strong>Beta-Hinweis:</strong> saaskaya befindet sich derzeit in der geschlossenen Beta. Diese Bedingungen
+			gelten für Beta-Teilnehmer und können vor dem kostenpflichtigen öffentlichen Start aktualisiert
+			werden.
 		</p>
 
 		<h2>1. Vertragsparteien</h2>
@@ -190,7 +212,10 @@
 		</p>
 
 		<h2>2. Art der Dienstleistung</h2>
-		<p>saaskaya ist eine KI-gestützte Plattform zur Website-Erstellung und -Veröffentlichung. Der Leistungsumfang umfasst:</p>
+		<p>
+			saaskaya ist eine KI-gestützte Plattform zur Website-Erstellung und -Veröffentlichung. Der
+			Leistungsumfang umfasst:
+		</p>
 		<ul>
 			<li>KI-generierte Website-Inhalte aus deiner Textbeschreibung</li>
 			<li>Website-Bearbeitung per Chat</li>
@@ -209,16 +234,18 @@
 			<li>Ein Konto wird nach E-Mail-Verifizierung per Magic-Link erstellt</li>
 			<li>Du musst eine echte, aktuelle E-Mail-Adresse angeben</li>
 			<li>Du bist für die Kontosicherheit verantwortlich; melde unbefugten Zugriff sofort</li>
-			<li>Während der geschlossenen Beta können nur eingeladene E-Mail-Adressen ein Konto anlegen</li>
+			<li>
+				Während der geschlossenen Beta können nur eingeladene E-Mail-Adressen ein Konto anlegen
+			</li>
 			<li>Ein Konto kann mehrere Websites enthalten; das Pro-Abo gilt pro Website</li>
 		</ul>
 
 		<h2>4. Tarife und Limits</h2>
 		<p>
 			Tariflimits (KI-Credits, Seiten, Medien, Sprachen, Domains) sind auf der
-			<a href="/pricing">Preisseite</a> aufgeführt und können vom Betreiber aktualisiert werden.
-			Limits werden serverseitig durchgesetzt. Bei Überschreitung eines Limits kann ein
-			Tarif-Upgrade oder der Kauf zusätzlicher Credits erforderlich sein.
+			<a href="/pricing">Preisseite</a> aufgeführt und können vom Betreiber aktualisiert werden. Limits
+			werden serverseitig durchgesetzt. Bei Überschreitung eines Limits kann ein Tarif-Upgrade oder der
+			Kauf zusätzlicher Credits erforderlich sein.
 		</p>
 
 		<h2>5. Zahlung</h2>
@@ -233,47 +260,80 @@
 				werden. Der aktive Checkout-Bildschirm zeigt an, welcher Zahlungsanbieter verwendet wird.
 			</li>
 			<li>Domain-Käufe können über den Zahlungsanbieter oder per Banküberweisung erfolgen</li>
-			<li>Die Domain-Registrierung erfolgt erst nach Zahlungsbestätigung (nicht erstattungsfähig)</li>
-			<li>Kostenpflichtige Funktionen bleiben bis zum Ende der aktuellen Abrechnungsperiode aktiv</li>
-			<li>Erstattungs- und Widerrufsbedingungen findest du auf der <a href="/legal/refund">Seite zu Kündigung und Erstattung</a></li>
+			<li>
+				Die Domain-Registrierung erfolgt erst nach Zahlungsbestätigung (nicht erstattungsfähig)
+			</li>
+			<li>
+				Kostenpflichtige Funktionen bleiben bis zum Ende der aktuellen Abrechnungsperiode aktiv
+			</li>
+			<li>
+				Erstattungs- und Widerrufsbedingungen findest du auf der <a href="/legal/refund"
+					>Seite zu Kündigung und Erstattung</a
+				>
+			</li>
 		</ul>
 
 		<h2>6. Deine Pflichten</h2>
 		<ul>
-			<li>Du bist für die Richtigkeit und Rechtskonformität deiner Website-Inhalte verantwortlich</li>
-			<li>Für professionelle Inhalte gilt der <a href="/legal/disclaimer">Haftungsausschluss</a></li>
-			<li>Veröffentliche keine rechtswidrigen, verleumderischen, urheberrechtsverletzenden oder irreführenden Inhalte</li>
-			<li>Die Einhaltung von Werberegelungen im Gesundheits-/Rechtsbereich liegt in deiner Verantwortung</li>
+			<li>
+				Du bist für die Richtigkeit und Rechtskonformität deiner Website-Inhalte verantwortlich
+			</li>
+			<li>
+				Für professionelle Inhalte gilt der <a href="/legal/disclaimer">Haftungsausschluss</a>
+			</li>
+			<li>
+				Veröffentliche keine rechtswidrigen, verleumderischen, urheberrechtsverletzenden oder
+				irreführenden Inhalte
+			</li>
+			<li>
+				Die Einhaltung von Werberegelungen im Gesundheits-/Rechtsbereich liegt in deiner
+				Verantwortung
+			</li>
 			<li>Es wird empfohlen, KI-Ausgaben vor der Veröffentlichung zu prüfen</li>
 			<li>Verkaufe oder übertrage dein Konto nicht an Dritte</li>
 		</ul>
 
 		<h2>7. Zulässige Nutzung</h2>
 		<p>
-			Details findest du auf der Seite <a href="/legal/acceptable-use">Zulässige Nutzung</a>.
-			Kurz gefasst: Missbrauch, Spam, Scraping, Reverse Engineering und das Ausnutzen von
-			KI-Credits sind untersagt.
+			Details findest du auf der Seite <a href="/legal/acceptable-use">Zulässige Nutzung</a>. Kurz
+			gefasst: Missbrauch, Spam, Scraping, Reverse Engineering und das Ausnutzen von KI-Credits sind
+			untersagt.
 		</p>
 
 		<h2>8. KI-Generierung und Sicherheit</h2>
 		<ul>
-			<li>Die KI schreibt niemals HTML/CSS/JS; sie erzeugt ausschließlich validierte Strukturdaten</li>
-			<li>Jede KI-Ausgabe wird gegen ein Zod-Schema validiert; ungültige Ausgaben werden nie gerendert</li>
-			<li>KI-Ausgaben sind ein Entwurf, keine Beratung; du bestätigst sie vor der Veröffentlichung</li>
+			<li>
+				Die KI schreibt niemals HTML/CSS/JS; sie erzeugt ausschließlich validierte Strukturdaten
+			</li>
+			<li>
+				Jede KI-Ausgabe wird gegen ein Zod-Schema validiert; ungültige Ausgaben werden nie gerendert
+			</li>
+			<li>
+				KI-Ausgaben sind ein Entwurf, keine Beratung; du bestätigst sie vor der Veröffentlichung
+			</li>
 			<li>Bei Ausfall eines KI-Anbieters kann der Dienst vorübergehend nicht verfügbar sein</li>
 		</ul>
 
 		<h2>9. Domains</h2>
 		<ul>
 			<li>Eine Domain gehört dir nach der Registrierung (gemäß ICANN-Regeln)</li>
-			<li>Beim monatlichen Pro-Tarif kann ein verwalteter .com-Domain-Service gegen jährlichen Aufpreis angeboten werden</li>
-			<li>Beim jährlichen Pro-Tarif ist eine Standard-.com-Domain enthalten, solange der Jahrestarif aktiv bleibt</li>
+			<li>
+				Beim monatlichen Pro-Tarif kann ein verwalteter .com-Domain-Service gegen jährlichen
+				Aufpreis angeboten werden
+			</li>
+			<li>
+				Beim jährlichen Pro-Tarif ist eine Standard-.com-Domain enthalten, solange der Jahrestarif
+				aktiv bleibt
+			</li>
 			<li>Premium-Domains, Nicht-.com-Endungen und Zweitdomains werden gesondert behandelt</li>
 			<li>
 				Der E-Mail-Dienst ist eine Weiterleitung, kein Postfach — z. B. können Nachrichten an
 				info@domain.com an deine verifizierte bestehende E-Mail-Adresse weitergeleitet werden
 			</li>
-			<li>Bei Abo-Kündigung bleibt die Domain 30 Tage lang in einer Kulanzfrist aktiv und wird danach getrennt</li>
+			<li>
+				Bei Abo-Kündigung bleibt die Domain 30 Tage lang in einer Kulanzfrist aktiv und wird danach
+				getrennt
+			</li>
 			<li>Ein Domain-Transfer-out ist jederzeit möglich (über den Registrar)</li>
 		</ul>
 
@@ -281,7 +341,10 @@
 		<ul>
 			<li>Du bist Eigentümer deiner Website-Inhalte</li>
 			<li>Du kannst deine Daten jederzeit exportieren (Dashboard → Export)</li>
-			<li>Bei einer Löschanfrage werden deine Daten innerhalb von 30 Tagen entfernt (bleiben eine Zeit lang in Backups erhalten)</li>
+			<li>
+				Bei einer Löschanfrage werden deine Daten innerhalb von 30 Tagen entfernt (bleiben eine Zeit
+				lang in Backups erhalten)
+			</li>
 			<li>saaskaya kann anonyme Nutzungsdaten zur Plattformverbesserung erheben</li>
 		</ul>
 
@@ -297,8 +360,8 @@
 		<p>
 			Der Dienst wird „wie besehen" bereitgestellt. Es wird keine Garantie für die Richtigkeit,
 			medizinische/rechtliche Gültigkeit oder das geschäftliche Ergebnis KI-generierter Inhalte
-			übernommen. Die maximal mögliche Haftung für Ausfälle, Fehler oder Datenverlust entspricht
-			dem in den letzten 12 Monaten gezahlten Betrag.
+			übernommen. Die maximal mögliche Haftung für Ausfälle, Fehler oder Datenverlust entspricht dem
+			in den letzten 12 Monaten gezahlten Betrag.
 		</p>
 
 		<h2>13. Haftungsbeschränkung</h2>
@@ -310,8 +373,14 @@
 		<h2>14. Kündigung</h2>
 		<ul>
 			<li>Du kannst dein Konto jederzeit löschen</li>
-			<li>Der Betreiber kann ein Konto bei Verstoß gegen diese Bedingungen, Missbrauch oder rechtlicher Verpflichtung sperren</li>
-			<li>Bei Kündigung werden deine Website-Inhalte nach 30 Tagen gelöscht (außer der Domain-Kulanzfrist)</li>
+			<li>
+				Der Betreiber kann ein Konto bei Verstoß gegen diese Bedingungen, Missbrauch oder
+				rechtlicher Verpflichtung sperren
+			</li>
+			<li>
+				Bei Kündigung werden deine Website-Inhalte nach 30 Tagen gelöscht (außer der
+				Domain-Kulanzfrist)
+			</li>
 		</ul>
 
 		<h2>15. Streitbeilegung</h2>
@@ -337,11 +406,10 @@
 		</p>
 
 		<p class="sk-callout">
-			<strong>Rechtliche Prüfung:</strong> Diese Bedingungen sind ein operativer Entwurf, der an die
-			Creem-Merchant-of-Record-Entscheidung angepasst wurde. Sie sollten nicht als „für den
-			kostenpflichtigen öffentlichen Start freigegeben" gelten, solange keine professionelle
-			Prüfung zu deutscher Gewerbe-/Einkommensteuer, Verkäufen in die Türkei, Verbraucherrechten
-			und Fernabsatzregeln erfolgt ist.
+			<strong>Rechtliche Prüfung:</strong> Diese Bedingungen sind ein operativer Entwurf, der an die Creem-Merchant-of-Record-Entscheidung
+			angepasst wurde. Sie sollten nicht als „für den kostenpflichtigen öffentlichen Start freigegeben"
+			gelten, solange keine professionelle Prüfung zu deutscher Gewerbe-/Einkommensteuer, Verkäufen in
+			die Türkei, Verbraucherrechten und Fernabsatzregeln erfolgt ist.
 		</p>
 	{:else}
 		<p class="sk-callout">
@@ -351,8 +419,8 @@
 
 		<h2>1. Taraflar</h2>
 		<p>
-			Bu şartlar ("Şartlar"), saaskaya platformunu işleten ile platforma hesap açan kullanıcı ("Siz",
-			"Kullanıcı") arasındaki sözleşmedir. Hesap oluşturduğunuzda bu Şartları kabul etmiş
+			Bu şartlar ("Şartlar"), saaskaya platformunu işleten ile platforma hesap açan kullanıcı
+			("Siz", "Kullanıcı") arasındaki sözleşmedir. Hesap oluşturduğunuzda bu Şartları kabul etmiş
 			sayılırsınız.
 		</p>
 
@@ -384,8 +452,8 @@
 		<p>
 			Plan limitleri (AI kredileri, sayfa, medya, dil, domain) <a href="/pricing"
 				>fiyatlandırma sayfasında</a
-			> listelenir ve operatör tarafından güncellenebilir. Limitler sunucu tarafında uygulanır. Limit aşımı
-			durumunda plan yükseltme veya ek kredi satın alma gerekebilir.
+			> listelenir ve operatör tarafından güncellenebilir. Limitler sunucu tarafında uygulanır. Limit
+			aşımı durumunda plan yükseltme veya ek kredi satın alma gerekebilir.
 		</p>
 
 		<h2>5. Ödeme</h2>
@@ -396,8 +464,8 @@
 				yürütür.
 			</li>
 			<li>
-				Stripe, geçiş/fallback sağlayıcısı olarak veya eski ödeme kayıtları için kullanılabilir. Aktif
-				checkout ekranında hangi ödeme sağlayıcısının kullanıldığı görünür.
+				Stripe, geçiş/fallback sağlayıcısı olarak veya eski ödeme kayıtları için kullanılabilir.
+				Aktif checkout ekranında hangi ödeme sağlayıcısının kullanıldığı görünür.
 			</li>
 			<li>Domain satın alımı ödeme sağlayıcısı veya banka havalesi ile yapılabilir</li>
 			<li>Domain tescili yalnızca ödeme onayından sonra yapılır (geri alınamaz)</li>
@@ -436,8 +504,8 @@
 			<li>Yıllık Pro’da bir standart .com alan adı, yıllık plan aktif kaldığı sürece dahildir</li>
 			<li>Premium domainler, .com dışı uzantılar ve ikinci domainler ayrı değerlendirilir</li>
 			<li>
-				E-posta hizmeti posta kutusu değil yönlendirme hizmetidir; örn. info@domain.com adresine gelen
-				mesajlar doğrulanmış mevcut e-posta adresinize yönlendirilebilir
+				E-posta hizmeti posta kutusu değil yönlendirme hizmetidir; örn. info@domain.com adresine
+				gelen mesajlar doğrulanmış mevcut e-posta adresinize yönlendirilebilir
 			</li>
 			<li>Abonelik iptalinde domain 30 gün grace dönemi boyunca aktif kalır, sonra ayrılır</li>
 			<li>Domain transfer-out her zaman mümkündür (kayıtçı üzerinden)</li>
@@ -462,8 +530,8 @@
 		<h2>12. Garanti Reddi</h2>
 		<p>
 			Hizmet "olduğu gibi" sunulur. AI üretiminin doğruluğu, tıbbi/hukuki geçerliliği veya iş sonucu
-			garantisi verilmez. Kesintiler, hatalar veya veri kaybı için mümkün olan azami sorumluluk son 12
-			ayda ödenen tutardır.
+			garantisi verilmez. Kesintiler, hatalar veya veri kaybı için mümkün olan azami sorumluluk son
+			12 ayda ödenen tutardır.
 		</p>
 
 		<h2>13. Sorumluluğun Sınırlandırılması</h2>
@@ -476,18 +544,19 @@
 		<ul>
 			<li>Hesabınızı istediğiniz zaman silebilirsiniz</li>
 			<li>
-				Operatör, Şart ihlali, kötüye kullanım veya yasal yükümlülük durumunda hesabı askıya alabilir
+				Operatör, Şart ihlali, kötüye kullanım veya yasal yükümlülük durumunda hesabı askıya
+				alabilir
 			</li>
 			<li>Fesihde site içeriğiniz 30 gün sonra silinir (domain grace hariç)</li>
 		</ul>
 
 		<h2>15. Uyuşmazlık Çözümü</h2>
 		<p>
-			Önce iyi niyetli müzakere ve destek kanalları kullanılır. Ücretli checkout'ta Creem Merchant of
-			Record olarak görünüyorsa, ödeme, chargeback, vergi/fatura ve tüketici mevzuatı konularında
-			Creem'in checkout sırasında sunduğu ek şartlar da uygulanabilir. saaskaya platform kullanımı ve
-			yayınlanan içerik sorumlulukları bu Şartlara tabidir. Nihai uygulanacak hukuk ve yetkili merci,
-			ücretli genel lansman öncesi hukuki danışmanla kesinleştirilecektir.
+			Önce iyi niyetli müzakere ve destek kanalları kullanılır. Ücretli checkout'ta Creem Merchant
+			of Record olarak görünüyorsa, ödeme, chargeback, vergi/fatura ve tüketici mevzuatı konularında
+			Creem'in checkout sırasında sunduğu ek şartlar da uygulanabilir. saaskaya platform kullanımı
+			ve yayınlanan içerik sorumlulukları bu Şartlara tabidir. Nihai uygulanacak hukuk ve yetkili
+			merci, ücretli genel lansman öncesi hukuki danışmanla kesinleştirilecektir.
 		</p>
 
 		<h2>16. Değişiklikler</h2>

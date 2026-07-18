@@ -22,9 +22,7 @@ export const GET: RequestHandler = ({ locals }) => {
 			display: 'standalone',
 			background_color: '#ece7dd',
 			theme_color: '#ece7dd',
-			icons: [
-				{ src: branding.iconUrl, sizes: 'any', type: branding.iconMime }
-			]
+			icons: [{ src: branding.iconUrl, sizes: 'any', type: branding.iconMime }]
 		},
 		{ headers: { 'content-type': 'application/manifest+json' } }
 	);

@@ -2,12 +2,13 @@
 	import { renderStoryCard } from '$lib/share/storyCard';
 	import { shareStory } from '$lib/share/webShare';
 	import type { Locale } from '$lib/i18n';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 
 	let {
 		siteName,
 		liveUrl,
 		locale = 'tr',
-		class: className = 'sk-btn sk-btn-secondary sk-btn-sm'
+		class: className = ''
 	}: {
 		siteName: string;
 		liveUrl: string;
@@ -68,10 +69,18 @@
 </script>
 
 <div class="flex flex-col gap-2" data-testid="share-story">
-	<button type="button" class={className} onclick={share} disabled={busy}>
-		{#if busy}<span class="loading loading-spinner loading-xs"></span>{copy.preparing}
+	<FlowbiteButton
+		type="button"
+		variant="secondary"
+		size="sm"
+		class={className}
+		onclick={share}
+		disabled={busy}
+		loading={busy}
+	>
+		{#if busy}{copy.preparing}
 		{:else}{copy.share}{/if}
-	</button>
+	</FlowbiteButton>
 	{#if toast}
 		<p class="text-xs leading-5 text-emerald-800" data-testid="share-story-toast">{copy.copied}</p>
 	{/if}

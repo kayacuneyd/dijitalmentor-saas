@@ -1,4 +1,4 @@
- tüm# Progress — saaskaya
+tüm# Progress — saaskaya
 
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
@@ -19,6 +19,7 @@ live preview’de görünür; public domain’e çıkması için Publish/Republi
 ve kullanıcı onayı nedeniyle eklenmedi.
 
 Doğrulama:
+
 - `npx vitest --run src/lib/render/sectionStyle.test.ts` — 2 başarılı test
 - `npm run check` — başarılı
 - `npm run build` — başarılı
@@ -37,6 +38,7 @@ gelecekteki migration tablolarını sqlite_master üzerinden otomatik kapsıyor.
 önceki test sırasına bağımlı olmaması için kendi harcanmış credit state’ini kuruyor.
 
 Doğrulama:
+
 - Hedef izolasyon testleri — 11/11 başarılı
 - `npm test -- --reporter=dot` — 89 dosya başarılı, 611 test başarılı, 11 skip
 - Suite ikinci kez tekrarlandı — yine 89 dosya / 611 test başarılı / 11 skip
@@ -108,6 +110,7 @@ Tüm editör ve AI katmanı özellikleri sistematik olarak test edildi. Yeni tes
 ### Test Edilen ve ✅ Onaylanan Özellikler
 
 **A1 — Patch Operations (applyPatch):** 25 test, hepsi geçti
+
 - `add_page`: nav'li/nav'siz ekleme, 3 dilde başlık, 10 sayfa limiti, duplicate slug koruması
 - `add_section`: mevcut sayfaya ekleme, duplicate id koruması
 - `set_text`: düz path, nested path (items[0].name), invalid path hatası, boş metin Zod hatası
@@ -123,15 +126,18 @@ Tüm editör ve AI katmanı özellikleri sistematik olarak test edildi. Yeni tes
 - Immutability: input site değişmiyor
 
 **A2 — Schema Validation:** 6 test, hepsi geçti
+
 - `add_page` op schema (geçerli input, addToNav false, page meta opsiyonel)
 - `chatPatchSchema`: tüm 12 op tipini kapsıyor, boş operations (Q&A), max 20 limiti
 
 **A3 — Integration Protection:** 3 test, hepsi geçti
+
 - AI, `integrations.url` alanını değiştiremez
 - AI, `integrations.phone` alanını değiştiremez
 - AI, integrations dizisini tamamen silemez
 
 **A4 — Change Summary:** 5 test, hepsi geçti
+
 - Sayfa eklenince özet çıkıyor (sayfa adı + nav değişikliği)
 - Başlık değişince özet çıkıyor
 - Tema değişince özet çıkıyor
@@ -139,30 +145,36 @@ Tüm editör ve AI katmanı özellikleri sistematik olarak test edildi. Yeni tes
 - `firstAddedPageSlug` — yeni sayfanın slug'ı doğru dönüyor (preview focus)
 
 **A5 — Native Page Operations (pageOps.ts):** 5 test, hepsi geçti
+
 - `addPage`: nav'e ekleme, geçersiz slug hatası, max 10 limiti
 - `removePage`: min 1 sayfa koruması, nav backfill
 
 **A6 — Site Quality Check:** 3 test, hepsi geçti
+
 - Placeholder metin tespiti (`placeholder_text`)
 - Geçerli site publish edilebilir
 - Profesyonel olmayan claim tespiti (`unsafe_professional_claim`)
 
 **A7 — Completion Checklist:** 3 test, hepsi geçti
+
 - 7 madde döndürüyor (headline, contact, services, languages, media, identity, publish)
 - `nextChecklistItem` ilk tamamlanmamış maddeyi döndürüyor
 - `publishedVersion` varsa publish maddesi complete
 
 **A8 — Gatekeeper Schema:** 4 test, hepsi geçti
+
 - 4 intent tipi (edit, question, off_topic, help_request)
 - edit intent → distilledPrompt + riskLevel zorunlu
 - 3 risk seviyesi (low, medium, high)
 - onboardingGuardSchema: onTopic=false → reply zorunlu
 
 **A9 — Section Type Coverage:** 2 test, hepsi geçti
+
 - 17 section tipi tanımlı ve eksiksiz
 - genSectionSchema discriminator tüm tipleri kapsıyor
 
 **A10 — Onboarding Guard:** 1 test, geçti
+
 - Schema seviyesinde doğrulandı (A8'de kapsandı)
 
 ### Genel Değerlendirme
@@ -3608,6 +3620,7 @@ geçer. Raw HTML/CSS asla tenant'a ulaşmaz. Yeni block'lar registry pattern'i i
 
 **4A — Kontrollü GA4/Meta Pixel + Cookie Consent:**
 `SiteRenderer.svelte`'e eklendi:
+
 - `site.settings.analytics.ga4Id` (regex: `G-[A-Z0-9]{10,}`) → Google Analytics 4 script injection
 - `site.settings.analytics.metaPixelId` (regex: `^\d{15,16}$`) → Meta Pixel script injection
 - `site.settings.cookieConsent` → consent banner gösterimi
@@ -3627,10 +3640,12 @@ daha sonraki bir database-migration iş akışında eklenecek. Mevcut sistem pub
 doğru şekilde takip ediyor.
 
 **Doğrulama:**
+
 - `npm run check`: **0 errors, 0 warnings** ✅
 - `npx vitest`: **30/30 passed** (site 13 + generate 6 + patch 11) ✅
 
 **Kararlar:**
+
 - Analytics için `{@html}` yerine `$effect` + `document.createElement('script')` kullanıldı —
   Svelte 5'te `{@html}` `<script>` etiketlerini execute etmez, güvenlik kısıtlaması var.
   `$effect` yaklaşımı aynı güvenliği korur (ID regex-validated) ve çalışır.
@@ -3655,6 +3670,7 @@ bileşenleriyle, quality control `badge-success/badge-error/badge-warning` ile c
 
 **WS5 — Sitemap Panel (yeni eklendi):**
 `PagesTab.svelte` genişletildi:
+
 - **Quality-driven sitemap suggestions**: Her sayfa için durum badge'leri (İletişim yok, Eksik çeviri,
   Menüde gizli)
 - **AI Önerileri paneli**: Deterministic quality check sonuçlarına dayalı yapısal öneriler
@@ -3665,16 +3681,18 @@ bileşenleriyle, quality control `badge-success/badge-error/badge-warning` ile c
 var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
 
 **Doğrulama:**
+
 - `npm run check`: **0 errors, 0 warnings** ✅
 - `npx vitest`: **30/30 passed** (site 13 + generate 6 + patch 11) ✅
 
 **Editor Value Upgrade Plan durumu:** Tüm 6 workstream tamamlandı veya zaten implemente edilmişti.
+
 ### 2026-07-14 — Admin command center Stage 4 foundation: privacy-safe public visit counters
 
 - Started the previously pending command-center Stage 4 with a deliberately narrow, privacy-safe
   foundation. Added migration v30 and the `site_visit_stats` aggregate table, keyed by site + UTC day
-  + locale + page slug. It stores only integer counters; no IP, user-agent, cookie, referrer,
-  visitor identifier, or page content is persisted.
+  - locale + page slug. It stores only integer counters; no IP, user-agent, cookie, referrer,
+    visitor identifier, or page content is persisted.
 - Public published-site page loads now increment the matching aggregate bucket. The admin overview
   shows the last-30-day total and top sites, without exposing tenant visitor identities or raw request
   data. Preview/editor routes do not use this counter.
@@ -3705,6 +3723,7 @@ var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
   and historical AI provider/invalid-output records—not a new deploy failure.
 - Git commit could not be created because this managed checkout exposes `.git/index` as read-only;
   the verified source changes remain in the working tree and are already live in the atomic release.
+
 ### 2026-07-14 — Brand logo and favicon integration
 
 - Integrated the operator-provided `static/logo.png` as the SaaS wordmark in `BrandMark` and the
@@ -3725,6 +3744,7 @@ var. Bu workstream'ler mevcut kapsamda tamamlanmış durumda.
 - Updated SaaS wordmark, footer, admin mark, and Organization JSON-LD to use the derivatives. The
   compact wordmark uses `h-7 w-32`; `h-28` would create a 112px-tall header logo, so it is retained
   only as a sizing reference rather than applied to the navigation chrome.
+
 ### 2026-07-14 — Professional outcome claims changed from blocker to warning
 
 - The `unsafe_professional_claim` check (`kesin sonuç`, `garanti`, `%100`, etc.) was incorrectly
@@ -3767,18 +3787,18 @@ Test dosyası: `src/lib/server/ai/live-smoke.test.ts`
 
 ### Sonuçlar: 9/10 geçti ✅
 
-| # | Test | Model | Sonuç | Süre |
-|---|------|-------|:----:|------|
-| 1 | Gatekeeper edit intent | Groq | ✅ | 0.7s |
-| 2 | Gatekeeper off-topic | Groq | ✅ | 0.6s |
-| 3 | Gatekeeper soru | Groq | ✅ | 0.4s |
-| 4 | Renk değişimi (set_theme) | DeepSeek Flash | ✅ | 2.5s |
-| 5 | Layout değişimi (set_layout) | DeepSeek Flash | ✅ | 2.8s |
-| 6 | Menü etiketi (set_nav_label) | DeepSeek Flash | ✅ | 2.2s |
-| 7 | Sayfa ekleme (add_page) | DeepSeek Flash | ✅ | 7.0s |
-| 8 | Section ekleme (add_section) | DeepSeek Flash/Pro | ❌ | 17.5s |
-| 9 | Integration koruma | - | ✅ | 0.0s |
-| 10 | Schema validasyon | - | ✅ | 0.0s |
+| #   | Test                         | Model              | Sonuç | Süre  |
+| --- | ---------------------------- | ------------------ | :---: | ----- |
+| 1   | Gatekeeper edit intent       | Groq               |  ✅   | 0.7s  |
+| 2   | Gatekeeper off-topic         | Groq               |  ✅   | 0.6s  |
+| 3   | Gatekeeper soru              | Groq               |  ✅   | 0.4s  |
+| 4   | Renk değişimi (set_theme)    | DeepSeek Flash     |  ✅   | 2.5s  |
+| 5   | Layout değişimi (set_layout) | DeepSeek Flash     |  ✅   | 2.8s  |
+| 6   | Menü etiketi (set_nav_label) | DeepSeek Flash     |  ✅   | 2.2s  |
+| 7   | Sayfa ekleme (add_page)      | DeepSeek Flash     |  ✅   | 7.0s  |
+| 8   | Section ekleme (add_section) | DeepSeek Flash/Pro |  ❌   | 17.5s |
+| 9   | Integration koruma           | -                  |  ✅   | 0.0s  |
+| 10  | Schema validasyon            | -                  |  ✅   | 0.0s  |
 
 **Detaylar:**
 
@@ -3799,7 +3819,7 @@ Test dosyası: `src/lib/server/ai/live-smoke.test.ts`
 
 - **DeepSeek Flash/Pro add_section**: ❌ **Model davranışı sorunu.** DeepSeek `patch_site`
   tool call cevabında `reply` ve `operations` alanlarını undefined döndürdü. 2 repair denemesi
-  de başarısız. Kod seviyesinde `add_section` operasyonu doğru çalışıyor (A1 testlerinde 
+  de başarısız. Kod seviyesinde `add_section` operasyonu doğru çalışıyor (A1 testlerinde
   kanıtlandı). Bu bir model output parsing sorunu, kod hatası değil.
 
 - **Integration protection**: AI, Calendly/WhatsApp linklerini değiştiremez — doğrulandı.
@@ -3812,6 +3832,7 @@ yönetiliyor; AI bu alanlara dokunamıyor — güvenlik doğrulandı.
 ### Integration (Entegrasyon) Kullanım Kılavuzu
 
 Editör → Settings sekmesi → "Entegrasyonlar" kartı:
+
 1. **Calendly/Booking**: `booking-external` tipini aktif et, Calendly linkini gir → Booking
    bloğu otomatik olarak bu linki kullanır.
 2. **WhatsApp**: `whatsapp-order` tipini aktif et, telefon numarasını E.164 formatında gir
@@ -4020,3 +4041,339 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Çözüm: `PageShell` kullanıcı panelleri için tek zorunlu frame’e sabitlendi: `max-w-[92rem]` canvas ve `max-w-7xl` içerik alanı; route bazlı `max`/`canvasMax` override’ları kaldırıldı. Bu ölçüler admin shell’in varsayılanlarıyla eşleşir.
 - Kullanıcı sidebar’ı markalı header’a taşındı, account ikonu profile semantiğine düzeltildi ve eski daraltılmış tercihleri etkilememesi için sidebar storage anahtarı `saaskaya.user.sidebar.v2` olarak güncellendi. Sidebar ilk ziyaretinde geniş/etiketli görünür.
 - Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run build` başarılı; tam test paketi 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `git diff --check` temiz.
+
+## 2026-07-17 — Flowbite tabanlı ürün arayüzü yaratıcı yıkım planı
+
+- Tenant siteleri kapsam dışında bırakılarak SaasKaya’nın marketing, auth, onboarding, dashboard, editor, admin ve chat yüzeyleri için Flowbite-Svelte tabanlı yeniden tasarım planı oluşturuldu: `docs/specs/yaraticiyikim/newpath.md`.
+- Flowbite’ın marka kimliği değil, erişilebilir component davranışları ve etkileşim altyapısı olarak kullanılması kararlaştırıldı. Marka dili mevcut logo ile Aleo display + Inter UI font yaklaşımından türetilecek.
+- Hazır spacing, radius, shadow ve state token’ları dayatılmayacak; bu kararlar sonraki marka brief’inde belirlenecek. Tenant `Site` schema’sı, renderer ve block registry’si korunacak.
+- İlk dikey dilim onboarding + editor olarak belirlendi; ortak shell ve primitive bileşenlerden sonra dashboard/admin ve public yüzeylere ilerlenmesi planlandı.
+
+## 2026-07-17 — Flowbite ürün UI entegrasyon zemini
+
+- `flowbite`, `flowbite-svelte`, `flowbite-svelte-icons` ve `@fontsource/aleo` platform UI hazırlığı için eklendi.
+- Tailwind v4 CSS entrypoint’ine Flowbite plugin ve component source yolları eklendi; DaisyUI bu ilk dilimde kaldırılmadı.
+- Platform font değişkenleri Aleo display + Inter UI/gövde yaklaşımına alındı; mevcut Nunito import’u eski kullanım için layout’ta korunuyor.
+- `FlowbiteButton` ve `FlowbiteBadge` adapter bileşenleri eklendi. Flowbite’ın davranış/erişilebilirlik katmanı, mevcut SaasKaya renk ve yüzey sınıflarıyla kaplandı.
+- Login ekranında ana gezinme ve magic-link submit düğmesi ilk gerçek Flowbite adapter kullanımına taşındı; form action, loading ve auth davranışı değişmedi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run test` 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `npm run build` başarılı; `git diff --check` temiz.
+
+## 2026-07-17 — Account, support ve share Flowbite geçişi
+
+- Account profile, billing, export, deletion ve navigation aksiyonları Flowbite button adapter’ına taşındı.
+- Support request oluşturma ve ticket reply aksiyonları form action/server davranışı değiştirilmeden taşındı.
+- Share CTA, fallback download, copy-link ve `ShareStoryButton` aynı button diline bağlandı.
+- Messages ekranında bu dilimde interaktif button yüzeyi olmadığı için içerik kartları korunurken status rendering ortak Flowbite badge adapter’ını kullanıyor.
+- Auth, navigation, Web Share, clipboard ve fallback-download davranışları korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; testler 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; production build başarılı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin overview, inbox ve support Flowbite geçişi
+
+- Admin overview system logs aksiyonu, inbox filtreleri/open aksiyonları ve support filtreleri/open aksiyonları `FlowbiteButton` adapter’ına taşındı.
+- URL filtreleri, active state, route navigation ve admin veri akışı korunarak yalnızca button primitive katmanı değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Ürün interaction state matrisi
+
+- Button adapter’a focus-visible teal ring, active tactile press, danger hover ve disabled/loading opacity kuralları eklendi.
+- Input adapter’a focus-visible ve aria-invalid error state kuralları eklendi.
+- Marka brief’ine Button/Input/Badge/Modal/Drawer/Dropdown/Tabs için ilk state matrisi eklendi.
+- Flowbite’ın davranış ve spinner altyapısı korunurken SaasKaya state görsel dili ortaklaştırıldı.
+- Doğrulama: `npm run check` ve `git diff --check` başarılı.
+
+## 2026-07-17 — Marka brief’inden ilk ürün token rolleri
+
+- Mevcut ürün yüzeylerinden türetilen eksik `radius-sm`, `radius-lg`, `shadow-lg`, `accent`, `focus` ve `error` rolleri `layout.css` root tokenlarına eklendi.
+- Tokenlar logo-merkezli kağıt/mürekkep/teal ve border-first geometri kararlarına bağlandı; tenant tokenları değiştirilmedi.
+- Brief’e ilk türetilen rol tablosu eklendi; nihai component state matrisi sonraki aşamada doğrulanacak.
+- Doğrulama: `npm run check` ve `git diff --check` başarılı.
+
+## 2026-07-17 — SaasKaya marka brief’inin onaylanması
+
+- Logo merkezli ürün arayüzü dili kalıcı brief’e yazıldı: `docs/specs/yaraticiyikim/brand-brief.md`.
+- Onaylanan marka fikri: “İşini bilen küçük bir dijital atölye.”
+- Kağıt/fildişi zemin, mürekkep siyahı metin, kontrollü mevcut teal vurgu, Aleo + Inter typography, orta-köşeli border-first yüzeyler ve sakin teknik zanaat tonu kilitlendi.
+- Nihai sayısal spacing/radius/shadow/state token’ları henüz icat edilmedi; bir sonraki uygulama adımında bu brief’ten türetilecek.
+
+## 2026-07-17 — Platform DaisyUI sınıf temizliği
+
+- Editor ContentTab collapse ve admin settings file upload/wordmark controls DaisyUI sınıflarından çıkarıldı.
+- Platform route/editor taramasında artık DaisyUI’nin `form-control`, `input`, `join-item`, `collapse-*`, `file-input` ve checkbox sınıfları kullanılmıyor.
+- DaisyUI plugin/package hâlâ korunuyor; tenant renderer (`src/lib/blocks`, `src/lib/render`) bu çalışmanın dışında ve DaisyUI renk/class sözleşmesine sahip.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Platform button migration cleanup
+
+- Dashboard ve editor disclosure summary’leri eski `sk-btn` sınıflarından çıkarılıp semantik `sk-disclosure-trigger` sınıfına taşındı.
+- Editor language dropdown trigger’ı Flowbite Button adapter’ını kullanıyor.
+- Platform route/component Svelte dosyalarında eski `sk-btn` kullanımı temizlendi; nested file input için özel upload-label ve disclosure summary’leri semantik custom controls olarak kaldı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Editor ve share button yüzeyi temizliği
+
+- Editor dashboard geri dönüş aksiyonu Flowbite adapter’a taşındı.
+- `ShareStoryButton` varsayılan eski `sk-btn` class’ından arındırıldı; variant/size artık adapter tarafından yönetiliyor.
+- ImageUploadField nested file input gerektirdiği için Flowbite Button yerine eşdeğer markalı upload-label adapter CSS’i kullanıyor.
+- Share, editor navigation ve media upload davranışları korunarak yalnızca primitive/class katmanı temizlendi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Shared Flowbite Tooltip ve Card primitive’leri
+
+- `FlowbiteTooltip` adapter’ı bindable open state, placement/trigger ve Flowbite erişilebilir tooltip davranışını ortaklaştırıyor.
+- `FlowbiteCard` adapter’ı Flowbite Card kompozisyonunu SaasKaya yüzey sınıflarıyla birleştiriyor; Flowbite’ın varsayılan shadow davranışı kapatıldı.
+- Typography hizalaması yapıldı, marka spacing/radius/shadow token’ları primitive içine dayatılmadı.
+- Mevcut route’lara toplu Card/Tooltip dönüşümü yapılmadı; primitive sözleşmesi hazırlandı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Shared Flowbite Dropdown ve Tabs primitive’leri
+
+- `FlowbiteDropdown` adapter’ı bindable open state ve Flowbite dropdown davranışını ortaklaştırıyor.
+- `FlowbiteTabs` ve `FlowbiteTabItem` adapter’ları selected state, tab style ve panel kompozisyonunu ortaklaştırıyor.
+- Primitive’ler SaasKaya typography’siyle hizalandı; görsel token dayatılmadı.
+- Mevcut editor dropdown/tab yüzeyleri bu aşamada toplu biçimde değiştirilmedi; route davranışları korunarak adapter sözleşmesi hazırlandı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Shared Flowbite Modal ve Drawer primitive’leri
+
+- `FlowbiteModal` adapter’ı bindable open state, title/header/footer snippet’leri ve Flowbite dismiss/focus davranışını ortaklaştırıyor.
+- `FlowbiteDrawer` adapter’ı bindable open state, placement, title/header ve Flowbite drawer davranışını ortaklaştırıyor.
+- Her iki primitive mevcut marka typography’siyle hizalandı; yeni spacing/radius/shadow token’ı dayatılmadı.
+- Bu aşamada mevcut route davranışlarını değiştirecek toplu modal/drawer dönüşümü yapılmadı; primitive sözleşmesi sonraki kontrollü kullanım için hazırlandı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Shared Flowbite Input ve Field primitive’leri
+
+- `FlowbiteInput` adapter’ı eklendi; Flowbite Input davranışını SaasKaya form sınıfları ve mevcut font diliyle birleştiriyor.
+- `FlowbiteField` adapter’ı eklendi; label, hint ve error semantiğini ortak bir form primitive’inde topluyor.
+- Login email alanı ilk gerçek `FlowbiteInput` kullanımına taşındı; magic-link form action ve loading davranışı değişmedi.
+- Marka spacing/radius/shadow token’ları primitive içine dayatılmadı; mevcut adapter CSS’i yalnızca form rolü ve typography hizalaması sağlıyor.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Dashboard site management Flowbite geçişi
+
+- Site billing monthly/yearly, edit, preview, live, unpublish/prepare, delete confirmation ve domain detach/attach aksiyonları Flowbite button adapter’ına taşındı.
+- Domain reservation transfer/card/cancel, domain availability ve attach CTA’ları da aynı primitive’i kullanıyor.
+- More-actions `<summary>` özel disclosure kontrolü olarak korundu; detay menüsü davranışı değiştirilmedi.
+- Billing, reservation, domain ve delete server action akışları korunarak yalnızca button primitive’leri değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Onboarding answer controls Flowbite geçişi
+
+- Onboarding transcript içindeki cevap değiştirme ve raw description’dan sorulara dönme aksiyonları Flowbite button adapter’ına taşındı.
+- Raw description submit, answer editing state ve onboarding navigation davranışları korunarak yalnızca iki button primitive değiştirildi.
+- Bu dilimin choice/card/list/text seçenekleri sonraki kontrollü adımda ele alınacak; kartlar görsel seçim yüzeyi oldukları için doğrudan generic button’a dönüştürülmedi.
+- İlk doğrulamada yanlış kapanış etiketi yakalanıp düzeltildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı.
+
+## 2026-07-17 — Editor DaisyUI form/layout temizliği
+
+- Editor form yüzeylerindeki `form-control`, `input`, `join-item` ve eski DaisyUI fieldset sınıfları `sk-field-stack`, `sk-input` ve mevcut yüzey sınıflarına taşındı.
+- Editor language dropdown content ve ContentTab collapse yüzeyleri markalı custom CSS sınıflarına taşındı.
+- Editor input/select/fieldset değerleri, bindings ve draft state davranışları korunarak yalnızca class/layout katmanı değiştirildi.
+- Tenant block’ları ve üretilen site renderer yüzeyleri kapsam dışında tutuldu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Editor DaisyUI badge temizliği
+
+- Editor checklist/publish status badge’leri `FlowbiteBadge` adapter’ına taşındı.
+- LanguagesTab enabled locale badge’i ve PagesTab sections/navigation/status badge’leri Flowbite adapter’ına taşındı.
+- Publish quality, page status ve locale state semantiği korunarak yalnızca badge primitive değiştirildi.
+- Tenant `src/lib/blocks` yüzeylerine dokunulmadı.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Onboarding choice, multi-choice, list ve text controls Flowbite geçişi
+
+- Choice option, multi-choice selection/continue, list item add/continue ve short/open text send/skip aksiyonları Flowbite adapter’a taşındı.
+- Multi-choice active/inactive state, validation disabled koşulları, list limits ve onboarding answer state korunarak yalnızca button primitive’leri değiştirildi.
+- Visual direction ve niche seçim kartları, card-as-selection semantiği nedeniyle custom selection surfaces olarak korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Editor checklist, languages ve style controls Flowbite geçişi
+
+- Editor checklist “Aç” ve publish success “Canlı siteyi aç” aksiyonları Flowbite adapter’a taşındı.
+- LanguagesTab locale seçimleri ve SectionStyleControls background reset aksiyonu Flowbite adapter’a taşındı.
+- Editor tabs, dropdown summary ve özel close/fab chrome kontrolleri semantik olarak farklı oldukları için custom editor controls olarak korundu.
+- Iframe preview, publish gate, draft store ve editor state davranışları değişmedi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Editor Pages, Settings ve ImageUploadField Flowbite geçişi
+
+- PagesTab page delete/confirm/cancel ve add page aksiyonları Flowbite button adapter’ına taşındı.
+- SettingsTab identity save ve AI memory save aksiyonları Flowbite loading/disabled davranışını kullanıyor.
+- ImageUploadField media library aç/yenile aksiyonu Flowbite adapter’a taşındı; file input label’i native upload kontrolü olarak korundu.
+- Draft store, page operations, media API ve editor state davranışları değişmedi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Profile start ve owner login Flowbite geçişi
+
+- Profile start home ve profile submit aksiyonları Flowbite button adapter’ına taşındı.
+- Owner login ve verification code submit aksiyonları Flowbite loading/disabled davranışını kullanıyor.
+- Beta profile, owner secret ve form `enhance` akışları korunarak yalnızca button primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Public blog ve login verify Flowbite geçişi
+
+- Public blog article read CTA’ları Flowbite button adapter’ına taşındı.
+- Login verify ekranındaki sign-in ve yeni magic-link CTA’ları Flowbite adapter’a taşındı.
+- Blog locale URL’leri ve magic-link error/retry akışı korunarak yalnızca button primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — About, beta ve contact Flowbite geçişi
+
+- About CTA’ları, beta home/request access ve contact email/beta/blog/form submit aksiyonları Flowbite button adapter’ına taşındı.
+- Beta form loading/disabled davranışı, contact server action ve locale navigation korunarak yalnızca button primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Marketing homepage, pricing ve templates Flowbite geçişi
+
+- Homepage hero, mid-page CTA, preview/edit CTA, feature CTA ve closing CTA yüzeyleri Flowbite button adapter’ına taşındı.
+- Pricing hero, plan CTA’ları, dashboard/login yönlendirmeleri ve closing CTA Flowbite adapter’a taşındı.
+- Templates hero ve kit başlatma CTA’ları Flowbite adapter’a taşındı.
+- Locale copy, navigation URL’leri, plan koşulları ve public preview davranışları korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — PublicHeader Flowbite geçişi
+
+- Public desktop ve mobile header içindeki dashboard/login/start CTA’ları Flowbite button adapter’ına taşındı.
+- Locale switcher, mobile dialog, active navigation ve menu aç/kapat davranışları korunarak yalnızca CTA primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin share ve admin aşamasının kapanışı
+
+- Admin share asset save, toggle, move up/down ve delete aksiyonlarının tamamı Flowbite button adapter’ına taşındı.
+- Böylece admin overview, inbox, support, messages, settings, share, invites, copy, blog ve customers yüzeylerindeki button geçişi tamamlandı.
+- Admin form action, confirmation ve upload davranışları korunarak yalnızca UI primitive katmanı değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Ortak MessageBubble ve SiteAssistantDock Flowbite geçişi
+
+- `MessageBubble` içindeki close, contact submit ve floating trigger aksiyonları Flowbite button adapter’ına taşındı.
+- `SiteAssistantDock` contact submit aksiyonu Flowbite loading/disabled davranışını kullanıyor; dock minimize/close/send kontrolleri özel assistant chrome olarak korunuyor.
+- Admin share ekranındaki caption save ve asset toggle aksiyonları da Flowbite adapter’a bağlandı.
+- Inquiry API, busy state, dock state ve mevcut chat davranışları korunarak yalnızca button primitive yüzeyleri değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin customers ve customer detail Flowbite geçişi
+
+- Customer list view action ve customer detail back navigation Flowbite button adapter’ına taşındı.
+- Subscription override, AI top-up, domain detach, preview/edit/live, publish/unpublish ve site delete confirmation aksiyonları da aynı adapter’a bağlandı.
+- `enhance`, delete confirmation state, site management server actions ve external live URL davranışları korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin blog listeleme ve editör Flowbite geçişi
+
+- Blog create/import, public preview, edit, back ve save aksiyonları Flowbite button adapter’ına taşındı.
+- Rich text editor, multipart import, locale alanları ve blog server action davranışları korunarak yalnızca button primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin inbox ve support detail Flowbite geçişi
+
+- Inbox inquiry detail ve support ticket detail ekranlarında back navigation, status değişimi ve reply aksiyonları Flowbite button adapter’ına taşındı.
+- Disabled active status, form `enhance`, server actions ve mesaj akışları korunarak yalnızca UI primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı.
+
+## 2026-07-17 — Admin invites ve copy Flowbite geçişi
+
+- Closed beta enable/disable, invite send/reactivate/revoke aksiyonları Flowbite button adapter’ına taşındı.
+- Admin copy ekranında namespace open, locale save ve reset aksiyonları Flowbite button adapter’ına taşındı.
+- Invite/copy form action, `enhance`, locale ve beta erişim davranışları korunarak yalnızca button primitive değiştirildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin share ve messages Flowbite geçişi
+
+- Admin share page enable/disable, upload, caption save, asset toggle ve asset navigation yüzeyleri Flowbite button adapter’ına taşındı.
+- Upload aksiyonunda mevcut `enhance` akışı korunarak adapter’ın loading state’i kullanıldı.
+- Admin messages namespace açma, locale string save ve reset aksiyonları Flowbite button adapter’ına taşındı.
+- Settings ekranı bu dilimde kapsamlı biçimlendirme farkları nedeniyle değiştirilmedi; sonraki kontrollü admin diliminde ele alınacak.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Admin settings Flowbite geçişi
+
+- Payment confirmation/rejection/fulfillment, platform branding upload/reset, branding preferences, settings group open, setting save/clear ve error resolve aksiyonları Flowbite button adapter’ına taşındı.
+- Mevcut `enhance`, multipart upload, confirmation ve server action davranışları korunarak yalnızca UI primitive değiştirildi.
+- İlk doğrulamada bir component kapanış etiketi hatası yakalandı ve düzeltildi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `git diff --check` temiz.
+
+## 2026-07-17 — Onboarding ve editor Flowbite geçişi
+
+- Onboarding’in üst navigasyon, kampanya CTA’sı, raw description gönderimi ve tamamla/üret akışı `FlowbiteButton` adapter’ına taşındı.
+- Editor viewport switcher’ı, publish kontrolü ve ChatTab içindeki save, force-send, undo, proposal approve/cancel ve send aksiyonları Flowbite davranış katmanını kullanıyor.
+- Iframe preview, postMessage draft bridge, autosave, publish kalite kapısı, AI proposal akışı ve mevcut state yönetimi değiştirilmedi.
+- Seçim kartları ve tab kompozisyonları henüz toplu biçimde değiştirilmedi; sonraki tasarım dilimi için görsel karar alanı olarak korundu.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run test` 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `npm run build` başarılı; `git diff --check` temiz.
+
+## 2026-07-17 — Dashboard ve ortak panel shell Flowbite geçişi
+
+- Ortak `StatusPill`, Flowbite Badge adapter’ına bağlandı; dashboard, account ve admin durum etiketleri aynı davranış katmanını kullanıyor.
+- `PanelShell` sidebar toggle’ı Flowbite Button adapter’ına taşındı; collapse, mobile drawer, localStorage tercihi ve route kapanış davranışları korundu.
+- Dashboard üst aksiyonları, AI kredi aksiyonu, empty-state CTA’sı ve site identity save kontrolü Flowbite Button adapter’ına taşındı.
+- Dashboard, account ve admin ekranlarının veri akışı, form action’ları, auth ve navigation sözleşmeleri değiştirilmedi.
+- Doğrulama: `npm run check` 0 hata/0 uyarı; `npm run test` 92 dosya geçti / 2 skip, 640 test geçti / 11 skip; `npm run build` başarılı; `git diff --check` temiz.
+
+## 2026-07-17 — Flowbite creative-destruction validation baseline
+
+- Platform Flowbite migration, approved brand brief, derived token roles, interaction state matrix and platform DaisyUI cleanup are currently buildable.
+- Tenant DaisyUI contract remains intentionally untouched; generated-site renderer is still out of scope.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `npm run test` passed with 92 test files and 640 tests; `npm run build` completed successfully; `git diff --check` is clean.
+- Follow-up: visual QA at critical responsive breakpoints, keyboard/focus review, screenshot regression and a separate Flowbite bundle-size review.
+
+## 2026-07-17 — Legacy platform button CSS cleanup
+
+- Removed the unused legacy `.sk-btn` CSS system from the platform stylesheet after confirming no platform Svelte surface references it.
+- Connected shared card, soft-surface, input and Flowbite button geometry to the approved brand-derived radius tokens.
+- Kept native inputs/selects where they are still part of existing platform forms; the shared Flowbite input primitive remains available for deliberate surface-by-surface migration.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `git diff --check` is clean.
+
+## 2026-07-17 — Auth and profile input primitive migration
+
+- Migrated beta profile and owner access forms from native platform inputs to the shared `FlowbiteInput` primitive.
+- Kept form names, validation attributes, server actions and disabled/busy behavior unchanged.
+- Applied the approved large input geometry consistently to these high-visibility entry surfaces.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `git diff --check` is clean.
+
+## 2026-07-17 — Dashboard form input migration
+
+- Migrated dashboard site identity fields and domain attachment/reservation inputs to `FlowbiteInput`.
+- Preserved hidden fields, form actions, server enhancement, payment branching, placeholders and monospace domain treatment.
+- Left compact table-style quick-edit controls and native selects for a later deliberate pass, avoiding a broad behavioral change in dense dashboard regions.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `git diff --check` is clean.
+
+## 2026-07-17 — Three-wave creative-destruction closeout
+
+- Wave 1: added shared `FlowbiteSelect` and `FlowbiteTextarea` primitives; made input/select/textarea values bindable; migrated shared contact surfaces and editor Content, Languages, Settings, Theme and Section Style forms.
+- Wave 2: removed remaining platform DaisyUI control/state classes (`loading`, `join`, `toggle`, `select`, `textarea`, `label-text`) and replaced them with SaasKaya-owned spinner, dots and toggle styles. Tenant renderer DaisyUI remains intentionally preserved.
+- Wave 3: validated focus selectors, 320px minimum layout baseline, responsive media rules and icon/control labeling through static scans; formatted touched files and ran project checks.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `npm run test` passed with 92 files / 640 tests; `npm run build` completed successfully; `git diff --check` is clean.
+- Note: repository-wide `npm run lint` still reports pre-existing formatting warnings across unrelated repository and skill/reference files; touched files were formatted separately.
+
+## 2026-07-18 — Browser mobile QA and touch-target closeout
+
+- Ran the repository’s Playwright mobile audit against the local dev server at 320×700, 375×812, 414×896 and 768×900 across public marketing, auth, onboarding and content routes.
+- All audited routes returned HTTP 200 with no console errors and no real document horizontal overflow. Reported wide elements are intentional horizontal carousel/animation content inside clipped surfaces.
+- Raised coarse-pointer Flowbite button minimum height to 44px so compact buttons remain usable on touch devices.
+- Re-ran the focused audit after the fix: no overflow or console errors; login button hit-area warnings dropped from 6–7 to 5.
+- Screenshots and machine-readable reports are available under `/tmp/saaskaya-mobile-audit-20260718-final` for visual review.
+- Verification: `npm run check` passed with 0 errors and 0 warnings; `npm run test` passed with 92 files / 640 tests; `npm run build` completed successfully; `git diff --check` is clean.
+- Repository-wide `npm run lint` remains noisy because it checks pre-existing formatting deviations across unrelated skill/reference, tenant and legacy files; touched platform files were formatted separately.
+
+## 2026-07-18 — Repository formatting cleanup
+
+- Ran Prettier across the repository and resolved the final remaining source warning in `src/routes/legal/kvkk/+page.svelte`.
+- `npm run lint` now passes: all files match Prettier code style.
+- Re-verified `npm run check`, `npm run test` (92 files / 640 tests) and `npm run build`; all pass.
+- Prettier’s markdown code-block indentation in imported Hallmark reference material can appear as whitespace in `git diff --check`; it does not affect application code or runtime behavior.
+
+## 2026-07-18 — Formatting warning cleanup completed
+
+- Formatted the repository’s project files with Prettier and fixed the final application-file warning in `src/routes/legal/kvkk/+page.svelte`.
+- Added `.agents/` to `.prettierignore` because it contains external Hallmark skill/reference material, not application or project source.
+- `npm run lint` now passes with all project-scoped files matching Prettier.
+- `npm run check` passes with 0 errors and 0 warnings; `git diff --check` is clean.
+
+## 2026-07-18 — Pre-launch verification gate
+
+- Local candidate: `npm run check` passed with 0 errors/warnings; `npm run test` passed with 92 files / 640 tests; `npm run build` completed successfully; `npm run lint` passed; `git diff --check` is clean.
+- Production read-only smoke: `scripts/smoke-production.mjs` passed for `https://saaskaya.com` and `https://seed-law.saaskaya.com/en` on mobile and desktop.
+- Domain/TLS: `http://saaskaya.com` returns 301 to HTTPS; HTTPS certificate subject is `saaskaya.com` with `*.saaskaya.com` SAN; HTTPS response includes HSTS.
+- Public routes: key marketing/auth/onboarding routes returned successfully; `/robots.txt` and `/sitemap.xml` returned 200; title and description metadata present on checked public routes.
+- Not exercised: authenticated mutation flows, real email delivery, payments, uploads and the post-deploy smoke of this exact un-deployed working tree. Run the read-only smoke again immediately after deployment.

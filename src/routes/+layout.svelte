@@ -11,6 +11,10 @@
 	import '@fontsource/nunito/latin-ext.css';
 	import '@fontsource/nunito/latin-800.css';
 	import '@fontsource/nunito/latin-ext-800.css';
+	import '@fontsource/aleo/latin.css';
+	import '@fontsource/aleo/latin-ext.css';
+	import '@fontsource/inter/latin.css';
+	import '@fontsource/inter/latin-ext.css';
 	import '@fontsource/ibm-plex-mono/latin.css';
 	import '@fontsource/ibm-plex-mono/latin-ext.css';
 
@@ -32,7 +36,11 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={data.platformBranding?.iconUrl ?? '/logo.svg'} type={data.platformBranding?.iconMime ?? 'image/svg+xml'} />
+	<link
+		rel="icon"
+		href={data.platformBranding?.iconUrl ?? '/logo.svg'}
+		type={data.platformBranding?.iconMime ?? 'image/svg+xml'}
+	/>
 	<link rel="apple-touch-icon" href={data.platformBranding?.iconUrl ?? '/logo.svg'} />
 	{#if !data.isTenantHost}
 		<link rel="manifest" href="/manifest.webmanifest" />

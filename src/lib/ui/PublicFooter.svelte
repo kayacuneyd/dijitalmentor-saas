@@ -126,7 +126,8 @@
 		<div>
 			<div class="flex items-center gap-3">
 				<img src={logoUrl} alt="saaskaya" class="size-10 rounded-[9px] object-contain" />
-				{#if showWordmark}<span class="text-lg font-semibold tracking-[-0.02em]">{brandName}</span>{/if}
+				{#if showWordmark}<span class="text-lg font-semibold tracking-[-0.02em]">{brandName}</span
+					>{/if}
 			</div>
 			<p class="mt-3 max-w-xs text-sm leading-6 text-[var(--sk-muted)]">{copy.tagline}</p>
 			<p class="mt-2 text-xs text-[var(--sk-faint)]">{copy.location}</p>

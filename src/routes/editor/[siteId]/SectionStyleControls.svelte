@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { SectionStyle } from '$lib/schema/site';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
 
 	let {
 		style,
@@ -23,96 +26,119 @@
 	}
 </script>
 
-<fieldset class="mb-4 rounded-[10px] border border-base-300 bg-base-100 p-3">
+<fieldset class="mb-4 rounded-[10px] border border-[var(--sk-line)] bg-white p-3">
 	<legend class="px-1 text-xs font-semibold">Section design</legend>
-	<p class="mb-3 text-[11px] leading-4 text-base-content/60">
+	<p class="mb-3 text-[11px] leading-4 text-[var(--sk-muted)]">
 		Change this section without asking the AI. Full width is the default for a cleaner, modern
 		canvas.
 	</p>
 	<div class="grid grid-cols-2 gap-3">
-		<label class="form-control col-span-2 sm:col-span-1">
-			<span class="label-text mb-1 text-xs">Layout</span>
-			<select
-				class="select select-sm w-full"
+		<label class="sk-field-stack col-span-2 sm:col-span-1">
+			<span class="mb-1 text-xs">Layout</span>
+			<FlowbiteSelect
+				class="w-full"
+				size="sm"
 				value={style.layout}
-				onchange={(e) => update('layout', e.currentTarget.value as SectionStyle['layout'])}
+				onchange={(e: Event) =>
+					update('layout', (e.currentTarget as HTMLSelectElement).value as SectionStyle['layout'])}
 			>
 				<option value="full">Full width</option>
 				<option value="boxed">Boxed</option>
-			</select>
+			</FlowbiteSelect>
 		</label>
-		<label class="form-control col-span-2 sm:col-span-1">
-			<span class="label-text mb-1 text-xs">Content width</span>
-			<select
-				class="select select-sm w-full"
+		<label class="sk-field-stack col-span-2 sm:col-span-1">
+			<span class="mb-1 text-xs">Content width</span>
+			<FlowbiteSelect
+				class="w-full"
+				size="sm"
 				value={style.contentWidth}
-				onchange={(e) =>
-					update('contentWidth', e.currentTarget.value as SectionStyle['contentWidth'])}
+				onchange={(e: Event) =>
+					update(
+						'contentWidth',
+						(e.currentTarget as HTMLSelectElement).value as SectionStyle['contentWidth']
+					)}
 			>
 				<option value="full">Full</option>
 				<option value="wide">Wide</option>
 				<option value="narrow">Narrow</option>
-			</select>
+			</FlowbiteSelect>
 		</label>
-		<label class="form-control">
-			<span class="label-text mb-1 text-xs">Vertical padding</span>
-			<select
-				class="select select-sm w-full"
+		<label class="sk-field-stack">
+			<span class="mb-1 text-xs">Vertical padding</span>
+			<FlowbiteSelect
+				class="w-full"
+				size="sm"
 				value={style.paddingY}
-				onchange={(e) => update('paddingY', e.currentTarget.value as SectionStyle['paddingY'])}
+				onchange={(e: Event) =>
+					update(
+						'paddingY',
+						(e.currentTarget as HTMLSelectElement).value as SectionStyle['paddingY']
+					)}
 			>
 				<option value="compact">Compact</option>
 				<option value="standard">Standard</option>
 				<option value="spacious">Spacious</option>
-			</select>
+			</FlowbiteSelect>
 		</label>
-		<label class="form-control">
-			<span class="label-text mb-1 text-xs">Vertical margin</span>
-			<select
-				class="select select-sm w-full"
+		<label class="sk-field-stack">
+			<span class="mb-1 text-xs">Vertical margin</span>
+			<FlowbiteSelect
+				class="w-full"
+				size="sm"
 				value={style.marginY}
-				onchange={(e) => update('marginY', e.currentTarget.value as SectionStyle['marginY'])}
+				onchange={(e: Event) =>
+					update(
+						'marginY',
+						(e.currentTarget as HTMLSelectElement).value as SectionStyle['marginY']
+					)}
 			>
 				<option value="none">None</option>
 				<option value="compact">Compact</option>
 				<option value="standard">Standard</option>
 				<option value="spacious">Spacious</option>
-			</select>
+			</FlowbiteSelect>
 		</label>
-		<label class="form-control">
-			<span class="label-text mb-1 text-xs">Section height</span>
-			<select
-				class="select select-sm w-full"
+		<label class="sk-field-stack">
+			<span class="mb-1 text-xs">Section height</span>
+			<FlowbiteSelect
+				class="w-full"
+				size="sm"
 				value={style.minHeight}
-				onchange={(e) => update('minHeight', e.currentTarget.value as SectionStyle['minHeight'])}
+				onchange={(e: Event) =>
+					update(
+						'minHeight',
+						(e.currentTarget as HTMLSelectElement).value as SectionStyle['minHeight']
+					)}
 			>
 				<option value="auto">Content based</option>
 				<option value="compact">Compact</option>
 				<option value="standard">Standard</option>
 				<option value="tall">Tall</option>
-			</select>
+			</FlowbiteSelect>
 		</label>
-		<label class="form-control col-span-2">
-			<span class="label-text mb-1 text-xs">Background color</span>
+		<label class="sk-field-stack col-span-2">
+			<span class="mb-1 text-xs">Background color</span>
 			<div class="flex gap-2">
 				<input
 					type="color"
-					class="h-8 w-10 cursor-pointer rounded border border-base-300 bg-base-100 p-0.5"
+					class="h-8 w-10 cursor-pointer rounded border border-[var(--sk-line)] bg-white p-0.5"
 					value={style.backgroundColor ?? '#ffffff'}
 					oninput={(e) => updateBackground(e.currentTarget.value)}
 					aria-label="Background color"
 				/>
-				<input
+				<FlowbiteInput
 					type="text"
-					class="input input-sm min-w-0 flex-1 font-mono"
+					size="sm"
+					class="min-w-0 flex-1 font-mono"
 					value={style.backgroundColor ?? ''}
 					placeholder="Theme default"
-					oninput={(e) => updateBackground(e.currentTarget.value)}
+					oninput={(e: Event) => updateBackground((e.currentTarget as HTMLInputElement).value)}
 				/>
-				<button
+				<FlowbiteButton
 					type="button"
-					class="btn btn-ghost btn-sm"
-					onclick={() => update('backgroundColor', undefined)}>Reset</button
+					variant="ghost"
+					size="sm"
+					onclick={() => update('backgroundColor', undefined)}>Reset</FlowbiteButton
 				>
 			</div>
 		</label>

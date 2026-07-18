@@ -9,7 +9,11 @@ import {
 import { PUT } from './+server';
 
 const owner = { id: 'identity-owner', email: 'identity-owner@example.com', isAdmin: false };
-const stranger = { id: 'identity-stranger', email: 'identity-stranger@example.com', isAdmin: false };
+const stranger = {
+	id: 'identity-stranger',
+	email: 'identity-stranger@example.com',
+	isAdmin: false
+};
 
 function jsonRequest(body: unknown) {
 	return { json: async () => body } as Request;
@@ -61,11 +65,13 @@ describe('site identity API', () => {
 		site.tenantId = 'tenant-identity-one-rename';
 		saveDraft(site, { ownerUserId: owner.id });
 		expect(
-			(await PUT({
-				params: { siteId: site.id },
-				request: jsonRequest({ siteName: 'Rename Test', publicHandle: 'before-rename' }),
-				locals: { user: owner }
-			} as never)).status
+			(
+				await PUT({
+					params: { siteId: site.id },
+					request: jsonRequest({ siteName: 'Rename Test', publicHandle: 'before-rename' }),
+					locals: { user: owner }
+				} as never)
+			).status
 		).toBe(200);
 		publishDraft(site.id);
 
@@ -76,9 +82,9 @@ describe('site identity API', () => {
 		} as never);
 		expect(renamed.status).toBe(200);
 		expect(getSiteMeta(site.id)).toMatchObject({
-		publicHandle: 'after-rename',
-		previousPublicHandle: 'before-rename',
-		publicHandleChangeCount: 1
+			publicHandle: 'after-rename',
+			previousPublicHandle: 'before-rename',
+			publicHandleChangeCount: 1
 		});
 		expect(findSiteIdByPublicHandle('before-rename')).toBe(site.id);
 

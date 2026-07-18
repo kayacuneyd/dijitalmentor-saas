@@ -452,7 +452,9 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 	const joinedCopy = allCopy.join(' ');
 	if (
 		riskProfile === 'health' &&
-		!/(gizlilik|etik|mahremiyet|confidential|privacy|medical advice|not medical advice)/i.test(joinedCopy)
+		!/(gizlilik|etik|mahremiyet|confidential|privacy|medical advice|not medical advice)/i.test(
+			joinedCopy
+		)
 	) {
 		addIssue(
 			issues,
@@ -464,7 +466,9 @@ export function siteQualityCheck(input: unknown): SiteQualityReport {
 	}
 	if (
 		riskProfile === 'legal' &&
-		!/(hukuki danışmanlık yerine geçmez|hukuki bilgi|legal advice|not legal advice|rechtliche beratung)/i.test(joinedCopy)
+		!/(hukuki danışmanlık yerine geçmez|hukuki bilgi|legal advice|not legal advice|rechtliche beratung)/i.test(
+			joinedCopy
+		)
 	) {
 		addIssue(
 			issues,

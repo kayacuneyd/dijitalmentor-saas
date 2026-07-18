@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 	import type { CatalogKey } from '$lib/i18n/catalog';
@@ -75,8 +76,8 @@
 					class="sk-input py-1.5 text-sm"
 					placeholder={t('account.support.messagePlaceholder')}></textarea>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
-				>{t('account.support.send')}</button
+			<FlowbiteButton type="submit" variant="primary" size="sm" class="self-start"
+				>{t('account.support.send')}</FlowbiteButton
 			>
 		</form>
 	</AppCard>

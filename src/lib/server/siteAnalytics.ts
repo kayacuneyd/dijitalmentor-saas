@@ -9,7 +9,11 @@ function day(date = new Date()): string {
 	return date.toISOString().slice(0, 10);
 }
 
-export function recordConversion(input: { siteId: string; event: SiteConversionEvent; date?: Date }): void {
+export function recordConversion(input: {
+	siteId: string;
+	event: SiteConversionEvent;
+	date?: Date;
+}): void {
 	db.insert(siteConversionStats)
 		.values({ siteId: input.siteId, day: day(input.date), event: input.event, count: 1 })
 		.onConflictDoUpdate({
@@ -26,5 +30,8 @@ export function conversionSummary(siteId: string, days = 30, now = new Date()) {
 		.from(siteConversionStats)
 		.where(and(eq(siteConversionStats.siteId, siteId), gte(siteConversionStats.day, since)))
 		.all();
-	return EVENTS.map((event) => ({ event, count: rows.filter((row) => row.event === event).reduce((sum, row) => sum + row.count, 0) }));
+	return EVENTS.map((event) => ({
+		event,
+		count: rows.filter((row) => row.event === event).reduce((sum, row) => sum + row.count, 0)
+	}));
 }

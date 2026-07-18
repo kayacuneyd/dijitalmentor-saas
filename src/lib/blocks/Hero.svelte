@@ -25,7 +25,9 @@
 					{content.headline}
 				</h1>
 				{#if content.subheadline}
-					<p class="text-base-content/75 mt-5 max-w-prose text-[clamp(1rem,3vw,1.125rem)] leading-8">
+					<p
+						class="text-base-content/75 mt-5 max-w-prose text-[clamp(1rem,3vw,1.125rem)] leading-8"
+					>
 						{content.subheadline}
 					</p>
 				{/if}

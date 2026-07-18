@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { DEFAULT_LOCALE, type Locale } from '$lib/i18n';
 	import AppCanvasShell from './AppCanvasShell.svelte';
+	import FlowbiteButton from './primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from './LanguageSwitcher.svelte';
 	import PanelSidebar, { type PanelNavItem } from './PanelSidebar.svelte';
 	import { uiIcons } from './icons';
@@ -43,9 +44,24 @@
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
 	const labels = $derived(
 		{
-			en: { open: 'Open sidebar', close: 'Close sidebar', collapse: 'Collapse sidebar', expand: 'Expand sidebar' },
-			tr: { open: 'Kenar çubuğunu aç', close: 'Kenar çubuğunu kapat', collapse: 'Kenar çubuğunu daralt', expand: 'Kenar çubuğunu genişlet' },
-			de: { open: 'Seitenleiste öffnen', close: 'Seitenleiste schließen', collapse: 'Seitenleiste einklappen', expand: 'Seitenleiste ausklappen' }
+			en: {
+				open: 'Open sidebar',
+				close: 'Close sidebar',
+				collapse: 'Collapse sidebar',
+				expand: 'Expand sidebar'
+			},
+			tr: {
+				open: 'Kenar çubuğunu aç',
+				close: 'Kenar çubuğunu kapat',
+				collapse: 'Kenar çubuğunu daralt',
+				expand: 'Kenar çubuğunu genişlet'
+			},
+			de: {
+				open: 'Seitenleiste öffnen',
+				close: 'Seitenleiste schließen',
+				collapse: 'Seitenleiste einklappen',
+				expand: 'Seitenleiste ausklappen'
+			}
 		}[locale]
 	);
 
@@ -93,16 +109,17 @@
 
 {#snippet chromeRight()}
 	<div class="flex items-center gap-2">
-		<button
-			type="button"
-			class="inline-flex size-9 items-center justify-center rounded-[9px] border border-[var(--sk-line)] bg-[rgb(251_250_247/.68)] text-[var(--sk-muted)] transition hover:bg-white hover:text-[var(--sk-ink)]"
+		<FlowbiteButton
+			variant="secondary"
+			size="sm"
+			class="size-9 !p-0"
 			aria-expanded={mobileOpen || !collapsed}
 			aria-controls="panel-sidebar"
 			aria-label={mobileOpen ? labels.close : collapsed ? labels.expand : labels.collapse}
 			onclick={toggleSidebar}
 		>
 			{@html uiIcons.menu(16)}
-		</button>
+		</FlowbiteButton>
 		<LanguageSwitcher {locale} variant="cookie" />
 	</div>
 {/snippet}
@@ -123,8 +140,8 @@
 			id="panel-sidebar"
 			{items}
 			label={sidebarLabel}
-			collapsed={collapsed}
-			mobileOpen={mobileOpen}
+			{collapsed}
+			{mobileOpen}
 			position={sidebarPosition}
 			{brand}
 			onCloseMobile={() => (mobileOpen = false)}
@@ -137,14 +154,19 @@
 				>
 					<div class="min-w-0">
 						{#if backHref}
-							<a href={backHref} class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]">
+							<a
+								href={backHref}
+								class="sk-link inline-flex items-center gap-1.5 text-sm text-[var(--sk-faint)]"
+							>
 								{@html uiIcons.arrowLeft(14)}{backLabel}
 							</a>
 						{/if}
 						<div class="sk-mono mt-2 text-[10px] text-[var(--sk-faint)]">saaskaya.app</div>
 						<h1 class="sk-display mt-1 text-4xl leading-none sm:text-[42px]">{title}</h1>
 						{#if description}
-							<p class="mt-3 max-w-2xl text-sm leading-6 text-[var(--sk-muted)] sm:text-[15px]">{description}</p>
+							<p class="mt-3 max-w-2xl text-sm leading-6 text-[var(--sk-muted)] sm:text-[15px]">
+								{description}
+							</p>
 						{/if}
 					</div>
 					{#if actions}

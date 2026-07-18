@@ -196,9 +196,9 @@ export async function createDestinationAddress(
 ): Promise<CloudflareDestinationAddress> {
 	const { accountId } = cloudflareConfig();
 	const normalizedEmail = email.trim().toLowerCase();
-	const existing = await cloudflareFetch<
-		{ id: string; email: string; verified?: string | null }[]
-	>(`/accounts/${encodeURIComponent(accountId)}/email/routing/addresses`);
+	const existing = await cloudflareFetch<{ id: string; email: string; verified?: string | null }[]>(
+		`/accounts/${encodeURIComponent(accountId)}/email/routing/addresses`
+	);
 	const address = existing.result?.find((item) => item.email.toLowerCase() === normalizedEmail);
 	if (address) {
 		return {

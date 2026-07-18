@@ -15,6 +15,7 @@
 	import { withLocale, type Locale } from '$lib/i18n';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 	import type { PageProps } from './$types';
@@ -646,7 +647,7 @@
 
 <AppCanvasShell label={copy.label}>
 	{#snippet right()}
-		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm">{copy.home}</a>
+		<FlowbiteButton href={l('/')} variant="secondary" size="sm">{copy.home}</FlowbiteButton>
 		<LanguageSwitcher {locale} variant="dropdown" />
 	{/snippet}
 
@@ -681,15 +682,16 @@
 					<p class="mt-3 text-[11px] leading-4 text-[var(--sk-faint)]">
 						{copy.campaignPrompt}
 					</p>
-					<button
-						type="button"
-						class="sk-btn sk-btn-primary sk-btn-sm mt-3"
+					<FlowbiteButton
+						variant="primary"
+						size="sm"
+						class="mt-3"
 						disabled={busy}
 						onclick={() => submitAnswer('niche', data.preselectedNiche)}
 					>
 						{copy.campaignCta}
 						{@html uiIcons.arrowRight(14)}
-					</button>
+					</FlowbiteButton>
 				</div>
 			{/if}
 			{#if data.selectedKit}
@@ -733,14 +735,16 @@
 					<ChatBubble role="assistant">{displayedQuestion.prompt}</ChatBubble>
 					<div class="flex items-start gap-2">
 						<ChatBubble role="user">{formatAnswer(displayedQuestion, answers[q.id])}</ChatBubble>
-						<button
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-sm mt-1 shrink-0 text-[11px]"
+							variant="ghost"
+							size="sm"
+							class="mt-1 shrink-0 text-[11px]"
 							disabled={busy}
 							onclick={() => (editingId = q.id)}
 						>
 							{copy.changeAnswer}
-						</button>
+						</FlowbiteButton>
 					</div>
 				{/each}
 
@@ -805,23 +809,24 @@
 						</div>
 					</div>
 					<div class="flex flex-wrap gap-2">
-						<button
-							type="button"
-							class="sk-btn sk-btn-primary sk-btn-sm"
+						<FlowbiteButton
+							variant="primary"
+							size="sm"
 							disabled={busy || rawText.trim().length < 30}
 							onclick={() => submitAnswer('rawDescription', rawText)}
 						>
 							{copy.send}
-						</button>
-						<button
+						</FlowbiteButton>
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
+							variant="ghost"
+							size="sm"
 							disabled={busy}
 							onclick={() => (useRaw = false)}
 						>
 							{@html uiIcons.arrowLeft(14)}
 							{copy.backToQuestions}
-						</button>
+						</FlowbiteButton>
 					</div>
 				</div>
 			{:else if active?.id === 'visualDirection'}
@@ -888,40 +893,42 @@
 			{:else if active?.kind === 'choice'}
 				<div class="flex flex-wrap gap-2">
 					{#each activeDisplay?.options ?? [] as option (option.value)}
-						<button
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-secondary sk-btn-sm"
+							variant="secondary"
+							size="sm"
 							disabled={busy}
 							onclick={() => submitAnswer(active!.id, option.value)}
 						>
 							{option.label}
-						</button>
+						</FlowbiteButton>
 					{/each}
 				</div>
 			{:else if active?.kind === 'multi_choice'}
 				<div class="flex flex-col gap-2">
 					<div class="flex flex-wrap gap-2">
 						{#each activeDisplay?.options ?? [] as option (option.value)}
-							<button
+							<FlowbiteButton
 								type="button"
-								class="sk-btn sk-btn-sm {multiValue.includes(option.value)
-									? 'sk-btn-primary'
-									: 'sk-btn-secondary'}"
+								variant={multiValue.includes(option.value) ? 'primary' : 'secondary'}
+								size="sm"
 								disabled={busy}
 								onclick={() => toggleMulti(option.value)}
 							>
 								{option.label}
-							</button>
+							</FlowbiteButton>
 						{/each}
 					</div>
-					<button
+					<FlowbiteButton
 						type="button"
-						class="sk-btn sk-btn-primary sk-btn-sm w-fit"
+						variant="primary"
+						size="sm"
+						class="w-fit"
 						disabled={busy || multiValue.length === 0}
 						onclick={() => submitAnswer(active!.id, multiValue)}
 					>
 						{copy.continue}
-					</button>
+					</FlowbiteButton>
 				</div>
 			{:else if active?.kind === 'list_text'}
 				<div class="flex flex-col gap-2">
@@ -956,28 +963,31 @@
 							onfocus={keepInputVisible}
 							disabled={busy || listItems.length >= 8}
 						/>
-						<button
+						<FlowbiteButton
 							type="submit"
-							class="sk-btn sk-btn-secondary sk-btn-sm"
+							variant="secondary"
+							size="sm"
 							disabled={busy ||
 								!listInput.trim() ||
 								listInput.trim().length > listItemLimit ||
 								listItems.length >= 8}
 						>
 							{copy.add}
-						</button>
+						</FlowbiteButton>
 					</form>
 					<div class="text-[11px] text-[var(--sk-faint)]">
 						{listInput.trim().length} / {listItemLimit}
 					</div>
-					<button
+					<FlowbiteButton
 						type="button"
-						class="sk-btn sk-btn-primary sk-btn-sm w-fit"
+						variant="primary"
+						size="sm"
+						class="w-fit"
 						disabled={busy || listItems.length === 0}
 						onclick={() => submitAnswer(active!.id, listItems)}
 					>
 						{copy.continue}
-					</button>
+					</FlowbiteButton>
 				</div>
 			{:else if active?.kind === 'short_text' || active?.kind === 'open_text'}
 				<form
@@ -1006,15 +1016,16 @@
 							disabled={busy}
 						/>
 					{/if}
-					<button
+					<FlowbiteButton
 						type="submit"
-						class="sk-btn sk-btn-primary sk-btn-sm"
+						variant="primary"
+						size="sm"
 						disabled={busy ||
 							(active!.required && !textValue.trim()) ||
 							(Boolean(activeTextLimit) && textValue.trim().length > Number(activeTextLimit))}
 					>
 						{copy.send}
-					</button>
+					</FlowbiteButton>
 				</form>
 				{#if activeTextLimit}
 					<div class="text-[11px] text-[var(--sk-faint)]">
@@ -1022,43 +1033,48 @@
 					</div>
 				{/if}
 				{#if !active!.required}
-					<button
+					<FlowbiteButton
 						type="button"
-						class="sk-btn sk-btn-ghost sk-btn-sm w-fit"
+						variant="ghost"
+						size="sm"
+						class="w-fit"
 						disabled={busy}
 						onclick={() => submitAnswer(active!.id, '')}
 					>
 						{copy.skip}
-					</button>
+					</FlowbiteButton>
 				{/if}
 			{:else if !active}
-				<button
-					type="button"
-					class="sk-btn sk-btn-primary sk-btn-lg w-full"
+				<FlowbiteButton
+					variant="primary"
+					size="lg"
+					class="w-full"
 					disabled={busy}
+					loading={busy}
 					onclick={completeFlow}
 				>
 					{#if busy}
-						<span class="loading loading-spinner loading-sm"></span>
 						{generationStage || (data.user ? copy.generating : copy.redirecting)}
 					{:else if data.user}
 						{copy.createSite}
 					{:else}
 						{copy.startFree}
 					{/if}
-				</button>
+				</FlowbiteButton>
 			{/if}
 
 			{#if !useRaw && current && !editingId}
-				<button
+				<FlowbiteButton
 					type="button"
-					class="sk-btn sk-btn-ghost sk-btn-sm w-fit"
+					variant="ghost"
+					size="sm"
+					class="w-fit"
 					disabled={busy}
 					onclick={() => (useRaw = true)}
 				>
 					{copy.rawToggle}
 					{@html uiIcons.arrowRight(14)}
-				</button>
+				</FlowbiteButton>
 			{/if}
 
 			<p class="text-xs leading-5 text-[var(--sk-faint)]">

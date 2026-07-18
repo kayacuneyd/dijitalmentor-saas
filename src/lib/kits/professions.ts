@@ -67,7 +67,12 @@ type ProfessionKitConfig = {
 		items: Record<Locale, PricingItem[]>;
 	};
 	process?: { title: LocalizedText; intro: LocalizedText; steps: Record<Locale, ProcessStep[]> };
-	booking?: { title: LocalizedText; subtitle: LocalizedText; buttonLabel: LocalizedText; note: LocalizedText };
+	booking?: {
+		title: LocalizedText;
+		subtitle: LocalizedText;
+		buttonLabel: LocalizedText;
+		note: LocalizedText;
+	};
 	credentials?: {
 		title: LocalizedText;
 		intro: LocalizedText;
@@ -413,7 +418,8 @@ function createProfessionSite(config: ProfessionKitConfig): Site {
 			content
 		} as never);
 	}
-	if (home.sections.length > 12) throw new Error('Kit ' + config.slug + ' has ' + home.sections.length + ' sections (max 12).');
+	if (home.sections.length > 12)
+		throw new Error('Kit ' + config.slug + ' has ' + home.sections.length + ' sections (max 12).');
 
 	// --- Write kit default integrations into settings (enabled: false, no url/phone) ---
 	const integrationTypes = coerceFeatureKits(config.featureKits);
@@ -858,80 +864,824 @@ const configs: ProfessionKitConfig[] = [
 					'Güzellik salonu sitemde hizmetlerimi, hijyen yaklaşımımı ve randevu alma adımlarını daha net ve profesyonel hale getir.'
 			}
 		]
-	}
-,
+	},
 
 	{
-		slug: 'physiotherapist-modern', basePreset: 'dental', label: 'Fizyoterapist', profession: 'Fizyoterapist', category: 'health',
-		audience: 'Manuel terapi, spor rehabilitasyonu veya kronik ağrı yönetimi yapan fizyoterapistler',
+		slug: 'physiotherapist-modern',
+		basePreset: 'dental',
+		label: 'Fizyoterapist',
+		profession: 'Fizyoterapist',
+		category: 'health',
+		audience:
+			'Manuel terapi, spor rehabilitasyonu veya kronik ağrı yönetimi yapan fizyoterapistler',
 		outcome: 'Tedavi alanlarını ve randevu yolunu güven veren bir sağlık sitesinde toparlar.',
-		siteName: 'Fzt. Deniz Korkmaz', contactEmail: 'randevu@denizkorkmaz.example',
-		colors: { primary: '#2e6b62', secondary: '#ddebe5', accent: '#c48644', base: '#faf9f4', neutral: '#213530' },
-		hero: { headline: { tr: 'Hareketle iyileş, güçlen, devam et', en: 'Recover, strengthen, keep moving', de: 'Heilen, kräftigen, weiter bewegen' }, subheadline: { tr: 'Kişiye özel fizyoterapi ve rehabilitasyon.', en: 'Personalized physiotherapy and rehabilitation.', de: 'Individuelle Physiotherapie und Rehabilitation.' }, ctaLabel: { tr: 'Ön görüşme talep et', en: 'Request a first call', de: 'Erstgespräch anfragen' } },
-		about: { title: { tr: 'Yaklaşım', en: 'Approach', de: 'Ansatz' }, body: { tr: 'İlk seansta hareket analizi ve hedefler değerlendirilir. Plan kişiye özel hedeflerle yürütülür.', en: 'Movement analysis and goals are assessed in the first session.', de: 'Bewegungsanalyse und Ziele werden in der ersten Sitzung bewertet.' } },
-		services: { title: { tr: 'Tedavi alanları', en: 'Treatment areas', de: 'Behandlungsbereiche' }, intro: { tr: 'Her program bireysel değerlendirme sonrası planlanır.', en: 'Each program is planned after individual assessment.', de: 'Jedes Programm wird nach individueller Bewertung geplant.' }, items: { tr: [{ name: 'Manuel terapi', description: 'Eklem ve yumuşak doku mobilizasyonu.' }, { name: 'Spor rehabilitasyonu', description: 'Sakatlık sonrası güvenli spora dönüş.' }, { name: 'Kronik ağrı', description: 'Duruş, güçlendirme ve günlük yaşam stratejileri.' }], en: [{ name: 'Manual therapy', description: 'Joint and soft-tissue mobilization.' }, { name: 'Sports rehab', description: 'Safe return to sport after injury.' }, { name: 'Chronic pain', description: 'Posture, strengthening and daily-life strategies.' }], de: [{ name: 'Manuelle Therapie', description: 'Gelenk- und Weichteilmobilisation.' }, { name: 'Sport-Reha', description: 'Sichere Rückkehr zum Sport.' }, { name: 'Chronische Schmerzen', description: 'Haltung, Kräftigung und Alltagsstrategien.' }] } },
-		faq: { title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' }, items: { tr: [{ question: 'İlk seansta ne yapılır?', answer: 'Hareket analizi, ağrı değerlendirmesi ve hedef belirleme yapılır.' }, { question: 'Kaç seans gerekir?', answer: 'Değerlendirme sonrası tahmini seans sayısı paylaşılır.' }], en: [{ question: 'First session?', answer: 'Movement analysis, pain assessment and goal setting.' }, { question: 'How many sessions?', answer: 'An estimate is shared after assessment.' }], de: [{ question: 'Erste Sitzung?', answer: 'Bewegungsanalyse, Schmerzbewertung und Zielsetzung.' }, { question: 'Wie viele Sitzungen?', answer: 'Eine Schätzung wird nach der Bewertung geteilt.' }] } },
-		contact: { title: { tr: 'Randevu talep et', en: 'Request an appointment', de: 'Termin anfragen' }, description: { tr: 'Kısa bir mesaj bırak; dönüş yapılır.', en: 'Leave a short message for a suitable appointment.', de: 'Sende eine kurze Nachricht.' }, submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' } },
-		footer: { tr: '© Fzt. Deniz Korkmaz. Bu site tıbbi tanı yerine geçmez.', en: '© Physio Deniz Korkmaz. Not a medical diagnosis.', de: '© Physio Deniz Korkmaz. Keine medizinische Diagnose.' },
-		seo: { tr: 'Fizyoterapist Deniz Korkmaz için hareket odaklı site.', en: 'Movement-focused site for Physiotherapist Deniz Korkmaz.', de: 'Bewegungsorientierte Website für Physiotherapeut Deniz Korkmaz.' },
-		featureKits: ['booking-request', 'faq', 'whatsapp-cta'], promptRecipes: [{ title: 'Tedavi alanlarını netleştir', useCase: 'İlk taslak', prompt: 'Fizyoterapist sitemde tedavi alanlarımı ve randevu sürecimi daha güven veren bir dille anlat. Tıbbi garanti kullanma.' }],
-		process: { title: { tr: 'Tedavi süreci', en: 'Treatment process', de: 'Behandlungsablauf' }, intro: { tr: 'İlk görüşmeden taburcuya adımlar.', en: 'Steps from first visit to discharge.', de: 'Schritte vom Erstbesuch bis zur Entlassung.' }, steps: { tr: [{ label: 'Değerlendirme', description: 'Hareket analizi ve hedef belirleme.' }, { label: 'Tedavi planı', description: 'Kişiye özel program.' }, { label: 'Takip', description: 'Düzenli ölçüm ve güncelleme.' }], en: [{ label: 'Assessment', description: 'Movement analysis and goal setting.' }, { label: 'Treatment plan', description: 'Personalized program.' }, { label: 'Follow-up', description: 'Regular measurement and updates.' }], de: [{ label: 'Bewertung', description: 'Bewegungsanalyse und Zielsetzung.' }, { label: 'Behandlungsplan', description: 'Individuelles Programm.' }, { label: 'Verlaufskontrolle', description: 'Regelmäßige Messung.' }] } },
-		pricing: { title: { tr: 'Seans seçenekleri', en: 'Session options', de: 'Sitzungsoptionen' }, intro: { tr: 'İhtiyaca göre paket.', en: 'Package based on need.', de: 'Paket nach Bedarf.' }, items: { tr: [{ name: 'Tek seans', price: '800 ₺', description: 'Değerlendirme ve tedavi.', features: ['50 dk', 'Egzersiz planı'], highlighted: false }, { name: '5 seans', price: '3500 ₺', description: 'Kapsamlı rehabilitasyon.', features: ['5 × 50 dk', 'İlerleme raporu', 'Mesaj desteği'], highlighted: true }, { name: '10 seans', price: '6500 ₺', description: 'Uzun süreli takip.', features: ['10 × 50 dk', 'Detaylı rapor', 'Öncelikli randevu'], highlighted: false }], en: [{ name: 'Single', price: '800 TL', description: 'Assessment and treatment.', features: ['50-min', 'Exercise plan'], highlighted: false }, { name: '5-pack', price: '3500 TL', description: 'Comprehensive rehab.', features: ['5 × 50-min', 'Progress report', 'Message support'], highlighted: true }, { name: '10-pack', price: '6500 TL', description: 'Long-term follow-up.', features: ['10 × 50-min', 'Detailed report', 'Priority booking'], highlighted: false }], de: [{ name: 'Einzeln', price: '800 TL', description: 'Bewertung und Behandlung.', features: ['50-Min.', 'Übungsplan'], highlighted: false }, { name: '5er-Paket', price: '3500 TL', description: 'Umfassende Reha.', features: ['5 × 50-Min.', 'Fortschrittsbericht'], highlighted: true }, { name: '10er-Paket', price: '6500 TL', description: 'Langzeit.', features: ['10 × 50-Min.'], highlighted: false }] } },
-		testimonials: { title: { tr: 'Danışan yorumları', en: 'Client feedback', de: 'Rückmeldungen' }, intro: { tr: 'İsimler gizlilik nedeniyle kısaltılmıştır.', en: 'Names shortened for confidentiality.', de: 'Namen aus Vertraulichkeit gekürzt.' }, items: { tr: [{ quote: 'Bel ağrım 3 seansta büyük ölçüde azaldı.', name: 'Ö.K.', role: 'danışan', rating: 5 }, { quote: 'Spor sakatlığım sonrası güvenle koşuya döndüm.', name: 'T.M.', role: 'sporcu', rating: 5 }, { quote: 'Kronik boyun ağrım için duruş analizi çok faydalı oldu.', name: 'R.A.', role: 'danışan', rating: 4 }], en: [{ quote: 'Back pain reduced significantly in 3 sessions.', name: 'Ö.K.', role: 'client', rating: 5 }, { quote: 'Returned to running safely post-injury.', name: 'T.M.', role: 'athlete', rating: 5 }, { quote: 'Posture analysis helped my chronic neck pain.', name: 'R.A.', role: 'client', rating: 4 }], de: [{ quote: 'Rückenschmerzen in 3 Sitzungen stark reduziert.', name: 'Ö.K.', role: 'Klient*in', rating: 5 }, { quote: 'Sicher zum Laufen zurückgekehrt.', name: 'T.M.', role: 'Sportler*in', rating: 5 }, { quote: 'Haltungsanalyse half bei Nackenschmerzen.', name: 'R.A.', role: 'Klient*in', rating: 4 }] } },
-		booking: { title: { tr: 'İlk adımı atın', en: 'Take the first step', de: 'Machen Sie den ersten Schritt' }, subtitle: { tr: 'Uygun gün ve saat için formu doldurun.', en: 'Fill out the form.', de: 'Formular ausfüllen.' }, buttonLabel: { tr: 'Randevu talep et', en: 'Request appointment', de: 'Termin anfragen' }, note: { tr: 'Her mesaj gizlilik çerçevesinde değerlendirilir.', en: 'Every message is handled confidentially.', de: 'Vertrauliche Behandlung.' } }
+		siteName: 'Fzt. Deniz Korkmaz',
+		contactEmail: 'randevu@denizkorkmaz.example',
+		colors: {
+			primary: '#2e6b62',
+			secondary: '#ddebe5',
+			accent: '#c48644',
+			base: '#faf9f4',
+			neutral: '#213530'
+		},
+		hero: {
+			headline: {
+				tr: 'Hareketle iyileş, güçlen, devam et',
+				en: 'Recover, strengthen, keep moving',
+				de: 'Heilen, kräftigen, weiter bewegen'
+			},
+			subheadline: {
+				tr: 'Kişiye özel fizyoterapi ve rehabilitasyon.',
+				en: 'Personalized physiotherapy and rehabilitation.',
+				de: 'Individuelle Physiotherapie und Rehabilitation.'
+			},
+			ctaLabel: {
+				tr: 'Ön görüşme talep et',
+				en: 'Request a first call',
+				de: 'Erstgespräch anfragen'
+			}
+		},
+		about: {
+			title: { tr: 'Yaklaşım', en: 'Approach', de: 'Ansatz' },
+			body: {
+				tr: 'İlk seansta hareket analizi ve hedefler değerlendirilir. Plan kişiye özel hedeflerle yürütülür.',
+				en: 'Movement analysis and goals are assessed in the first session.',
+				de: 'Bewegungsanalyse und Ziele werden in der ersten Sitzung bewertet.'
+			}
+		},
+		services: {
+			title: { tr: 'Tedavi alanları', en: 'Treatment areas', de: 'Behandlungsbereiche' },
+			intro: {
+				tr: 'Her program bireysel değerlendirme sonrası planlanır.',
+				en: 'Each program is planned after individual assessment.',
+				de: 'Jedes Programm wird nach individueller Bewertung geplant.'
+			},
+			items: {
+				tr: [
+					{ name: 'Manuel terapi', description: 'Eklem ve yumuşak doku mobilizasyonu.' },
+					{ name: 'Spor rehabilitasyonu', description: 'Sakatlık sonrası güvenli spora dönüş.' },
+					{ name: 'Kronik ağrı', description: 'Duruş, güçlendirme ve günlük yaşam stratejileri.' }
+				],
+				en: [
+					{ name: 'Manual therapy', description: 'Joint and soft-tissue mobilization.' },
+					{ name: 'Sports rehab', description: 'Safe return to sport after injury.' },
+					{ name: 'Chronic pain', description: 'Posture, strengthening and daily-life strategies.' }
+				],
+				de: [
+					{ name: 'Manuelle Therapie', description: 'Gelenk- und Weichteilmobilisation.' },
+					{ name: 'Sport-Reha', description: 'Sichere Rückkehr zum Sport.' },
+					{
+						name: 'Chronische Schmerzen',
+						description: 'Haltung, Kräftigung und Alltagsstrategien.'
+					}
+				]
+			}
+		},
+		faq: {
+			title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' },
+			items: {
+				tr: [
+					{
+						question: 'İlk seansta ne yapılır?',
+						answer: 'Hareket analizi, ağrı değerlendirmesi ve hedef belirleme yapılır.'
+					},
+					{
+						question: 'Kaç seans gerekir?',
+						answer: 'Değerlendirme sonrası tahmini seans sayısı paylaşılır.'
+					}
+				],
+				en: [
+					{
+						question: 'First session?',
+						answer: 'Movement analysis, pain assessment and goal setting.'
+					},
+					{ question: 'How many sessions?', answer: 'An estimate is shared after assessment.' }
+				],
+				de: [
+					{
+						question: 'Erste Sitzung?',
+						answer: 'Bewegungsanalyse, Schmerzbewertung und Zielsetzung.'
+					},
+					{
+						question: 'Wie viele Sitzungen?',
+						answer: 'Eine Schätzung wird nach der Bewertung geteilt.'
+					}
+				]
+			}
+		},
+		contact: {
+			title: { tr: 'Randevu talep et', en: 'Request an appointment', de: 'Termin anfragen' },
+			description: {
+				tr: 'Kısa bir mesaj bırak; dönüş yapılır.',
+				en: 'Leave a short message for a suitable appointment.',
+				de: 'Sende eine kurze Nachricht.'
+			},
+			submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' }
+		},
+		footer: {
+			tr: '© Fzt. Deniz Korkmaz. Bu site tıbbi tanı yerine geçmez.',
+			en: '© Physio Deniz Korkmaz. Not a medical diagnosis.',
+			de: '© Physio Deniz Korkmaz. Keine medizinische Diagnose.'
+		},
+		seo: {
+			tr: 'Fizyoterapist Deniz Korkmaz için hareket odaklı site.',
+			en: 'Movement-focused site for Physiotherapist Deniz Korkmaz.',
+			de: 'Bewegungsorientierte Website für Physiotherapeut Deniz Korkmaz.'
+		},
+		featureKits: ['booking-request', 'faq', 'whatsapp-cta'],
+		promptRecipes: [
+			{
+				title: 'Tedavi alanlarını netleştir',
+				useCase: 'İlk taslak',
+				prompt:
+					'Fizyoterapist sitemde tedavi alanlarımı ve randevu sürecimi daha güven veren bir dille anlat. Tıbbi garanti kullanma.'
+			}
+		],
+		process: {
+			title: { tr: 'Tedavi süreci', en: 'Treatment process', de: 'Behandlungsablauf' },
+			intro: {
+				tr: 'İlk görüşmeden taburcuya adımlar.',
+				en: 'Steps from first visit to discharge.',
+				de: 'Schritte vom Erstbesuch bis zur Entlassung.'
+			},
+			steps: {
+				tr: [
+					{ label: 'Değerlendirme', description: 'Hareket analizi ve hedef belirleme.' },
+					{ label: 'Tedavi planı', description: 'Kişiye özel program.' },
+					{ label: 'Takip', description: 'Düzenli ölçüm ve güncelleme.' }
+				],
+				en: [
+					{ label: 'Assessment', description: 'Movement analysis and goal setting.' },
+					{ label: 'Treatment plan', description: 'Personalized program.' },
+					{ label: 'Follow-up', description: 'Regular measurement and updates.' }
+				],
+				de: [
+					{ label: 'Bewertung', description: 'Bewegungsanalyse und Zielsetzung.' },
+					{ label: 'Behandlungsplan', description: 'Individuelles Programm.' },
+					{ label: 'Verlaufskontrolle', description: 'Regelmäßige Messung.' }
+				]
+			}
+		},
+		pricing: {
+			title: { tr: 'Seans seçenekleri', en: 'Session options', de: 'Sitzungsoptionen' },
+			intro: { tr: 'İhtiyaca göre paket.', en: 'Package based on need.', de: 'Paket nach Bedarf.' },
+			items: {
+				tr: [
+					{
+						name: 'Tek seans',
+						price: '800 ₺',
+						description: 'Değerlendirme ve tedavi.',
+						features: ['50 dk', 'Egzersiz planı'],
+						highlighted: false
+					},
+					{
+						name: '5 seans',
+						price: '3500 ₺',
+						description: 'Kapsamlı rehabilitasyon.',
+						features: ['5 × 50 dk', 'İlerleme raporu', 'Mesaj desteği'],
+						highlighted: true
+					},
+					{
+						name: '10 seans',
+						price: '6500 ₺',
+						description: 'Uzun süreli takip.',
+						features: ['10 × 50 dk', 'Detaylı rapor', 'Öncelikli randevu'],
+						highlighted: false
+					}
+				],
+				en: [
+					{
+						name: 'Single',
+						price: '800 TL',
+						description: 'Assessment and treatment.',
+						features: ['50-min', 'Exercise plan'],
+						highlighted: false
+					},
+					{
+						name: '5-pack',
+						price: '3500 TL',
+						description: 'Comprehensive rehab.',
+						features: ['5 × 50-min', 'Progress report', 'Message support'],
+						highlighted: true
+					},
+					{
+						name: '10-pack',
+						price: '6500 TL',
+						description: 'Long-term follow-up.',
+						features: ['10 × 50-min', 'Detailed report', 'Priority booking'],
+						highlighted: false
+					}
+				],
+				de: [
+					{
+						name: 'Einzeln',
+						price: '800 TL',
+						description: 'Bewertung und Behandlung.',
+						features: ['50-Min.', 'Übungsplan'],
+						highlighted: false
+					},
+					{
+						name: '5er-Paket',
+						price: '3500 TL',
+						description: 'Umfassende Reha.',
+						features: ['5 × 50-Min.', 'Fortschrittsbericht'],
+						highlighted: true
+					},
+					{
+						name: '10er-Paket',
+						price: '6500 TL',
+						description: 'Langzeit.',
+						features: ['10 × 50-Min.'],
+						highlighted: false
+					}
+				]
+			}
+		},
+		testimonials: {
+			title: { tr: 'Danışan yorumları', en: 'Client feedback', de: 'Rückmeldungen' },
+			intro: {
+				tr: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
+				en: 'Names shortened for confidentiality.',
+				de: 'Namen aus Vertraulichkeit gekürzt.'
+			},
+			items: {
+				tr: [
+					{
+						quote: 'Bel ağrım 3 seansta büyük ölçüde azaldı.',
+						name: 'Ö.K.',
+						role: 'danışan',
+						rating: 5
+					},
+					{
+						quote: 'Spor sakatlığım sonrası güvenle koşuya döndüm.',
+						name: 'T.M.',
+						role: 'sporcu',
+						rating: 5
+					},
+					{
+						quote: 'Kronik boyun ağrım için duruş analizi çok faydalı oldu.',
+						name: 'R.A.',
+						role: 'danışan',
+						rating: 4
+					}
+				],
+				en: [
+					{
+						quote: 'Back pain reduced significantly in 3 sessions.',
+						name: 'Ö.K.',
+						role: 'client',
+						rating: 5
+					},
+					{
+						quote: 'Returned to running safely post-injury.',
+						name: 'T.M.',
+						role: 'athlete',
+						rating: 5
+					},
+					{
+						quote: 'Posture analysis helped my chronic neck pain.',
+						name: 'R.A.',
+						role: 'client',
+						rating: 4
+					}
+				],
+				de: [
+					{
+						quote: 'Rückenschmerzen in 3 Sitzungen stark reduziert.',
+						name: 'Ö.K.',
+						role: 'Klient*in',
+						rating: 5
+					},
+					{
+						quote: 'Sicher zum Laufen zurückgekehrt.',
+						name: 'T.M.',
+						role: 'Sportler*in',
+						rating: 5
+					},
+					{
+						quote: 'Haltungsanalyse half bei Nackenschmerzen.',
+						name: 'R.A.',
+						role: 'Klient*in',
+						rating: 4
+					}
+				]
+			}
+		},
+		booking: {
+			title: {
+				tr: 'İlk adımı atın',
+				en: 'Take the first step',
+				de: 'Machen Sie den ersten Schritt'
+			},
+			subtitle: {
+				tr: 'Uygun gün ve saat için formu doldurun.',
+				en: 'Fill out the form.',
+				de: 'Formular ausfüllen.'
+			},
+			buttonLabel: { tr: 'Randevu talep et', en: 'Request appointment', de: 'Termin anfragen' },
+			note: {
+				tr: 'Her mesaj gizlilik çerçevesinde değerlendirilir.',
+				en: 'Every message is handled confidentially.',
+				de: 'Vertrauliche Behandlung.'
+			}
+		}
 	},
 	{
-		slug: 'dentist-clinic', basePreset: 'dental', label: 'Diş Kliniği', profession: 'Diş Hekimi', category: 'health',
+		slug: 'dentist-clinic',
+		basePreset: 'dental',
+		label: 'Diş Kliniği',
+		profession: 'Diş Hekimi',
+		category: 'health',
 		audience: 'Muayenehane veya klinikte genel diş hekimliği yapan profesyoneller',
 		outcome: 'Hizmetleri ve randevu yolunu güven veren bir klinik vitrininde toparlar.',
-		siteName: 'Dt. Selin Arslan', contactEmail: 'randevu@selinarslan.example',
-		colors: { primary: '#3d6b8a', secondary: '#dde7f0', accent: '#b8804c', base: '#f7f9fb', neutral: '#1f303c' },
-		hero: { headline: { tr: 'Sağlıklı gülüşler için güvenilir dokunuş', en: 'Trusted care for healthy smiles', de: 'Vertrauensvolle Pflege für gesunde Lächeln' }, subheadline: { tr: 'Genel diş hekimliği, koruyucu bakım ve estetik uygulamalar.', en: 'General dentistry, preventive care and aesthetic treatments.', de: 'Allgemeine Zahnheilkunde, Prophylaxe und ästhetische Behandlungen.' }, ctaLabel: { tr: 'Randevu al', en: 'Book an appointment', de: 'Termin vereinbaren' } },
-		about: { title: { tr: 'Kliniğimiz', en: 'Our clinic', de: 'Unsere Praxis' }, body: { tr: 'Modern ekipman ve titiz hijyenle her yaştan hastaya hizmet veriyoruz.', en: 'We serve patients of all ages with modern equipment and strict hygiene.', de: 'Wir betreuen Patienten jeden Alters mit moderner Ausstattung.' } },
-		services: { title: { tr: 'Hizmetler', en: 'Services', de: 'Leistungen' }, intro: { tr: 'Her tedavi bireysel değerlendirme sonrası planlanır.', en: 'Every treatment is planned after individual assessment.', de: 'Jede Behandlung wird individuell geplant.' }, items: { tr: [{ name: 'Genel diş hekimliği', description: 'Check-up, dolgu, kanal tedavisi.' }, { name: 'Estetik diş hekimliği', description: 'Beyazlatma, bonding, laminate veneer.' }, { name: 'Koruyucu bakım', description: 'Periyodik kontrol ve hijyen danışmanlığı.' }], en: [{ name: 'General dentistry', description: 'Check-ups, fillings, root canals.' }, { name: 'Aesthetic dentistry', description: 'Whitening, bonding, veneers.' }, { name: 'Preventive care', description: 'Periodic exams and hygiene counseling.' }], de: [{ name: 'Allgemeine Zahnheilkunde', description: 'Check-ups, Füllungen.' }, { name: 'Ästhetische Zahnheilkunde', description: 'Bleaching, Veneers.' }, { name: 'Prophylaxe', description: 'Regelmäßige Kontrollen.' }] } },
-		faq: { title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' }, items: { tr: [{ question: 'İlk muayenede ne yapılır?', answer: 'Ağız içi muayene ve tedavi planı sunulur.' }, { question: 'Randevu nasıl alınır?', answer: 'Formu doldurarak veya telefonla.' }], en: [{ question: 'First exam?', answer: 'Oral exam and treatment plan.' }, { question: 'How to book?', answer: 'Use the form or phone.' }], de: [{ question: 'Erste Untersuchung?', answer: 'Munduntersuchung und Behandlungsplan.' }, { question: 'Termin buchen?', answer: 'Über Formular oder Telefon.' }] } },
-		contact: { title: { tr: 'Randevu talep et', en: 'Request an appointment', de: 'Termin anfragen' }, description: { tr: 'Kısa mesaj bırak; dönüş yapalım.', en: 'Leave a message for a suitable time.', de: 'Nachricht für passenden Termin.' }, submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' } },
-		footer: { tr: '© Dt. Selin Arslan. Bilgilendirme amaçlıdır.', en: '© Dentist Selin Arslan. Informational only.', de: '© Zahnärztin Selin Arslan. Nur zu Informationszwecken.' },
-		seo: { tr: 'Diş hekimi Selin Arslan için klinik sitesi.', en: 'Dental clinic site for Dentist Selin Arslan.', de: 'Zahnarztpraxis-Website für Selin Arslan.' },
-		featureKits: ['booking-request', 'faq', 'gallery'], promptRecipes: [{ title: 'Klinik hizmetlerini vurgula', useCase: 'İlk taslak', prompt: 'Diş hekimi sitemde hizmetlerimi daha profesyonel bir dille anlat.' }],
-		testimonials: { title: { tr: 'Hasta yorumları', en: 'Patient feedback', de: 'Patientenfeedback' }, intro: { tr: 'İsimler kısaltılmıştır.', en: 'Names shortened.', de: 'Namen gekürzt.' }, items: { tr: [{ quote: 'En rahat gittiğim muayenehane.', name: 'B.D.', role: 'hasta', rating: 5 }, { quote: 'Kanal tedavisi çok konforlu geçti.', name: 'E.Ç.', role: 'hasta', rating: 5 }, { quote: 'Gülüş tasarımı sonrası özgüvenim arttı.', name: 'M.Y.', role: 'hasta', rating: 4 }], en: [{ quote: 'Most comfortable practice ever.', name: 'B.D.', role: 'patient', rating: 5 }, { quote: 'Root canal was very comfortable.', name: 'E.Ç.', role: 'patient', rating: 5 }, { quote: 'Confidence boost after smile design.', name: 'M.Y.', role: 'patient', rating: 4 }], de: [{ quote: 'Angenehmste Praxis seit Jahren.', name: 'B.D.', role: 'Patient*in', rating: 5 }, { quote: 'Wurzelbehandlung sehr angenehm.', name: 'E.Ç.', role: 'Patient*in', rating: 5 }, { quote: 'Selbstvertrauen nach Lächel-Design gestiegen.', name: 'M.Y.', role: 'Patient*in', rating: 4 }] } },
-		pricing: { title: { tr: 'Tedavi paketleri', en: 'Treatment packages', de: 'Behandlungspakete' }, intro: { tr: 'Fiyatlar muayene sonrası netleşir.', en: 'Prices finalized after examination.', de: 'Preise nach Untersuchung festgelegt.' }, items: { tr: [{ name: 'Check-up', price: '600 ₺', description: 'Muayene ve röntgen.', features: ['Ağız içi muayene', 'Röntgen', 'Tedavi planı'], highlighted: false }, { name: 'Diş taşı + beyazlatma', price: '2500 ₺', description: 'Profesyonel temizlik.', features: ['Diş taşı temizliği', 'Beyazlatma', 'Kontrol'], highlighted: true }, { name: 'Yıllık bakım', price: '1200 ₺', description: '2 check-up ve koruyucu bakım.', features: ['2 muayene', '1 temizlik', 'Flor'], highlighted: false }], en: [{ name: 'Check-up', price: '600 TL', description: 'Exam and x-ray.', features: ['Oral exam', 'X-ray'], highlighted: false }, { name: 'Scaling + whitening', price: '2500 TL', description: 'Professional cleaning.', features: ['Scaling', 'Whitening'], highlighted: true }, { name: 'Annual care', price: '1200 TL', description: '2 check-ups.', features: ['2 exams', '1 scaling'], highlighted: false }], de: [{ name: 'Check-up', price: '600 TL', description: 'Untersuchung und Röntgen.', features: ['Munduntersuchung'], highlighted: false }, { name: 'Reinigung + Bleaching', price: '2500 TL', description: 'Professionelle Reinigung.', features: ['Zahnreinigung', 'Bleaching'], highlighted: true }, { name: 'Jahrespflege', price: '1200 TL', description: '2 Check-ups.', features: ['2 Untersuchungen'], highlighted: false }] } },
-		booking: { title: { tr: 'Randevunuzu planlayın', en: 'Book your appointment', de: 'Termin buchen' }, subtitle: { tr: 'Uygun gün ve saat için formu doldurun.', en: 'Fill out the form.', de: 'Formular ausfüllen.' }, buttonLabel: { tr: 'Randevu al', en: 'Book appointment', de: 'Termin buchen' }, note: { tr: 'Acil durumlar için telefonla ulaşın.', en: 'For emergencies, please call.', de: 'In Notfällen anrufen.' } },
-		credentials: { title: { tr: 'Üyelik ve sertifikalar', en: 'Memberships', de: 'Mitgliedschaften' }, intro: { tr: '', en: '', de: '' }, items: { tr: [{ name: 'Diş Hekimi Ruhsatı', issuer: 'TDB', year: '2014' }, { name: 'Estetik Diş Hekimliği Sertifikası', issuer: 'EDAD', year: '2018' }], en: [{ name: 'Dental License', issuer: 'TDA', year: '2014' }, { name: 'Aesthetic Dentistry Cert', issuer: 'EDAC', year: '2018' }], de: [{ name: 'Approbation', issuer: 'TDB', year: '2014' }, { name: 'Zertifikat Ästhetik', issuer: 'EDAC', year: '2018' }] } }
+		siteName: 'Dt. Selin Arslan',
+		contactEmail: 'randevu@selinarslan.example',
+		colors: {
+			primary: '#3d6b8a',
+			secondary: '#dde7f0',
+			accent: '#b8804c',
+			base: '#f7f9fb',
+			neutral: '#1f303c'
+		},
+		hero: {
+			headline: {
+				tr: 'Sağlıklı gülüşler için güvenilir dokunuş',
+				en: 'Trusted care for healthy smiles',
+				de: 'Vertrauensvolle Pflege für gesunde Lächeln'
+			},
+			subheadline: {
+				tr: 'Genel diş hekimliği, koruyucu bakım ve estetik uygulamalar.',
+				en: 'General dentistry, preventive care and aesthetic treatments.',
+				de: 'Allgemeine Zahnheilkunde, Prophylaxe und ästhetische Behandlungen.'
+			},
+			ctaLabel: { tr: 'Randevu al', en: 'Book an appointment', de: 'Termin vereinbaren' }
+		},
+		about: {
+			title: { tr: 'Kliniğimiz', en: 'Our clinic', de: 'Unsere Praxis' },
+			body: {
+				tr: 'Modern ekipman ve titiz hijyenle her yaştan hastaya hizmet veriyoruz.',
+				en: 'We serve patients of all ages with modern equipment and strict hygiene.',
+				de: 'Wir betreuen Patienten jeden Alters mit moderner Ausstattung.'
+			}
+		},
+		services: {
+			title: { tr: 'Hizmetler', en: 'Services', de: 'Leistungen' },
+			intro: {
+				tr: 'Her tedavi bireysel değerlendirme sonrası planlanır.',
+				en: 'Every treatment is planned after individual assessment.',
+				de: 'Jede Behandlung wird individuell geplant.'
+			},
+			items: {
+				tr: [
+					{ name: 'Genel diş hekimliği', description: 'Check-up, dolgu, kanal tedavisi.' },
+					{ name: 'Estetik diş hekimliği', description: 'Beyazlatma, bonding, laminate veneer.' },
+					{ name: 'Koruyucu bakım', description: 'Periyodik kontrol ve hijyen danışmanlığı.' }
+				],
+				en: [
+					{ name: 'General dentistry', description: 'Check-ups, fillings, root canals.' },
+					{ name: 'Aesthetic dentistry', description: 'Whitening, bonding, veneers.' },
+					{ name: 'Preventive care', description: 'Periodic exams and hygiene counseling.' }
+				],
+				de: [
+					{ name: 'Allgemeine Zahnheilkunde', description: 'Check-ups, Füllungen.' },
+					{ name: 'Ästhetische Zahnheilkunde', description: 'Bleaching, Veneers.' },
+					{ name: 'Prophylaxe', description: 'Regelmäßige Kontrollen.' }
+				]
+			}
+		},
+		faq: {
+			title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' },
+			items: {
+				tr: [
+					{
+						question: 'İlk muayenede ne yapılır?',
+						answer: 'Ağız içi muayene ve tedavi planı sunulur.'
+					},
+					{ question: 'Randevu nasıl alınır?', answer: 'Formu doldurarak veya telefonla.' }
+				],
+				en: [
+					{ question: 'First exam?', answer: 'Oral exam and treatment plan.' },
+					{ question: 'How to book?', answer: 'Use the form or phone.' }
+				],
+				de: [
+					{ question: 'Erste Untersuchung?', answer: 'Munduntersuchung und Behandlungsplan.' },
+					{ question: 'Termin buchen?', answer: 'Über Formular oder Telefon.' }
+				]
+			}
+		},
+		contact: {
+			title: { tr: 'Randevu talep et', en: 'Request an appointment', de: 'Termin anfragen' },
+			description: {
+				tr: 'Kısa mesaj bırak; dönüş yapalım.',
+				en: 'Leave a message for a suitable time.',
+				de: 'Nachricht für passenden Termin.'
+			},
+			submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' }
+		},
+		footer: {
+			tr: '© Dt. Selin Arslan. Bilgilendirme amaçlıdır.',
+			en: '© Dentist Selin Arslan. Informational only.',
+			de: '© Zahnärztin Selin Arslan. Nur zu Informationszwecken.'
+		},
+		seo: {
+			tr: 'Diş hekimi Selin Arslan için klinik sitesi.',
+			en: 'Dental clinic site for Dentist Selin Arslan.',
+			de: 'Zahnarztpraxis-Website für Selin Arslan.'
+		},
+		featureKits: ['booking-request', 'faq', 'gallery'],
+		promptRecipes: [
+			{
+				title: 'Klinik hizmetlerini vurgula',
+				useCase: 'İlk taslak',
+				prompt: 'Diş hekimi sitemde hizmetlerimi daha profesyonel bir dille anlat.'
+			}
+		],
+		testimonials: {
+			title: { tr: 'Hasta yorumları', en: 'Patient feedback', de: 'Patientenfeedback' },
+			intro: { tr: 'İsimler kısaltılmıştır.', en: 'Names shortened.', de: 'Namen gekürzt.' },
+			items: {
+				tr: [
+					{ quote: 'En rahat gittiğim muayenehane.', name: 'B.D.', role: 'hasta', rating: 5 },
+					{ quote: 'Kanal tedavisi çok konforlu geçti.', name: 'E.Ç.', role: 'hasta', rating: 5 },
+					{
+						quote: 'Gülüş tasarımı sonrası özgüvenim arttı.',
+						name: 'M.Y.',
+						role: 'hasta',
+						rating: 4
+					}
+				],
+				en: [
+					{ quote: 'Most comfortable practice ever.', name: 'B.D.', role: 'patient', rating: 5 },
+					{ quote: 'Root canal was very comfortable.', name: 'E.Ç.', role: 'patient', rating: 5 },
+					{
+						quote: 'Confidence boost after smile design.',
+						name: 'M.Y.',
+						role: 'patient',
+						rating: 4
+					}
+				],
+				de: [
+					{ quote: 'Angenehmste Praxis seit Jahren.', name: 'B.D.', role: 'Patient*in', rating: 5 },
+					{ quote: 'Wurzelbehandlung sehr angenehm.', name: 'E.Ç.', role: 'Patient*in', rating: 5 },
+					{
+						quote: 'Selbstvertrauen nach Lächel-Design gestiegen.',
+						name: 'M.Y.',
+						role: 'Patient*in',
+						rating: 4
+					}
+				]
+			}
+		},
+		pricing: {
+			title: { tr: 'Tedavi paketleri', en: 'Treatment packages', de: 'Behandlungspakete' },
+			intro: {
+				tr: 'Fiyatlar muayene sonrası netleşir.',
+				en: 'Prices finalized after examination.',
+				de: 'Preise nach Untersuchung festgelegt.'
+			},
+			items: {
+				tr: [
+					{
+						name: 'Check-up',
+						price: '600 ₺',
+						description: 'Muayene ve röntgen.',
+						features: ['Ağız içi muayene', 'Röntgen', 'Tedavi planı'],
+						highlighted: false
+					},
+					{
+						name: 'Diş taşı + beyazlatma',
+						price: '2500 ₺',
+						description: 'Profesyonel temizlik.',
+						features: ['Diş taşı temizliği', 'Beyazlatma', 'Kontrol'],
+						highlighted: true
+					},
+					{
+						name: 'Yıllık bakım',
+						price: '1200 ₺',
+						description: '2 check-up ve koruyucu bakım.',
+						features: ['2 muayene', '1 temizlik', 'Flor'],
+						highlighted: false
+					}
+				],
+				en: [
+					{
+						name: 'Check-up',
+						price: '600 TL',
+						description: 'Exam and x-ray.',
+						features: ['Oral exam', 'X-ray'],
+						highlighted: false
+					},
+					{
+						name: 'Scaling + whitening',
+						price: '2500 TL',
+						description: 'Professional cleaning.',
+						features: ['Scaling', 'Whitening'],
+						highlighted: true
+					},
+					{
+						name: 'Annual care',
+						price: '1200 TL',
+						description: '2 check-ups.',
+						features: ['2 exams', '1 scaling'],
+						highlighted: false
+					}
+				],
+				de: [
+					{
+						name: 'Check-up',
+						price: '600 TL',
+						description: 'Untersuchung und Röntgen.',
+						features: ['Munduntersuchung'],
+						highlighted: false
+					},
+					{
+						name: 'Reinigung + Bleaching',
+						price: '2500 TL',
+						description: 'Professionelle Reinigung.',
+						features: ['Zahnreinigung', 'Bleaching'],
+						highlighted: true
+					},
+					{
+						name: 'Jahrespflege',
+						price: '1200 TL',
+						description: '2 Check-ups.',
+						features: ['2 Untersuchungen'],
+						highlighted: false
+					}
+				]
+			}
+		},
+		booking: {
+			title: { tr: 'Randevunuzu planlayın', en: 'Book your appointment', de: 'Termin buchen' },
+			subtitle: {
+				tr: 'Uygun gün ve saat için formu doldurun.',
+				en: 'Fill out the form.',
+				de: 'Formular ausfüllen.'
+			},
+			buttonLabel: { tr: 'Randevu al', en: 'Book appointment', de: 'Termin buchen' },
+			note: {
+				tr: 'Acil durumlar için telefonla ulaşın.',
+				en: 'For emergencies, please call.',
+				de: 'In Notfällen anrufen.'
+			}
+		},
+		credentials: {
+			title: { tr: 'Üyelik ve sertifikalar', en: 'Memberships', de: 'Mitgliedschaften' },
+			intro: { tr: '', en: '', de: '' },
+			items: {
+				tr: [
+					{ name: 'Diş Hekimi Ruhsatı', issuer: 'TDB', year: '2014' },
+					{ name: 'Estetik Diş Hekimliği Sertifikası', issuer: 'EDAD', year: '2018' }
+				],
+				en: [
+					{ name: 'Dental License', issuer: 'TDA', year: '2014' },
+					{ name: 'Aesthetic Dentistry Cert', issuer: 'EDAC', year: '2018' }
+				],
+				de: [
+					{ name: 'Approbation', issuer: 'TDB', year: '2014' },
+					{ name: 'Zertifikat Ästhetik', issuer: 'EDAC', year: '2018' }
+				]
+			}
+		}
 	},
 	{
-		slug: 'lawyer-trust', basePreset: 'law', label: 'Avukat Güven Odaklı', profession: 'Avukat', category: 'local-service',
+		slug: 'lawyer-trust',
+		basePreset: 'law',
+		label: 'Avukat Güven Odaklı',
+		profession: 'Avukat',
+		category: 'local-service',
 		audience: 'Serbest avukat veya küçük hukuk bürosu',
 		outcome: 'Çalışma alanlarını ve yetkinlikleri güven veren bir vitrine dönüştürür.',
-		siteName: 'Av. Kerem Demir', contactEmail: 'info@keremdemir.example',
-		colors: { primary: '#3a3f6b', secondary: '#dfe0ed', accent: '#8a7540', base: '#f8f8fa', neutral: '#1c1e30' },
-		hero: { headline: { tr: 'Haklarınızı bilmek ilk adımdır', en: 'Knowing your rights is the first step', de: 'Ihre Rechte zu kennen ist der erste Schritt' }, subheadline: { tr: 'Bireysel ve ticari hukukta şeffaf süreç.', en: 'Transparent process in civil and commercial law.', de: 'Transparenter Prozess im Zivil- und Wirtschaftsrecht.' }, ctaLabel: { tr: 'Ön görüşme talep et', en: 'Request a consultation', de: 'Erstberatung anfragen' } },
-		about: { title: { tr: 'Yaklaşım', en: 'Approach', de: 'Ansatz' }, body: { tr: 'İlk görüşmede durumunuzu dinler, hukuki çerçeveyi sade bir dille açıklarız.', en: 'We listen and explain the legal framework in plain language.', de: 'Wir hören zu und erklären den rechtlichen Rahmen in einfacher Sprache.' } },
-		services: { title: { tr: 'Çalışma alanları', en: 'Practice areas', de: 'Tätigkeitsbereiche' }, intro: { tr: 'Her dosya bireysel değerlendirilir.', en: 'Each case is individually assessed.', de: 'Jeder Fall wird individuell bewertet.' }, items: { tr: [{ name: 'Aile hukuku', description: 'Boşanma, velayet, nafaka.' }, { name: 'Ticaret hukuku', description: 'Şirket sözleşmeleri, alacak.' }, { name: 'Gayrimenkul hukuku', description: 'Tapu, kira, imar.' }], en: [{ name: 'Family law', description: 'Divorce, custody, alimony.' }, { name: 'Commercial law', description: 'Company contracts, debt.' }, { name: 'Real estate law', description: 'Title deeds, leases.' }], de: [{ name: 'Familienrecht', description: 'Scheidung, Sorgerecht.' }, { name: 'Wirtschaftsrecht', description: 'Gesellschaftsverträge.' }, { name: 'Immobilienrecht', description: 'Grundbuch, Miete.' }] } },
-		faq: { title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' }, items: { tr: [{ question: 'İlk görüşme ücretli mi?', answer: 'Durum değerlendirilir; ücret bilgisi önceden paylaşılır.' }, { question: 'Süreç ne kadar sürer?', answer: 'Dosyaya göre değişir; tahmini zaman çizelgesi verilir.' }], en: [{ question: 'Is the first meeting free?', answer: 'Fee info shared beforehand.' }, { question: 'How long?', answer: 'Varies per case; timeline provided.' }], de: [{ question: 'Erstgespräch kostenlos?', answer: 'Gebühreninfo vorab.' }, { question: 'Wie lange?', answer: 'Fallabhängig; Zeitschätzung.' }] } },
-		contact: { title: { tr: 'Ön görüşme talep et', en: 'Request a consultation', de: 'Erstberatung anfragen' }, description: { tr: 'Kısa mesaj bırak; dönüş yapalım.', en: 'Leave a short message.', de: 'Kurze Nachricht.' }, submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' } },
-		footer: { tr: '© Av. Kerem Demir. Hukuki danışmanlık yerine geçmez.', en: '© Att. Kerem Demir. Not legal advice.', de: '© RA Kerem Demir. Keine Rechtsberatung.' },
-		seo: { tr: 'Avukat Kerem Demir için güven odaklı hukuk bürosu sitesi.', en: 'Trust-focused law office site for Attorney Kerem Demir.', de: 'Vertrauensorientierte Kanzlei-Website.' },
-		featureKits: ['whatsapp-cta', 'map-location'], promptRecipes: [{ title: 'Çalışma alanlarını güçlendir', useCase: 'İlk taslak', prompt: 'Avukat sitemde çalışma alanlarımı güven veren bir dille anlat. Sonuç garantisi kullanma.' }],
-		process: { title: { tr: 'Çalışma süreci', en: 'Work process', de: 'Arbeitsablauf' }, intro: { tr: 'İlk görüşmeden sonuca şeffaf adımlar.', en: 'Transparent steps from consultation to resolution.', de: 'Transparente Schritte vom Erstgespräch zur Lösung.' }, steps: { tr: [{ label: 'Ön görüşme', description: 'Durum değerlendirmesi.' }, { label: 'Strateji', description: 'Dosyaya özel yol haritası.' }, { label: 'Yürütme', description: 'Dava veya sözleşme süreci.' }], en: [{ label: 'Consultation', description: 'Situation assessment.' }, { label: 'Strategy', description: 'Case roadmap.' }, { label: 'Execution', description: 'Litigation or contract process.' }], de: [{ label: 'Erstberatung', description: 'Situationsbewertung.' }, { label: 'Strategie', description: 'Fall-Roadmap.' }, { label: 'Durchführung', description: 'Prozess oder Vertrag.' }] } },
-		credentials: { title: { tr: 'Baro ve yetkinlikler', en: 'Bar admission', de: 'Zulassung' }, intro: { tr: '', en: '', de: '' }, items: { tr: [{ name: 'İstanbul Barosu', issuer: 'TBB', year: '2010' }, { name: 'Arabuluculuk Yetki Belgesi', issuer: 'Adalet Bakanlığı', year: '2017' }], en: [{ name: 'Istanbul Bar', issuer: 'UBA', year: '2010' }, { name: 'Mediation License', issuer: 'Ministry of Justice', year: '2017' }], de: [{ name: 'Rechtsanwaltskammer', issuer: 'TBB', year: '2010' }, { name: 'Mediationslizenz', issuer: 'Justizministerium', year: '2017' }] } },
-		testimonials: { title: { tr: 'Danışan yorumları', en: 'Client feedback', de: 'Mandantenfeedback' }, intro: { tr: 'İsimler kısaltılmıştır.', en: 'Names shortened.', de: 'Namen gekürzt.' }, items: { tr: [{ quote: 'Süreci adım adım anlatması çok rahatlattı.', name: 'N.Y.', role: 'danışan', rating: 5 }, { quote: 'Hukuki dili sadeleştirerek anlatması karar vermemi kolaylaştırdı.', name: 'F.K.', role: 'danışan', rating: 5 }, { quote: 'Dosyamın takibinde her zaman ulaşılabilirdi.', name: 'S.D.', role: 'danışan', rating: 4 }], en: [{ quote: 'Step-by-step explanation was very reassuring.', name: 'N.Y.', role: 'client', rating: 5 }, { quote: 'Simplifying legal language helped me decide.', name: 'F.K.', role: 'client', rating: 5 }, { quote: 'Always reachable for case updates.', name: 'S.D.', role: 'client', rating: 4 }], de: [{ quote: 'Schrittweise Erklärung war beruhigend.', name: 'N.Y.', role: 'Mandant*in', rating: 5 }, { quote: 'Vereinfachung half bei Entscheidungen.', name: 'F.K.', role: 'Mandant*in', rating: 5 }, { quote: 'Immer erreichbar für Updates.', name: 'S.D.', role: 'Mandant*in', rating: 4 }] } }
+		siteName: 'Av. Kerem Demir',
+		contactEmail: 'info@keremdemir.example',
+		colors: {
+			primary: '#3a3f6b',
+			secondary: '#dfe0ed',
+			accent: '#8a7540',
+			base: '#f8f8fa',
+			neutral: '#1c1e30'
+		},
+		hero: {
+			headline: {
+				tr: 'Haklarınızı bilmek ilk adımdır',
+				en: 'Knowing your rights is the first step',
+				de: 'Ihre Rechte zu kennen ist der erste Schritt'
+			},
+			subheadline: {
+				tr: 'Bireysel ve ticari hukukta şeffaf süreç.',
+				en: 'Transparent process in civil and commercial law.',
+				de: 'Transparenter Prozess im Zivil- und Wirtschaftsrecht.'
+			},
+			ctaLabel: {
+				tr: 'Ön görüşme talep et',
+				en: 'Request a consultation',
+				de: 'Erstberatung anfragen'
+			}
+		},
+		about: {
+			title: { tr: 'Yaklaşım', en: 'Approach', de: 'Ansatz' },
+			body: {
+				tr: 'İlk görüşmede durumunuzu dinler, hukuki çerçeveyi sade bir dille açıklarız.',
+				en: 'We listen and explain the legal framework in plain language.',
+				de: 'Wir hören zu und erklären den rechtlichen Rahmen in einfacher Sprache.'
+			}
+		},
+		services: {
+			title: { tr: 'Çalışma alanları', en: 'Practice areas', de: 'Tätigkeitsbereiche' },
+			intro: {
+				tr: 'Her dosya bireysel değerlendirilir.',
+				en: 'Each case is individually assessed.',
+				de: 'Jeder Fall wird individuell bewertet.'
+			},
+			items: {
+				tr: [
+					{ name: 'Aile hukuku', description: 'Boşanma, velayet, nafaka.' },
+					{ name: 'Ticaret hukuku', description: 'Şirket sözleşmeleri, alacak.' },
+					{ name: 'Gayrimenkul hukuku', description: 'Tapu, kira, imar.' }
+				],
+				en: [
+					{ name: 'Family law', description: 'Divorce, custody, alimony.' },
+					{ name: 'Commercial law', description: 'Company contracts, debt.' },
+					{ name: 'Real estate law', description: 'Title deeds, leases.' }
+				],
+				de: [
+					{ name: 'Familienrecht', description: 'Scheidung, Sorgerecht.' },
+					{ name: 'Wirtschaftsrecht', description: 'Gesellschaftsverträge.' },
+					{ name: 'Immobilienrecht', description: 'Grundbuch, Miete.' }
+				]
+			}
+		},
+		faq: {
+			title: { tr: 'Sık sorular', en: 'Common questions', de: 'Häufige Fragen' },
+			items: {
+				tr: [
+					{
+						question: 'İlk görüşme ücretli mi?',
+						answer: 'Durum değerlendirilir; ücret bilgisi önceden paylaşılır.'
+					},
+					{
+						question: 'Süreç ne kadar sürer?',
+						answer: 'Dosyaya göre değişir; tahmini zaman çizelgesi verilir.'
+					}
+				],
+				en: [
+					{ question: 'Is the first meeting free?', answer: 'Fee info shared beforehand.' },
+					{ question: 'How long?', answer: 'Varies per case; timeline provided.' }
+				],
+				de: [
+					{ question: 'Erstgespräch kostenlos?', answer: 'Gebühreninfo vorab.' },
+					{ question: 'Wie lange?', answer: 'Fallabhängig; Zeitschätzung.' }
+				]
+			}
+		},
+		contact: {
+			title: {
+				tr: 'Ön görüşme talep et',
+				en: 'Request a consultation',
+				de: 'Erstberatung anfragen'
+			},
+			description: {
+				tr: 'Kısa mesaj bırak; dönüş yapalım.',
+				en: 'Leave a short message.',
+				de: 'Kurze Nachricht.'
+			},
+			submitLabel: { tr: 'Gönder', en: 'Send', de: 'Senden' }
+		},
+		footer: {
+			tr: '© Av. Kerem Demir. Hukuki danışmanlık yerine geçmez.',
+			en: '© Att. Kerem Demir. Not legal advice.',
+			de: '© RA Kerem Demir. Keine Rechtsberatung.'
+		},
+		seo: {
+			tr: 'Avukat Kerem Demir için güven odaklı hukuk bürosu sitesi.',
+			en: 'Trust-focused law office site for Attorney Kerem Demir.',
+			de: 'Vertrauensorientierte Kanzlei-Website.'
+		},
+		featureKits: ['whatsapp-cta', 'map-location'],
+		promptRecipes: [
+			{
+				title: 'Çalışma alanlarını güçlendir',
+				useCase: 'İlk taslak',
+				prompt:
+					'Avukat sitemde çalışma alanlarımı güven veren bir dille anlat. Sonuç garantisi kullanma.'
+			}
+		],
+		process: {
+			title: { tr: 'Çalışma süreci', en: 'Work process', de: 'Arbeitsablauf' },
+			intro: {
+				tr: 'İlk görüşmeden sonuca şeffaf adımlar.',
+				en: 'Transparent steps from consultation to resolution.',
+				de: 'Transparente Schritte vom Erstgespräch zur Lösung.'
+			},
+			steps: {
+				tr: [
+					{ label: 'Ön görüşme', description: 'Durum değerlendirmesi.' },
+					{ label: 'Strateji', description: 'Dosyaya özel yol haritası.' },
+					{ label: 'Yürütme', description: 'Dava veya sözleşme süreci.' }
+				],
+				en: [
+					{ label: 'Consultation', description: 'Situation assessment.' },
+					{ label: 'Strategy', description: 'Case roadmap.' },
+					{ label: 'Execution', description: 'Litigation or contract process.' }
+				],
+				de: [
+					{ label: 'Erstberatung', description: 'Situationsbewertung.' },
+					{ label: 'Strategie', description: 'Fall-Roadmap.' },
+					{ label: 'Durchführung', description: 'Prozess oder Vertrag.' }
+				]
+			}
+		},
+		credentials: {
+			title: { tr: 'Baro ve yetkinlikler', en: 'Bar admission', de: 'Zulassung' },
+			intro: { tr: '', en: '', de: '' },
+			items: {
+				tr: [
+					{ name: 'İstanbul Barosu', issuer: 'TBB', year: '2010' },
+					{ name: 'Arabuluculuk Yetki Belgesi', issuer: 'Adalet Bakanlığı', year: '2017' }
+				],
+				en: [
+					{ name: 'Istanbul Bar', issuer: 'UBA', year: '2010' },
+					{ name: 'Mediation License', issuer: 'Ministry of Justice', year: '2017' }
+				],
+				de: [
+					{ name: 'Rechtsanwaltskammer', issuer: 'TBB', year: '2010' },
+					{ name: 'Mediationslizenz', issuer: 'Justizministerium', year: '2017' }
+				]
+			}
+		},
+		testimonials: {
+			title: { tr: 'Danışan yorumları', en: 'Client feedback', de: 'Mandantenfeedback' },
+			intro: { tr: 'İsimler kısaltılmıştır.', en: 'Names shortened.', de: 'Namen gekürzt.' },
+			items: {
+				tr: [
+					{
+						quote: 'Süreci adım adım anlatması çok rahatlattı.',
+						name: 'N.Y.',
+						role: 'danışan',
+						rating: 5
+					},
+					{
+						quote: 'Hukuki dili sadeleştirerek anlatması karar vermemi kolaylaştırdı.',
+						name: 'F.K.',
+						role: 'danışan',
+						rating: 5
+					},
+					{
+						quote: 'Dosyamın takibinde her zaman ulaşılabilirdi.',
+						name: 'S.D.',
+						role: 'danışan',
+						rating: 4
+					}
+				],
+				en: [
+					{
+						quote: 'Step-by-step explanation was very reassuring.',
+						name: 'N.Y.',
+						role: 'client',
+						rating: 5
+					},
+					{
+						quote: 'Simplifying legal language helped me decide.',
+						name: 'F.K.',
+						role: 'client',
+						rating: 5
+					},
+					{ quote: 'Always reachable for case updates.', name: 'S.D.', role: 'client', rating: 4 }
+				],
+				de: [
+					{
+						quote: 'Schrittweise Erklärung war beruhigend.',
+						name: 'N.Y.',
+						role: 'Mandant*in',
+						rating: 5
+					},
+					{
+						quote: 'Vereinfachung half bei Entscheidungen.',
+						name: 'F.K.',
+						role: 'Mandant*in',
+						rating: 5
+					},
+					{ quote: 'Immer erreichbar für Updates.', name: 'S.D.', role: 'Mandant*in', rating: 4 }
+				]
+			}
+		}
 	}
-];export const professionKits: ControlledKit[] = configs.map((config) => ({
-		slug: config.slug,
-		label: config.label,
-		profession: config.profession,
-		category: config.category,
-		audience: config.audience,
+];
+export const professionKits: ControlledKit[] = configs.map((config) => ({
+	slug: config.slug,
+	label: config.label,
+	profession: config.profession,
+	category: config.category,
+	audience: config.audience,
+	outcome: config.outcome,
+	featureKits: coerceFeatureKits(config.featureKits),
+	promptRecipes: config.promptRecipes,
+	createSite: () => createProfessionSite(config),
+	strategy: strategyForKit({
 		outcome: config.outcome,
+		category: config.category,
+		profession: config.profession,
 		featureKits: coerceFeatureKits(config.featureKits),
-		promptRecipes: config.promptRecipes,
-		createSite: () => createProfessionSite(config),
-		strategy: strategyForKit({
-			outcome: config.outcome,
-			category: config.category,
-			profession: config.profession,
-			featureKits: coerceFeatureKits(config.featureKits),
-			createSite: () => createProfessionSite(config)
-		})
-	}));
+		createSite: () => createProfessionSite(config)
+	})
+}));

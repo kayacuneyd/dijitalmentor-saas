@@ -3,6 +3,8 @@
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
@@ -81,9 +83,9 @@
 		>
 			<BrandMark href={l('/')} compact />
 			<div class="flex items-center gap-2">
-				<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm"
-					>{@html uiIcons.home(14)}{copy.home}</a
-				>
+				<FlowbiteButton href={l('/')} variant="secondary" size="sm">
+					{@html uiIcons.home(14)}{copy.home}
+				</FlowbiteButton>
 				<LanguageSwitcher {locale} />
 			</div>
 		</header>
@@ -125,23 +127,23 @@
 								};
 							}}
 						>
-							<input
+							<FlowbiteInput
 								type="email"
 								name="email"
 								value={data?.email}
 								required
 								placeholder={copy.placeholder}
-								class="sk-input text-[15px]"
+								size="lg"
+								class="text-[15px]"
 								disabled={busy}
 							/>
 							{#if form?.message}
 								<p class="text-sm text-[#b8532f]">{form.message}</p>
 							{/if}
-							<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
-								{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
+							<FlowbiteButton type="submit" size="lg" class="w-full" loading={busy} disabled={busy}>
 								{#if !busy}{@html uiIcons.mail(16)}{/if}
 								{copy.submit}
-							</button>
+							</FlowbiteButton>
 						</form>
 					{/if}
 				</div>

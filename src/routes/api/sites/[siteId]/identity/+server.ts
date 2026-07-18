@@ -5,12 +5,18 @@ import type { RequestHandler } from './$types';
 
 export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	if (!locals.user) {
-		return json({ ok: false, message: 'Sign in as the site owner to edit this site.' }, { status: 401 });
+		return json(
+			{ ok: false, message: 'Sign in as the site owner to edit this site.' },
+			{ status: 401 }
+		);
 	}
 	const meta = getSiteMeta(params.siteId);
 	if (!meta) return json({ ok: false, message: 'Site not found.' }, { status: 404 });
 	if (!canManageSite(locals.user, meta.ownerUserId)) {
-		return json({ ok: false, message: 'Sign in as the site owner to edit this site.' }, { status: 403 });
+		return json(
+			{ ok: false, message: 'Sign in as the site owner to edit this site.' },
+			{ status: 403 }
+		);
 	}
 
 	let body: unknown;

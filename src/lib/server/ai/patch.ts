@@ -9,7 +9,13 @@ import {
 	type ChatPatch,
 	type PatchOp
 } from './schemas';
-import { addUsage, AIInvalidOutputError, runToolCall, type RunToolCall, type TokenUsage } from './llm';
+import {
+	addUsage,
+	AIInvalidOutputError,
+	runToolCall,
+	type RunToolCall,
+	type TokenUsage
+} from './llm';
 
 /**
  * Chat edits (PLAN §4): the AI never free-edits the draft — it emits constrained
@@ -324,7 +330,14 @@ export async function chatEdit(
 		memory?: string;
 	},
 	deps: { run: RunToolCall } = { run: runToolCall }
-	): Promise<{ site: Site; reply: string; usage: TokenUsage; provider?: string; model?: string; fallbackUsed?: boolean }> {
+): Promise<{
+	site: Site;
+	reply: string;
+	usage: TokenUsage;
+	provider?: string;
+	model?: string;
+	fallbackUsed?: boolean;
+}> {
 	const tool = {
 		name: 'patch_site',
 		description: 'Reply to the user and emit the operations that implement the request.',

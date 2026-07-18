@@ -3,6 +3,7 @@
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
 	import { uiIcons } from '$lib/ui/icons';
@@ -57,8 +58,7 @@
 			},
 			de: {
 				title: 'Der saaskaya Beta beitreten',
-				description:
-					'Fordere deinen Beta-Anmeldelink an und starte deine erste saaskaya Website.',
+				description: 'Fordere deinen Beta-Anmeldelink an und starte deine erste saaskaya Website.',
 				home: 'Startseite',
 				badge: 'Beta nur mit Einladung',
 				h1: 'Erstelle deinen Beta-Zugangslink.',
@@ -87,8 +87,8 @@
 
 <AppCanvasShell label="saaskaya.app / beta">
 	{#snippet right()}
-		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm"
-			>{@html uiIcons.home(14)}{copy.home}</a
+		<FlowbiteButton href={l('/')} variant="secondary" size="sm"
+			>{@html uiIcons.home(14)}{copy.home}</FlowbiteButton
 		>
 		<LanguageSwitcher {locale} />
 	{/snippet}
@@ -158,11 +158,18 @@
 					{#if form?.message}
 						<div class="sk-alert sk-alert-error text-xs">{form.message}</div>
 					{/if}
-					<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
-						{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
+					<FlowbiteButton
+						type="submit"
+						variant="primary"
+						size="lg"
+						class="w-full"
+						loading={busy}
+						disabled={busy}
+					>
+						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 						{copy.submit}
 						{#if !busy}{@html uiIcons.arrowRight(16)}{/if}
-					</button>
+					</FlowbiteButton>
 				</form>
 			{/if}
 		</AppCard>

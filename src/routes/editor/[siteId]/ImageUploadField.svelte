@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getTranslate } from '$lib/i18n/context';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 
 	const t = getTranslate();
 
@@ -71,7 +72,7 @@
 		</div>
 	{/if}
 	<div class="flex items-center gap-2">
-		<label class="sk-btn sk-btn-secondary sk-btn-sm cursor-pointer">
+		<label class="sk-flowbite-upload-label cursor-pointer">
 			{uploading
 				? t('editor.imageUpload.uploading')
 				: value
@@ -95,16 +96,14 @@
 			/>
 		{/if}
 	</div>
-	<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick={loadLibrary}>
+	<FlowbiteButton type="button" variant="ghost" size="sm" onclick={loadLibrary}>
 		{libraryOpen ? 'Medya kütüphanesini yenile' : 'Medya kütüphanesini aç'}
-	</button>
+	</FlowbiteButton>
 	{#if uploadError}
 		<p class="text-xs text-[var(--sk-error)]">{uploadError}</p>
 	{/if}
 	{#if libraryOpen}
-		<div
-			class="grid grid-cols-3 gap-2 rounded-[6px] border border-[var(--sk-line)] bg-base-100 p-2"
-		>
+		<div class="grid grid-cols-3 gap-2 rounded-[6px] border border-[var(--sk-line)] bg-white p-2">
 			{#if assets.length === 0}
 				<p class="col-span-3 text-xs text-base-content/60">Henüz yüklenmiş medya yok.</p>
 			{:else}

@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { LOCALES } from '$lib/i18n';
 	import { getTranslate } from '$lib/i18n/context';
@@ -36,14 +37,13 @@
 			</div>
 			<form method="POST" action="?/togglePage" use:enhance>
 				<input type="hidden" name="enabled" value={data.sharePageEnabled ? '0' : '1'} />
-				<button
+				<FlowbiteButton
 					type="submit"
-					class={data.sharePageEnabled
-						? 'sk-btn sk-btn-secondary sk-btn-sm'
-						: 'sk-btn sk-btn-primary sk-btn-sm'}
+					variant={data.sharePageEnabled ? 'secondary' : 'primary'}
+					size="sm"
 				>
 					{data.sharePageEnabled ? t('admin.share.disable') : t('admin.share.enable')}
-				</button>
+				</FlowbiteButton>
 			</form>
 		</div>
 	</AppCard>
@@ -106,11 +106,18 @@
 					</label>
 				{/each}
 			</div>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm w-fit" disabled={uploading}>
-				{#if uploading}<span class="loading loading-spinner loading-xs"></span>{t(
+			<FlowbiteButton
+				type="submit"
+				variant="primary"
+				size="sm"
+				class="w-fit"
+				loading={uploading}
+				disabled={uploading}
+			>
+				{#if uploading}<span class="sk-spinner sk-spinner-xs" aria-hidden="true"></span>{t(
 						'admin.share.uploading'
 					)}{:else}{t('admin.share.upload')}{/if}
-			</button>
+			</FlowbiteButton>
 		</form>
 	</AppCard>
 
@@ -163,8 +170,8 @@
 									/>
 								{/each}
 							</div>
-							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm w-fit"
-								>{t('admin.share.saveCaptions')}</button
+							<FlowbiteButton type="submit" variant="ghost" size="sm" class="w-fit"
+								>{t('admin.share.saveCaptions')}</FlowbiteButton
 							>
 						</form>
 					</div>
@@ -173,27 +180,29 @@
 						<form method="POST" action="?/toggle" use:enhance>
 							<input type="hidden" name="id" value={asset.id} />
 							<input type="hidden" name="active" value={asset.active ? '0' : '1'} />
-							<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+							<FlowbiteButton type="submit" variant="secondary" size="sm">
 								{asset.active ? t('admin.share.hide') : t('admin.share.activate')}
-							</button>
+							</FlowbiteButton>
 						</form>
 						<div class="flex gap-1.5">
 							<form method="POST" action="?/moveUp" use:enhance>
 								<input type="hidden" name="id" value={asset.id} />
-								<button
+								<FlowbiteButton
 									type="submit"
-									class="sk-btn sk-btn-ghost sk-btn-sm"
+									variant="ghost"
+									size="sm"
 									disabled={index === 0}
-									aria-label={t('admin.share.moveUp')}>↑</button
+									aria-label={t('admin.share.moveUp')}>↑</FlowbiteButton
 								>
 							</form>
 							<form method="POST" action="?/moveDown" use:enhance>
 								<input type="hidden" name="id" value={asset.id} />
-								<button
+								<FlowbiteButton
 									type="submit"
-									class="sk-btn sk-btn-ghost sk-btn-sm"
+									variant="ghost"
+									size="sm"
 									disabled={index === data.assets.length - 1}
-									aria-label={t('admin.share.moveDown')}>↓</button
+									aria-label={t('admin.share.moveDown')}>↓</FlowbiteButton
 								>
 							</form>
 						</div>
@@ -205,8 +214,8 @@
 							}}
 						>
 							<input type="hidden" name="id" value={asset.id} />
-							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm sk-btn-danger"
-								>{t('admin.share.delete')}</button
+							<FlowbiteButton type="submit" variant="danger" size="sm"
+								>{t('admin.share.delete')}</FlowbiteButton
 							>
 						</form>
 					</div>

@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { type Locale } from '$lib/i18n';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
+	import FlowbiteTextarea from '$lib/ui/primitives/FlowbiteTextarea.svelte';
 
 	let { locale, userEmail = '' }: { locale: Locale; userEmail?: string } = $props();
 
@@ -115,9 +119,9 @@
 					<h2 class="font-semibold">{copy.title}</h2>
 					<p class="mt-1 text-xs text-[var(--sk-muted)]">{copy.expectation}</p>
 				</div>
-				<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick={() => (open = false)}>
+				<FlowbiteButton type="button" variant="ghost" size="sm" onclick={() => (open = false)}>
 					{copy.close}
-				</button>
+				</FlowbiteButton>
 			</div>
 			{#if sent}
 				<div class="sk-alert sk-alert-success mt-4">{copy.success}</div>
@@ -131,52 +135,57 @@
 				>
 					{#if error}<div class="sk-alert sk-alert-error py-2 text-xs">{error}</div>{/if}
 					<input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" />
-					<input
+					<FlowbiteInput
 						bind:value={name}
 						required
 						maxlength="120"
-						class="sk-input min-h-9 py-1.5 text-sm"
+						size="sm"
+						class="text-sm"
 						placeholder={copy.name}
 					/>
-					<input
+					<FlowbiteInput
 						bind:value={email}
 						required
 						type="email"
-						class="sk-input min-h-9 py-1.5 text-sm"
+						size="sm"
+						class="text-sm"
 						placeholder={copy.email}
 					/>
-					<select
+					<FlowbiteSelect
 						bind:value={category}
-						class="sk-select min-h-9 py-1.5 text-sm"
+						class="text-sm"
+						size="sm"
 						aria-label={copy.category}
 					>
 						{#each categories as item (item)}
 							<option value={item}>{copy.categories[item]}</option>
 						{/each}
-					</select>
-					<textarea
+					</FlowbiteSelect>
+					<FlowbiteTextarea
 						bind:value={message}
 						required
 						minlength="20"
 						maxlength="4000"
 						rows="4"
-						class="sk-textarea text-sm"
-						placeholder={copy.placeholder}></textarea>
-					<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm" disabled={busy}>
+						class="text-sm"
+						placeholder={copy.placeholder}
+					/>
+					<FlowbiteButton type="submit" variant="primary" size="sm" loading={busy} disabled={busy}>
 						{busy ? '...' : copy.send}
-					</button>
+					</FlowbiteButton>
 				</form>
 			{/if}
 		</div>
 	{/if}
-	<button
+	<FlowbiteButton
 		type="button"
-		class="sk-btn sk-btn-primary shadow-lg"
+		variant="primary"
+		class="shadow-lg"
 		aria-expanded={open}
 		aria-label={copy.button}
 		onclick={() => (open = !open)}
 	>
 		<span aria-hidden="true">✉</span>
 		<span>{copy.button}</span>
-	</button>
+	</FlowbiteButton>
 </div>

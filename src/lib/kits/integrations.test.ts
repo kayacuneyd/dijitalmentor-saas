@@ -40,15 +40,11 @@ describe('coerceFeatureKits', () => {
 	});
 
 	it('drops unknown strings', () => {
-		expect(coerceFeatureKits(['booking-request', 'fantasy-plugin'])).toEqual([
-			'booking-external'
-		]);
+		expect(coerceFeatureKits(['booking-request', 'fantasy-plugin'])).toEqual(['booking-external']);
 	});
 
 	it('deduplicates', () => {
-		expect(coerceFeatureKits(['booking-request', 'booking-request'])).toEqual([
-			'booking-external'
-		]);
+		expect(coerceFeatureKits(['booking-request', 'booking-request'])).toEqual(['booking-external']);
 	});
 
 	it('returns empty for empty input', () => {
@@ -61,7 +57,8 @@ describe('validateIntegrationTarget', () => {
 		const issues: { code: 'custom'; path: (string | number)[]; message: string }[] = [];
 		return {
 			issues,
-			addIssue: (arg: { code: 'custom'; path: (string | number)[]; message: string }) => issues.push(arg)
+			addIssue: (arg: { code: 'custom'; path: (string | number)[]; message: string }) =>
+				issues.push(arg)
 		};
 	};
 
@@ -76,10 +73,7 @@ describe('validateIntegrationTarget', () => {
 
 	it('accepts a valid whatsapp-order with phone', () => {
 		const c = ctx();
-		validateIntegrationTarget(
-			{ type: 'whatsapp-order', enabled: true, phone: '+905551234567' },
-			c
-		);
+		validateIntegrationTarget({ type: 'whatsapp-order', enabled: true, phone: '+905551234567' }, c);
 		expect(c.issues).toHaveLength(0);
 	});
 
@@ -180,10 +174,7 @@ describe('validateIntegrationTarget', () => {
 
 	it('rejects invalid URL format', () => {
 		const c = ctx();
-		validateIntegrationTarget(
-			{ type: 'booking-external', enabled: true, url: 'not-a-url' },
-			c
-		);
+		validateIntegrationTarget({ type: 'booking-external', enabled: true, url: 'not-a-url' }, c);
 		const urlIssue = c.issues.find((i) => i.path.includes('url'));
 		expect(urlIssue).toBeDefined();
 	});

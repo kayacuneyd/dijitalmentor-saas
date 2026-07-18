@@ -62,7 +62,9 @@ describe('site publish API quality gate', () => {
 			ok: false,
 			quality: { canPublish: false }
 		});
-		expect(body.quality.blockers.map((issue: { code: string }) => issue.code)).toContain('psych_scope_claim');
+		expect(body.quality.blockers.map((issue: { code: string }) => issue.code)).toContain(
+			'psych_scope_claim'
+		);
 	});
 
 	it('limits Free users to one first-time published website', async () => {

@@ -3,6 +3,7 @@
 	import type { DraftStore } from '$lib/stores/draft.svelte';
 	import type { ChatMessageRow } from '$lib/server/chatLog';
 	import ChatBubble from '$lib/ui/ChatBubble.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import TypingIndicator from '$lib/ui/TypingIndicator.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 	import { getTranslate } from '$lib/i18n/context';
@@ -32,10 +33,26 @@
 
 	type PromptNote = { id: string; title: string; text: string };
 	const defaultPromptNotes: PromptNote[] = [
-		{ id: 'clarity', title: 'Clearer copy', text: 'Rewrite the page copy to be clearer, warmer, and easier to scan.' },
-		{ id: 'spacing', title: 'More breathing room', text: 'Give the main sections more breathing room and make the page feel calmer.' },
-		{ id: 'trust', title: 'Build trust', text: 'Make the page feel more trustworthy for a first-time visitor without inventing claims.' },
-		{ id: 'mobile', title: 'Mobile polish', text: 'Improve the mobile reading flow and make every important action easy to find.' }
+		{
+			id: 'clarity',
+			title: 'Clearer copy',
+			text: 'Rewrite the page copy to be clearer, warmer, and easier to scan.'
+		},
+		{
+			id: 'spacing',
+			title: 'More breathing room',
+			text: 'Give the main sections more breathing room and make the page feel calmer.'
+		},
+		{
+			id: 'trust',
+			title: 'Build trust',
+			text: 'Make the page feel more trustworthy for a first-time visitor without inventing claims.'
+		},
+		{
+			id: 'mobile',
+			title: 'Mobile polish',
+			text: 'Improve the mobile reading flow and make every important action easy to find.'
+		}
 	];
 	let promptNotes = $state<PromptNote[]>(defaultPromptNotes);
 	let showPromptNotes = $state(false);
@@ -47,11 +64,20 @@
 			if (!saved) return;
 			const parsed = JSON.parse(saved);
 			if (Array.isArray(parsed)) promptNotes = [...defaultPromptNotes, ...parsed];
-		} catch { /* optional */ }
+		} catch {
+			/* optional */
+		}
 	});
 
 	function persistPromptNotes() {
-		try { localStorage.setItem(`saaskaya:prompt-notes:${store.site.id}`, JSON.stringify(promptNotes.slice(defaultPromptNotes.length))); } catch { /* optional */ }
+		try {
+			localStorage.setItem(
+				`saaskaya:prompt-notes:${store.site.id}`,
+				JSON.stringify(promptNotes.slice(defaultPromptNotes.length))
+			);
+		} catch {
+			/* optional */
+		}
 	}
 
 	function usePrompt(text: string) {
@@ -98,7 +124,8 @@
 			// Detect moves: same set of ids, different order.
 			if (
 				aLen === bLen &&
-				beforePage.sections.map((s) => s.id).join() === afterPage.sections.map((s) => s.id).join() &&
+				beforePage.sections.map((s) => s.id).join() ===
+					afterPage.sections.map((s) => s.id).join() &&
 				!beforePage.sections.every((s, i) => s.id === afterPage.sections[i].id)
 			) {
 				sectionsMoved += aLen;
@@ -107,10 +134,7 @@
 			if (!sectionStyleChanged) {
 				sectionStyleChanged = afterPage.sections.some((afterSec) => {
 					const beforeSec = beforePage.sections.find((s) => s.id === afterSec.id);
-					return (
-						beforeSec &&
-						JSON.stringify(beforeSec.style) !== JSON.stringify(afterSec.style)
-					);
+					return beforeSec && JSON.stringify(beforeSec.style) !== JSON.stringify(afterSec.style);
 				});
 			}
 		}
@@ -206,7 +230,10 @@
 					// Honest chat: AI değişiklik yapmadıysa kullanıcıya bildir
 					const summary = changeSummary(before, after);
 					if (!summary && JSON.stringify(before) === JSON.stringify(after)) {
-						messages.push({ role: 'assistant', text: data.reply || 'Hiçbir değişiklik yapılmadı.' });
+						messages.push({
+							role: 'assistant',
+							text: data.reply || 'Hiçbir değişiklik yapılmadı.'
+						});
 						proposal = null;
 						break;
 					}
@@ -285,30 +312,61 @@
 </script>
 
 <div class="flex h-full flex-col gap-3">
-	<div class="shrink-0 rounded-[12px] border border-[#e4d7bb] bg-[#f8edc9] p-3 shadow-[2px_3px_0_rgb(23_22_20/.08)] rotate-[-.35deg]">
-    		<button type="button" class="flex w-full items-center justify-between text-left" onclick={() => (showPromptNotes = !showPromptNotes)} aria-expanded={showPromptNotes}>
-			<span><span class="text-sm font-semibold">Prompt notes</span><span class="ml-2 text-xs text-black/55">copy-ready ideas</span></span>
+	<div
+		class="shrink-0 rounded-[12px] border border-[#e4d7bb] bg-[#f8edc9] p-3 shadow-[2px_3px_0_rgb(23_22_20/.08)] rotate-[-.35deg]"
+	>
+		<button
+			type="button"
+			class="flex w-full items-center justify-between text-left"
+			onclick={() => (showPromptNotes = !showPromptNotes)}
+			aria-expanded={showPromptNotes}
+		>
+			<span
+				><span class="text-sm font-semibold">Prompt notes</span><span
+					class="ml-2 text-xs text-black/55">copy-ready ideas</span
+				></span
+			>
 			<span class="text-xs text-black/55">{showPromptNotes ? 'Hide' : 'Open'}</span>
 		</button>
 		{#if showPromptNotes}
 			<div class="mt-3 grid gap-2 sm:grid-cols-2">
 				{#each promptNotes as note (note.id)}
-					<button type="button" class="rounded-[9px] border border-[#e2d2a8] bg-[#fff8df] p-2.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm" onclick={() => usePrompt(note.text)}>
+					<button
+						type="button"
+						class="rounded-[9px] border border-[#e2d2a8] bg-[#fff8df] p-2.5 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
+						onclick={() => usePrompt(note.text)}
+					>
 						<span class="block text-xs font-semibold">{note.title}</span>
-						<span class="mt-1 block line-clamp-2 text-[11px] leading-4 text-black/60">{note.text}</span>
+						<span class="mt-1 block line-clamp-2 text-[11px] leading-4 text-black/60"
+							>{note.text}</span
+						>
 					</button>
 				{/each}
 			</div>
-			<form class="mt-2 flex gap-2" onsubmit={(e) => { e.preventDefault(); addPrompt(); }}>
-				<input class="sk-input min-w-0 flex-1 bg-[#fff8df] text-xs" bind:value={newPrompt} placeholder="Save your own prompt..." />
-				<button class="sk-btn sk-btn-ghost sk-btn-sm" type="submit" disabled={!newPrompt.trim()}>Save</button>
+			<form
+				class="mt-2 flex gap-2"
+				onsubmit={(e) => {
+					e.preventDefault();
+					addPrompt();
+				}}
+			>
+				<input
+					class="sk-input min-w-0 flex-1 bg-[#fff8df] text-xs"
+					bind:value={newPrompt}
+					placeholder="Save your own prompt..."
+				/>
+				<FlowbiteButton variant="ghost" size="sm" type="submit" disabled={!newPrompt.trim()}
+					>Save</FlowbiteButton
+				>
 			</form>
 		{/if}
 	</div>
 	<div bind:this={transcriptEl} class="flex min-h-32 flex-1 flex-col gap-2 overflow-y-auto">
 		{#if messages.length === 0}
 			<ChatBubble role="assistant">
-				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]">{t('editor.chat.assistantLabel')}</span>
+				<span class="sk-mono mb-2 block text-[10px] text-[var(--sk-faint)]"
+					>{t('editor.chat.assistantLabel')}</span
+				>
 				<span>{t('editor.chat.greeting')}</span>
 			</ChatBubble>
 		{/if}
@@ -317,16 +375,22 @@
 		{/each}
 
 		{#if redirected && !busy}
-			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={forceSend}>
+			<FlowbiteButton
+				type="button"
+				variant="ghost"
+				size="sm"
+				class="self-start"
+				onclick={forceSend}
+			>
 				{t('editor.chat.forceSendPrompt')}
 				{@html uiIcons.arrowRight(14)}
-			</button>
+			</FlowbiteButton>
 		{/if}
 
 		{#if undoStack.length > 0 && !busy && !proposal}
-			<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm self-start" onclick={undo}>
+			<FlowbiteButton type="button" variant="ghost" size="sm" class="self-start" onclick={undo}>
 				{t('editor.chat.undo')} ({undoStack.length})
-			</button>
+			</FlowbiteButton>
 		{/if}
 
 		{#if proposal}
@@ -339,12 +403,25 @@
 						{t('editor.chat.previewNote')}
 					</p>
 					<div class="mt-1 flex flex-wrap gap-2">
-						<button type="button" class="sk-btn sk-btn-primary sk-btn-sm" onclick={approve} disabled={busy}>
+						<FlowbiteButton
+							type="button"
+							variant="primary"
+							size="sm"
+							onclick={approve}
+							disabled={busy}
+							loading={busy}
+						>
 							{t('editor.chat.apply')}
-						</button>
-						<button type="button" class="sk-btn sk-btn-ghost sk-btn-sm" onclick={cancel} disabled={busy}>
+						</FlowbiteButton>
+						<FlowbiteButton
+							type="button"
+							variant="ghost"
+							size="sm"
+							onclick={cancel}
+							disabled={busy}
+						>
 							{t('editor.chat.cancelProposal')}
-						</button>
+						</FlowbiteButton>
 					</div>
 				</div>
 			</div>
@@ -355,7 +432,13 @@
 		{/if}
 	</div>
 
-	<form class="flex gap-2" onsubmit={(e) => { e.preventDefault(); send(); }}>
+	<form
+		class="flex gap-2"
+		onsubmit={(e) => {
+			e.preventDefault();
+			send();
+		}}
+	>
 		<input
 			type="text"
 			class="sk-input min-h-9 flex-1 py-1.5 text-base sm:text-sm"
@@ -365,9 +448,15 @@
 			onfocus={(e) => e.currentTarget.scrollIntoView({ block: 'nearest' })}
 			disabled={busy || proposal !== null}
 		/>
-		<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm" disabled={busy || proposal !== null || !input.trim()}>
+		<FlowbiteButton
+			type="submit"
+			variant="primary"
+			size="sm"
+			disabled={busy || proposal !== null || !input.trim()}
+			loading={busy}
+		>
 			{t('editor.chat.send')}
-		</button>
+		</FlowbiteButton>
 	</form>
 
 	<p class="text-xs leading-5 text-[var(--sk-faint)]">

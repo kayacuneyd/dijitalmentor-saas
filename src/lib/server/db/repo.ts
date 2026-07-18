@@ -37,8 +37,26 @@ export function getDraft(siteId: string): Site | null {
 export function getSiteMeta(siteId: string): SiteMeta | null {
 	const row = db.select().from(sites).where(eq(sites.id, siteId)).get();
 	if (!row) return null;
-	const { id, tenantId, publicHandle, previousPublicHandle, publicHandleChangeCount, ownerUserId, publishedVersion, updatedAt } = row;
-	return { id, tenantId, publicHandle, previousPublicHandle, publicHandleChangeCount, ownerUserId, publishedVersion, updatedAt };
+	const {
+		id,
+		tenantId,
+		publicHandle,
+		previousPublicHandle,
+		publicHandleChangeCount,
+		ownerUserId,
+		publishedVersion,
+		updatedAt
+	} = row;
+	return {
+		id,
+		tenantId,
+		publicHandle,
+		previousPublicHandle,
+		publicHandleChangeCount,
+		ownerUserId,
+		publishedVersion,
+		updatedAt
+	};
 }
 
 export function saveDraft(site: Site, opts?: { ownerUserId?: string }): Site {
@@ -114,9 +132,9 @@ export function isPublicHandleAvailable(handle: string, exceptSiteId?: string): 
 		.where(
 			exceptSiteId
 				? and(
-					or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized)),
-					ne(sites.id, exceptSiteId)
-				)
+						or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized)),
+						ne(sites.id, exceptSiteId)
+					)
 				: or(eq(sites.publicHandle, normalized), eq(sites.previousPublicHandle, normalized))
 		)
 		.get();
@@ -149,7 +167,9 @@ export function setSiteIdentity(input: {
 		};
 	}
 	const isPublishedRename =
-		Boolean(row.publishedVersion) && Boolean(row.publicHandle) && row.publicHandle !== handle.handle;
+		Boolean(row.publishedVersion) &&
+		Boolean(row.publicHandle) &&
+		row.publicHandle !== handle.handle;
 	if (isPublishedRename && row.publicHandleChangeCount >= 1) {
 		return {
 			ok: false,
@@ -172,9 +192,9 @@ export function setSiteIdentity(input: {
 			publicHandle: handle.handle,
 			...(isPublishedRename
 				? {
-					previousPublicHandle: row.publicHandle,
-					publicHandleChangeCount: row.publicHandleChangeCount + 1
-				}
+						previousPublicHandle: row.publicHandle,
+						publicHandleChangeCount: row.publicHandleChangeCount + 1
+					}
 				: {}),
 			updatedAt: new Date()
 		})

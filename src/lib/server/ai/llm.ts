@@ -325,9 +325,13 @@ async function runGroq(req: ToolCallRequest, model: string): Promise<ToolCallRes
 			);
 		}
 		if (auth) {
-			throw new AIUnavailableError('Groq API key is invalid or unauthorized — check /admin/settings.');
+			throw new AIUnavailableError(
+				'Groq API key is invalid or unauthorized — check /admin/settings.'
+			);
 		}
-		throw new AIProviderTransientError(payload.error?.message || 'Groq is unavailable — retry shortly.');
+		throw new AIProviderTransientError(
+			payload.error?.message || 'Groq is unavailable — retry shortly.'
+		);
 	}
 	const call = payload.choices?.[0]?.message?.tool_calls?.find(
 		(item) => item.function?.name === req.tool.name

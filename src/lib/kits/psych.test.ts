@@ -52,14 +52,19 @@ describe('psych professional kits', () => {
 		expect(site.pages[0].sections.every((section) => section.id.includes(kit.slug))).toBe(true);
 	});
 
-	it.each(kitSites)('$slug passes the Phase 3 quality gate without blockers or non-integration warnings', (kit) => {
-		const report = siteQualityCheck(kit.createSite());
-		expect(report.canPublish).toBe(true);
-		expect(report.blockers).toEqual([]);
-		// Integration warnings are expected — kits ship with integrations disabled by design
-		const nonIntegrationWarnings = report.warnings.filter((w) => !w.code.startsWith('integration_'));
-		expect(nonIntegrationWarnings).toEqual([]);
-	});
+	it.each(kitSites)(
+		'$slug passes the Phase 3 quality gate without blockers or non-integration warnings',
+		(kit) => {
+			const report = siteQualityCheck(kit.createSite());
+			expect(report.canPublish).toBe(true);
+			expect(report.blockers).toEqual([]);
+			// Integration warnings are expected — kits ship with integrations disabled by design
+			const nonIntegrationWarnings = report.warnings.filter(
+				(w) => !w.code.startsWith('integration_')
+			);
+			expect(nonIntegrationWarnings).toEqual([]);
+		}
+	);
 
 	it.each(kitSites)('$slug contains no seed media references', (kit) => {
 		const siteText = JSON.stringify(kit.createSite());

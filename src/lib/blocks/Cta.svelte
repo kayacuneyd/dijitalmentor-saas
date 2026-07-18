@@ -3,7 +3,8 @@
 	import { waMeLink, INTEGRATION_DEFAULT_LABELS } from '$lib/kits/integrations';
 	import type { BlockProps } from './registry';
 
-	let { props, content, integrations }: BlockProps<'cta'> & { integrations?: Integration[] } = $props();
+	let { props, content, integrations }: BlockProps<'cta'> & { integrations?: Integration[] } =
+		$props();
 
 	const whatsapp = $derived(getSiteIntegration(integrations ?? [], 'whatsapp-order'));
 	const social = $derived(getSiteIntegration(integrations ?? [], 'social-link'));
@@ -14,10 +15,27 @@
 	const waHref = $derived(whatsapp?.phone ? waMeLink(whatsapp.phone) : null);
 	const extraLinks = $derived(
 		[
-			social ? { href: social.url!, label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link'] } : null,
-			video ? { href: video.url!, label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult'] } : null,
-			menu ? { href: menu.url!, label: menu.label?.tr ?? INTEGRATION_DEFAULT_LABELS['menu-digital'] } : null,
-			payment ? { href: payment.url!, label: payment.label?.tr ?? INTEGRATION_DEFAULT_LABELS['payment-link'] } : null
+			social
+				? {
+						href: social.url!,
+						label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link']
+					}
+				: null,
+			video
+				? {
+						href: video.url!,
+						label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult']
+					}
+				: null,
+			menu
+				? { href: menu.url!, label: menu.label?.tr ?? INTEGRATION_DEFAULT_LABELS['menu-digital'] }
+				: null,
+			payment
+				? {
+						href: payment.url!,
+						label: payment.label?.tr ?? INTEGRATION_DEFAULT_LABELS['payment-link']
+					}
+				: null
 		].filter(Boolean) as { href: string; label: string }[]
 	);
 </script>
@@ -36,15 +54,22 @@
 					>{content.buttonLabel}</a
 				>
 				{#if waHref}
-					<a href={waHref} target="_blank" rel="noopener nofollow"
+					<a
+						href={waHref}
+						target="_blank"
+						rel="noopener nofollow"
 						class="btn btn-ghost border-primary-content/30 mt-2 text-sm"
 					>
 						💬 {whatsapp?.label?.tr ?? INTEGRATION_DEFAULT_LABELS['whatsapp-order']}
 					</a>
 				{/if}
 				{#each extraLinks as link}
-					<a href={link.href} target="_blank" rel="noopener nofollow"
-						class="btn btn-ghost border-primary-content/30 mt-1 text-sm">{link.label}</a>
+					<a
+						href={link.href}
+						target="_blank"
+						rel="noopener nofollow"
+						class="btn btn-ghost border-primary-content/30 mt-1 text-sm">{link.label}</a
+					>
 				{/each}
 			</div>
 		</div>
@@ -65,15 +90,22 @@
 					{content.buttonLabel}
 				</a>
 				{#if waHref}
-					<a href={waHref} target="_blank" rel="noopener nofollow"
+					<a
+						href={waHref}
+						target="_blank"
+						rel="noopener nofollow"
 						class="btn btn-ghost border-primary-content/30 text-sm"
 					>
 						💬 {whatsapp?.label?.tr ?? INTEGRATION_DEFAULT_LABELS['whatsapp-order']}
 					</a>
 				{/if}
 				{#each extraLinks as link}
-					<a href={link.href} target="_blank" rel="noopener nofollow"
-						class="btn btn-ghost border-primary-content/30 text-sm">{link.label}</a>
+					<a
+						href={link.href}
+						target="_blank"
+						rel="noopener nofollow"
+						class="btn btn-ghost border-primary-content/30 text-sm">{link.label}</a
+					>
 				{/each}
 			</div>
 		</div>

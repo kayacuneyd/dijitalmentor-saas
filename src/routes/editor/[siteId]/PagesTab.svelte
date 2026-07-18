@@ -7,6 +7,8 @@
 	import { DEFAULT_LOCALE, type Locale as AppLocale } from '$lib/i18n';
 	import type { CatalogKey } from '$lib/i18n/catalog';
 	import { siteQualityCheck } from '$lib/quality/siteQuality';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteBadge from '$lib/ui/primitives/FlowbiteBadge.svelte';
 
 	const t = getTranslate();
 	const appLocale: AppLocale = $derived(
@@ -63,29 +65,47 @@
 	const suggestions = $derived.by(() => {
 		const items: Array<{ severity: 'warning' | 'info'; message: string; action: string }> = [];
 		const hasFaq = store.site.pages.some((p) => p.sections.some((s) => s.type === 'faq'));
-		const hasContact = store.site.pages.some(
-			(p) => p.sections.some((s) => s.type === 'contact')
+		const hasContact = store.site.pages.some((p) => p.sections.some((s) => s.type === 'contact'));
+		const hasCredentials = store.site.pages.some((p) =>
+			p.sections.some((s) => s.type === 'credentials')
 		);
-		const hasCredentials = store.site.pages.some(
-			(p) => p.sections.some((s) => s.type === 'credentials')
-		);
-		const hasTestimonials = store.site.pages.some(
-			(p) => p.sections.some((s) => s.type === 'testimonials')
+		const hasTestimonials = store.site.pages.some((p) =>
+			p.sections.some((s) => s.type === 'testimonials')
 		);
 		if (!hasContact) {
-			items.push({ severity: 'warning', message: 'İletişim section ekle — ziyaretçiler sana ulaşamaz.', action: 'contact-block' });
+			items.push({
+				severity: 'warning',
+				message: 'İletişim section ekle — ziyaretçiler sana ulaşamaz.',
+				action: 'contact-block'
+			});
 		}
 		if (!hasFaq && store.site.pages.length < MAX_PAGES) {
-			items.push({ severity: 'info', message: 'SSS sayfası ekle — güveni artırır.', action: 'add-faq-page' });
+			items.push({
+				severity: 'info',
+				message: 'SSS sayfası ekle — güveni artırır.',
+				action: 'add-faq-page'
+			});
 		}
 		if (!hasCredentials) {
-			items.push({ severity: 'info', message: 'Sertifika/yetkinlik section\'ı ekle — profesyonel güven.', action: 'credentials-section' });
+			items.push({
+				severity: 'info',
+				message: "Sertifika/yetkinlik section'ı ekle — profesyonel güven.",
+				action: 'credentials-section'
+			});
 		}
 		if (!hasTestimonials) {
-			items.push({ severity: 'info', message: 'Referans section\'ı ekle — sosyal kanıt sağlar.', action: 'testimonials-section' });
+			items.push({
+				severity: 'info',
+				message: "Referans section'ı ekle — sosyal kanıt sağlar.",
+				action: 'testimonials-section'
+			});
 		}
 		if (quality.warnings.find((w) => w.code === 'missing_contact_path')) {
-			items.push({ severity: 'warning', message: 'İletişim yolun zayıf — contact veya booking section ekle.', action: 'contact-page' });
+			items.push({
+				severity: 'warning',
+				message: 'İletişim yolun zayıf — contact veya booking section ekle.',
+				action: 'contact-page'
+			});
 		}
 		return items;
 	});
@@ -93,9 +113,7 @@
 	const pageStatuses = $derived.by(() => {
 		return store.site.pages.map((page) => {
 			const issues: Array<{ kind: 'warning' | 'info'; label: string }> = [];
-			const hasContact = page.sections.some(
-				(s) => s.type === 'contact' || s.type === 'booking'
-			);
+			const hasContact = page.sections.some((s) => s.type === 'contact' || s.type === 'booking');
 			const hasMissingLocale = LOCALES.some(
 				(loc) => !page.title[loc] || page.title[loc].trim() === ''
 			);
@@ -149,36 +167,38 @@
 						</span>
 					</button>
 					{#if store.site.pages.length > 1}
-						<button
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm shrink-0 px-2"
+							variant="danger"
+							size="sm"
+							class="shrink-0 !px-2"
 							onclick={() => (confirmRemoveSlug = pageItem.slug)}
 							aria-label={t('editor.pages.deleteAria', { name: pageItem.title[store.editLocale] })}
 							title={t('editor.pages.deleteTitle')}
 						>
 							✕
-						</button>
+						</FlowbiteButton>
 					{/if}
 				</div>
 				<div class="flex flex-wrap gap-1 px-3 pb-2">
-					<span class="badge badge-sm badge-secondary"
-						>{t('editor.pages.sectionsBadge', { count: pageItem.sections.length })}</span
+					<FlowbiteBadge tone="neutral"
+						>{t('editor.pages.sectionsBadge', { count: pageItem.sections.length })}</FlowbiteBadge
 					>
 					{#if navSlugs.has(pageItem.slug)}
-						<span class="badge badge-sm">{t('editor.pages.inMenu')}</span>
+						<FlowbiteBadge tone="neutral">{t('editor.pages.inMenu')}</FlowbiteBadge>
 					{:else}
-						<span class="badge badge-sm badge-warning">{t('editor.pages.notInMenu')}</span>
+						<FlowbiteBadge tone="warning">{t('editor.pages.notInMenu')}</FlowbiteBadge>
 					{/if}
 					{#if pageHasContact(pageItem.slug)}
-						<span class="badge badge-sm badge-success">{t('editor.pages.hasContact')}</span>
+						<FlowbiteBadge tone="success">{t('editor.pages.hasContact')}</FlowbiteBadge>
 					{/if}
 					{#each statuses as status (status.label)}
-						<span
-							class="badge badge-sm {status.kind === 'warning' ? 'badge-warning' : 'badge-ghost'}"
+						<FlowbiteBadge
+							tone={status.kind === 'warning' ? 'warning' : 'neutral'}
 							title={status.label}
 						>
 							{status.label}
-						</span>
+						</FlowbiteBadge>
 					{/each}
 				</div>
 				<ol class="border-t border-[var(--sk-line)] px-3 py-2">
@@ -187,7 +207,7 @@
 							<span class="sk-mono w-5 text-[10px] text-[var(--sk-faint)]">
 								{index + 1}
 							</span>
-							<span class="badge badge-sm">{sectionLabel(section.type)}</span>
+							<FlowbiteBadge tone="neutral">{sectionLabel(section.type)}</FlowbiteBadge>
 							<span class="min-w-0 truncate font-[var(--font-mono)] text-[10px]">{section.id}</span>
 						</li>
 					{/each}
@@ -204,20 +224,22 @@
 						{/if}
 					</p>
 					<div class="flex gap-2">
-						<button
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
+							variant="danger"
+							size="sm"
 							onclick={() => confirmRemove(pageItem.slug)}
 						>
 							{t('editor.pages.confirmYes')}
-						</button>
-						<button
+						</FlowbiteButton>
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-ghost sk-btn-sm"
+							variant="ghost"
+							size="sm"
 							onclick={() => (confirmRemoveSlug = null)}
 						>
 							{t('editor.pages.confirmCancel')}
-						</button>
+						</FlowbiteButton>
 					</div>
 				</li>
 			{/if}
@@ -251,14 +273,16 @@
 			{#if formError}
 				<p class="sk-alert sk-alert-error px-3 py-2 text-xs">{formError}</p>
 			{/if}
-			<button
+			<FlowbiteButton
 				type="button"
-				class="sk-btn sk-btn-primary sk-btn-sm mt-1 w-fit"
+				variant="primary"
+				size="sm"
+				class="mt-1 w-fit"
 				onclick={submitAddPage}
 				disabled={store.site.pages.length >= MAX_PAGES}
 			>
 				{t('editor.pages.addButton')}
-			</button>
+			</FlowbiteButton>
 			<p class="text-xs text-[var(--sk-faint)]">
 				{t('editor.pages.addHelp')}
 			</p>
@@ -271,7 +295,10 @@
 			<div class="flex flex-col gap-1.5">
 				{#each suggestions as sug (`${sug.action}`)}
 					<div
-						class="flex items-start gap-2 rounded-[8px] bg-white/80 px-2.5 py-2 text-xs {sug.severity === 'warning' ? 'text-amber-800' : 'text-blue-800'}"
+						class="flex items-start gap-2 rounded-[8px] bg-white/80 px-2.5 py-2 text-xs {sug.severity ===
+						'warning'
+							? 'text-amber-800'
+							: 'text-blue-800'}"
 					>
 						<span class="mt-0.5 shrink-0">{sug.severity === 'warning' ? '⚠' : '💡'}</span>
 						<span class="leading-5">{sug.message}</span>

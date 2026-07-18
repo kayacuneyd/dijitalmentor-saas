@@ -2,6 +2,8 @@
 	import { enhance } from '$app/forms';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
@@ -62,8 +64,8 @@
 
 <AppCanvasShell label="saaskaya.app / beta profile">
 	{#snippet right()}
-		<a href={l('/')} class="sk-btn sk-btn-secondary sk-btn-sm"
-			>{@html uiIcons.home(14)}{copy.home}</a
+		<FlowbiteButton href={l('/')} variant="secondary" size="sm"
+			>{@html uiIcons.home(14)}{copy.home}</FlowbiteButton
 		>
 		<LanguageSwitcher {locale} />
 	{/snippet}
@@ -93,51 +95,61 @@
 			>
 				<label class="flex flex-col gap-1 text-sm font-medium">
 					{copy.fullName}
-					<input
+					<FlowbiteInput
 						name="fullName"
 						required
 						minlength="2"
 						maxlength="100"
 						value={data.profile?.fullName ?? ''}
 						placeholder={copy.fullNamePlaceholder}
-						class="sk-input text-[15px]"
+						size="lg"
+						class="text-[15px]"
 						disabled={busy}
 					/>
 				</label>
 				<label class="flex flex-col gap-1 text-sm font-medium">
 					{copy.profession}
-					<input
+					<FlowbiteInput
 						name="profession"
 						required
 						minlength="2"
 						maxlength="80"
 						value={data.profile?.profession ?? ''}
 						placeholder={copy.professionPlaceholder}
-						class="sk-input text-[15px]"
+						size="lg"
+						class="text-[15px]"
 						disabled={busy}
 					/>
 				</label>
 				<label class="flex flex-col gap-1 text-sm font-medium">
 					{copy.city}
-					<input
+					<FlowbiteInput
 						name="city"
 						required
 						minlength="2"
 						maxlength="80"
 						value={data.profile?.city ?? ''}
 						placeholder={copy.cityPlaceholder}
-						class="sk-input text-[15px]"
+						size="lg"
+						class="text-[15px]"
 						disabled={busy}
 					/>
 				</label>
 				{#if form?.message}
 					<div class="sk-alert sk-alert-error text-xs">{form.message}</div>
 				{/if}
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
-					{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
+				<FlowbiteButton
+					type="submit"
+					variant="primary"
+					size="lg"
+					class="w-full"
+					loading={busy}
+					disabled={busy}
+				>
+					{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 					{copy.submit}
 					{#if !busy}{@html uiIcons.arrowRight(16)}{/if}
-				</button>
+				</FlowbiteButton>
 			</form>
 		</AppCard>
 	</div>

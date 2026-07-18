@@ -143,7 +143,10 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		});
 		appendChatMessage({ siteId: site.id, role: 'assistant', kind: 'applied', body: result.reply });
 		// Append a memory note so the AI remembers this decision across sessions.
-		appendToMemory(site.id, `${opts.decision === 'auto_applied' ? 'Auto-applied' : 'Applied'}: ${result.reply.slice(0, 200)}`).catch((e) => console.error('[memory] append failed:', e));
+		appendToMemory(
+			site.id,
+			`${opts.decision === 'auto_applied' ? 'Auto-applied' : 'Applied'}: ${result.reply.slice(0, 200)}`
+		).catch((e) => console.error('[memory] append failed:', e));
 		return json({ ok: true, kind: 'applied', reply: result.reply, site: result.site });
 	};
 

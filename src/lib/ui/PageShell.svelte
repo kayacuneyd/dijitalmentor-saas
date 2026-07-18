@@ -42,13 +42,21 @@
 			...(page.data.user?.isAdmin
 				? [{ href: '/admin', label: t('dashboard.nav.admin'), icon: uiIcons.settings(16) }]
 				: [])
-		].map((item) => ({ ...item, active: currentPath === item.href || currentPath.startsWith(`${item.href}/`) })) as PanelNavItem[]
+		].map((item) => ({
+			...item,
+			active: currentPath === item.href || currentPath.startsWith(`${item.href}/`)
+		})) as PanelNavItem[]
 	);
 </script>
 
 {#snippet brand()}
-	<a href="/dashboard" class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]">
-		<span class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]">
+	<a
+		href="/dashboard"
+		class="panel-sidebar-brand flex min-w-0 items-center gap-2 text-[var(--sk-ink)]"
+	>
+		<span
+			class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[#171614]"
+		>
 			<img src={logoUrl} alt="saaskaya" class="size-full object-contain" />
 		</span>
 		{#if showWordmark}
@@ -73,7 +81,11 @@
 	{canvasLabel}
 	{actions}
 	items={userItems}
-	sidebarLabel={locale === 'tr' ? 'Kullanıcı paneli' : locale === 'de' ? 'Benutzerbereich' : 'User panel'}
+	sidebarLabel={locale === 'tr'
+		? 'Kullanıcı paneli'
+		: locale === 'de'
+			? 'Benutzerbereich'
+			: 'User panel'}
 	sidebarPosition="right"
 	storageKey="saaskaya.user.sidebar.v2"
 	{brand}

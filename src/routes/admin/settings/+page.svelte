@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -176,22 +177,22 @@
 										{#if res.status === 'pending'}
 											<form method="POST" action="?/confirmPayment" use:enhance>
 												<input type="hidden" name="reservationId" value={res.id} />
-												<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
-													>Confirm</button
+												<FlowbiteButton type="submit" variant="primary" size="sm"
+													>Confirm</FlowbiteButton
 												>
 											</form>
 											<form method="POST" action="?/rejectPayment" use:enhance>
 												<input type="hidden" name="reservationId" value={res.id} />
-												<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+												<FlowbiteButton type="submit" variant="danger" size="sm">
 													Reject
-												</button>
+												</FlowbiteButton>
 											</form>
 										{:else if res.status === 'paid' || res.status === 'failed'}
 											<form method="POST" action="?/fulfillReservation" use:enhance>
 												<input type="hidden" name="reservationId" value={res.id} />
-												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+												<FlowbiteButton type="submit" variant="secondary" size="sm">
 													{res.status === 'failed' ? 'Retry' : 'Fulfill'}
-												</button>
+												</FlowbiteButton>
 											</form>
 										{/if}
 									</div>
@@ -209,47 +210,71 @@
 			<div>
 				<h2 class="text-base font-semibold">Platform branding</h2>
 				<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
-					Upload the platform logo or icon without changing code. SVG files are checked for unsafe content;
-					PNG, JPEG, GIF and WebP files are normalized before storage.
+					Upload the platform logo or icon without changing code. SVG files are checked for unsafe
+					content; PNG, JPEG, GIF and WebP files are normalized before storage.
 				</p>
 			</div>
 			<div class="grid gap-4 md:grid-cols-2">
-				{#each [
-					{ target: 'logo', label: 'Main logo', url: data.branding.logoUrl },
-					{ target: 'icon', label: 'Favicon / app icon', url: data.branding.iconUrl }
-				] as asset (asset.target)}
+				{#each [{ target: 'logo', label: 'Main logo', url: data.branding.logoUrl }, { target: 'icon', label: 'Favicon / app icon', url: data.branding.iconUrl }] as asset (asset.target)}
 					<div class="rounded-[var(--sk-radius)] border border-[var(--sk-line)] p-3">
 						<div class="flex items-center gap-3">
-							<div class="flex size-16 items-center justify-center overflow-hidden rounded-[10px] bg-[var(--sk-shell)]">
+							<div
+								class="flex size-16 items-center justify-center overflow-hidden rounded-[10px] bg-[var(--sk-shell)]"
+							>
 								<img src={asset.url} alt={asset.label} class="size-full object-contain" />
 							</div>
 							<div>
 								<p class="text-sm font-semibold">{asset.label}</p>
-								<p class="sk-mono mt-1 text-[10px] text-[var(--sk-faint)]">v{data.branding.version}</p>
+								<p class="sk-mono mt-1 text-[10px] text-[var(--sk-faint)]">
+									v{data.branding.version}
+								</p>
 							</div>
 						</div>
-						<form method="POST" action="?/uploadBranding" enctype="multipart/form-data" use:enhance class="mt-3 flex flex-wrap items-center gap-2">
+						<form
+							method="POST"
+							action="?/uploadBranding"
+							enctype="multipart/form-data"
+							use:enhance
+							class="mt-3 flex flex-wrap items-center gap-2"
+						>
 							<input type="hidden" name="target" value={asset.target} />
-							<input name="file" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg,image/gif,image/webp" class="file-input file-input-sm w-full max-w-xs" />
-							<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Upload</button>
+							<input
+								name="file"
+								type="file"
+								accept=".svg,image/svg+xml,image/png,image/jpeg,image/gif,image/webp"
+								class="sk-input w-full max-w-xs py-1.5"
+							/>
+							<FlowbiteButton type="submit" variant="primary" size="sm">Upload</FlowbiteButton>
 						</form>
 						<form method="POST" action="?/resetBranding" use:enhance class="mt-2">
 							<input type="hidden" name="target" value={asset.target} />
-							<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Use committed default</button>
+							<FlowbiteButton type="submit" variant="ghost" size="sm"
+								>Use committed default</FlowbiteButton
+							>
 						</form>
 					</div>
 				{/each}
 			</div>
-			<form method="POST" action="?/saveBrandingPreferences" use:enhance class="grid gap-3 border-t border-[var(--sk-line)] pt-4 md:grid-cols-[minmax(220px,1fr)_auto_auto] md:items-end">
-				<label class="form-control">
+			<form
+				method="POST"
+				action="?/saveBrandingPreferences"
+				use:enhance
+				class="grid gap-3 border-t border-[var(--sk-line)] pt-4 md:grid-cols-[minmax(220px,1fr)_auto_auto] md:items-end"
+			>
+				<label class="sk-field-stack">
 					<span class="mb-1 text-xs font-medium">Brand name</span>
 					<input name="brandName" value={data.branding.brandName} maxlength="80" class="sk-input" />
 				</label>
 				<label class="flex items-center gap-2 pb-2 text-sm">
-					<input name="showWordmark" type="checkbox" class="checkbox checkbox-sm" checked={data.branding.showWordmark} />
+					<input
+						name="showWordmark"
+						type="checkbox"
+						class="size-4 accent-[var(--sk-ink)]"
+						checked={data.branding.showWordmark}
+					/>
 					Show beside logo
 				</label>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Save preferences</button>
+				<FlowbiteButton type="submit" variant="primary" size="sm">Save preferences</FlowbiteButton>
 			</form>
 		</div>
 	</AppCard>
@@ -301,7 +326,7 @@
 									{groupMeta[group].detail} · {groupSummary(group)}
 								</span>
 							</span>
-							<span class="sk-btn sk-btn-secondary sk-btn-sm">Open</span>
+							<FlowbiteButton variant="secondary" size="sm">Open</FlowbiteButton>
 						</summary>
 						<div class="border-t border-[var(--sk-line)]">
 							{#each settingsFor(group) as setting (setting.key)}
@@ -334,14 +359,15 @@
 												placeholder={setting.display || 'not set'}
 												autocomplete="off"
 											/>
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Save</button>
+											<FlowbiteButton type="submit" variant="primary" size="sm">Save</FlowbiteButton
+											>
 										</form>
 										{#if setting.source === 'db'}
 											<form method="POST" action="?/clear" use:enhance>
 												<input type="hidden" name="key" value={setting.key} />
-												<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+												<FlowbiteButton type="submit" variant="danger" size="sm">
 													Clear
-												</button>
+												</FlowbiteButton>
 											</form>
 										{/if}
 									</div>
@@ -406,9 +432,9 @@
 										{#if !item.resolvedAt}
 											<form method="POST" action="?/resolveError" use:enhance>
 												<input type="hidden" name="errorId" value={item.id} />
-												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+												<FlowbiteButton type="submit" variant="secondary" size="sm">
 													Resolve
-												</button>
+												</FlowbiteButton>
 											</form>
 										{/if}
 									</li>

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import FlowbiteBadge from './primitives/FlowbiteBadge.svelte';
+
 	type Tone = 'neutral' | 'success' | 'warning' | 'error';
 	type Props = {
 		tone?: Tone;
@@ -7,15 +9,6 @@
 	};
 
 	let { tone = 'neutral', children, class: className = '' }: Props = $props();
-
-	const toneClass = {
-		neutral: '',
-		success: 'sk-pill-success',
-		warning: 'sk-pill-warning',
-		error: 'sk-pill-error'
-	} as const;
 </script>
 
-<span class="sk-pill {toneClass[tone]} {className}">
-	{@render children()}
-</span>
+<FlowbiteBadge {tone} class={className}>{@render children()}</FlowbiteBadge>

@@ -13,4 +13,3 @@ export const UNSUPPORTED_NICHE = 'unsupported';
 export function isUnsupportedNicheAnswer(answers: OnboardingAnswers): boolean {
 	return answers.niche === UNSUPPORTED_NICHE;
 }
-

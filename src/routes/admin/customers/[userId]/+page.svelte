@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 
@@ -57,7 +58,9 @@
 	active="/admin/customers"
 >
 	{#snippet actions()}
-		<a href="/admin/customers" class="sk-btn sk-btn-secondary sk-btn-sm">Back to customers</a>
+		<FlowbiteButton href="/admin/customers" variant="secondary" size="sm"
+			>Back to customers</FlowbiteButton
+		>
 	{/snippet}
 	{#if form?.overridden}
 		<div class="sk-alert sk-alert-success">
@@ -149,16 +152,17 @@
 				{#if c.subscription.state === 'free'}
 					<form method="POST" action="?/overrideSubscription" use:enhance>
 						<input type="hidden" name="next" value="active" />
-						<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">Comp Pro</button>
+						<FlowbiteButton type="submit" variant="secondary" size="sm">Comp Pro</FlowbiteButton>
 					</form>
 					<form method="POST" action="?/overrideSubscription" use:enhance>
 						<input type="hidden" name="next" value="premium" />
-						<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">Comp Premium</button>
+						<FlowbiteButton type="submit" variant="secondary" size="sm">Comp Premium</FlowbiteButton
+						>
 					</form>
 				{:else}
 					<form method="POST" action="?/overrideSubscription" use:enhance>
 						<input type="hidden" name="next" value="free" />
-						<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Revert to Free</button>
+						<FlowbiteButton type="submit" variant="ghost" size="sm">Revert to Free</FlowbiteButton>
 					</form>
 				{/if}
 			</div>
@@ -221,7 +225,9 @@
 					placeholder="Reason (required)"
 					class="sk-input min-h-8 py-1.5 text-sm"
 				/>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm w-fit">Grant top-up</button>
+				<FlowbiteButton type="submit" variant="primary" size="sm" class="w-fit"
+					>Grant top-up</FlowbiteButton
+				>
 			</form>
 		</div>
 	</AppCard>
@@ -266,45 +272,51 @@
 											AI: {site.lastGateDecision}
 										</StatusPill>
 									{/if}
-									<a
+									<FlowbiteButton
 										href="/preview/{site.id}"
 										target="_blank"
-										class="sk-btn sk-btn-ghost sk-btn-sm"
+										variant="ghost"
+										size="sm"
 									>
 										Preview
-									</a>
-									<a href="/editor/{site.id}" class="sk-btn sk-btn-secondary sk-btn-sm">Edit</a>
+									</FlowbiteButton>
+									<FlowbiteButton href="/editor/{site.id}" variant="secondary" size="sm"
+										>Edit</FlowbiteButton
+									>
 									{#if site.domain}
 										<form method="POST" action="?/detachDomain" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
-											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
+											<FlowbiteButton type="submit" variant="ghost" size="sm">
 												Detach domain
-											</button>
+											</FlowbiteButton>
 										</form>
 									{/if}
 									{#if site.publishedVersion}
-										<a href={liveUrl(site)} target="_blank" class="sk-btn sk-btn-ghost sk-btn-sm">
+										<FlowbiteButton href={liveUrl(site)} target="_blank" variant="ghost" size="sm">
 											Live {@html uiIcons.external(13)}
-										</a>
+										</FlowbiteButton>
 										<form method="POST" action="?/unpublish" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
-											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+											<FlowbiteButton type="submit" variant="danger" size="sm">
 												Unpublish
-											</button>
+											</FlowbiteButton>
 										</form>
 									{:else}
 										<form method="POST" action="?/publish" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
-											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">Publish</button>
+											<FlowbiteButton type="submit" variant="ghost" size="sm"
+												>Publish</FlowbiteButton
+											>
 										</form>
 									{/if}
-									<button
+									<FlowbiteButton
 										type="button"
 										onclick={() => (deleteConfirmSiteId = site.id)}
-										class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
+										variant="danger"
+										size="sm"
 									>
 										Delete
-									</button>
+									</FlowbiteButton>
 								</div>
 							</div>
 							{#if deleteConfirmSiteId === site.id}
@@ -326,17 +338,18 @@
 										}}
 									>
 										<input type="hidden" name="siteId" value={site.id} />
-										<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+										<FlowbiteButton type="submit" variant="danger" size="sm">
 											Confirm delete
-										</button>
+										</FlowbiteButton>
 									</form>
-									<button
+									<FlowbiteButton
 										type="button"
 										onclick={() => (deleteConfirmSiteId = null)}
-										class="sk-btn sk-btn-ghost sk-btn-sm"
+										variant="ghost"
+										size="sm"
 									>
 										Cancel
-									</button>
+									</FlowbiteButton>
 								</div>
 							{/if}
 						</li>

@@ -99,7 +99,9 @@ export const actions: Actions = {
 			});
 			return { brandingSaved: target };
 		} catch (error) {
-			return fail(400, { message: error instanceof Error ? error.message : 'Branding upload failed.' });
+			return fail(400, {
+				message: error instanceof Error ? error.message : 'Branding upload failed.'
+			});
 		}
 	},
 	resetBranding: async ({ request, locals }) => {
@@ -120,7 +122,9 @@ export const actions: Actions = {
 			});
 			return { brandingPreferencesSaved: true };
 		} catch (error) {
-			return fail(400, { message: error instanceof Error ? error.message : 'Branding preferences failed.' });
+			return fail(400, {
+				message: error instanceof Error ? error.message : 'Branding preferences failed.'
+			});
 		}
 	},
 	resolveError: async ({ request, locals }) => {

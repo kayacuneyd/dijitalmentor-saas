@@ -54,7 +54,10 @@ export function siteVisitSummaryForSite(siteId: string, days = 30, now = new Dat
 		// Materialize before sorting so the export is stable across runtimes.
 		byDay: [
 			...rows
-				.reduce((map, row) => map.set(row.day, (map.get(row.day) ?? 0) + row.visits), new Map<string, number>())
+				.reduce(
+					(map, row) => map.set(row.day, (map.get(row.day) ?? 0) + row.visits),
+					new Map<string, number>()
+				)
 				.entries()
 		]
 			.sort(([a], [b]) => a.localeCompare(b))

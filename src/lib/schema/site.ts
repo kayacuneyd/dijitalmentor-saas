@@ -303,10 +303,7 @@ export const sectionShapes = {
 			url: z
 				.string()
 				.url()
-				.refine(
-					(u) => /youtube|vimeo|youtu\.be/.test(u),
-					'URL must be a YouTube or Vimeo link'
-				),
+				.refine((u) => /youtube|vimeo|youtu\.be/.test(u), 'URL must be a YouTube or Vimeo link'),
 			aspectRatio: z.enum(['16/9', '4/3', '1/1']).default('16/9'),
 			hideOnMobile
 		}),
@@ -318,30 +315,37 @@ export const sectionShapes = {
 	collection: {
 		props: z.strictObject({
 			variant: z.enum(['cards', 'list']).default('cards'),
-			kind: z.enum([
-				'projects',
-				'resources',
-				'publications',
-				'courses',
-				'media-appearances',
-				'downloads',
-				'case-studies',
-				'positions',
-				'academic-service'
-			]).default('resources'),
+			kind: z
+				.enum([
+					'projects',
+					'resources',
+					'publications',
+					'courses',
+					'media-appearances',
+					'downloads',
+					'case-studies',
+					'positions',
+					'academic-service'
+				])
+				.default('resources'),
 			hideOnMobile
 		}),
 		content: z.strictObject({
 			title: nonEmpty,
 			intro: z.string().optional(),
-			items: z.array(z.strictObject({
-				title: nonEmpty,
-				description: z.string().optional(),
-				href: href.optional(),
-				meta: z.string().optional(),
-				imageUrl: imageRef.optional(),
-				imageAlt: z.string().optional()
-			})).min(1).max(12)
+			items: z
+				.array(
+					z.strictObject({
+						title: nonEmpty,
+						description: z.string().optional(),
+						href: href.optional(),
+						meta: z.string().optional(),
+						imageUrl: imageRef.optional(),
+						imageAlt: z.string().optional()
+					})
+				)
+				.min(1)
+				.max(12)
 		})
 	}
 } as const;
@@ -410,10 +414,12 @@ export const pageSchema = z.strictObject({
 	slug,
 	title: localized(nonEmpty),
 	sections: z.array(sectionSchema).min(1).max(12),
-	meta: z.strictObject({
-		title: nonEmpty.max(70).optional(),
-		description: nonEmpty.max(200).optional()
-	}).optional()
+	meta: z
+		.strictObject({
+			title: nonEmpty.max(70).optional(),
+			description: nonEmpty.max(200).optional()
+		})
+		.optional()
 });
 export type Page = z.infer<typeof pageSchema>;
 
@@ -483,21 +489,33 @@ export const siteSettingsSchema = z.strictObject({
 	primaryCta: localized(nonEmpty).optional(),
 	contactEmail: z.email().optional(),
 	poweredByBadge: z.boolean().default(true),
-	seo: z.strictObject({
-		description: localized(nonEmpty).optional(),
-		ogImage: imageRef.optional(),
-		twitterCard: z.enum(['summary', 'summary_large_image']).optional()
-	}).optional(),
+	seo: z
+		.strictObject({
+			description: localized(nonEmpty).optional(),
+			ogImage: imageRef.optional(),
+			twitterCard: z.enum(['summary', 'summary_large_image']).optional()
+		})
+		.optional(),
 	integrations: z.array(integrationEntrySchema).max(8).optional(),
 	favicon: imageRef.optional(),
-	logo: z.strictObject({
-		light: imageRef.optional(),
-		dark: imageRef.optional()
-	}).optional(),
-	analytics: z.strictObject({
-		ga4Id: z.string().regex(/^G-[A-Z0-9]{10,}$/).optional(),
-		metaPixelId: z.string().regex(/^\d{15,16}$/).optional()
-	}).optional(),
+	logo: z
+		.strictObject({
+			light: imageRef.optional(),
+			dark: imageRef.optional()
+		})
+		.optional(),
+	analytics: z
+		.strictObject({
+			ga4Id: z
+				.string()
+				.regex(/^G-[A-Z0-9]{10,}$/)
+				.optional(),
+			metaPixelId: z
+				.string()
+				.regex(/^\d{15,16}$/)
+				.optional()
+		})
+		.optional(),
 	cookieConsent: z.boolean().optional()
 });
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;

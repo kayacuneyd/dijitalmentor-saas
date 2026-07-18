@@ -4,7 +4,10 @@ import type { OnboardingAnswers } from '$lib/onboarding/questions';
 import { kitBySlug } from '$lib/kits';
 import type { Locale, Site } from '$lib/schema/site';
 
-const localeSchema = z.array(z.enum(['tr', 'en', 'de'])).min(1).max(3);
+const localeSchema = z
+	.array(z.enum(['tr', 'en', 'de']))
+	.min(1)
+	.max(3);
 const emailSchema = z.email();
 
 const FALLBACK_KIT_BY_NICHE: Record<string, string> = {
@@ -61,7 +64,10 @@ function pickLocales(answers?: OnboardingAnswers): Locale[] {
 	return parsed.success ? parsed.data : ['tr', 'en', 'de'];
 }
 
-function localized(base: Partial<Record<Locale, string>>, fallbackKey: keyof (typeof fallbackText)['tr']) {
+function localized(
+	base: Partial<Record<Locale, string>>,
+	fallbackKey: keyof (typeof fallbackText)['tr']
+) {
 	return {
 		tr: base.tr?.trim() || fallbackText.tr[fallbackKey],
 		en: base.en?.trim() || fallbackText.en[fallbackKey],

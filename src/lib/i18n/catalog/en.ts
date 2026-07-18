@@ -124,11 +124,11 @@ export const en = {
 			booking: 'Booking',
 			credentials: 'Credentials',
 			team: 'Team',
-			footer: 'Footer'
-			,stats: 'Stats'
-			,clients: 'Client logos'
-			,video: 'Video'
-			,collection: 'Collection'
+			footer: 'Footer',
+			stats: 'Stats',
+			clients: 'Client logos',
+			video: 'Video',
+			collection: 'Collection'
 		},
 		settings: {
 			siteNameLabel: 'Site name',

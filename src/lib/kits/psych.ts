@@ -235,27 +235,81 @@ export function createCalmIntakePsychSite(): Site {
 								title: 'Danışan yorumları',
 								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
 								items: [
-									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
-									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
-									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+									{
+										quote:
+											'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.',
+										name: 'A.K.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.',
+										name: 'E.D.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.',
+										name: 'M.T.',
+										role: 'danışan',
+										rating: 4
+									}
 								]
 							},
 							en: {
 								title: 'Client feedback',
 								intro: 'Names are shortened for confidentiality.',
 								items: [
-									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
-									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
-									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+									{
+										quote:
+											'A space where I felt safe to express myself. I felt trust from the first session.',
+										name: 'A.K.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'I appreciated the step-by-step approach. We worked at my own pace, without pressure.',
+										name: 'E.D.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'My questions were answered clearly and honestly. It helped me better understand my expectations.',
+										name: 'M.T.',
+										role: 'client',
+										rating: 4
+									}
 								]
 							},
 							de: {
 								title: 'Rückmeldungen',
 								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
 								items: [
-									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+									{
+										quote:
+											'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.',
+										name: 'A.K.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.',
+										name: 'E.D.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.',
+										name: 'M.T.',
+										role: 'Klient*in',
+										rating: 4
+									}
 								]
 							}
 						}
@@ -601,27 +655,81 @@ export function createModernClinicPsychSite(): Site {
 								title: 'Danışan yorumları',
 								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
 								items: [
-									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
-									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
-									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+									{
+										quote:
+											'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.',
+										name: 'A.K.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.',
+										name: 'E.D.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.',
+										name: 'M.T.',
+										role: 'danışan',
+										rating: 4
+									}
 								]
 							},
 							en: {
 								title: 'Client feedback',
 								intro: 'Names are shortened for confidentiality.',
 								items: [
-									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
-									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
-									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+									{
+										quote:
+											'A space where I felt safe to express myself. I felt trust from the first session.',
+										name: 'A.K.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'I appreciated the step-by-step approach. We worked at my own pace, without pressure.',
+										name: 'E.D.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'My questions were answered clearly and honestly. It helped me better understand my expectations.',
+										name: 'M.T.',
+										role: 'client',
+										rating: 4
+									}
 								]
 							},
 							de: {
 								title: 'Rückmeldungen',
 								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
 								items: [
-									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+									{
+										quote:
+											'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.',
+										name: 'A.K.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.',
+										name: 'E.D.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.',
+										name: 'M.T.',
+										role: 'Klient*in',
+										rating: 4
+									}
 								]
 							}
 						}
@@ -944,27 +1052,81 @@ export function createOnlineTherapyPsychSite(): Site {
 								title: 'Danışan yorumları',
 								intro: 'İsimler gizlilik nedeniyle kısaltılmıştır.',
 								items: [
-									{ quote: 'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.', name: 'A.K.', role: 'danışan', rating: 5 },
-									{ quote: 'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.', name: 'E.D.', role: 'danışan', rating: 5 },
-									{ quote: 'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.', name: 'M.T.', role: 'danışan', rating: 4 }
+									{
+										quote:
+											'Kendimi rahatça ifade edebildiğim bir ortamdı. İlk seanstan itibaren güven hissettim.',
+										name: 'A.K.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Adım adım ilerlediğimizi hissetmek iyi geldi. Acele ettirilmeden, kendi tempomda çalıştık.',
+										name: 'E.D.',
+										role: 'danışan',
+										rating: 5
+									},
+									{
+										quote:
+											'Sorularım net ve dürüst biçimde yanıtlandı. Beklentilerimi daha iyi anlamama yardımcı oldu.',
+										name: 'M.T.',
+										role: 'danışan',
+										rating: 4
+									}
 								]
 							},
 							en: {
 								title: 'Client feedback',
 								intro: 'Names are shortened for confidentiality.',
 								items: [
-									{ quote: 'A space where I felt safe to express myself. I felt trust from the first session.', name: 'A.K.', role: 'client', rating: 5 },
-									{ quote: 'I appreciated the step-by-step approach. We worked at my own pace, without pressure.', name: 'E.D.', role: 'client', rating: 5 },
-									{ quote: 'My questions were answered clearly and honestly. It helped me better understand my expectations.', name: 'M.T.', role: 'client', rating: 4 }
+									{
+										quote:
+											'A space where I felt safe to express myself. I felt trust from the first session.',
+										name: 'A.K.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'I appreciated the step-by-step approach. We worked at my own pace, without pressure.',
+										name: 'E.D.',
+										role: 'client',
+										rating: 5
+									},
+									{
+										quote:
+											'My questions were answered clearly and honestly. It helped me better understand my expectations.',
+										name: 'M.T.',
+										role: 'client',
+										rating: 4
+									}
 								]
 							},
 							de: {
 								title: 'Rückmeldungen',
 								intro: 'Namen sind aus Vertraulichkeitsgründen gekürzt.',
 								items: [
-									{ quote: 'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.', name: 'A.K.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.', name: 'E.D.', role: 'Klient*in', rating: 5 },
-									{ quote: 'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.', name: 'M.T.', role: 'Klient*in', rating: 4 }
+									{
+										quote:
+											'Ein Raum, in dem ich mich sicher ausdrücken konnte. Vom ersten Termin an spürte ich Vertrauen.',
+										name: 'A.K.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Die schrittweise Vorgehensweise tat gut. Wir arbeiteten in meinem eigenen Tempo, ohne Druck.',
+										name: 'E.D.',
+										role: 'Klient*in',
+										rating: 5
+									},
+									{
+										quote:
+											'Meine Fragen wurden klar und ehrlich beantwortet. Es half mir, meine Erwartungen besser zu verstehen.',
+										name: 'M.T.',
+										role: 'Klient*in',
+										rating: 4
+									}
 								]
 							}
 						}

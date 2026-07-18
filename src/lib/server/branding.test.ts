@@ -3,9 +3,9 @@ import { assertSafeSvg } from './branding';
 
 describe('platform branding SVG validation', () => {
 	it('accepts the supplied logo shape', () => {
-		expect(assertSafeSvg(new TextEncoder().encode('<svg viewBox="0 0 10 10"><path /></svg>'))).toContain(
-			'<svg'
-		);
+		expect(
+			assertSafeSvg(new TextEncoder().encode('<svg viewBox="0 0 10 10"><path /></svg>'))
+		).toContain('<svg');
 	});
 
 	it('rejects executable and external SVG content', () => {

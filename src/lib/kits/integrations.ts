@@ -23,12 +23,27 @@ export const INTEGRATION_DOMAIN_ALLOWLIST: Record<IntegrationType, string[]> = {
 		'stripe.com',
 		'buymeacoffee.com'
 	],
-	'social-link': ['instagram.com', 'tiktok.com', '@tiktok', 'youtube.com', 'linkedin.com', 'twitter.com', 'x.com'],
+	'social-link': [
+		'instagram.com',
+		'tiktok.com',
+		'@tiktok',
+		'youtube.com',
+		'linkedin.com',
+		'twitter.com',
+		'x.com'
+	],
 	'video-consult': ['zoom.us', 'meet.google.com', 'teams.microsoft.com', 'whereby.com'],
 	'menu-digital': [], // open-ended — restaurants may host menus anywhere
 	'review-platform': ['trustpilot.com', 'provenexpert.com', 'doctoralia.com'],
 	'academic-profile': ['orcid.org', 'scholar.google.com', 'researchgate.net'],
-	'portfolio-gallery': ['behance.net', 'dribbble.com', 'artstation.com', 'github.com', 'gitlab.com', '500px.com']
+	'portfolio-gallery': [
+		'behance.net',
+		'dribbble.com',
+		'artstation.com',
+		'github.com',
+		'gitlab.com',
+		'500px.com'
+	]
 };
 
 /** Default display label per integration type (tr). Renderer uses locale key. */
@@ -62,10 +77,10 @@ export function waMeLink(phone: string, message?: string): string {
 export const LEGACY_FEATURE_KIT_MAP: Record<string, IntegrationType> = {
 	'booking-request': 'booking-external',
 	'whatsapp-cta': 'whatsapp-order',
-	'payment': 'payment-link',
-	'social': 'social-link',
-	'video': 'video-consult',
-	'menu': 'menu-digital',
+	payment: 'payment-link',
+	social: 'social-link',
+	video: 'video-consult',
+	menu: 'menu-digital',
 	'property-inquiry': 'whatsapp-order',
 	'map-location': 'menu-digital', // v1.5'te Leaflet facade'e dönüşecek; v1'de no-op
 	gallery: 'social-link',
@@ -105,17 +120,29 @@ export function validateIntegrationTarget(
 
 	if (entry.type === 'whatsapp-order') {
 		if (!entry.phone || entry.phone.trim() === '') {
-			ctx.addIssue({ code: 'custom', path: ['phone'], message: 'whatsapp-order requires a phone number (E.164)' });
+			ctx.addIssue({
+				code: 'custom',
+				path: ['phone'],
+				message: 'whatsapp-order requires a phone number (E.164)'
+			});
 		}
 		if (entry.url) {
-			ctx.addIssue({ code: 'custom', path: ['url'], message: 'whatsapp-order must not have a url — use phone instead' });
+			ctx.addIssue({
+				code: 'custom',
+				path: ['url'],
+				message: 'whatsapp-order must not have a url — use phone instead'
+			});
 		}
 	} else {
 		if (!entry.url || entry.url.trim() === '') {
 			ctx.addIssue({ code: 'custom', path: ['url'], message: `${entry.type} requires a url` });
 		}
 		if (entry.phone) {
-			ctx.addIssue({ code: 'custom', path: ['phone'], message: `${entry.type} must not have a phone — use url instead` });
+			ctx.addIssue({
+				code: 'custom',
+				path: ['phone'],
+				message: `${entry.type} must not have a phone — use url instead`
+			});
 		}
 	}
 
@@ -128,7 +155,9 @@ export function validateIntegrationTarget(
 			ctx.addIssue({ code: 'custom', path: ['url'], message: `Invalid URL: ${entry.url}` });
 			return;
 		}
-		const allowed = allowlist.some((domain) => hostname === domain || hostname.endsWith('.' + domain));
+		const allowed = allowlist.some(
+			(domain) => hostname === domain || hostname.endsWith('.' + domain)
+		);
 		if (!allowed) {
 			ctx.addIssue({
 				code: 'custom',

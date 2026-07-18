@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -31,14 +32,9 @@
 			</div>
 			<form method="POST" action="?/toggleBeta" use:enhance>
 				<input type="hidden" name="enabled" value={data.betaMode ? '0' : '1'} />
-				<button
-					type="submit"
-					class={data.betaMode
-						? 'sk-btn sk-btn-secondary sk-btn-sm'
-						: 'sk-btn sk-btn-primary sk-btn-sm'}
-				>
+				<FlowbiteButton type="submit" variant={data.betaMode ? 'secondary' : 'primary'} size="sm">
 					{data.betaMode ? t('admin.invites.disable') : t('admin.invites.enable')}
-				</button>
+				</FlowbiteButton>
 			</form>
 		</div>
 	</AppCard>
@@ -98,8 +94,8 @@
 					<option value="de">DE</option>
 				</select>
 			</div>
-			<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
-				>{t('admin.invites.send')}</button
+			<FlowbiteButton type="submit" variant="primary" size="sm"
+				>{t('admin.invites.send')}</FlowbiteButton
 			>
 		</form>
 	</AppCard>
@@ -130,16 +126,16 @@
 							{#if invite.status === 'revoked'}
 								<form method="POST" action="?/reactivate" use:enhance>
 									<input type="hidden" name="email" value={invite.email} />
-									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm"
-										>{t('admin.invites.reactivate')}</button
+									<FlowbiteButton type="submit" variant="ghost" size="sm"
+										>{t('admin.invites.reactivate')}</FlowbiteButton
 									>
 								</form>
 							{:else}
 								<form method="POST" action="?/revoke" use:enhance>
 									<input type="hidden" name="email" value={invite.email} />
-									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+									<FlowbiteButton type="submit" variant="danger" size="sm">
 										{t('admin.invites.revoke')}
-									</button>
+									</FlowbiteButton>
 								</form>
 							{/if}
 						</li>

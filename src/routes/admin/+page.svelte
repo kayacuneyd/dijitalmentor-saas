@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import Sparkline from '$lib/ui/Sparkline.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
@@ -149,7 +150,9 @@
 		<div class="flex flex-col gap-3">
 			<div class="flex items-center justify-between gap-3">
 				<h2 class="font-semibold">Aktivite akışı</h2>
-				<a href="/admin/settings#errors" class="sk-btn sk-btn-secondary sk-btn-sm">System logs</a>
+				<FlowbiteButton href="/admin/settings#errors" variant="secondary" size="sm"
+					>System logs</FlowbiteButton
+				>
 			</div>
 			{#if data.activity.length === 0}
 				<p class="text-sm text-[var(--sk-muted)]">Henüz aktivite yok.</p>

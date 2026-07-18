@@ -48,7 +48,10 @@ export function getPlatformBranding(): PlatformBranding {
 	};
 }
 
-export function saveBrandingPreferences(input: { brandName: string; showWordmark: boolean }): PlatformBranding {
+export function saveBrandingPreferences(input: {
+	brandName: string;
+	showWordmark: boolean;
+}): PlatformBranding {
 	const brandName = input.brandName.trim().slice(0, 80);
 	if (!brandName) throw new Error('Brand name is required.');
 	setSetting(BRAND_NAME_KEY, brandName);
@@ -65,12 +68,20 @@ function setSetting(key: string, value: string): void {
 }
 
 function safeFileName(fileName: string): string {
-	return fileName.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').slice(-80) || 'logo';
+	return (
+		fileName
+			.toLowerCase()
+			.replace(/[^a-z0-9._-]+/g, '-')
+			.slice(-80) || 'logo'
+	);
 }
 
 export function assertSafeSvg(bytes: Uint8Array): string {
 	if (bytes.byteLength > 1_048_576) throw new Error('SVG must be 1 MB or smaller.');
-	const svg = new TextDecoder().decode(bytes).replace(/^\uFEFF/, '').trim();
+	const svg = new TextDecoder()
+		.decode(bytes)
+		.replace(/^\uFEFF/, '')
+		.trim();
 	if (!/^<svg(?:\s|>)/i.test(svg) || !/<\/svg>\s*$/i.test(svg)) {
 		throw new Error('Upload a valid SVG logo.');
 	}

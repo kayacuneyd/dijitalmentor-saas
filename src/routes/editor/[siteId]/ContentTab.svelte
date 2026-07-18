@@ -7,6 +7,7 @@
 	import type { CatalogKey } from '$lib/i18n/catalog';
 	import SectionStyleControls from './SectionStyleControls.svelte';
 	import { DEFAULT_SECTION_STYLE, type SectionStyle } from '$lib/schema/site';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
 
 	const t = getTranslate();
 	const sectionLabel = (type: string) => t(`editor.blocks.${type}` as CatalogKey);
@@ -15,35 +16,40 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">{t('editor.content.pageLabel')}</span>
-		<select
-			class="select select-sm w-full"
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.content.pageLabel')}</span>
+		<FlowbiteSelect
+			class="w-full"
+			size="sm"
 			value={store.currentSlug}
-			onchange={(e) => (store.currentSlug = e.currentTarget.value)}
+			onchange={(e: Event) => (store.currentSlug = (e.currentTarget as HTMLSelectElement).value)}
 		>
 			{#each store.site.pages as page, i (`${page.slug}-${i}`)}
 				<option value={page.slug}>{page.title[store.editLocale]} (/{page.slug})</option>
 			{/each}
-		</select>
+		</FlowbiteSelect>
 	</label>
 
-	<p class="text-base-content/60 text-xs">
+	<p class="text-xs text-[var(--sk-muted)]">
 		{t('editor.content.editingNote', { locale: store.editLocale.toUpperCase() })}
 	</p>
 
 	{#each store.currentPage.sections as section, i (`${section.id}-${i}`)}
-		<details class="collapse-arrow bg-base-200 collapse">
-			<summary class="collapse-title min-h-0 py-3 text-sm font-semibold">
+		<details class="sk-editor-collapse">
+			<summary class="min-h-0 cursor-pointer list-none py-3 text-sm font-semibold">
 				{sectionLabel(section.type)}
-				<span class="text-base-content/40 ml-1 text-xs font-normal">#{section.id}</span>
+				<span class="ml-1 text-xs font-normal text-[var(--sk-faint)]">#{section.id}</span>
 			</summary>
-			<div class="collapse-content">
-					<SectionStyleControls
-						style={{ ...DEFAULT_SECTION_STYLE, ...section.style }}
-						onupdate={(key, value) =>
+			<div class="px-4 pb-4">
+				<SectionStyleControls
+					style={{ ...DEFAULT_SECTION_STYLE, ...section.style }}
+					onupdate={(key, value) =>
 						store.update(() => {
-							section.style = { ...DEFAULT_SECTION_STYLE, ...section.style, [key]: value } as SectionStyle;
+							section.style = {
+								...DEFAULT_SECTION_STYLE,
+								...section.style,
+								[key]: value
+							} as SectionStyle;
 						})}
 				/>
 				{#if section.type === 'hero' || section.type === 'about'}

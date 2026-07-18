@@ -224,9 +224,9 @@ describe('applyPatch', () => {
 	});
 
 	it('rejects removing the last page', () => {
-		expect(() =>
-			applyPatch(site(), [{ op: 'remove_page', pageSlug: 'home' }])
-		).toThrow(PatchApplyError);
+		expect(() => applyPatch(site(), [{ op: 'remove_page', pageSlug: 'home' }])).toThrow(
+			PatchApplyError
+		);
 	});
 
 	it('reorders pages to match given order', () => {
@@ -237,10 +237,12 @@ describe('applyPatch', () => {
 	});
 
 	it('rejects reorder with missing slug', () => {
-		const slugs = site().pages.map((p) => p.slug).slice(0, -1);
-		expect(() =>
-			applyPatch(site(), [{ op: 'reorder_pages', order: slugs }])
-		).toThrow(PatchApplyError);
+		const slugs = site()
+			.pages.map((p) => p.slug)
+			.slice(0, -1);
+		expect(() => applyPatch(site(), [{ op: 'reorder_pages', order: slugs }])).toThrow(
+			PatchApplyError
+		);
 	});
 
 	it('sets section style properties', () => {

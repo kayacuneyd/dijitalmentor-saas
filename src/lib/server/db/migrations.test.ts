@@ -106,7 +106,9 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 			.get();
 		expect(mediaIdx).toBeTruthy();
 		expect(
-			client.prepare(`SELECT 1 FROM pragma_table_info('sites') WHERE name='previous_public_handle'`).get()
+			client
+				.prepare(`SELECT 1 FROM pragma_table_info('sites') WHERE name='previous_public_handle'`)
+				.get()
 		).toBeTruthy();
 		expect(
 			client
@@ -154,7 +156,7 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 				`SELECT 1 FROM sqlite_master WHERE type='index' AND name='billing_events_created_idx'`
 			)
 			.get();
-		 expect(billingEventsIdx).toBeTruthy();
+		expect(billingEventsIdx).toBeTruthy();
 		const conversionTable = client
 			.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='site_conversion_stats'")
 			.get();
@@ -264,7 +266,10 @@ describe('migration runner (versioned, idempotent, resumable)', () => {
 		runMigrations(client, migrations.slice(0, 1)); // stop after v1 (simulated crash)
 		const { applied } = runMigrations(client); // full list
 		expect(applied).toEqual(
-			[...migrations].filter((m) => m.version !== 1).sort((a, b) => a.version - b.version).map((m) => `${m.version}-${m.name}`)
+			[...migrations]
+				.filter((m) => m.version !== 1)
+				.sort((a, b) => a.version - b.version)
+				.map((m) => `${m.version}-${m.name}`)
 		);
 	});
 

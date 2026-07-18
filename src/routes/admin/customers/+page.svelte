@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -55,9 +56,9 @@
 									{summaryLine(customer)}
 								</p>
 							</div>
-							<a href="/admin/customers/{customer.id}" class="sk-btn sk-btn-secondary sk-btn-sm">
+							<FlowbiteButton href="/admin/customers/{customer.id}" variant="secondary" size="sm">
 								{t('admin.list.view')}
-							</a>
+							</FlowbiteButton>
 						</li>
 					{/each}
 				</ul>

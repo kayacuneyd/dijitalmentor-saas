@@ -4,6 +4,7 @@
 	import RichTextEditor from '$lib/admin/RichTextEditor.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -25,9 +26,11 @@
 	max="max-w-[78rem]"
 >
 	{#snippet actions()}
-		<a href="/admin/blog" class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.blog.back')}</a>
-		<a href={`/blog/${data.post.slug}`} class="sk-btn sk-btn-secondary sk-btn-sm"
-			>{t('admin.blog.openPublic')}</a
+		<FlowbiteButton href="/admin/blog" variant="secondary" size="sm"
+			>{t('admin.blog.back')}</FlowbiteButton
+		>
+		<FlowbiteButton href={`/blog/${data.post.slug}`} variant="secondary" size="sm"
+			>{t('admin.blog.openPublic')}</FlowbiteButton
 		>
 		<StatusPill tone={tone(data.post.status)}>{data.post.status}</StatusPill>
 	{/snippet}
@@ -187,7 +190,7 @@
 		</div>
 
 		<div class="sticky bottom-3 z-10 flex justify-end">
-			<button type="submit" class="sk-btn sk-btn-primary">{t('admin.blog.save')}</button>
+			<FlowbiteButton type="submit" variant="primary">{t('admin.blog.save')}</FlowbiteButton>
 		</div>
 	</form>
 </AdminShell>

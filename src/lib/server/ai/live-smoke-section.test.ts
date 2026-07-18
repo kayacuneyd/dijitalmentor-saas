@@ -17,21 +17,22 @@ describe.runIf(RUN_LIVE)('🔍 DeepSeek V4 Pro — add_section live smoke', () =
 		const { site: result, reply } = await chatEdit({
 			site: s,
 			message: 'Ana sayfaya bir SSS (FAQ) bölümü ekle',
-			approvedPrompt: 'Ana sayfaya FAQ section ekle. slug=home, section id=faq-home, type=faq, variant=accordion. 3 soru-cevap tr/en/de.',
+			approvedPrompt:
+				'Ana sayfaya FAQ section ekle. slug=home, section id=faq-home, type=faq, variant=accordion. 3 soru-cevap tr/en/de.',
 			model: process.env.DEEPSEEK_MODEL_HEAVY // V4 Pro
 		});
 		console.log('  Reply:', reply);
 		console.log('  Sections:', originalSections, '→', result.pages[0].sections.length);
-		const hasFaq = result.pages[0].sections.some(s => s.type === 'faq');
+		const hasFaq = result.pages[0].sections.some((s) => s.type === 'faq');
 		console.log('  FAQ var mı:', hasFaq);
-		
+
 		if (hasFaq) {
-			const faq = result.pages[0].sections.find(s => s.type === 'faq')!;
+			const faq = result.pages[0].sections.find((s) => s.type === 'faq')!;
 			if (faq.type === 'faq') {
 				console.log('  FAQ items (TR):', faq.content.tr.items.length);
 			}
 		}
-		
+
 		expect(hasFaq).toBe(true);
 	}, 60000);
 });

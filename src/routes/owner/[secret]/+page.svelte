@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 
 	let { form } = $props();
@@ -45,21 +47,29 @@
 				>
 					<label class="text-sm font-medium" for="code">Email onay kodu</label>
 					<input type="hidden" name="deviceToken" value={form?.deviceToken ?? ''} />
-					<input
+					<FlowbiteInput
 						id="code"
 						name="code"
 						inputmode="numeric"
 						autocomplete="one-time-code"
 						maxlength="11"
 						required
-						class="sk-input text-center font-[var(--font-mono)] text-xl tracking-[0.3em]"
+						size="lg"
+						class="text-center font-[var(--font-mono)] text-xl tracking-[0.3em]"
 						disabled={busy}
 					/>
-					<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
-						{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
+					<FlowbiteButton
+						type="submit"
+						variant="primary"
+						size="lg"
+						class="w-full"
+						loading={busy}
+						disabled={busy}
+					>
+						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 						{#if !busy}{@html uiIcons.lock(16)}{/if}
 						Onayla
-					</button>
+					</FlowbiteButton>
 				</form>
 			{:else}
 				<form
@@ -75,20 +85,28 @@
 					}}
 				>
 					<label class="text-sm font-medium" for="password">Owner şifresi</label>
-					<input
+					<FlowbiteInput
 						id="password"
 						name="password"
 						type="password"
 						autocomplete="current-password"
 						required
-						class="sk-input text-[15px]"
+						size="lg"
+						class="text-[15px]"
 						disabled={busy}
 					/>
-					<button type="submit" class="sk-btn sk-btn-primary sk-btn-lg w-full" disabled={busy}>
-						{#if busy}<span class="loading loading-spinner loading-sm"></span>{/if}
+					<FlowbiteButton
+						type="submit"
+						variant="primary"
+						size="lg"
+						class="w-full"
+						loading={busy}
+						disabled={busy}
+					>
+						{#if busy}<span class="sk-spinner sk-spinner-sm" aria-hidden="true"></span>{/if}
 						{#if !busy}{@html uiIcons.lock(16)}{/if}
 						Giriş yap
-					</button>
+					</FlowbiteButton>
 				</form>
 			{/if}
 		</div>

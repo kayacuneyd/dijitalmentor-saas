@@ -4,6 +4,10 @@
 	import type { Locale } from '$lib/i18n';
 	import { withLocale } from '$lib/i18n';
 	import { uiIcons } from '$lib/ui/icons';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
+	import FlowbiteTextarea from '$lib/ui/primitives/FlowbiteTextarea.svelte';
 
 	type AssistantAction =
 		| 'start_onboarding'
@@ -302,36 +306,35 @@
 						<p>{String(t.contactIntro)}</p>
 					</div>
 					<div class="sk-assistant-contact-grid">
-						<input
-							class="sk-input"
-							bind:value={contactName}
-							placeholder={String(t.name)}
-							required
-						/>
-						<input
-							class="sk-input"
+						<FlowbiteInput bind:value={contactName} placeholder={String(t.name)} required />
+						<FlowbiteInput
 							type="email"
 							bind:value={contactEmail}
 							placeholder={String(t.email)}
 							required
 						/>
 					</div>
-					<select class="sk-select" bind:value={contactCategory}>
+					<FlowbiteSelect bind:value={contactCategory}>
 						<option value="beta_access">{String(t.categories.beta_access)}</option>
 						<option value="support">{String(t.categories.support)}</option>
 						<option value="partnership">{String(t.categories.partnership)}</option>
 						<option value="billing">{String(t.categories.billing)}</option>
 						<option value="other">{String(t.categories.other)}</option>
-					</select>
-					<textarea
-						class="sk-textarea"
+					</FlowbiteSelect>
+					<FlowbiteTextarea
 						bind:value={contactMessage}
 						placeholder={String(t.message)}
 						rows="3"
-						required></textarea>
-					<button class="sk-btn sk-btn-primary" type="submit" disabled={contactBusy}>
+						required
+					/>
+					<FlowbiteButton
+						type="submit"
+						variant="primary"
+						loading={contactBusy}
+						disabled={contactBusy}
+					>
 						{contactBusy ? String(t.thinking) : String(t.contactSend)}
-					</button>
+					</FlowbiteButton>
 				</form>
 			{/if}
 

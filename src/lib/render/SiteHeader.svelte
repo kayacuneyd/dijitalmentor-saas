@@ -25,14 +25,14 @@
 
 	// Show desktop nav only above the mobile breakpoint
 	const breakpointClass = $derived(
-		mobileBreakpoint === 'sm' ? 'hidden sm:flex' :
-		mobileBreakpoint === 'md' ? 'hidden md:flex' :
-		'hidden lg:flex'
+		mobileBreakpoint === 'sm'
+			? 'hidden sm:flex'
+			: mobileBreakpoint === 'md'
+				? 'hidden md:flex'
+				: 'hidden lg:flex'
 	);
 	const hamburgerClass = $derived(
-		mobileBreakpoint === 'sm' ? 'sm:hidden' :
-		mobileBreakpoint === 'md' ? 'md:hidden' :
-		'lg:hidden'
+		mobileBreakpoint === 'sm' ? 'sm:hidden' : mobileBreakpoint === 'md' ? 'md:hidden' : 'lg:hidden'
 	);
 
 	const showHamburger = $derived(navVariant === 'hamburger' || navVariant === 'drawer');
@@ -155,9 +155,13 @@
 		onclick={(event) => {
 			if (event.target === dialogEl) closeMenu();
 		}}
-		class={navVariant === 'drawer' ? 'fixed inset-y-0 left-0 z-40 m-0 h-full max-h-full w-72 max-w-[80vw] rounded-r-xl border border-base-300 bg-base-100 p-0 shadow-2xl backdrop:bg-black/40' : 'rounded-xl border border-base-300 bg-base-100 p-0 shadow-2xl backdrop:bg-black/40'}
+		class={navVariant === 'drawer'
+			? 'fixed inset-y-0 left-0 z-40 m-0 h-full max-h-full w-72 max-w-[80vw] rounded-r-xl border border-base-300 bg-base-100 p-0 shadow-2xl backdrop:bg-black/40'
+			: 'rounded-xl border border-base-300 bg-base-100 p-0 shadow-2xl backdrop:bg-black/40'}
 	>
-		<div class="flex shrink-0 items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
+		<div
+			class="flex shrink-0 items-center justify-between gap-3 border-b border-base-300 px-4 py-3"
+		>
 			<a
 				href={hrefFor(site.pages[0].slug)}
 				class="text-primary text-lg font-bold tracking-normal no-underline"

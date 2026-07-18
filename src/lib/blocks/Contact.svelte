@@ -4,7 +4,12 @@
 	import { INTEGRATION_DEFAULT_LABELS } from '$lib/kits/integrations';
 	import type { BlockProps } from './registry';
 
-	let { props, content, locale, integrations }: BlockProps<'contact'> & { integrations?: Integration[] } = $props();
+	let {
+		props,
+		content,
+		locale,
+		integrations
+	}: BlockProps<'contact'> & { integrations?: Integration[] } = $props();
 
 	const render = getRenderContext();
 
@@ -15,11 +20,36 @@
 	const portfolio = $derived(getSiteIntegration(integrations ?? [], 'portfolio-gallery'));
 	const extraLinks = $derived(
 		[
-			social ? { href: social.url!, label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link'] } : null,
-			video ? { href: video.url!, label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult'] } : null,
-			review ? { href: review.url!, label: review.label?.tr ?? INTEGRATION_DEFAULT_LABELS['review-platform'] } : null,
-			academic ? { href: academic.url!, label: academic.label?.tr ?? INTEGRATION_DEFAULT_LABELS['academic-profile'] } : null,
-			portfolio ? { href: portfolio.url!, label: portfolio.label?.tr ?? INTEGRATION_DEFAULT_LABELS['portfolio-gallery'] } : null
+			social
+				? {
+						href: social.url!,
+						label: social.label?.tr ?? INTEGRATION_DEFAULT_LABELS['social-link']
+					}
+				: null,
+			video
+				? {
+						href: video.url!,
+						label: video.label?.tr ?? INTEGRATION_DEFAULT_LABELS['video-consult']
+					}
+				: null,
+			review
+				? {
+						href: review.url!,
+						label: review.label?.tr ?? INTEGRATION_DEFAULT_LABELS['review-platform']
+					}
+				: null,
+			academic
+				? {
+						href: academic.url!,
+						label: academic.label?.tr ?? INTEGRATION_DEFAULT_LABELS['academic-profile']
+					}
+				: null,
+			portfolio
+				? {
+						href: portfolio.url!,
+						label: portfolio.label?.tr ?? INTEGRATION_DEFAULT_LABELS['portfolio-gallery']
+					}
+				: null
 		].filter(Boolean) as { href: string; label: string }[]
 	);
 
@@ -164,16 +194,19 @@
 				</form>
 			{/if}
 			{#if extraLinks.length > 0}
-					<div class="mt-6 flex flex-wrap justify-center gap-3">
-						{#each extraLinks as link}
-							<a href={link.href} target="_blank" rel="noopener nofollow"
-								class="btn btn-outline btn-sm rounded-full"
-							>
-								{link.label}
-							</a>
-						{/each}
-					</div>
-				{/if}
+				<div class="mt-6 flex flex-wrap justify-center gap-3">
+					{#each extraLinks as link}
+						<a
+							href={link.href}
+							target="_blank"
+							rel="noopener nofollow"
+							class="btn btn-outline btn-sm rounded-full"
+						>
+							{link.label}
+						</a>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</div>
 </section>

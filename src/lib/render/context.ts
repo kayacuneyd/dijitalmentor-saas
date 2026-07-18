@@ -29,7 +29,11 @@ const KEY = 'saaskaya:render';
 
 export const setRenderContext = (ctx: RenderContext) => setContext(KEY, ctx);
 export const getRenderContext = (): RenderContext =>
-	getContext<RenderContext | undefined>(KEY) ?? { mode: 'preview', contactState: 'idle', integrations: [] };
+	getContext<RenderContext | undefined>(KEY) ?? {
+		mode: 'preview',
+		contactState: 'idle',
+		integrations: []
+	};
 
 /**
  * Returns the first integration of the requested type that is enabled.

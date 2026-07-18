@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
@@ -19,11 +20,7 @@
 				description:
 					'Website starting points for professional groups such as psychologists, lawyers, dietitians, dentists, academics, and consultants.',
 				create: 'Create site',
-				pills: [
-					'Profession kits',
-					`${data.kits.length} starting points`,
-					'TR · EN · DE ready'
-				],
+				pills: ['Profession kits', `${data.kits.length} starting points`, 'TR · EN · DE ready'],
 				h1: 'Start from a profession-aware kit, not a blank page.',
 				lead: 'Choose a starting point close to your work. saaskaya prepares the first site structure, text direction, and language setup so you can review and edit faster.',
 				primary: 'Describe your work',
@@ -47,11 +44,7 @@
 				description:
 					'Psikolog, avukat, diyetisyen, diş hekimi, akademisyen ve danışmanlar için mesleğe yakın web sitesi başlangıçları.',
 				create: 'Site oluştur',
-				pills: [
-					'Meslek kitleri',
-					`${data.kits.length} başlangıç`,
-					'TR · EN · DE hazır'
-				],
+				pills: ['Meslek kitleri', `${data.kits.length} başlangıç`, 'TR · EN · DE hazır'],
 				h1: 'Boş sayfadan değil, mesleğe uygun bir kitten başla.',
 				lead: 'Psikolog, avukat, diyetisyen ve diğer uzmanlar için işine yakın bir başlangıç seç. saaskaya ilk site yapısını, metin yönünü ve dil hazırlığını çıkarır; sen hızlıca inceler ve düzenlersin.',
 				primary: 'Mesleğini anlat',
@@ -75,11 +68,7 @@
 				description:
 					'Website-Startpunkte für Berufsgruppen wie Psychologie, Recht, Ernährung, Zahnmedizin, Wissenschaft und Beratung.',
 				create: 'Website erstellen',
-				pills: [
-					'Berufs-Kits',
-					`${data.kits.length} Startpunkte`,
-					'TR · EN · DE bereit'
-				],
+				pills: ['Berufs-Kits', `${data.kits.length} Startpunkte`, 'TR · EN · DE bereit'],
 				h1: 'Starte mit einem berufsnahen Kit, nicht mit einer leeren Seite.',
 				lead: 'Wähle einen Startpunkt, der zu deiner Arbeit passt. saaskaya bereitet Struktur, Textrichtung und Sprachen vor, damit du schneller prüfen und bearbeiten kannst.',
 				primary: 'Angebot beschreiben',
@@ -110,7 +99,11 @@
 	path="/templates"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl), softwareJsonLd(locale, copy.description)]}
+	jsonLd={[
+		organizationJsonLd(data.platformBranding?.logoUrl),
+		webSiteJsonLd(locale, data.platformBranding?.logoUrl),
+		softwareJsonLd(locale, copy.description)
+	]}
 />
 
 <PublicShell
@@ -136,10 +129,12 @@
 				</p>
 			</div>
 			<div class="flex flex-wrap gap-3">
-				<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
-					>{copy.primary}{@html uiIcons.arrowRight(16)}</a
+				<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+					>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
 				>
-				<a href={l('/pricing')} class="sk-btn sk-btn-secondary sk-btn-lg">{copy.pricing}</a>
+				<FlowbiteButton href={l('/pricing')} variant="secondary" size="lg"
+					>{copy.pricing}</FlowbiteButton
+				>
 			</div>
 		</header>
 
@@ -148,9 +143,9 @@
 				<article class="sk-card template-card flex min-h-full flex-col overflow-hidden">
 					{#if kit.hasImage}
 						<img
-								src="/templates/{kit.slug}.jpg"
-								alt="{kit.label} — {kit.headline}"
-								loading="eager"
+							src="/templates/{kit.slug}.jpg"
+							alt="{kit.label} — {kit.headline}"
+							loading="eager"
 							width="1280"
 							height="860"
 							class="aspect-3/2 w-full border-b border-[var(--sk-line)] object-cover object-top"
@@ -240,9 +235,14 @@
 							</div>
 						</div>
 
-						<a href={l(`/new?kit=${kit.slug}`)} class="sk-btn sk-btn-secondary sk-btn-sm w-fit">
+						<FlowbiteButton
+							href={l(`/new?kit=${kit.slug}`)}
+							variant="secondary"
+							size="sm"
+							class="w-fit"
+						>
 							{copy.startStyle}
-						</a>
+						</FlowbiteButton>
 					</div>
 				</article>
 			{/each}

@@ -1,7 +1,15 @@
 import { desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import { db } from '$lib/server/db';
-import { adminActions, aiGateLog, aiUsage, siteChatMessages, siteVersions, sites, users } from '$lib/server/db/schema';
+import {
+	adminActions,
+	aiGateLog,
+	aiUsage,
+	siteChatMessages,
+	siteVersions,
+	sites,
+	users
+} from '$lib/server/db/schema';
 import {
 	siteSubscriptionState,
 	subscriptionState,
@@ -139,13 +147,13 @@ export function getCustomerDetail(userId: string): CustomerDetail | null {
 			: null;
 	const lastPublishedAt =
 		siteIds.length > 0
-			? db
+			? (db
 					.select({ createdAt: siteVersions.createdAt })
 					.from(siteVersions)
 					.where(eq(siteVersions.siteId, siteIds[0]))
 					.orderBy(desc(siteVersions.version))
 					.limit(1)
-					.get()?.createdAt ?? null
+					.get()?.createdAt ?? null)
 			: null;
 	// Get max version across all user sites
 	let maxPub: Date | null = null;
@@ -161,35 +169,38 @@ export function getCustomerDetail(userId: string): CustomerDetail | null {
 	}
 	const lastAiEditAt =
 		siteIds.length > 0
-			? db
+			? (db
 					.select({ createdAt: aiGateLog.createdAt })
 					.from(aiGateLog)
 					.where(eq(aiGateLog.siteId, siteIds[0]))
 					.orderBy(desc(aiGateLog.createdAt))
 					.limit(1)
-					.get()?.createdAt ?? null
+					.get()?.createdAt ?? null)
 			: null;
 
 	const sitesList = ownedSites.map((site) => {
-		const chatCount = db
-			.select({ n: sql<number>`count(*)` })
-			.from(siteChatMessages)
-			.where(eq(siteChatMessages.siteId, site.id))
-			.get()?.n ?? 0;
-		const lastChat = db
-			.select({ createdAt: siteChatMessages.createdAt })
-			.from(siteChatMessages)
-			.where(eq(siteChatMessages.siteId, site.id))
-			.orderBy(desc(siteChatMessages.createdAt))
-			.limit(1)
-			.get()?.createdAt ?? null;
-		const lastGate = db
-			.select({ decision: aiGateLog.decision })
-			.from(aiGateLog)
-			.where(eq(aiGateLog.siteId, site.id))
-			.orderBy(desc(aiGateLog.createdAt))
-			.limit(1)
-			.get()?.decision ?? null;
+		const chatCount =
+			db
+				.select({ n: sql<number>`count(*)` })
+				.from(siteChatMessages)
+				.where(eq(siteChatMessages.siteId, site.id))
+				.get()?.n ?? 0;
+		const lastChat =
+			db
+				.select({ createdAt: siteChatMessages.createdAt })
+				.from(siteChatMessages)
+				.where(eq(siteChatMessages.siteId, site.id))
+				.orderBy(desc(siteChatMessages.createdAt))
+				.limit(1)
+				.get()?.createdAt ?? null;
+		const lastGate =
+			db
+				.select({ decision: aiGateLog.decision })
+				.from(aiGateLog)
+				.where(eq(aiGateLog.siteId, site.id))
+				.orderBy(desc(aiGateLog.createdAt))
+				.limit(1)
+				.get()?.decision ?? null;
 		return {
 			...site,
 			plan: siteSubscriptionState(site.id, userId),

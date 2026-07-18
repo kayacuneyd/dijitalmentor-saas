@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -34,22 +35,24 @@
 	<div class="flex flex-col gap-2">
 		<div class="flex flex-wrap gap-2">
 			{#each statuses as status (status)}
-				<a
+				<FlowbiteButton
 					href={href(status, data.source)}
-					class="sk-btn sk-btn-sm {data.status === status ? 'sk-btn-primary' : 'sk-btn-secondary'}"
+					variant={data.status === status ? 'primary' : 'secondary'}
+					size="sm"
 				>
 					{status}
-				</a>
+				</FlowbiteButton>
 			{/each}
 		</div>
 		<div class="flex flex-wrap gap-2">
 			{#each sources as source (source)}
-				<a
+				<FlowbiteButton
 					href={href(data.status, source)}
-					class="sk-btn sk-btn-sm {data.source === source ? 'sk-btn-primary' : 'sk-btn-secondary'}"
+					variant={data.source === source ? 'primary' : 'secondary'}
+					size="sm"
 				>
 					{source}
-				</a>
+				</FlowbiteButton>
 			{/each}
 		</div>
 	</div>
@@ -79,9 +82,9 @@
 									).toLocaleString()}
 								</p>
 							</div>
-							<a href="/admin/inbox/{inquiry.id}" class="sk-btn sk-btn-secondary sk-btn-sm">
+							<FlowbiteButton href="/admin/inbox/{inquiry.id}" variant="secondary" size="sm">
 								{t('admin.list.open')}
-							</a>
+							</FlowbiteButton>
 						</li>
 					{/each}
 				</ul>

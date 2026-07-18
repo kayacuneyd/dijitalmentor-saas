@@ -7,6 +7,9 @@
 		INTEGRATION_DOMAIN_ALLOWLIST
 	} from '$lib/kits/integrations';
 	import { getTranslate } from '$lib/i18n/context';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteTextarea from '$lib/ui/primitives/FlowbiteTextarea.svelte';
 
 	const t = getTranslate();
 
@@ -135,16 +138,15 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium"
-			>{t('editor.settings.siteNameLabel')}</span
-		>
-		<input
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.settings.siteNameLabel')}</span>
+		<FlowbiteInput
 			type="text"
-			class="input input-sm w-full"
+			size="sm"
+			class="w-full"
 			value={store.site.settings.siteName}
-			oninput={(e) => {
-				const next = e.currentTarget.value;
+			oninput={(e: Event) => {
+				const next = (e.currentTarget as HTMLInputElement).value;
 				store.update((site) => {
 					site.settings.siteName = next;
 				});
@@ -152,22 +154,21 @@
 		/>
 	</label>
 
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium"
-			>{t('editor.settings.publicSubdomainLabel')}</span
-		>
-		<div class="join w-full">
-			<input
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.settings.publicSubdomainLabel')}</span>
+		<div class="flex w-full">
+			<FlowbiteInput
 				type="text"
-				class="input input-sm join-item min-w-0 flex-1 font-[var(--font-mono)]"
+				size="sm"
+				class="min-w-0 flex-1 font-[var(--font-mono)]"
 				value={handleDraft}
-				oninput={(e) => {
-					handleDraft = normalizePublicHandle(e.currentTarget.value);
+				oninput={(e: Event) => {
+					handleDraft = normalizePublicHandle((e.currentTarget as HTMLInputElement).value);
 				}}
 				placeholder="ogo-football"
 			/>
 			<span
-				class="join-item border-base-300 bg-base-200 inline-flex items-center border px-2 text-xs"
+				class="inline-flex items-center border border-[var(--sk-line)] bg-[var(--sk-shell)] px-2 text-xs"
 			>
 				.saaskaya.com
 			</span>
@@ -178,20 +179,21 @@
 		{#if publicHandleChangeCount === 0}
 			<p class="mt-1 text-xs text-amber-700">{t('editor.settings.publicSubdomainRenameNotice')}</p>
 		{:else}
-			<p class="mt-1 text-xs text-[var(--sk-faint)]">{t('editor.settings.publicSubdomainRenameUsed')}</p>
+			<p class="mt-1 text-xs text-[var(--sk-faint)]">
+				{t('editor.settings.publicSubdomainRenameUsed')}
+			</p>
 		{/if}
 	</label>
 
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium"
-			>{t('editor.settings.contactEmailLabel')}</span
-		>
-		<input
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.settings.contactEmailLabel')}</span>
+		<FlowbiteInput
 			type="email"
-			class="input input-sm w-full"
+			size="sm"
+			class="w-full"
 			value={store.site.settings.contactEmail ?? ''}
-			oninput={(e) => {
-				const next = e.currentTarget.value.trim();
+			oninput={(e: Event) => {
+				const next = (e.currentTarget as HTMLInputElement).value.trim();
 				store.update((site) => {
 					if (next) site.settings.contactEmail = next;
 					else delete site.settings.contactEmail;
@@ -200,15 +202,17 @@
 		/>
 	</label>
 
-	<button
+	<FlowbiteButton
 		type="button"
-		class="sk-btn sk-btn-secondary sk-btn-sm w-fit"
+		variant="secondary"
+		size="sm"
+		class="w-fit"
 		onclick={saveIdentity}
 		disabled={savingIdentity}
 	>
-		{#if savingIdentity}<span class="loading loading-spinner loading-xs"></span>{/if}
+		{#if savingIdentity}<span class="sk-spinner sk-spinner-xs" aria-hidden="true"></span>{/if}
 		{t('editor.settings.saveIdentity')}
-	</button>
+	</FlowbiteButton>
 
 	{#if identityMessage}
 		<div
@@ -224,7 +228,7 @@
 		<span class="text-sm">{t('editor.settings.poweredByBadgeLabel')}</span>
 		<input
 			type="checkbox"
-			class="toggle toggle-primary toggle-sm"
+			class="sk-toggle"
 			checked={store.site.settings.poweredByBadge}
 			onchange={(e) => {
 				const next = e.currentTarget.checked;
@@ -261,7 +265,7 @@
 						<span class="text-sm font-medium">{INTEGRATION_DEFAULT_LABELS[type]}</span>
 						<input
 							type="checkbox"
-							class="toggle toggle-primary toggle-sm"
+							class="sk-toggle"
 							checked={enabled}
 							onchange={(e) => {
 								const checked = e.currentTarget.checked;
@@ -284,15 +288,15 @@
 					</label>
 					{#if enabled}
 						{#if type === 'whatsapp-order'}
-							<label class="form-control">
-								<span class="label-text mb-1 block text-[11px]"
+							<label class="sk-field-stack">
+								<span class="mb-1 block text-[11px]"
 									>{t('editor.settings.phoneLabel', {
 										example: t('editor.settings.phoneExample')
 									})}</span
 								>
 								<input
 									type="text"
-									class="input input-sm w-full font-[var(--font-mono)] text-xs"
+									class="sk-input w-full font-[var(--font-mono)] text-xs"
 									value={currentPhone}
 									placeholder={t('editor.settings.phoneExample')}
 									oninput={(e) => {
@@ -306,8 +310,8 @@
 								/>
 							</label>
 						{:else}
-							<label class="form-control">
-								<span class="label-text mb-1 block text-[11px]">
+							<label class="sk-field-stack">
+								<span class="mb-1 block text-[11px]">
 									{t('editor.settings.linkLabel')}
 									{#if allowlist.length > 0}
 										<span class="text-base-content/40"> ({allowlist.join(', ')})</span>
@@ -315,7 +319,7 @@
 								</span>
 								<input
 									type="url"
-									class="input input-sm w-full font-[var(--font-mono)] text-xs"
+									class="sk-input w-full font-[var(--font-mono)] text-xs"
 									value={currentUrl}
 									placeholder="https://..."
 									oninput={(e) => {
@@ -330,15 +334,15 @@
 							</label>
 						{/if}
 						{#if entry?.label}
-							<label class="form-control">
-								<span class="label-text mb-1 block text-[11px]"
+							<label class="sk-field-stack">
+								<span class="mb-1 block text-[11px]"
 									>{t('editor.settings.buttonLabelLabel', {
 										default: INTEGRATION_DEFAULT_LABELS[type]
 									})}</span
 								>
 								<input
 									type="text"
-									class="input input-sm w-full text-xs"
+									class="sk-input w-full text-xs"
 									value={entry.label?.tr ?? ''}
 									oninput={(e) => {
 										const next = e.currentTarget.value;
@@ -373,26 +377,28 @@
 			{t('editor.settings.aiMemoryHelp')}
 		</p>
 		{#if memoryLoading}
-			<span class="loading loading-spinner loading-xs"></span>
+			<span class="sk-spinner sk-spinner-xs" aria-hidden="true"></span>
 		{:else}
-			<textarea
-				class="textarea textarea-bordered textarea-xs h-40 w-full font-[var(--font-mono)] text-[11px] leading-snug"
+			<FlowbiteTextarea
+				class="h-40 w-full font-[var(--font-mono)] text-[11px] leading-snug"
 				value={memoryContent ?? ''}
-				oninput={(e) => {
-					memoryContent = e.currentTarget.value;
+				oninput={(e: Event) => {
+					memoryContent = (e.currentTarget as HTMLTextAreaElement).value;
 					memoryMessage = null;
 				}}
-				placeholder={t('editor.settings.aiMemoryPlaceholder')}></textarea>
+				placeholder={t('editor.settings.aiMemoryPlaceholder')}
+			/>
 			<div class="mt-2 flex items-center justify-between gap-2">
-				<button
+				<FlowbiteButton
 					type="button"
-					class="sk-btn sk-btn-secondary sk-btn-xs"
+					variant="secondary"
+					size="xs"
 					onclick={saveMemory}
 					disabled={memorySaving}
 				>
-					{#if memorySaving}<span class="loading loading-spinner loading-xs"></span>{/if}
+					{#if memorySaving}<span class="sk-spinner sk-spinner-xs" aria-hidden="true"></span>{/if}
 					{t('editor.settings.aiMemorySave')}
-				</button>
+				</FlowbiteButton>
 				{#if memoryMessage}
 					<span
 						class="text-[10px] {memoryMessage.tone === 'success' ? 'text-success' : 'text-error'}"

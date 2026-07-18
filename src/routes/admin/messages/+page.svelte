@@ -3,6 +3,7 @@
 	import { LOCALES, localeNames } from '$lib/i18n';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -76,7 +77,9 @@
 								{entries.length} editable {entries.length === 1 ? 'string' : 'strings'}
 							</span>
 						</span>
-						<span class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.messagePanel.open')}</span>
+						<FlowbiteButton variant="secondary" size="sm"
+							>{t('admin.messagePanel.open')}</FlowbiteButton
+						>
 					</summary>
 					<div class="grid gap-4 border-t border-[var(--sk-line)] p-4">
 						{#each entries as entry (entry.key)}
@@ -122,7 +125,8 @@
 													/>
 												{/if}
 												<div class="flex gap-2">
-													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">Save</button
+													<FlowbiteButton type="submit" variant="primary" size="sm"
+														>Save</FlowbiteButton
 													>
 												</div>
 											</form>
@@ -130,9 +134,9 @@
 												<form method="POST" action="?/reset" class="mt-1" use:enhance>
 													<input type="hidden" name="key" value={entry.key} />
 													<input type="hidden" name="locale" value={locale} />
-													<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
+													<FlowbiteButton type="submit" variant="ghost" size="sm">
 														Reset to default
-													</button>
+													</FlowbiteButton>
 												</form>
 											{/if}
 										</div>

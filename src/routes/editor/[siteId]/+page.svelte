@@ -8,6 +8,8 @@
 	import SettingsTab from './SettingsTab.svelte';
 	import AppCanvasShell from '$lib/ui/AppCanvasShell.svelte';
 	import EditorDock from '$lib/ui/EditorDock.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteBadge from '$lib/ui/primitives/FlowbiteBadge.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import {
 		buildCompletionChecklist,
@@ -239,15 +241,16 @@
 		<div class="flex shrink-0 items-center gap-2 border-b border-[var(--sk-line)] px-3 py-2">
 			<div class="flex gap-1 rounded-[10px] bg-[var(--sk-shell)] p-1">
 				{#each viewports as vp (vp.id)}
-					<button
-						class="sk-btn sk-btn-sm {viewport.id === vp.id ? 'sk-btn-primary' : 'sk-btn-ghost'}"
+					<FlowbiteButton
+						variant={viewport.id === vp.id ? 'primary' : 'ghost'}
+						size="sm"
 						onclick={() => (viewport = vp)}
 						aria-label={vp.label}
 						aria-pressed={viewport.id === vp.id}
 						title={vp.label}
 					>
 						{@html viewportIcons[vp.id]}
-					</button>
+					</FlowbiteButton>
 				{/each}
 			</div>
 		</div>
@@ -266,21 +269,24 @@
 					class="flex shrink-0 flex-col gap-1 border-b border-[var(--sk-line)] py-2 pr-14 pl-4"
 				>
 					<div class="flex min-w-0 flex-wrap items-center justify-between gap-2">
-						<a
+						<FlowbiteButton
 							href="/dashboard"
-							class="sk-btn sk-btn-ghost sk-btn-sm shrink-0"
+							variant="ghost"
+							size="sm"
+							class="shrink-0"
 							aria-label="saaskaya dashboard"
 						>
 							{@html uiIcons.arrowLeft(13)} Dashboard
-						</a>
+						</FlowbiteButton>
 						<div class="flex min-w-0 flex-wrap items-center justify-end gap-2">
-							<button
-								class="sk-btn sk-btn-primary sk-btn-sm"
+							<FlowbiteButton
+								variant="primary"
+								size="sm"
 								onclick={publish}
 								disabled={publishing}
+								loading={publishing}
 								title={canPublish ? 'Publish' : 'Publish engelini görmek için tıkla'}
 							>
-								{#if publishing}<span class="loading loading-spinner loading-xs"></span>{/if}
 								{#if !canPublish}
 									Yayın engelini çöz
 								{:else if publishedVersion}
@@ -288,72 +294,80 @@
 								{:else}
 									Publish
 								{/if}
-							</button>
-						<details class="relative">
-							<summary
-								class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
-								aria-label="Diğer işlemler"
-							>
-								⋯
-							</summary>
-							<div
-								class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
-							>
-								<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
-									{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
-									{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
+							</FlowbiteButton>
+							<details class="relative">
+								<summary
+									class="sk-disclosure-trigger cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
+									aria-label="Diğer işlemler"
+								>
+									⋯
+								</summary>
+								<div
+									class="absolute right-0 z-10 mt-1 flex w-56 flex-col gap-1 rounded-[10px] border border-[var(--sk-line-strong)] bg-[var(--sk-card)] p-2 shadow-lg"
+								>
+									<div class="px-2 py-1.5 text-[11px] text-[var(--sk-muted)]">
+										{publishedVersion ? `Published v${publishedVersion}` : 'Not published'} ·
+										{hasUnpublishedChanges ? 'Unsaved draft changes' : 'Saved draft'}
+									</div>
+									<button
+										type="button"
+										class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
+										onclick={saveNow}
+									>
+										Save now
+									</button>
+									<a
+										href={savedPreviewSrc}
+										target="_blank"
+										class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
+									>
+										Saved preview {@html uiIcons.external(13)}
+									</a>
 								</div>
-								<button
-									type="button"
-									class="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-[#171614]/5"
-									onclick={saveNow}
+							</details>
+							<div class="dropdown dropdown-end">
+								<FlowbiteButton
+									tabindex="0"
+									variant="ghost"
+									size="sm"
+									class="gap-1 !px-1.5 text-[10px] font-bold"
+									aria-label="Düzenleme dili"
 								>
-									Save now
-								</button>
-								<a
-									href={savedPreviewSrc}
-									target="_blank"
-									class="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-[#171614]/5"
-								>
-									Saved preview {@html uiIcons.external(13)}
-								</a>
-							</div>
-						</details>
-						<div class="dropdown dropdown-end">
-							<button
-								tabindex="0"
-								class="sk-btn sk-btn-ghost sk-btn-sm gap-1 px-1.5 text-[10px] font-bold"
-								aria-label="Düzenleme dili"
-							>
-								<svg class="text-base-content/70 size-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-									><path stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
-									/></svg
-								>
-								<span>{store.editLocale.toUpperCase()}</span>
-							</button>
-							<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-							<div
-								tabindex="0"
-								class="dropdown-content bg-base-200 text-base-content rounded-box z-20 mt-1 max-h-44 w-44 overflow-y-auto border border-white/5 p-2 shadow-2xl outline outline-1 outline-black/5"
-							>
-								<ul class="menu menu-sm w-full">
-									{#each store.site.locales as locale (locale)}
-										<li>
-											<button
-												class:menu-active={store.editLocale === locale}
-												onclick={() => (store.editLocale = locale)}
-											>
-												{@html flagSvgs[locale]}
-												<span class="font-sans">{localeLabels[locale]}</span>
-											</button>
-										</li>
-									{/each}
-								</ul>
+									<svg
+										class="text-base-content/70 size-3.5"
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 24 24"
+										><path
+											stroke-linejoin="round"
+											stroke-linecap="round"
+											stroke-width="2"
+											fill="none"
+											stroke="currentColor"
+											d="M12 21a9 9 0 1 0 0-18m0 18a9 9 0 1 1 0-18m0 18c2.761 0 3.941-5.163 3.941-9S14.761 3 12 3m0 18c-2.761 0-3.941-5.163-3.941-9S9.239 3 12 3M3.5 9h17m-17 6h17"
+										/></svg
+									>
+									<span>{store.editLocale.toUpperCase()}</span>
+								</FlowbiteButton>
+								<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+								<div tabindex="0" class="sk-editor-dropdown-content">
+									<ul class="menu menu-sm w-full">
+										{#each store.site.locales as locale (locale)}
+											<li>
+												<button
+													class:menu-active={store.editLocale === locale}
+													onclick={() => (store.editLocale = locale)}
+												>
+													{@html flagSvgs[locale]}
+													<span class="font-sans">{localeLabels[locale]}</span>
+												</button>
+											</li>
+										{/each}
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-				<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
+					<h1 class="truncate text-sm font-semibold">{store.site.settings.siteName}</h1>
 				</header>
 
 				<div
@@ -411,10 +425,10 @@
 						>
 							<div class="min-w-0">
 								<div class="flex flex-wrap items-center gap-1.5">
-									<span class="badge badge-sm badge-secondary">Checklist</span>
-									<span class="badge badge-sm">
+									<FlowbiteBadge tone="neutral">Checklist</FlowbiteBadge>
+									<FlowbiteBadge tone="neutral">
 										{checklist.filter((item) => item.complete).length}/{checklist.length}
-									</span>
+									</FlowbiteBadge>
 									<span class="truncate text-xs font-semibold">{nextAction.label}</span>
 								</div>
 								<p class="mt-1 truncate text-xs text-[var(--sk-muted)]">{nextAction.helper}</p>
@@ -423,13 +437,15 @@
 								{checklistOpen ? 'Gizle' : 'Detay'}
 							</span>
 						</summary>
-						<button
+						<FlowbiteButton
 							type="button"
-							class="sk-btn sk-btn-secondary sk-btn-sm mt-3 shrink-0"
+							variant="secondary"
+							size="sm"
+							class="mt-3 shrink-0"
 							onclick={() => goToChecklistItem(nextAction)}
 						>
 							Aç
-						</button>
+						</FlowbiteButton>
 						<div class="mt-3 flex flex-col gap-2">
 							{#each checklist as item (item.id)}
 								<button
@@ -458,15 +474,14 @@
 						>
 							<div class="min-w-0">
 								<div class="flex flex-wrap items-center gap-1.5">
-									<span class="badge badge-sm {canPublish ? 'badge-success' : 'badge-error'}">
+									<FlowbiteBadge tone={canPublish ? 'success' : 'error'}>
 										{canPublish ? 'Publish OK' : 'Blocked'}
-									</span>
+									</FlowbiteBadge>
 									{#if publishBlockers.length}
-										<span class="badge badge-sm badge-error">{publishBlockers.length} engel</span>
+										<FlowbiteBadge tone="error">{publishBlockers.length} engel</FlowbiteBadge>
 									{/if}
 									{#if quality.warnings.length}
-										<span class="badge badge-sm badge-warning">{quality.warnings.length} uyarı</span
-										>
+										<FlowbiteBadge tone="warning">{quality.warnings.length} uyarı</FlowbiteBadge>
 									{/if}
 									<span class="truncate text-xs font-semibold">
 										{publishBlockers[0]?.message ??
@@ -538,13 +553,14 @@
 							</div>
 							{#if publishNotice.tone === 'success'}
 								<div class="flex flex-wrap items-start gap-2">
-									<a
+									<FlowbiteButton
 										href={`${liveUrl}?v=${publishNotice.version ?? publishedVersion}`}
 										target="_blank"
-										class="sk-btn sk-btn-secondary sk-btn-sm"
+										variant="secondary"
+										size="sm"
 									>
 										Canlı siteyi aç {@html uiIcons.external(13)}
-									</a>
+									</FlowbiteButton>
 									<ShareStoryButton
 										siteName={store.site.settings.siteName}
 										{liveUrl}

@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 @plugin 'daisyui';
+@plugin 'flowbite/plugin';
+@source '../../node_modules/flowbite-svelte/dist';
+@source '../../node_modules/flowbite-svelte-icons/dist';
 
 :root {
 	--sk-ink: #171614;
@@ -20,9 +23,16 @@
 	--sk-error-bg: #f8e7e1;
 	--sk-error-line: rgb(184 83 47 / 0.32);
 	--sk-error-ink: #7a2f1a;
+	/* Brand-derived geometry/elevation roles: border-first, restrained surfaces. */
 	--sk-radius: 14px;
-	--font-display: 'Nunito', ui-sans-serif, system-ui, sans-serif;
-	--font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
+	--sk-radius-sm: 10px;
+	--sk-radius-lg: 18px;
+	--sk-shadow-lg: 0 18px 45px rgb(23 22 20 / 0.12);
+	--sk-accent: #2f6f6a;
+	--sk-focus: #2f6f6a;
+	--sk-error: #b8532f;
+	--font-display: 'Aleo', ui-serif, Georgia, serif;
+	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 	color: var(--sk-ink);
 	font-family: var(--font-sans);
@@ -81,14 +91,14 @@ select {
 
 .sk-card {
 	border: 1px solid var(--sk-line-strong);
-	border-radius: 12px;
+	border-radius: var(--sk-radius-sm);
 	background: var(--sk-card);
 	box-shadow: 0 1px 2px rgb(23 22 20 / 0.04);
 }
 
 .sk-soft {
 	border: 1px solid rgb(23 22 20 / 0.07);
-	border-radius: 12px;
+	border-radius: var(--sk-radius-sm);
 	background: var(--sk-shell);
 }
 
@@ -97,7 +107,7 @@ select {
 .sk-select {
 	width: 100%;
 	border: 1px solid var(--sk-line-strong);
-	border-radius: 10px;
+	border-radius: var(--sk-radius-sm);
 	background: #fff;
 	color: var(--sk-ink);
 }
@@ -121,88 +131,326 @@ select {
 	outline-offset: 2px;
 }
 
-.sk-btn {
-	display: inline-flex;
-	min-height: 2.25rem;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-	border: 1px solid transparent;
-	border-radius: 9px;
-	padding: 0.5rem 0.875rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	line-height: 1;
-	text-decoration: none;
+/* Flowbite adapter layer: behavior comes from Flowbite, visual language stays SaasKaya. */
+.sk-flowbite-btn {
+	border-radius: var(--sk-radius-sm) !important;
+	font-family: var(--font-sans) !important;
+	font-weight: 600 !important;
+	box-shadow: none !important;
 	transition:
 		background-color 0.15s ease,
 		border-color 0.15s ease,
 		color 0.15s ease,
-		opacity 0.15s ease;
+		opacity 0.15s ease,
+		transform 0.15s ease !important;
 }
 
-.sk-btn:hover {
-	text-decoration: none;
+.sk-flowbite-btn--primary {
+	background: var(--sk-ink) !important;
+	color: var(--sk-card) !important;
 }
 
-.sk-btn:focus-visible {
-	outline: 2px solid rgb(23 22 20 / 0.22);
+.sk-flowbite-btn--primary:hover {
+	background: #2a2824 !important;
+}
+
+.sk-flowbite-btn:focus-visible {
+	outline: 2px solid var(--sk-focus) !important;
 	outline-offset: 2px;
 }
 
-.sk-btn-primary {
-	background: var(--sk-ink);
-	color: #f3ecdd;
+.sk-flowbite-btn:active:not(:disabled) {
+	transform: translateY(1px);
 }
 
-.sk-btn-primary:hover {
-	background: #2a2824;
+.sk-flowbite-btn--secondary {
+	border: 1px solid var(--sk-line-strong) !important;
+	background: rgb(251 250 247 / 0.68) !important;
+	color: var(--sk-ink) !important;
 }
 
-.sk-btn-secondary {
-	border-color: var(--sk-line-strong);
-	background: rgb(251 250 247 / 0.68);
-	color: var(--sk-ink);
+.sk-flowbite-btn--secondary:hover {
+	border-color: rgb(23 22 20 / 0.24) !important;
+	background: #fff !important;
 }
 
-.sk-btn-secondary:hover {
-	border-color: rgb(23 22 20 / 0.24);
-	background: #fff;
+.sk-flowbite-btn--ghost {
+	background: transparent !important;
+	color: var(--sk-muted) !important;
 }
 
-.sk-btn-ghost {
-	border-color: transparent;
-	background: transparent;
-	color: var(--sk-muted);
+.sk-flowbite-btn--ghost:hover {
+	background: rgb(23 22 20 / 0.05) !important;
+	color: var(--sk-ink) !important;
 }
 
-.sk-btn-ghost:hover {
-	background: rgb(23 22 20 / 0.05);
-	color: var(--sk-ink);
+.sk-flowbite-btn--danger {
+	background: var(--sk-error-bg) !important;
+	color: var(--sk-error-ink) !important;
 }
 
-.sk-btn-danger {
-	color: #b8532f;
+.sk-flowbite-btn--danger:hover {
+	border-color: var(--sk-error-line) !important;
+	background: var(--sk-error-line) !important;
 }
 
-.sk-btn-sm {
-	min-height: 1.875rem;
-	border-radius: 7px;
-	padding: 0.375rem 0.625rem;
-	font-size: 0.75rem;
-}
-
-.sk-btn-lg {
-	min-height: 3rem;
-	border-radius: 11px;
-	padding: 0.875rem 1.25rem;
-	font-size: 0.9375rem;
-}
-
-.sk-btn[disabled],
-.sk-btn:disabled {
+.sk-flowbite-btn:disabled,
+.sk-flowbite-btn[aria-disabled='true'],
+.sk-flowbite-btn[aria-busy='true'] {
 	cursor: not-allowed;
 	opacity: 0.55;
+}
+
+.sk-flowbite-badge {
+	border-radius: 999px !important;
+	font-family: var(--font-sans) !important;
+	font-weight: 600 !important;
+}
+
+.sk-flowbite-input {
+	font-family: var(--font-sans);
+}
+
+.sk-flowbite-input:focus-visible {
+	border-color: var(--sk-focus) !important;
+	box-shadow: 0 0 0 2px rgb(47 111 106 / 0.18) !important;
+	outline: none;
+}
+
+.sk-flowbite-input[aria-invalid='true'] {
+	border-color: var(--sk-error) !important;
+}
+
+.sk-flowbite-textarea,
+.sk-flowbite-select {
+	border-color: var(--sk-line-strong) !important;
+	border-radius: var(--sk-radius-sm) !important;
+	background: #fff !important;
+	color: var(--sk-ink) !important;
+}
+
+.sk-flowbite-textarea:focus,
+.sk-flowbite-select:focus {
+	border-color: var(--sk-focus) !important;
+	box-shadow: 0 0 0 2px rgb(47 111 106 / 0.18) !important;
+}
+
+.sk-flowbite-field {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.sk-flowbite-field__label {
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.sk-flowbite-field__hint,
+.sk-flowbite-field__error {
+	font-size: 0.6875rem;
+}
+
+.sk-flowbite-field__hint {
+	color: var(--sk-faint);
+}
+
+.sk-flowbite-field__error {
+	color: var(--sk-error);
+}
+
+.sk-spinner {
+	display: inline-block;
+	height: 1em;
+	width: 1em;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 999px;
+	animation: sk-spin 0.7s linear infinite;
+	vertical-align: -0.12em;
+}
+
+.sk-spinner-xs {
+	height: 0.75rem;
+	width: 0.75rem;
+	border-width: 1.5px;
+}
+.sk-spinner-sm {
+	height: 0.9rem;
+	width: 0.9rem;
+}
+.sk-spinner-dots {
+	height: 0.5rem;
+	width: 2rem;
+	border: 0;
+	border-radius: 0;
+	background:
+		radial-gradient(circle, currentColor 35%, transparent 40%) 0 50% / 0.5rem 0.5rem no-repeat,
+		radial-gradient(circle, currentColor 35%, transparent 40%) 50% 50% / 0.5rem 0.5rem no-repeat,
+		radial-gradient(circle, currentColor 35%, transparent 40%) 100% 50% / 0.5rem 0.5rem no-repeat;
+	animation: sk-dots 1s ease-in-out infinite;
+}
+
+.sk-toggle {
+	position: relative;
+	height: 1.25rem;
+	width: 2.25rem;
+	appearance: none;
+	cursor: pointer;
+	border: 1px solid var(--sk-line-strong);
+	border-radius: 999px;
+	background: var(--sk-shell);
+	transition:
+		background-color 0.15s ease,
+		border-color 0.15s ease;
+}
+.sk-toggle::after {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	height: 0.875rem;
+	width: 0.875rem;
+	border-radius: 999px;
+	background: var(--sk-card);
+	box-shadow: 0 1px 2px rgb(23 22 20 / 0.16);
+	content: '';
+	transition: transform 0.15s ease;
+}
+.sk-toggle:checked {
+	border-color: var(--sk-accent);
+	background: var(--sk-accent);
+}
+.sk-toggle:checked::after {
+	transform: translateX(1rem);
+}
+.sk-toggle:focus-visible {
+	outline: 2px solid var(--sk-focus);
+	outline-offset: 2px;
+}
+
+@keyframes sk-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+@keyframes sk-dots {
+	0%,
+	100% {
+		opacity: 0.45;
+		transform: scale(0.92);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.sk-flowbite-modal,
+.sk-flowbite-drawer {
+	font-family: var(--font-sans);
+}
+
+.sk-flowbite-drawer__title {
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	font-weight: 700;
+}
+
+.sk-flowbite-dropdown,
+.sk-flowbite-tabs,
+.sk-flowbite-tab-item,
+.sk-flowbite-tooltip,
+.sk-flowbite-card {
+	font-family: var(--font-sans);
+}
+
+.sk-flowbite-upload-label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.25rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--sk-line-strong);
+	border-radius: var(--sk-radius-sm);
+	background: var(--sk-card);
+	color: var(--sk-ink);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	transition: background-color 120ms ease;
+}
+
+.sk-flowbite-upload-label:hover {
+	background: var(--sk-shell);
+}
+
+.sk-disclosure-trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.25rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid transparent;
+	border-radius: var(--sk-radius-sm);
+	color: var(--sk-muted);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	transition:
+		background-color 120ms ease,
+		color 120ms ease;
+}
+
+.sk-disclosure-trigger:hover {
+	background: var(--sk-shell);
+	color: var(--sk-ink);
+}
+
+.sk-field-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.sk-editor-dropdown-content {
+	position: absolute;
+	z-index: 20;
+	margin-top: 0.25rem;
+	max-height: 11rem;
+	width: 11rem;
+	overflow-y: auto;
+	border: 1px solid var(--sk-line);
+	border-radius: var(--sk-radius-sm);
+	background: var(--sk-card);
+	padding: 0.5rem;
+	box-shadow: var(--sk-shadow-lg);
+}
+
+.sk-editor-collapse {
+	border: 1px solid var(--sk-line);
+	border-radius: var(--sk-radius-sm);
+	background: var(--sk-shell);
+}
+
+.sk-flowbite-badge--neutral {
+	border: 1px solid var(--sk-line-strong) !important;
+	background: var(--sk-shell) !important;
+	color: var(--sk-ink) !important;
+}
+
+.sk-flowbite-badge--success {
+	border: 1px solid var(--sk-success-line) !important;
+	background: var(--sk-success-bg) !important;
+	color: var(--sk-success-ink) !important;
+}
+
+.sk-flowbite-badge--warning {
+	border: 1px solid var(--sk-warn-line) !important;
+	background: var(--sk-warn-bg) !important;
+	color: var(--sk-warn-ink) !important;
+}
+
+.sk-flowbite-badge--error {
+	border: 1px solid var(--sk-error-line) !important;
+	background: var(--sk-error-bg) !important;
+	color: var(--sk-error-ink) !important;
 }
 
 .sk-pill {
@@ -988,7 +1236,9 @@ body:has(dialog[data-editor-dock][open]) {
 	border-radius: 8px;
 	padding: 0.625rem 0.75rem;
 	font-size: 0.875rem;
-	transition: background-color 150ms ease, color 150ms ease;
+	transition:
+		background-color 150ms ease,
+		color 150ms ease;
 }
 
 .panel-sidebar-icon {
@@ -1064,12 +1314,8 @@ body:has(dialog[data-editor-dock][open]) {
 /* Comfortable touch targets on coarse pointers without changing desktop density.
    The 16px input floor also stops iOS Safari's focus auto-zoom. */
 @media (pointer: coarse) {
-	.sk-btn {
+	.sk-flowbite-btn {
 		min-height: 2.75rem;
-	}
-
-	.sk-btn-sm {
-		min-height: 2.5rem;
 	}
 
 	.sk-input,

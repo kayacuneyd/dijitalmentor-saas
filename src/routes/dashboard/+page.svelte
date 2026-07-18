@@ -3,6 +3,8 @@
 	import { page } from '$app/state';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import PageShell from '$lib/ui/PageShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
 	import ShareStoryButton from '$lib/share/ShareStoryButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import SitePreviewThumb from '$lib/ui/SitePreviewThumb.svelte';
@@ -53,15 +55,18 @@
 >
 	{#snippet actions()}
 		<div class="flex flex-wrap gap-2">
-			<a href="/new" class="sk-btn sk-btn-primary"
-				>{@html uiIcons.plus(16)}{t('dashboard.nav.newSite')}</a
+			<FlowbiteButton href="/new" variant="primary"
+				>{@html uiIcons.plus(16)}{t('dashboard.nav.newSite')}</FlowbiteButton
 			>
-			<a href="/account" class="sk-btn sk-btn-secondary">{t('dashboard.nav.account')}</a>
+			<FlowbiteButton href="/account" variant="secondary"
+				>{t('dashboard.nav.account')}</FlowbiteButton
+			>
 			{#if data.user.isAdmin}
-				<a href="/admin" class="sk-btn sk-btn-secondary">{t('dashboard.nav.admin')}</a>
+				<FlowbiteButton href="/admin" variant="secondary">{t('dashboard.nav.admin')}</FlowbiteButton
+				>
 			{/if}
 			<form method="POST" action="/logout">
-				<button type="submit" class="sk-btn sk-btn-ghost">{t('dashboard.nav.signOut')}</button>
+				<FlowbiteButton type="submit" variant="ghost">{t('dashboard.nav.signOut')}</FlowbiteButton>
 			</form>
 		</div>
 	{/snippet}
@@ -82,7 +87,9 @@
 			<div class="flex flex-wrap items-center gap-2">
 				<span class="text-xs text-[var(--sk-faint)]">{t('dashboard.plan.billingNote')}</span>
 				<form method="POST" action="/api/billing/topup">
-					<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">AI kredisi satın al</button>
+					<FlowbiteButton type="submit" variant="ghost" size="sm"
+						>AI kredisi satın al</FlowbiteButton
+					>
 				</form>
 			</div>
 		</div>
@@ -132,7 +139,7 @@
 				<p class="text-[var(--sk-muted)]">
 					{t('dashboard.empty.message')}
 				</p>
-				<a href="/new" class="sk-btn sk-btn-primary">{t('dashboard.empty.cta')}</a>
+				<FlowbiteButton href="/new" variant="primary">{t('dashboard.empty.cta')}</FlowbiteButton>
 			</div>
 		</AppCard>
 	{:else}
@@ -191,31 +198,35 @@
 									<input type="hidden" name="siteId" value={site.id} />
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
 										{t('dashboard.identity.siteName')}
-										<input
+										<FlowbiteInput
 											name="siteName"
 											value={site.siteName}
-											class="sk-input min-h-9 py-1.5 text-sm"
+											size="sm"
+											class="text-sm"
 										/>
 									</label>
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
 										{t('dashboard.identity.subdomain')}
-										<input
+										<FlowbiteInput
 											name="publicHandle"
 											value={site.publicHandle ?? site.id}
-											class="sk-input min-h-9 py-1.5 font-[var(--font-mono)] text-sm"
+											size="sm"
+											class="font-[var(--font-mono)] text-sm"
 										/>
 									</label>
 									<label class="flex flex-col gap-1 text-xs text-[var(--sk-muted)]">
 										{t('dashboard.identity.contactEmail')}
-										<input
+										<FlowbiteInput
 											name="contactEmail"
 											value={site.contactEmail ?? ''}
-											class="sk-input min-h-9 py-1.5 text-sm"
+											type="email"
+											size="sm"
+											class="text-sm"
 										/>
 									</label>
-									<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm self-end">
+									<FlowbiteButton type="submit" variant="secondary" size="sm" class="self-end">
 										{t('dashboard.identity.save')}
-									</button>
+									</FlowbiteButton>
 								</form>
 								<div
 									class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10.5px] text-[var(--sk-faint)]"
@@ -265,16 +276,16 @@
 											<form method="POST" action="/api/billing/checkout">
 												<input type="hidden" name="siteId" value={site.id} />
 												<input type="hidden" name="planInterval" value="monthly" />
-												<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+												<FlowbiteButton type="submit" variant="secondary" size="sm">
 													{t('dashboard.billing.monthlyButton')}
-												</button>
+												</FlowbiteButton>
 											</form>
 											<form method="POST" action="/api/billing/checkout">
 												<input type="hidden" name="siteId" value={site.id} />
 												<input type="hidden" name="planInterval" value="yearly" />
-												<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+												<FlowbiteButton type="submit" variant="primary" size="sm">
 													{t('dashboard.billing.yearlyButton')}
-												</button>
+												</FlowbiteButton>
 											</form>
 										</div>
 									{:else}
@@ -286,35 +297,41 @@
 							</div>
 
 							<div class="flex flex-wrap items-center gap-2">
-								<a href="/editor/{site.id}" class="sk-btn sk-btn-primary sk-btn-sm"
-									>{t('dashboard.actionsRow.edit')}</a
+								<FlowbiteButton href="/editor/{site.id}" variant="primary" size="sm"
+									>{t('dashboard.actionsRow.edit')}</FlowbiteButton
 								>
-								<a href={site.previewUrl} target="_blank" class="sk-btn sk-btn-secondary sk-btn-sm">
+								<FlowbiteButton
+									href={site.previewUrl}
+									target="_blank"
+									variant="secondary"
+									size="sm"
+								>
 									{t('dashboard.actionsRow.preview')}
-								</a>
+								</FlowbiteButton>
 								{#if site.publishedVersion}
-									<a
+									<FlowbiteButton
 										href="{site.liveUrl}?v={site.publishedVersion}"
 										target="_blank"
-										class="sk-btn sk-btn-secondary sk-btn-sm"
+										variant="secondary"
+										size="sm"
 									>
 										{t('dashboard.actionsRow.openLive')}
 										{@html uiIcons.external(13)}
-									</a>
+									</FlowbiteButton>
 									<form method="POST" action="?/unpublish" use:enhance>
 										<input type="hidden" name="siteId" value={site.id} />
-										<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
+										<FlowbiteButton type="submit" variant="ghost" size="sm">
 											{t('dashboard.actionsRow.unpublish')}
-										</button>
+										</FlowbiteButton>
 									</form>
 								{:else}
-									<a href="/editor/{site.id}" class="sk-btn sk-btn-secondary sk-btn-sm"
-										>{t('dashboard.actionsRow.prepareForLaunch')}</a
+									<FlowbiteButton href="/editor/{site.id}" variant="secondary" size="sm"
+										>{t('dashboard.actionsRow.prepareForLaunch')}</FlowbiteButton
 									>
 								{/if}
 								<details class="relative">
 									<summary
-										class="sk-btn sk-btn-ghost sk-btn-sm cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
+										class="sk-disclosure-trigger cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden"
 										aria-label={t('dashboard.actionsRow.moreActionsAria')}
 									>
 										⋯
@@ -414,20 +431,22 @@
 											class="sk-input min-h-8 w-52 py-1.5 text-sm"
 											autocomplete="off"
 										/>
-										<button
+										<FlowbiteButton
 											type="submit"
 											disabled={deleteConfirmText !== site.siteName}
-											class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm"
+											variant="danger"
+											size="sm"
 										>
 											{t('dashboard.deleteConfirm.confirmButton')}
-										</button>
-										<button
+										</FlowbiteButton>
+										<FlowbiteButton
 											type="button"
 											onclick={closeDeleteConfirm}
-											class="sk-btn sk-btn-ghost sk-btn-sm"
+											variant="ghost"
+											size="sm"
 										>
 											{t('dashboard.deleteConfirm.cancel')}
-										</button>
+										</FlowbiteButton>
 									</form>
 								</div>
 							{/if}
@@ -448,9 +467,9 @@
 										>
 										<form method="POST" action="?/detachDomain" use:enhance>
 											<input type="hidden" name="siteId" value={site.id} />
-											<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+											<FlowbiteButton type="submit" variant="danger" size="sm">
 												{t('dashboard.domain.remove')}
-											</button>
+											</FlowbiteButton>
 										</form>
 									</div>
 									{#if site.reservation?.emailLocalPart && site.reservation?.emailDestination}
@@ -504,16 +523,16 @@
 													<form method="POST" action="/api/billing/checkout">
 														<input type="hidden" name="siteId" value={site.id} />
 														<input type="hidden" name="planInterval" value="monthly" />
-														<button type="submit" class="sk-btn sk-btn-secondary sk-btn-sm">
+														<FlowbiteButton type="submit" variant="secondary" size="sm">
 															{t('dashboard.billing.monthlyButton')}
-														</button>
+														</FlowbiteButton>
 													</form>
 													<form method="POST" action="/api/billing/checkout">
 														<input type="hidden" name="siteId" value={site.id} />
 														<input type="hidden" name="planInterval" value="yearly" />
-														<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+														<FlowbiteButton type="submit" variant="primary" size="sm">
 															{t('dashboard.billing.yearlyButton')}
-														</button>
+														</FlowbiteButton>
 													</form>
 												</div>
 											{/if}
@@ -538,30 +557,30 @@
 											<div class="flex flex-wrap gap-2">
 												<form method="POST" action="?/reportTransfer" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
-													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+													<FlowbiteButton type="submit" variant="primary" size="sm">
 														{t('dashboard.reservation.reportTransfer')}
-													</button>
+													</FlowbiteButton>
 												</form>
 												<form method="POST" action="?/cancelReservation" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
-													<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+													<FlowbiteButton type="submit" variant="danger" size="sm">
 														{t('dashboard.reservation.cancel')}
-													</button>
+													</FlowbiteButton>
 												</form>
 											</div>
 										{:else if res.status === 'pending' && ['stripe', 'creem'].includes(res.paymentMethod)}
 											<div class="flex flex-wrap gap-2">
 												<form method="POST" action="?/payDomainStripe">
 													<input type="hidden" name="reservationId" value={res.id} />
-													<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+													<FlowbiteButton type="submit" variant="primary" size="sm">
 														{t('dashboard.reservation.cardContinue')}
-													</button>
+													</FlowbiteButton>
 												</form>
 												<form method="POST" action="?/cancelReservation" use:enhance>
 													<input type="hidden" name="reservationId" value={res.id} />
-													<button type="submit" class="sk-btn sk-btn-ghost sk-btn-danger sk-btn-sm">
+													<FlowbiteButton type="submit" variant="danger" size="sm">
 														{t('dashboard.reservation.cancel')}
-													</button>
+													</FlowbiteButton>
 												</form>
 											</div>
 										{:else if res.status === 'failed'}
@@ -601,19 +620,21 @@
 										class="flex flex-wrap items-center gap-2"
 									>
 										<input type="hidden" name="siteId" value={site.id} />
-										<input
+										<FlowbiteInput
 											type="text"
 											name="domain"
 											placeholder={t('dashboard.attach.placeholder')}
-											class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+											size="sm"
+											class="w-52 font-[var(--font-mono)] text-xs"
 										/>
-										<button
+										<FlowbiteButton
 											type="submit"
-											class="sk-btn sk-btn-secondary sk-btn-sm"
+											variant="secondary"
+											size="sm"
 											disabled={site.plan.state === 'free' && !data.user.isAdmin}
 										>
 											{t('dashboard.attach.button')}
-										</button>
+										</FlowbiteButton>
 									</form>
 									<p class="text-[10.5px] text-[var(--sk-faint)]">
 										{t('dashboard.attach.note')}
@@ -636,15 +657,16 @@
 											class="flex flex-wrap items-center gap-2"
 										>
 											<input type="hidden" name="siteId" value={site.id} />
-											<input
+											<FlowbiteInput
 												type="text"
 												name="domain"
 												placeholder={t('dashboard.attach.domainPlaceholder')}
-												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+												size="sm"
+												class="w-52 font-[var(--font-mono)] text-xs"
 											/>
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+											<FlowbiteButton type="submit" variant="primary" size="sm">
 												{t('dashboard.attach.includedButton')}
-											</button>
+											</FlowbiteButton>
 										</form>
 									{:else if site.planDetails.planInterval === 'monthly' && site.plan.state !== 'free' && (data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only' || data.payment.mode === 'hybrid')}
 										<div class="rounded-md bg-[#171614]/5 p-3 text-xs">
@@ -661,15 +683,16 @@
 										>
 											<input type="hidden" name="siteId" value={site.id} />
 											<input type="hidden" name="paymentMethod" value="stripe" />
-											<input
+											<FlowbiteInput
 												type="text"
 												name="domain"
 												placeholder={t('dashboard.attach.domainPlaceholder')}
-												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+												size="sm"
+												class="w-52 font-[var(--font-mono)] text-xs"
 											/>
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+											<FlowbiteButton type="submit" variant="primary" size="sm">
 												{t('dashboard.attach.yearlyButton')}
-											</button>
+											</FlowbiteButton>
 										</form>
 									{:else if data.payment.mode === 'stripe_only' || data.payment.mode === 'card_only'}
 										<form
@@ -680,15 +703,16 @@
 										>
 											<input type="hidden" name="siteId" value={site.id} />
 											<input type="hidden" name="paymentMethod" value="stripe" />
-											<input
+											<FlowbiteInput
 												type="text"
 												name="domain"
 												placeholder={t('dashboard.attach.domainPlaceholder')}
-												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+												size="sm"
+												class="w-52 font-[var(--font-mono)] text-xs"
 											/>
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+											<FlowbiteButton type="submit" variant="primary" size="sm">
 												{t('dashboard.attach.checkAvailability')}
-											</button>
+											</FlowbiteButton>
 										</form>
 									{:else}
 										<form
@@ -698,11 +722,12 @@
 											class="flex flex-wrap items-center gap-2"
 										>
 											<input type="hidden" name="siteId" value={site.id} />
-											<input
+											<FlowbiteInput
 												type="text"
 												name="domain"
 												placeholder={t('dashboard.attach.domainPlaceholder')}
-												class="sk-input min-h-8 w-52 py-1.5 font-[var(--font-mono)] text-xs"
+												size="sm"
+												class="w-52 font-[var(--font-mono)] text-xs"
 											/>
 											{#if data.payment.mode === 'hybrid'}
 												<select name="paymentMethod" class="sk-input min-h-8 py-1.5 text-xs">
@@ -712,9 +737,9 @@
 											{:else}
 												<input type="hidden" name="paymentMethod" value="bank_transfer" />
 											{/if}
-											<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm">
+											<FlowbiteButton type="submit" variant="primary" size="sm">
 												{t('dashboard.attach.checkAvailability')}
-											</button>
+											</FlowbiteButton>
 										</form>
 									{/if}
 									{#if form?.domainMessage && form?.siteId === site.id}

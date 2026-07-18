@@ -160,7 +160,9 @@ describe('Cloudflare DNS + Email Routing provider', () => {
 		const fetchMock = vi
 			.spyOn(globalThis, 'fetch')
 			.mockResolvedValueOnce(
-				json([{ id: 'addr_existing', email: 'owner@example.net', verified: '2026-01-01T00:00:00Z' }])
+				json([
+					{ id: 'addr_existing', email: 'owner@example.net', verified: '2026-01-01T00:00:00Z' }
+				])
 			)
 			.mockResolvedValueOnce(
 				json([

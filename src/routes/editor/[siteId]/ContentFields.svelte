@@ -2,6 +2,8 @@
 	import ContentFields from './ContentFields.svelte';
 	import ImageUploadField from './ImageUploadField.svelte';
 	import type { DraftStore } from '$lib/stores/draft.svelte';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteTextarea from '$lib/ui/primitives/FlowbiteTextarea.svelte';
 
 	/**
 	 * Generic editor over one locale's `content` object of a section: strings become
@@ -56,29 +58,31 @@
 					onchange={(url) => setImageField(key, url)}
 				/>
 			{:else}
-				<label class="form-control">
-					<span class="label-text mb-1 block text-xs font-medium capitalize">{key}</span>
+				<label class="sk-field-stack">
+					<span class="mb-1 block text-xs font-medium capitalize">{key}</span>
 					{#if isLongText(key, v)}
-						<textarea
-							class="textarea textarea-sm min-h-20 w-full text-sm"
+						<FlowbiteTextarea
+							class="min-h-20 w-full text-sm"
 							value={v}
-							oninput={(e) => setField(key, e.currentTarget.value)}></textarea>
+							oninput={(e: Event) => setField(key, (e.currentTarget as HTMLTextAreaElement).value)}
+						/>
 					{:else}
-						<input
+						<FlowbiteInput
 							type="text"
-							class="input input-sm w-full text-sm"
+							size="sm"
+							class="w-full text-sm"
 							value={v}
-							oninput={(e) => setField(key, e.currentTarget.value)}
+							oninput={(e: Event) => setField(key, (e.currentTarget as HTMLInputElement).value)}
 						/>
 					{/if}
 				</label>
 			{/if}
 		{:else if Array.isArray(v)}
-			<fieldset class="border-base-300 rounded-field border p-3">
+			<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
 				<legend class="px-1 text-xs font-medium capitalize">{key}</legend>
 				<div class="flex flex-col gap-3">
 					{#each v as item, i (i)}
-						<div class="bg-base-200 rounded-field p-3">
+						<div class="sk-soft rounded-[10px] p-3">
 							<ContentFields
 								value={item as Record<string, unknown>}
 								{store}

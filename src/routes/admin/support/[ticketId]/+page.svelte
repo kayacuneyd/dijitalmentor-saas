@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -24,8 +25,8 @@
 	active="/admin/support"
 >
 	{#snippet actions()}
-		<a href="/admin/support" class="sk-btn sk-btn-secondary sk-btn-sm"
-			>{t('admin.detail.backSupport')}</a
+		<FlowbiteButton href="/admin/support" variant="secondary" size="sm"
+			>{t('admin.detail.backSupport')}</FlowbiteButton
 		>
 		<StatusPill tone={statusTone(data.ticket.status)}>{data.ticket.status}</StatusPill>
 	{/snippet}
@@ -40,15 +41,14 @@
 			{#each statuses as s (s)}
 				<form method="POST" action="?/setStatus" use:enhance>
 					<input type="hidden" name="status" value={s} />
-					<button
+					<FlowbiteButton
 						type="submit"
 						disabled={data.ticket.status === s}
-						class="sk-btn sk-btn-sm {data.ticket.status === s
-							? 'sk-btn-primary'
-							: 'sk-btn-secondary'}"
+						variant={data.ticket.status === s ? 'primary' : 'secondary'}
+						size="sm"
 					>
 						{s}
-					</button>
+					</FlowbiteButton>
 				</form>
 			{/each}
 		</div>
@@ -81,8 +81,8 @@
 					rows="4"
 					class="sk-input py-1.5 text-sm"
 					placeholder={t('admin.detail.replyCustomer')}></textarea>
-				<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm self-start"
-					>{t('admin.detail.reply')}</button
+				<FlowbiteButton type="submit" variant="primary" size="sm" class="self-start"
+					>{t('admin.detail.reply')}</FlowbiteButton
 				>
 			</form>
 		</AppCard>

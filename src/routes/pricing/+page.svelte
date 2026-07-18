@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
@@ -321,15 +322,15 @@
 			const tagline = hasPeriod ? String(taglineOrFeatures) : String(periodOrTagline);
 			const features = hasPeriod ? maybeFeatures : taglineOrFeatures;
 			return {
-			name,
-			price,
-			period: hasPeriod ? String(periodOrTagline) : '',
-			tagline,
-			features,
-			highlight:
-				String(name).includes('Yearly') ||
-				String(name).includes('Yıllık') ||
-				String(name).includes('Jährlich')
+				name,
+				price,
+				period: hasPeriod ? String(periodOrTagline) : '',
+				tagline,
+				features,
+				highlight:
+					String(name).includes('Yearly') ||
+					String(name).includes('Yıllık') ||
+					String(name).includes('Jährlich')
 			};
 		})
 	);
@@ -341,7 +342,11 @@
 	path="/pricing"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl), softwareJsonLd(locale, copy.description)]}
+	jsonLd={[
+		organizationJsonLd(data.platformBranding?.logoUrl),
+		webSiteJsonLd(locale, data.platformBranding?.logoUrl),
+		softwareJsonLd(locale, copy.description)
+	]}
 />
 
 <PublicShell
@@ -362,10 +367,12 @@
 			<p class="mt-4 max-w-2xl text-[17px] leading-8 text-[var(--sk-muted)]">{copy.lead}</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
-			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
-				>{copy.cta}{@html uiIcons.arrowRight(16)}</a
+			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+				>{copy.cta}{@html uiIcons.arrowRight(16)}</FlowbiteButton
 			>
-			<a href="#pricing-faq" class="sk-btn sk-btn-secondary sk-btn-lg">{copy.faqLabel}</a>
+			<FlowbiteButton href="#pricing-faq" variant="secondary" size="lg"
+				>{copy.faqLabel}</FlowbiteButton
+			>
 		</div>
 	</MarketingSection>
 
@@ -399,17 +406,19 @@
 						{/each}
 					</ul>
 					{#if plan.name === 'Free'}
-						<a href={l('/new')} class="sk-btn sk-btn-secondary sk-btn-sm mt-5">{copy.startFree}</a>
+						<FlowbiteButton href={l('/new')} variant="secondary" size="sm" class="mt-5"
+							>{copy.startFree}</FlowbiteButton
+						>
 					{:else if data.user}
-						<a href="/dashboard" class="sk-btn sk-btn-primary sk-btn-sm mt-5">
+						<FlowbiteButton href="/dashboard" variant="primary" size="sm" class="mt-5">
 							{copy.upgrade}
 							{plan.name}
-						</a>
+						</FlowbiteButton>
 					{:else}
-						<a href={l('/login')} class="sk-btn sk-btn-primary sk-btn-sm mt-5">
+						<FlowbiteButton href={l('/login')} variant="primary" size="sm" class="mt-5">
 							{copy.start}
 							{plan.name}
-						</a>
+						</FlowbiteButton>
 					{/if}
 				</div>
 			{/each}
@@ -435,8 +444,8 @@
 	<MarketingSection class="mt-10 pb-12">
 		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
 			<p class="text-sm text-[var(--sk-muted)]">{copy.ctaText}</p>
-			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
-				>{copy.cta}{@html uiIcons.arrowRight(16)}</a
+			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+				>{copy.cta}{@html uiIcons.arrowRight(16)}</FlowbiteButton
 			>
 		</div>
 	</MarketingSection>

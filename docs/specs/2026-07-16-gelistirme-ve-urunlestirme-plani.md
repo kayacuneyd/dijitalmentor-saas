@@ -17,17 +17,17 @@ Bu doküman bir uygulama izni değildir; yapılacak işlerin sırasını ve kabu
 
 ## 2. Öncelik özeti
 
-| Faz | Konu | Öncelik | Beklenen çıktı | Durum |
-|---|---|---:|---|---|
-| 0 | AI `add_section` ve provider dayanıklılığı | P0 | Canlı AI patch akışı güvenilir | Tamamlandı — 2026-07-16 |
-| 1 | CI/CD, staging ve release doğrulama | P0 | Hatalı build’in production’a çıkmaması | Tamamlandı — 2026-07-16 |
-| 2 | Pricing, kota ve monetizasyon | P1 | Planların ve AI maliyetinin ölçülebilir olması | Tamamlandı — 2026-07-16 |
-| 3 | Site kalite kapısı ve profesyonel içerik güvenliği | P1 | Yayınlanabilir site kalite standardı | Tamamlandı — 2026-07-16 |
-| 4 | Media Manager | P1 | R2 üzerinde kullanılabilir medya kütüphanesi | Tamamlandı — 2026-07-16 |
-| 5 | Billing/domain self-service | P1 | Kullanıcının operatöre bağımlılığının azalması | Kısmi tamamlandı — 2026-07-16 |
-| 6 | SEO, analytics ve dönüşüm ölçümü | P1 | Trafik ve lead ölçüm altyapısı | Tamamlandı — 2026-07-16 |
-| 7 | Güvenlik, veri izolasyonu ve disaster recovery | P0/P1 | Beta büyümesine hazır işletim altyapısı | Tamamlandı — 2026-07-16 |
-| 8 | Dokümantasyon ve roadmap senkronizasyonu | P2 | Tek ve güncel proje hafızası | Tamamlandı — 2026-07-16 |
+| Faz | Konu                                               | Öncelik | Beklenen çıktı                                 | Durum                         |
+| --- | -------------------------------------------------- | ------: | ---------------------------------------------- | ----------------------------- |
+| 0   | AI `add_section` ve provider dayanıklılığı         |      P0 | Canlı AI patch akışı güvenilir                 | Tamamlandı — 2026-07-16       |
+| 1   | CI/CD, staging ve release doğrulama                |      P0 | Hatalı build’in production’a çıkmaması         | Tamamlandı — 2026-07-16       |
+| 2   | Pricing, kota ve monetizasyon                      |      P1 | Planların ve AI maliyetinin ölçülebilir olması | Tamamlandı — 2026-07-16       |
+| 3   | Site kalite kapısı ve profesyonel içerik güvenliği |      P1 | Yayınlanabilir site kalite standardı           | Tamamlandı — 2026-07-16       |
+| 4   | Media Manager                                      |      P1 | R2 üzerinde kullanılabilir medya kütüphanesi   | Tamamlandı — 2026-07-16       |
+| 5   | Billing/domain self-service                        |      P1 | Kullanıcının operatöre bağımlılığının azalması | Kısmi tamamlandı — 2026-07-16 |
+| 6   | SEO, analytics ve dönüşüm ölçümü                   |      P1 | Trafik ve lead ölçüm altyapısı                 | Tamamlandı — 2026-07-16       |
+| 7   | Güvenlik, veri izolasyonu ve disaster recovery     |   P0/P1 | Beta büyümesine hazır işletim altyapısı        | Tamamlandı — 2026-07-16       |
+| 8   | Dokümantasyon ve roadmap senkronizasyonu           |      P2 | Tek ve güncel proje hafızası                   | Tamamlandı — 2026-07-16       |
 
 ## 3. Faz 0 — AI `add_section` ve provider dayanıklılığı
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { seedSites } from '$lib/seed';
 	import FlowAnimation from '$lib/ui/FlowAnimation.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
@@ -245,7 +246,8 @@
 				],
 				stepLabel: 'Adım',
 				midCtaTitle: 'Birkaç dakikan var mı?',
-				midCtaBody: 'Önce mesleğini ve hizmetlerini anlat, güvenli ilk taslağı gör, sonra karar ver.',
+				midCtaBody:
+					'Önce mesleğini ve hizmetlerini anlat, güvenli ilk taslağı gör, sonra karar ver.',
 				midCtaAction: 'Beta başlangıcını aç',
 				exampleSites: 'Örnek siteler',
 				pages: 'sayfa',
@@ -271,10 +273,7 @@
 				},
 				steps: [
 					['Anlat', 'Uzmanlığını, hizmetlerini, hedef kitleni ve tonunu birkaç cümlede yaz.'],
-					[
-						'Üret',
-						'AI bu briefi sabit güvenli yapı içinde çok dilli site taslağına dönüştürür.'
-					],
+					['Üret', 'AI bu briefi sabit güvenli yapı içinde çok dilli site taslağına dönüştürür.'],
 					[
 						'Düzenle',
 						'Sohbetle "daha net olsun", "hizmet ekle" de. Doğrudan metin düzenleme ücretsiz.'
@@ -296,7 +295,7 @@
 					],
 					[
 						'Teknik yayına alma yükü için domain ve hosting',
-						"Pro ile özel domain, TLS, DNS kurulumu, hosting ve bakım süreci yönetilir."
+						'Pro ile özel domain, TLS, DNS kurulumu, hosting ve bakım süreci yönetilir.'
 					],
 					[
 						'Gelen talepler için iletişim formu',
@@ -553,7 +552,11 @@
 	path="/"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl), softwareJsonLd(locale, copy.description)]}
+	jsonLd={[
+		organizationJsonLd(data.platformBranding?.logoUrl),
+		webSiteJsonLd(locale, data.platformBranding?.logoUrl),
+		softwareJsonLd(locale, copy.description)
+	]}
 />
 
 <PublicShell {locale} currentPath="/" userEmail={data.user?.email ?? null} label="saaskaya.com">
@@ -569,11 +572,15 @@
 				{copy.lead}
 			</p>
 			<div class="flex flex-wrap items-center gap-3">
-				<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
-					>{copy.primary}{@html uiIcons.arrowRight(16)}</a
+				<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+					>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
 				>
-				<a href="#ornekler" class="sk-btn sk-btn-secondary sk-btn-lg">{copy.examples}</a>
-				<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-lg">{copy.pricing}</a>
+				<FlowbiteButton href="#ornekler" variant="secondary" size="lg"
+					>{copy.examples}</FlowbiteButton
+				>
+				<FlowbiteButton href={l('/pricing')} variant="ghost" size="lg"
+					>{copy.pricing}</FlowbiteButton
+				>
 			</div>
 			<!-- The two decisive trust answers, before the fold (full Trust section stays below) -->
 			<div class="mt-1 grid w-full gap-3 sm:grid-cols-2">
@@ -687,7 +694,9 @@
 				<h2 class="text-lg font-semibold">{copy.midCtaTitle}</h2>
 				<p class="mt-1 text-sm leading-6 text-[var(--sk-muted)]">{copy.midCtaBody}</p>
 			</div>
-			<a href={l('/beta')} class="sk-btn sk-btn-primary shrink-0">{copy.midCtaAction}</a>
+			<FlowbiteButton href={l('/beta')} variant="primary" class="shrink-0"
+				>{copy.midCtaAction}</FlowbiteButton
+			>
 		</div>
 	</MarketingSection>
 
@@ -732,12 +741,17 @@
 							{/each}
 						</div>
 						<div class="mt-auto flex gap-2 pt-1">
-							<a href="/preview/{site.id}" class="sk-btn sk-btn-secondary sk-btn-sm flex-1">
+							<FlowbiteButton
+								href="/preview/{site.id}"
+								variant="secondary"
+								size="sm"
+								class="flex-1"
+							>
 								{copy.preview}
-							</a>
-							<a href="/editor/{site.id}" class="sk-btn sk-btn-primary sk-btn-sm flex-1">
+							</FlowbiteButton>
+							<FlowbiteButton href="/editor/{site.id}" variant="primary" size="sm" class="flex-1">
 								{copy.edit}
-							</a>
+							</FlowbiteButton>
 						</div>
 					</div>
 				</li>
@@ -859,8 +873,8 @@
 				</span>
 			</a>
 		</div>
-		<a href={l('/pricing')} class="sk-btn sk-btn-ghost sk-btn-sm mt-4"
-			>{copy.allFeatures}{@html uiIcons.arrowRight(14)}</a
+		<FlowbiteButton href={l('/pricing')} variant="ghost" size="sm" class="mt-4"
+			>{copy.allFeatures}{@html uiIcons.arrowRight(14)}</FlowbiteButton
 		>
 	</MarketingSection>
 
@@ -924,8 +938,8 @@
 			<p class="max-w-md text-sm text-[var(--sk-muted)]">
 				{copy.finalBody}
 			</p>
-			<a href={l('/new')} class="sk-btn sk-btn-primary sk-btn-lg"
-				>{copy.primary}{@html uiIcons.arrowRight(16)}</a
+			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+				>{copy.primary}{@html uiIcons.arrowRight(16)}</FlowbiteButton
 			>
 		</div>
 	</MarketingSection>

@@ -3,6 +3,7 @@
 	import { getPathValue } from '$lib/publicCopy';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -41,7 +42,9 @@
 								{page.path} · {t('admin.copyPanel.editableFields', { count: page.fields.length })}
 							</span>
 						</span>
-						<span class="sk-btn sk-btn-secondary sk-btn-sm">{t('admin.copyPanel.open')}</span>
+						<FlowbiteButton variant="secondary" size="sm"
+							>{t('admin.copyPanel.open')}</FlowbiteButton
+						>
 					</summary>
 					<div class="grid gap-4 border-t border-[var(--sk-line)] p-4 xl:grid-cols-3">
 						{#each page.locales as localeRow (localeRow.locale)}
@@ -90,17 +93,17 @@
 										</label>
 									{/each}
 									<div class="mt-2 flex flex-wrap gap-2">
-										<button type="submit" class="sk-btn sk-btn-primary sk-btn-sm"
-											>{t('admin.copyPanel.save')}</button
+										<FlowbiteButton type="submit" variant="primary" size="sm"
+											>{t('admin.copyPanel.save')}</FlowbiteButton
 										>
 									</div>
 								</form>
 								<form method="POST" action="?/reset" class="mt-2" use:enhance>
 									<input type="hidden" name="page" value={page.key} />
 									<input type="hidden" name="locale" value={localeRow.locale} />
-									<button type="submit" class="sk-btn sk-btn-ghost sk-btn-sm">
+									<FlowbiteButton type="submit" variant="ghost" size="sm">
 										{t('admin.copyPanel.resetLanguage')}
-									</button>
+									</FlowbiteButton>
 								</form>
 							</section>
 						{/each}

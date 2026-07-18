@@ -1,13 +1,7 @@
 import { LOCALES, type Locale } from '$lib/i18n';
 
 export type PublicCopyPage =
-	| 'home'
-	| 'about'
-	| 'pricing'
-	| 'templates'
-	| 'blog'
-	| 'contact'
-	| 'beta';
+	'home' | 'about' | 'pricing' | 'templates' | 'blog' | 'contact' | 'beta';
 
 export type PublicCopyField = {
 	path: string;

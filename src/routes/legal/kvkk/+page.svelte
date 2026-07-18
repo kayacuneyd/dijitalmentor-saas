@@ -17,14 +17,15 @@
 		<p class="sk-callout">
 			<strong>Legal basis:</strong> Turkish Law No. 6698 on the Protection of Personal Data
 			("KVKK"), Art. 10 (disclosure) and Art. 5/2 (explicit consent). This text is Turkish law —
-			there is no equivalent German or EU statute with the same article numbers; it supplements
-			the <a href="/legal/privacy">Privacy Policy</a>.
+			there is no equivalent German or EU statute with the same article numbers; it supplements the
+			<a href="/legal/privacy">Privacy Policy</a>.
 		</p>
 
 		<h2>1. Data Controller</h2>
 		<p>
-			The organization operating the saaskaya platform is the "data controller" under KVKK.
-			Contact: <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>.
+			The organization operating the saaskaya platform is the "data controller" under KVKK. Contact: <a
+				href="mailto:destek@saaskaya.com">destek@saaskaya.com</a
+			>.
 		</p>
 
 		<h2>2. Disclosure Obligation (KVKK Art. 10)</h2>
@@ -41,7 +42,9 @@
 			<li>
 				<strong>Financial:</strong> payment provider customer ID, subscription status (no card data)
 			</li>
-			<li><strong>Service content:</strong> the description given to the AI, generated site content</li>
+			<li>
+				<strong>Service content:</strong> the description given to the AI, generated site content
+			</li>
 		</ul>
 
 		<h2>4. Purposes of Processing</h2>
@@ -55,7 +58,9 @@
 
 		<h2>5. Legal Bases (KVKK Art. 5/2)</h2>
 		<ul>
-			<li><strong>Performance of a contract:</strong> data required for the subscription and site publishing</li>
+			<li>
+				<strong>Performance of a contract:</strong> data required for the subscription and site publishing
+			</li>
 			<li><strong>Legal obligation:</strong> log retention, legal requests</li>
 			<li><strong>Legitimate interest:</strong> security, rate-limiting, abuse prevention</li>
 			<li><strong>Explicit consent:</strong> beta invitation, marketing (obtained separately)</li>
@@ -65,29 +70,32 @@
 		<p>Your personal data may be transferred to the following third parties:</p>
 		<ul>
 			<li>
-				<strong>AI providers (DeepSeek, Anthropic):</strong> your site description and chat text —
-				transfer abroad with appropriate safeguards under KVKK Art. 9
+				<strong>AI providers (DeepSeek, Anthropic):</strong> your site description and chat text — transfer
+				abroad with appropriate safeguards under KVKK Art. 9
 			</li>
 			<li>
-				<strong>Creem:</strong> handles checkout, tax/invoicing, and payment processing as
-				Merchant of Record/payment facilitator for subscription/digital-product payments
+				<strong>Creem:</strong> handles checkout, tax/invoicing, and payment processing as Merchant of
+				Record/payment facilitator for subscription/digital-product payments
 			</li>
 			<li>
-				<strong>Stripe:</strong> payment processing where used as a transition/fallback payment
-				provider
+				<strong>Stripe:</strong> payment processing where used as a transition/fallback payment provider
 			</li>
 			<li><strong>Cloudflare R2:</strong> image storage</li>
 			<li><strong>Resend/SMTP provider:</strong> transactional email</li>
-			<li><strong>Domain registrar (Porkbun/NameSilo):</strong> domain owner information for WHOIS</li>
+			<li>
+				<strong>Domain registrar (Porkbun/NameSilo):</strong> domain owner information for WHOIS
+			</li>
 		</ul>
 
 		<h2>7. Explicit Consent Statement</h2>
 		<p>
-			By accepting a beta invitation and creating an account, you give your <strong>explicit
-			consent</strong> to the processing and transfer to third parties of your personal data for
-			the purposes stated above. You can withdraw this consent at any time by writing to
-			<a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>; withdrawing consent may
-			require deleting your account.
+			By accepting a beta invitation and creating an account, you give your <strong
+				>explicit consent</strong
+			>
+			to the processing and transfer to third parties of your personal data for the purposes stated above.
+			You can withdraw this consent at any time by writing to
+			<a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>; withdrawing consent may require
+			deleting your account.
 		</p>
 
 		<h2>8. Your Rights (KVKK Art. 11)</h2>
@@ -101,8 +109,9 @@
 			<li>Object to results of automated analysis</li>
 		</ul>
 		<p>
-			Requests must be made in writing to <a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a>;
-			they are answered within 30 days.
+			Requests must be made in writing to <a href="mailto:destek@saaskaya.com"
+				>destek@saaskaya.com</a
+			>; they are answered within 30 days.
 		</p>
 
 		<h2>9. Data Retention Periods</h2>
@@ -151,7 +160,9 @@
 			<li>
 				<strong>Finanziell:</strong> Kunden-ID des Zahlungsanbieters, Abo-Status (keine Kartendaten)
 			</li>
-			<li><strong>Diensteinhalt:</strong> die der KI gegebene Beschreibung, generierte Website-Inhalte</li>
+			<li>
+				<strong>Diensteinhalt:</strong> die der KI gegebene Beschreibung, generierte Website-Inhalte
+			</li>
 		</ul>
 
 		<h2>4. Zwecke der Verarbeitung</h2>
@@ -165,29 +176,37 @@
 
 		<h2>5. Rechtsgrundlagen (KVKK Art. 5/2)</h2>
 		<ul>
-			<li><strong>Vertragserfüllung:</strong> für Abo und Website-Veröffentlichung erforderliche Daten</li>
+			<li>
+				<strong>Vertragserfüllung:</strong> für Abo und Website-Veröffentlichung erforderliche Daten
+			</li>
 			<li><strong>Rechtliche Verpflichtung:</strong> Protokollspeicherung, behördliche Anfragen</li>
-			<li><strong>Berechtigtes Interesse:</strong> Sicherheit, Ratenbegrenzung, Missbrauchsprävention</li>
-			<li><strong>Ausdrückliche Einwilligung:</strong> Beta-Einladung, Marketing (separat eingeholt)</li>
+			<li>
+				<strong>Berechtigtes Interesse:</strong> Sicherheit, Ratenbegrenzung, Missbrauchsprävention
+			</li>
+			<li>
+				<strong>Ausdrückliche Einwilligung:</strong> Beta-Einladung, Marketing (separat eingeholt)
+			</li>
 		</ul>
 
 		<h2>6. Datenübermittlung</h2>
 		<p>Deine personenbezogenen Daten können an folgende Dritte übermittelt werden:</p>
 		<ul>
 			<li>
-				<strong>KI-Anbieter (DeepSeek, Anthropic):</strong> deine Website-Beschreibung und
-				Chat-Texte — Übermittlung ins Ausland mit angemessenen Garantien gemäß KVKK Art. 9
+				<strong>KI-Anbieter (DeepSeek, Anthropic):</strong> deine Website-Beschreibung und Chat-Texte
+				— Übermittlung ins Ausland mit angemessenen Garantien gemäß KVKK Art. 9
 			</li>
 			<li>
-				<strong>Creem:</strong> übernimmt als Merchant of Record/Zahlungsdienstleister für
-				Abo-/Digitalprodukt-Zahlungen Checkout, Steuer/Rechnungsstellung und Zahlungsabwicklung
+				<strong>Creem:</strong> übernimmt als Merchant of Record/Zahlungsdienstleister für Abo-/Digitalprodukt-Zahlungen
+				Checkout, Steuer/Rechnungsstellung und Zahlungsabwicklung
 			</li>
 			<li>
 				<strong>Stripe:</strong> Zahlungsabwicklung, sofern als Übergangs-/Fallback-Zahlungsanbieter verwendet
 			</li>
 			<li><strong>Cloudflare R2:</strong> Bildspeicherung</li>
 			<li><strong>Resend/SMTP-Anbieter:</strong> transaktionale E-Mails</li>
-			<li><strong>Domain-Registrar (Porkbun/NameSilo):</strong> Angaben zum Domain-Inhaber für WHOIS</li>
+			<li>
+				<strong>Domain-Registrar (Porkbun/NameSilo):</strong> Angaben zum Domain-Inhaber für WHOIS
+			</li>
 		</ul>
 
 		<h2>7. Einwilligungserklärung</h2>
@@ -224,8 +243,7 @@
 		<h2>10. Daten von Kindern</h2>
 		<p>
 			Wir verarbeiten wissentlich keine Daten von Personen unter 18 Jahren. Der Dienst wird auch
-			nicht mit elterlicher Zustimmung angeboten — saaskaya richtet sich an erwachsene
-			Fachpersonen.
+			nicht mit elterlicher Zustimmung angeboten — saaskaya richtet sich an erwachsene Fachpersonen.
 		</p>
 
 		<h2>11. Kontakt und Anfragen</h2>
@@ -290,7 +308,8 @@
 				checkout, vergi/fatura ve ödeme işleme
 			</li>
 			<li>
-				<strong>Stripe:</strong> geçiş/fallback ödeme sağlayıcısı olarak kullanıldığı durumlarda ödeme işleme
+				<strong>Stripe:</strong> geçiş/fallback ödeme sağlayıcısı olarak kullanıldığı durumlarda ödeme
+				işleme
 			</li>
 			<li><strong>Cloudflare R2:</strong> görsel depolama</li>
 			<li><strong>Resend/SMTP sağlayıcı:</strong> transactional e-posta</li>
@@ -299,8 +318,8 @@
 
 		<h2>7. Açık Rıza Beyanı</h2>
 		<p>
-			Beta daveti kabul ederek ve hesap oluşturarak, kişisel verilerinizin yukarıda belirtilen amaçlar
-			kapsamında işlenmesine ve üçüncü taraflara aktarılmasına <strong>açık rıza</strong>
+			Beta daveti kabul ederek ve hesap oluşturarak, kişisel verilerinizin yukarıda belirtilen
+			amaçlar kapsamında işlenmesine ve üçüncü taraflara aktarılmasına <strong>açık rıza</strong>
 			vermiş olursunuz. Bu rızayı istediğiniz zaman
 			<a href="mailto:destek@saaskaya.com">destek@saaskaya.com</a> adresine yazarak geri çekebilirsiniz;
 			rızanın geri çekilmesi hesabınızın silinmesini gerektirebilir.

@@ -103,7 +103,9 @@
 						{ label: title }
 					]}
 				/>
-				<div class="sk-mono mt-6 text-[10.5px] text-[var(--sk-faint)]">{kicker ?? labels.legal}</div>
+				<div class="sk-mono mt-6 text-[10.5px] text-[var(--sk-faint)]">
+					{kicker ?? labels.legal}
+				</div>
 				<h1 class="sk-display mt-2 text-4xl leading-tight sm:text-[44px]">{title}</h1>
 				<p class="mt-3 text-sm leading-6 text-[var(--sk-muted)]">
 					{labels.updated}: {resolvedUpdated}

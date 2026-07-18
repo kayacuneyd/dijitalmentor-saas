@@ -87,8 +87,7 @@ export async function classifyOnboardingAnswer(
 	} catch (error) {
 		const fallbackProvider = configuredGatekeeperFallbackProvider();
 		const retryable =
-			error instanceof AIProviderRateLimitError ||
-			error instanceof AIProviderTransientError;
+			error instanceof AIProviderRateLimitError || error instanceof AIProviderTransientError;
 		if (!retryable || !fallbackProvider) throw error;
 		first = await attempt(undefined, fallbackProvider);
 	}

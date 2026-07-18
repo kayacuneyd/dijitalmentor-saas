@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppCard from '$lib/ui/AppCard.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 	import { getTranslate } from '$lib/i18n/context';
 
@@ -24,12 +25,13 @@
 >
 	<div class="flex flex-wrap gap-2">
 		{#each filters as f (f)}
-			<a
+			<FlowbiteButton
 				href={f === 'all' ? '/admin/support' : `/admin/support?status=${f}`}
-				class="sk-btn sk-btn-sm {data.status === f ? 'sk-btn-primary' : 'sk-btn-secondary'}"
+				variant={data.status === f ? 'primary' : 'secondary'}
+				size="sm"
 			>
 				{f}
-			</a>
+			</FlowbiteButton>
 		{/each}
 	</div>
 
@@ -55,9 +57,9 @@
 									).toLocaleString()}
 								</p>
 							</div>
-							<a href="/admin/support/{ticket.id}" class="sk-btn sk-btn-secondary sk-btn-sm">
+							<FlowbiteButton href="/admin/support/{ticket.id}" variant="secondary" size="sm">
 								{t('admin.list.open')}
-							</a>
+							</FlowbiteButton>
 						</li>
 					{/each}
 				</ul>

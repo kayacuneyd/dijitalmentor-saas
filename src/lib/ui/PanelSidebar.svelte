@@ -28,15 +28,16 @@
 		brand?: import('svelte').Snippet;
 		onCloseMobile: () => void;
 	} = $props();
-
 </script>
 
 <aside
-		{id}
-		class="panel-sidebar panel-sidebar--{position} {mobileOpen ? 'panel-sidebar--open' : 'panel-sidebar--closed'}"
-		data-collapsed={collapsed}
-		aria-label={label}
-	>
+	{id}
+	class="panel-sidebar panel-sidebar--{position} {mobileOpen
+		? 'panel-sidebar--open'
+		: 'panel-sidebar--closed'}"
+	data-collapsed={collapsed}
+	aria-label={label}
+>
 	<div class="flex min-h-full flex-col bg-[var(--sk-shell)]">
 		<div class="flex items-center justify-between border-b border-[var(--sk-line)] p-3 sm:p-4">
 			{#if brand}
@@ -68,7 +69,8 @@
 					<span class="panel-sidebar-icon">{@html item.icon}</span>
 					<span class="panel-sidebar-label min-w-0 flex-1 truncate font-medium">{item.label}</span>
 					{#if item.eyebrow}
-						<span class="panel-sidebar-eyebrow sk-mono text-[8.5px] opacity-60">{item.eyebrow}</span>
+						<span class="panel-sidebar-eyebrow sk-mono text-[8.5px] opacity-60">{item.eyebrow}</span
+						>
 					{/if}
 				</a>
 			{/each}

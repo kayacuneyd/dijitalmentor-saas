@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import { uiIcons } from '$lib/ui/icons';
 	import { withLocale, type Locale } from '$lib/i18n';
@@ -107,11 +108,15 @@
 		<div class="hidden flex-wrap items-center gap-2 lg:flex">
 			<LanguageSwitcher {locale} variant="dropdown" />
 			{#if userEmail}
-				<a href="/dashboard" class="sk-btn sk-btn-secondary sk-btn-sm">{labels.dashboard}</a>
+				<FlowbiteButton href="/dashboard" variant="secondary" size="sm"
+					>{labels.dashboard}</FlowbiteButton
+				>
 			{:else}
-				<a href={l('/login')} class="sk-btn sk-btn-secondary sk-btn-sm">{labels.login}</a>
+				<FlowbiteButton href={l('/login')} variant="secondary" size="sm"
+					>{labels.login}</FlowbiteButton
+				>
 			{/if}
-			<a href={l('/beta')} class="sk-btn sk-btn-primary sk-btn-sm">{labels.start}</a>
+			<FlowbiteButton href={l('/beta')} variant="primary" size="sm">{labels.start}</FlowbiteButton>
 		</div>
 
 		<div class="flex items-center gap-2 lg:hidden">
@@ -172,10 +177,16 @@
 
 	<div class="flex shrink-0 flex-col gap-2 border-t border-[var(--sk-line)] px-4 py-4">
 		{#if userEmail}
-			<a href="/dashboard" class="sk-btn sk-btn-secondary w-full">{labels.dashboard}</a>
+			<FlowbiteButton href="/dashboard" variant="secondary" class="w-full"
+				>{labels.dashboard}</FlowbiteButton
+			>
 		{:else}
-			<a href={l('/login')} class="sk-btn sk-btn-secondary w-full">{labels.login}</a>
+			<FlowbiteButton href={l('/login')} variant="secondary" class="w-full"
+				>{labels.login}</FlowbiteButton
+			>
 		{/if}
-		<a href={l('/beta')} class="sk-btn sk-btn-primary w-full">{labels.start}</a>
+		<FlowbiteButton href={l('/beta')} variant="primary" class="w-full"
+			>{labels.start}</FlowbiteButton
+		>
 	</div>
 </dialog>

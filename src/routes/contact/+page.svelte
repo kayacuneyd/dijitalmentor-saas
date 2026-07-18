@@ -2,6 +2,7 @@
 	import { withLocale, type Locale } from '$lib/i18n';
 	import { absoluteUrl, organizationJsonLd } from '$lib/seo';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
@@ -102,7 +103,7 @@
 		name: copy.title,
 		url: absoluteUrl(locale, '/contact'),
 		description: copy.description,
-			mainEntity: organizationJsonLd(data.platformBranding?.logoUrl)
+		mainEntity: organizationJsonLd(data.platformBranding?.logoUrl)
 	});
 </script>
 
@@ -126,11 +127,12 @@
 			<h1 class="sk-display mt-4 text-4xl leading-tight sm:text-[46px]">{copy.h1}</h1>
 			<p class="mt-4 max-w-2xl text-[17px] leading-8 text-[var(--sk-muted)]">{copy.lead}</p>
 			<div class="mt-6 flex flex-wrap gap-3">
-				<a href="mailto:support@saaskaya.com" class="sk-btn sk-btn-primary sk-btn-lg">
+				<FlowbiteButton href="mailto:support@saaskaya.com" variant="primary" size="lg">
 					{copy.email}
-				</a>
-				<a href={l('/beta')} class="sk-btn sk-btn-secondary sk-btn-lg">{copy.start}</a>
-				<a href={l('/blog')} class="sk-btn sk-btn-ghost sk-btn-lg">{copy.blog}</a>
+				</FlowbiteButton>
+				<FlowbiteButton href={l('/beta')} variant="secondary" size="lg">{copy.start}</FlowbiteButton
+				>
+				<FlowbiteButton href={l('/blog')} variant="ghost" size="lg">{copy.blog}</FlowbiteButton>
 			</div>
 			<div class="mt-6 space-y-2 text-sm text-[var(--sk-muted)]">
 				<p><strong class="text-[var(--sk-ink)]">support@saaskaya.com</strong></p>
@@ -192,7 +194,7 @@
 							placeholder={copy.placeholder}>{formValues?.message ?? ''}</textarea
 						>
 					</label>
-					<button type="submit" class="sk-btn sk-btn-primary">{copy.send}</button>
+					<FlowbiteButton type="submit" variant="primary">{copy.send}</FlowbiteButton>
 				</form>
 			{/if}
 		</aside>

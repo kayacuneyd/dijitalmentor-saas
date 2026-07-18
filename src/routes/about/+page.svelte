@@ -2,6 +2,7 @@
 	import { withLocale, type Locale } from '$lib/i18n';
 	import { organizationJsonLd, softwareJsonLd, webSiteJsonLd } from '$lib/seo';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
@@ -107,7 +108,11 @@
 	path="/about"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl), softwareJsonLd(locale, copy.description)]}
+	jsonLd={[
+		organizationJsonLd(data.platformBranding?.logoUrl),
+		webSiteJsonLd(locale, data.platformBranding?.logoUrl),
+		softwareJsonLd(locale, copy.description)
+	]}
 />
 
 <PublicShell
@@ -127,8 +132,11 @@
 				{/each}
 			</div>
 			<div class="mt-7 flex flex-wrap gap-3">
-				<a href={l('/beta')} class="sk-btn sk-btn-primary sk-btn-lg">{copy.primary}</a>
-				<a href={l('/pricing')} class="sk-btn sk-btn-secondary sk-btn-lg">{copy.secondary}</a>
+				<FlowbiteButton href={l('/beta')} variant="primary" size="lg">{copy.primary}</FlowbiteButton
+				>
+				<FlowbiteButton href={l('/pricing')} variant="secondary" size="lg"
+					>{copy.secondary}</FlowbiteButton
+				>
 			</div>
 		</div>
 

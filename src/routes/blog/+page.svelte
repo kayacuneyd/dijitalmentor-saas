@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { organizationJsonLd, webSiteJsonLd } from '$lib/seo';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
+	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
@@ -53,7 +54,10 @@
 	path="/blog"
 	title={copy.title}
 	description={copy.description}
-	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), webSiteJsonLd(locale, data.platformBranding?.logoUrl)]}
+	jsonLd={[
+		organizationJsonLd(data.platformBranding?.logoUrl),
+		webSiteJsonLd(locale, data.platformBranding?.logoUrl)
+	]}
 />
 
 <PublicShell
@@ -91,9 +95,14 @@
 					<p class="mt-3 flex-1 text-sm leading-7 text-[var(--sk-muted)]">
 						{post.description[locale]}
 					</p>
-					<a href={l(`/blog/${post.slug}`)} class="sk-btn sk-btn-secondary sk-btn-sm mt-5 w-fit">
+					<FlowbiteButton
+						href={l(`/blog/${post.slug}`)}
+						variant="secondary"
+						size="sm"
+						class="mt-5 w-fit"
+					>
 						{copy.read}
-					</a>
+					</FlowbiteButton>
 				</article>
 			{:else}
 				<div class="sk-card p-5 text-sm text-[var(--sk-muted)] lg:col-span-3">

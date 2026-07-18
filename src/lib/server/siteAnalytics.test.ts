@@ -12,14 +12,16 @@ describe('site analytics conversions', () => {
 		recordConversion({ siteId: 'analytics-site', event: 'cta_clicked' });
 
 		expect(conversionSummary('analytics-site')).toEqual([
-		{ event: 'contact_submitted', count: 2 },
-		{ event: 'cta_clicked', count: 1 }
-	]);
+			{ event: 'contact_submitted', count: 2 },
+			{ event: 'cta_clicked', count: 1 }
+		]);
 	});
 
 	it('does not mix sites', () => {
 		recordConversion({ siteId: 'one', event: 'contact_submitted' });
 		recordConversion({ siteId: 'two', event: 'contact_submitted' });
-		expect(conversionSummary('one').find((item) => item.event === 'contact_submitted')?.count).toBe(1);
+		expect(conversionSummary('one').find((item) => item.event === 'contact_submitted')?.count).toBe(
+			1
+		);
 	});
 });

@@ -3,6 +3,8 @@
 	import type { Theme } from '$lib/schema/site';
 	import { themePresets } from '$lib/presets';
 	import { getTranslate } from '$lib/i18n/context';
+	import FlowbiteInput from '$lib/ui/primitives/FlowbiteInput.svelte';
+	import FlowbiteSelect from '$lib/ui/primitives/FlowbiteSelect.svelte';
 
 	const t = getTranslate();
 
@@ -19,20 +21,22 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">{t('editor.theme.nichePreset')}</span>
-		<select
-			class="select select-sm w-full"
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.theme.nichePreset')}</span>
+		<FlowbiteSelect
+			class="w-full"
+			size="sm"
 			value={store.site.theme.preset}
-			onchange={(e) => applyPreset(e.currentTarget.value as Theme['preset'])}
+			onchange={(e: Event) =>
+				applyPreset((e.currentTarget as HTMLSelectElement).value as Theme['preset'])}
 		>
 			{#each Object.keys(themePresets) as preset (preset)}
 				<option value={preset}>{preset}</option>
 			{/each}
-		</select>
+		</FlowbiteSelect>
 	</label>
 
-	<fieldset class="border-base-300 rounded-field border p-3">
+	<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
 		<legend class="px-1 text-xs font-medium">{t('editor.theme.brandColors')}</legend>
 		<div class="flex flex-col gap-2">
 			{#each colorKeys as key (key)}
@@ -57,18 +61,19 @@
 		</div>
 	</fieldset>
 
-	<fieldset class="border-base-300 rounded-field border p-3">
+	<fieldset class="rounded-[10px] border border-[var(--sk-line)] p-3">
 		<legend class="px-1 text-xs font-medium">{t('editor.theme.fonts')}</legend>
 		<div class="flex flex-col gap-2">
 			{#each ['heading', 'body'] as const as key (key)}
-				<label class="form-control">
-					<span class="label-text mb-1 block text-xs capitalize">{key}</span>
-					<input
+				<label class="sk-field-stack">
+					<span class="mb-1 block text-xs capitalize">{key}</span>
+					<FlowbiteInput
 						type="text"
-						class="input input-sm w-full"
+						size="sm"
+						class="w-full"
 						value={store.site.theme.fonts[key]}
-						oninput={(e) => {
-							const next = e.currentTarget.value;
+						oninput={(e: Event) => {
+							const next = (e.currentTarget as HTMLInputElement).value;
 							store.update((site) => {
 								site.theme.fonts[key] = next;
 							});
@@ -79,13 +84,14 @@
 		</div>
 	</fieldset>
 
-	<label class="form-control">
-		<span class="label-text mb-1 block text-xs font-medium">{t('editor.theme.cornerRadius')}</span>
-		<select
-			class="select select-sm w-full"
+	<label class="sk-field-stack">
+		<span class="mb-1 block text-xs font-medium">{t('editor.theme.cornerRadius')}</span>
+		<FlowbiteSelect
+			class="w-full"
+			size="sm"
 			value={store.site.theme.radius}
-			onchange={(e) => {
-				const next = e.currentTarget.value as Theme['radius'];
+			onchange={(e: Event) => {
+				const next = (e.currentTarget as HTMLSelectElement).value as Theme['radius'];
 				store.update((site) => {
 					site.theme.radius = next;
 				});
@@ -94,6 +100,6 @@
 			{#each radii as radius (radius)}
 				<option value={radius}>{radius}</option>
 			{/each}
-		</select>
+		</FlowbiteSelect>
 	</label>
 </div>

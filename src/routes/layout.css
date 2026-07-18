@@ -33,6 +33,7 @@
 	--sk-radius-lg: 18px;
 	--sk-shadow-lg: 0 18px 45px rgb(23 22 20 / 0.12);
 	--sk-accent: #2f6f6a;
+	--sk-accent-soft: rgb(47 111 106 / 0.12);
 	--sk-focus: #2f6f6a;
 	--sk-error: #b8532f;
 	--font-display: 'Aleo', ui-serif, Georgia, serif;
@@ -75,6 +76,29 @@ select {
 	font-family: var(--font-mono);
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
+}
+
+/* Section eyebrow: 11px floor + muted ink keep it AA-legible, unlike faint 10.5px. */
+.sk-eyebrow {
+	font-family: var(--font-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--sk-muted);
+}
+
+/* Full-canvas background bands: rhythm between marketing sections without new layout. */
+.sk-band {
+	margin-top: 3rem;
+	border-block: 1px solid var(--sk-line);
+}
+
+.sk-band--card {
+	background: var(--sk-card);
+}
+
+.sk-band--paper {
+	background: var(--sk-paper);
 }
 
 .sk-page {
@@ -667,6 +691,7 @@ select {
 }
 
 .sk-link:hover {
+	color: var(--sk-accent);
 	text-decoration: underline;
 	text-underline-offset: 3px;
 }

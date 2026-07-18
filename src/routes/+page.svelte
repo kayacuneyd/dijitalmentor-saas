@@ -97,7 +97,18 @@
 				midCtaTitle: 'Have a few minutes?',
 				midCtaBody:
 					'Start with one clear description of your work and review the first safe draft before deciding.',
-				midCtaAction: 'Open beta start',
+				midCtaAction: 'Start the beta',
+				sectionTitles: {
+					problems: 'The tiring parts are not yours.',
+					process: 'Live in four steps.',
+					examples: 'Browse real drafts.',
+					pricing: 'Simple, clear pricing.',
+					trust: 'Your work stays protected.'
+				},
+				featuresEyebrow: 'Features',
+				faqEyebrow: 'FAQ',
+				presetLabels: { law: 'Law', psych: 'Psychology', dental: 'Dental' },
+				planAria: { free: 'Free plan', pro: 'Pro plan pricing', premium: 'Premium plan details' },
 				exampleSites: 'Example sites',
 				pages: 'pages',
 				preview: 'Preview',
@@ -257,7 +268,22 @@
 				midCtaTitle: 'Birkaç dakikan var mı?',
 				midCtaBody:
 					'Önce mesleğini ve hizmetlerini anlat, güvenli ilk taslağı gör, sonra karar ver.',
-				midCtaAction: 'Beta başlangıcını aç',
+				midCtaAction: 'Betaya başla',
+				sectionTitles: {
+					problems: 'Yorucu kısımlar sende değil.',
+					process: 'Dört adımda yayında.',
+					examples: 'Gerçek taslaklara bak.',
+					pricing: 'Net ve basit fiyat.',
+					trust: 'Emeğin güvende.'
+				},
+				featuresEyebrow: 'Özellikler',
+				faqEyebrow: 'SSS',
+				presetLabels: { law: 'Hukuk', psych: 'Psikoloji', dental: 'Diş' },
+				planAria: {
+					free: 'Free planı',
+					pro: 'Pro plan fiyatları',
+					premium: 'Premium plan detayları'
+				},
 				exampleSites: 'Örnek siteler',
 				pages: 'sayfa',
 				preview: 'Önizle',
@@ -417,7 +443,22 @@
 				midCtaTitle: 'Hast du ein paar Minuten?',
 				midCtaBody:
 					'Beschreibe zuerst dein Angebot, prüfe den sicheren Entwurf und entscheide dann.',
-				midCtaAction: 'Beta-Start öffnen',
+				midCtaAction: 'Beta starten',
+				sectionTitles: {
+					problems: 'Die mühsamen Teile übernimmt die Plattform.',
+					process: 'In vier Schritten online.',
+					examples: 'Echte Entwürfe ansehen.',
+					pricing: 'Einfache, klare Preise.',
+					trust: 'Deine Arbeit bleibt geschützt.'
+				},
+				featuresEyebrow: 'Funktionen',
+				faqEyebrow: 'FAQ',
+				presetLabels: { law: 'Recht', psych: 'Psychologie', dental: 'Zahnmedizin' },
+				planAria: {
+					free: 'Free-Plan',
+					pro: 'Pro-Plan-Preise',
+					premium: 'Premium-Plan-Details'
+				},
 				exampleSites: 'Beispielseiten',
 				pages: 'Seiten',
 				preview: 'Vorschau',
@@ -568,10 +609,12 @@
 		class="grid gap-8 pt-8 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(30rem,1.05fr)] lg:items-start"
 	>
 		<div class="flex max-w-3xl flex-col items-start gap-4 lg:pt-1">
-			<h1 class="sk-display max-w-[24ch] text-3xl leading-[1.08] sm:text-[2rem] lg:text-[2.5rem]">
+			<h1
+				class="sk-display max-w-[24ch] text-4xl leading-[1.08] sm:text-[2.75rem] lg:text-[3.25rem]"
+			>
 				{copy.h1}
 			</h1>
-			<p class="max-w-2xl text-[15px] leading-6 text-[var(--sk-muted)]">
+			<p class="max-w-2xl text-base leading-7 text-[var(--sk-muted)] sm:text-[17px]">
 				{copy.lead}
 			</p>
 			<div class="flex flex-wrap items-center gap-3">
@@ -589,10 +632,10 @@
 			<div class="mt-1 grid w-full gap-3 sm:grid-cols-2">
 				{#each heroTrust as card (card.title)}
 					<div class="flex min-h-24 items-start gap-2.5 border-t border-[var(--sk-line)] pt-3">
-						<ShieldCheckOutline size="sm" class="mt-0.5 shrink-0 text-[var(--sk-ink)]" />
+						<ShieldCheckOutline size="sm" class="mt-0.5 shrink-0 text-[var(--sk-accent)]" />
 						<div>
-							<h3 class="text-[13px] font-semibold">{card.title}</h3>
-							<p class="mt-0.5 text-xs leading-4 text-[var(--sk-muted)]">{card.desc}</p>
+							<h3 class="text-sm font-semibold">{card.title}</h3>
+							<p class="mt-0.5 text-[13px] leading-5 text-[var(--sk-muted)]">{card.desc}</p>
 						</div>
 					</div>
 				{/each}
@@ -609,16 +652,19 @@
 	<MarketingSection class="mt-8">
 		<div class="sk-soft p-4 sm:p-5 lg:p-6">
 			<div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-				<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.problemsLabel}</div>
+				<div class="sk-eyebrow">{copy.problemsLabel}</div>
 				<div class="hidden h-px flex-1 bg-[var(--sk-line)] sm:block"></div>
 			</div>
-			<ul class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+			<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+				{copy.sectionTitles.problems}
+			</h2>
+			<ul class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
 				{#each problemItems as item (item.title)}
 					<li
 						class="flex min-h-[6.25rem] gap-3 rounded-[10px] border border-[var(--sk-line)] bg-white/70 p-3.5"
 					>
 						<span
-							class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(47,111,106,.12)] text-[var(--sk-ink)]"
+							class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--sk-accent-soft)] text-[var(--sk-accent)]"
 							aria-hidden="true"
 						>
 							<CheckOutline size="xs" />
@@ -627,7 +673,7 @@
 							<span class="block text-sm font-semibold leading-5 text-[var(--sk-ink)]">
 								{item.title}
 							</span>
-							<span class="mt-1 block text-xs leading-5 text-[var(--sk-muted)]">
+							<span class="mt-1 block text-[13px] leading-5 text-[var(--sk-muted)]">
 								{item.body}
 							</span>
 						</span>
@@ -638,21 +684,24 @@
 	</MarketingSection>
 
 	<!-- Process -->
-	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.process}</div>
-		<div class="mt-4 grid gap-4 sm:grid-cols-4">
+	<MarketingSection band="card" class="py-10">
+		<div class="sk-eyebrow">{copy.process}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+			{copy.sectionTitles.process}
+		</h2>
+		<div class="mt-5 grid gap-4 sm:grid-cols-4">
 			{#each steps as step, i (step.n)}
 				{@const StepIcon = stepIcons[i]}
-				<div class="sk-card p-4">
+				<div class="sk-soft p-4">
 					<div class="flex items-center justify-between">
-						<StepIcon size="md" class="text-[var(--sk-ink)]" />
-						<span class="sk-mono text-[10.5px] text-[var(--sk-faint)]">
+						<StepIcon size="md" class="text-[var(--sk-accent)]" />
+						<span class="sk-eyebrow">
 							{copy.stepLabel}
 							{step.n}
 						</span>
 					</div>
 					<div class="mt-2 text-sm font-semibold">{step.title}</div>
-					<p class="mt-1.5 text-xs leading-5 text-[var(--sk-muted)]">{step.desc}</p>
+					<p class="mt-1.5 text-[13px] leading-5 text-[var(--sk-muted)]">{step.desc}</p>
 				</div>
 			{/each}
 		</div>
@@ -675,8 +724,11 @@
 
 	<!-- Examples -->
 	<MarketingSection id="ornekler" class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.exampleSites}</div>
-		<ul class="mt-4 grid gap-4 sm:grid-cols-3">
+		<div class="sk-eyebrow">{copy.exampleSites}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+			{copy.sectionTitles.examples}
+		</h2>
+		<ul class="mt-5 grid gap-4 sm:grid-cols-3">
 			{#each seeds as [preset, site] (preset)}
 				<li class="sk-card flex flex-col overflow-hidden p-0">
 					<a href="/preview/{site.id}" class="block" title={site.settings.siteName}>
@@ -695,10 +747,10 @@
 								{site.settings.siteName}
 							</a>
 							<span
-								class="rounded px-2 py-0.5 font-[var(--font-mono)] text-[10.5px] text-white"
+								class="rounded px-2 py-0.5 font-[var(--font-mono)] text-[11px] text-white"
 								style:background={swatches[preset as keyof typeof swatches]}
 							>
-								{preset}
+								{copy.presetLabels[preset as keyof typeof swatches]}
 							</span>
 						</div>
 						<div class="flex flex-wrap items-center gap-2 text-xs text-[var(--sk-muted)]">
@@ -707,7 +759,7 @@
 							{#each site.locales as locale (locale)}
 								<a
 									href="/preview/{site.id}?locale={locale}"
-									class="inline-flex min-h-7 items-center rounded border border-[var(--sk-line-strong)] px-2 py-0.5 font-[var(--font-mono)] text-[10px]"
+									class="inline-flex min-h-8 items-center rounded border border-[var(--sk-line-strong)] px-2 py-0.5 font-[var(--font-mono)] text-[11px]"
 								>
 									{locale.toUpperCase()}
 								</a>
@@ -722,7 +774,7 @@
 							>
 								{copy.preview}
 							</FlowbiteButton>
-							<FlowbiteButton href="/editor/{site.id}" variant="primary" size="sm" class="flex-1">
+							<FlowbiteButton href="/editor/{site.id}" variant="secondary" size="sm" class="flex-1">
 								{copy.edit}
 							</FlowbiteButton>
 						</div>
@@ -734,7 +786,7 @@
 
 	<!-- Profession-specific GTM hooks -->
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.segmentsLabel}</div>
+		<div class="sk-eyebrow">{copy.segmentsLabel}</div>
 		<div class="mt-3 flex max-w-3xl flex-col gap-2">
 			<h2 class="sk-display text-2xl leading-tight sm:text-3xl">{copy.segmentsTitle}</h2>
 		</div>
@@ -742,7 +794,7 @@
 			{#each segmentCards as segment (segment.title)}
 				<a
 					href={l(segment.href)}
-					class="sk-card group flex min-h-56 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)]"
+					class="sk-card group flex min-h-56 flex-col p-5 transition hover:-translate-y-0.5 hover:border-[rgba(47,111,106,.4)]"
 				>
 					<h3 class="text-base font-semibold text-[var(--sk-ink)]">{segment.title}</h3>
 					<p class="mt-2 text-sm leading-6 text-[var(--sk-muted)]">{segment.desc}</p>
@@ -751,7 +803,9 @@
 					>
 						{segment.details}
 					</p>
-					<span class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold">
+					<span
+						class="mt-auto inline-flex items-center gap-1 pt-5 text-sm font-semibold text-[var(--sk-accent)]"
+					>
 						{segment.action}
 						<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
 					</span>
@@ -762,12 +816,13 @@
 
 	<!-- Features -->
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.features}</div>
-		<div class="mt-4 grid gap-4 sm:grid-cols-2">
+		<div class="sk-eyebrow">{copy.featuresEyebrow}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">{copy.features}</h2>
+		<div class="mt-5 grid gap-4 sm:grid-cols-2">
 			{#each features as f (f.title)}
 				<div class="sk-card p-4">
 					<h3 class="text-sm font-semibold">{f.title}</h3>
-					<p class="mt-1.5 text-xs leading-5 text-[var(--sk-muted)]">{f.desc}</p>
+					<p class="mt-1.5 text-[13px] leading-5 text-[var(--sk-muted)]">{f.desc}</p>
 				</div>
 			{/each}
 		</div>
@@ -775,12 +830,15 @@
 
 	<!-- Pricing teaser -->
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.priceLabel}</div>
-		<div class="mt-4 grid gap-4 sm:grid-cols-3">
+		<div class="sk-eyebrow">{copy.priceLabel}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+			{copy.sectionTitles.pricing}
+		</h2>
+		<div class="mt-5 grid gap-4 sm:grid-cols-3">
 			<a
 				href={l('/new')}
-				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
-				aria-label="Free plan"
+				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(47,111,106,.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label={copy.planAria.free}
 			>
 				<div class="text-sm font-semibold">Free</div>
 				<div class="mt-2 flex items-baseline gap-1.5">
@@ -794,15 +852,17 @@
 							? '3 Vorschau-Websites, 1 veröffentlichte Website, 10 AI-Bearbeitungen.'
 							: '3 preview sites, 1 published website, 10 AI edits.'}
 				</p>
-				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+				<span
+					class="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--sk-accent)]"
+				>
 					{copy.primary}
 					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
 				</span>
 			</a>
 			<a
 				href={l('/pricing')}
-				class="sk-card group block border-[var(--sk-ink)] p-4 ring-1 ring-[var(--sk-ink)] transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
-				aria-label="Pro plan pricing"
+				class="sk-card group block border-[var(--sk-accent)] p-4 ring-1 ring-[var(--sk-accent)] transition hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label={copy.planAria.pro}
 			>
 				<div class="flex items-center justify-between">
 					<div class="text-sm font-semibold">Pro</div>
@@ -819,15 +879,17 @@
 							? 'Eigene Domain, 50 AI-Bearbeitungen, mehrsprachig.'
 							: 'Custom domain, 50 AI edits, multilingual.'}
 				</p>
-				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+				<span
+					class="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--sk-accent)]"
+				>
 					{copy.pricing}
 					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
 				</span>
 			</a>
 			<a
 				href={l('/pricing')}
-				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(23,22,20,.28)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
-				aria-label="Premium plan details"
+				class="sk-card group block p-4 transition hover:-translate-y-0.5 hover:border-[rgba(47,111,106,.4)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sk-ink)]"
+				aria-label={copy.planAria.premium}
 			>
 				<div class="text-sm font-semibold">Premium</div>
 				<div class="mt-2 sk-display text-3xl">
@@ -840,7 +902,9 @@
 							? 'Top-ups und Zusatzservices werden später entschieden.'
 							: 'Top-ups and extra services will be decided later.'}
 				</p>
-				<span class="mt-4 inline-flex items-center gap-1 text-xs font-semibold">
+				<span
+					class="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--sk-accent)]"
+				>
 					{copy.allFeatures}
 					<span class="transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
 				</span>
@@ -853,35 +917,39 @@
 
 	<!-- FAQ -->
 	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.faq}</div>
-		<div class="mt-4 flex flex-col gap-3">
+		<div class="sk-eyebrow">{copy.faqEyebrow}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">{copy.faq}</h2>
+		<div class="mt-5 flex flex-col gap-3">
 			{#each faqs as faq (faq.q)}
 				<details class="sk-card group p-4">
 					<summary
-						class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold select-none [&::-webkit-details-marker]:hidden"
+						class="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold transition-colors select-none hover:text-[var(--sk-accent)] [&::-webkit-details-marker]:hidden"
 					>
 						{faq.q}
 						<span
-							class="shrink-0 text-[var(--sk-faint)] transition-transform group-open:rotate-45"
+							class="shrink-0 text-[var(--sk-faint)] transition-transform group-open:rotate-45 group-open:text-[var(--sk-accent)]"
 							aria-hidden="true"
 						>
 							+
 						</span>
 					</summary>
-					<p class="mt-2 text-xs leading-6 text-[var(--sk-muted)]">{faq.a}</p>
+					<p class="mt-2 text-sm leading-6 text-[var(--sk-muted)]">{faq.a}</p>
 				</details>
 			{/each}
 		</div>
 	</MarketingSection>
 
 	<!-- Trust -->
-	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
-		<div class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{copy.trust}</div>
-		<div class="mt-4 grid gap-3 sm:grid-cols-2">
+	<MarketingSection band="paper" class="py-10">
+		<div class="sk-eyebrow">{copy.trust}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+			{copy.sectionTitles.trust}
+		</h2>
+		<div class="mt-5 grid gap-3 sm:grid-cols-2">
 			{#each trustCards as card (card.title)}
-				<div class="sk-soft p-4">
+				<div class="sk-card p-4">
 					<h3 class="text-sm font-semibold">{card.title}</h3>
-					<p class="mt-1.5 text-xs leading-5 text-[var(--sk-muted)]">{card.desc}</p>
+					<p class="mt-1.5 text-[13px] leading-5 text-[var(--sk-muted)]">{card.desc}</p>
 				</div>
 			{/each}
 		</div>

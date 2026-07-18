@@ -24,7 +24,7 @@
 
 	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? DEFAULT_LOCALE);
-	const iconUrl = $derived(page.data.platformBranding?.iconUrl ?? '/logo.svg');
+	const mascotUrl = $derived(page.data.platformBranding?.mascotUrl ?? '/mascot-bee.svg');
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 
@@ -113,7 +113,7 @@
 		<span
 			class="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-[var(--sk-line)] bg-[var(--sk-paper)]"
 		>
-			<img src={iconUrl} alt="saaskaya" class="size-full object-contain" />
+			<img src={mascotUrl} alt="saaskaya arı maskotu" class="size-full object-contain" />
 		</span>
 		{#if showWordmark}
 			<span class="panel-sidebar-brand-copy min-w-0">

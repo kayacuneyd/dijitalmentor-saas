@@ -3,6 +3,11 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Ana logo ve maskot yüzeyleri ayrıştırıldı
+
+- 46×48 px navbar rozeti ve public footer yeniden owner yönetimli ana nöral ağ + arı kompozisyonunu kullanıyor. Bu, marka tanınırlığını ana işaret etrafında toplar.
+- Kullanıcı ve admin panel rail’leri ise owner yönetimli arı maskotunu gösteriyor. Favicon/app icon kendi ayrı ayarıyla değişmeden kaldı; böylece küçük uygulama bağlamında arı, marka girişlerinde ise ana logo görünür.
+
 ## 2026-07-18 — Navbar logo rozet ölçüsü ve yüzey eşleşmesi
 
 - Ortak navbar `BrandMark` rozeti 46×48 px olarak sabitlendi. Arka planı header’ın yarı saydam kırık beyaz yüzeyiyle bire bir eşleşen `#fbfaf7db` oldu; böylece logo ayrı bir blok gibi görünmeden navbar ritmine katılır.

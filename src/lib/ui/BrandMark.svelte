@@ -15,7 +15,9 @@
 	}>();
 
 	const logoSize = 'h-12 w-[46px]';
-	const iconUrl = $derived(page.data.platformBranding?.iconUrl ?? '/logo.svg');
+	const logoUrl = $derived(
+		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
+	);
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(wordmark ?? page.data.platformBranding?.showWordmark ?? true);
 </script>
@@ -24,7 +26,7 @@
 	<span
 		class="flex shrink-0 items-center justify-center overflow-hidden rounded-[9px] bg-[#fbfaf7db] {logoSize}"
 	>
-		<img src={iconUrl} alt={label} class="h-full w-full object-contain" />
+		<img src={logoUrl} alt={label} class="h-full w-full object-contain" />
 	</span>
 	{#if showWordmark}<span class="text-sm font-semibold tracking-[-0.02em]">{brandName}</span>{/if}
 </a>

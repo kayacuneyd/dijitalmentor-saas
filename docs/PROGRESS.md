@@ -3,6 +3,10 @@ tüm# Progress — saaskaya
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
 
+## 2026-07-18 — Navbar logo rozet ölçüsü ve yüzey eşleşmesi
+
+- Ortak navbar `BrandMark` rozeti 46×48 px olarak sabitlendi. Arka planı header’ın yarı saydam kırık beyaz yüzeyiyle bire bir eşleşen `#fbfaf7db` oldu; böylece logo ayrı bir blok gibi görünmeden navbar ritmine katılır.
+
 ## 2026-07-18 — Arı odaklı compact logo sistemi
 
 - Tam ağ + arı kompozisyonu ana logo olarak korundu. Küçük marka yüzeyleri (public/app header, footer, admin/user panel rail ve favicon) için owner yönetimli app icon kullanılıyor; varsayılan `static/logo.svg` içindeki büyütülmüş standalone arıdır.

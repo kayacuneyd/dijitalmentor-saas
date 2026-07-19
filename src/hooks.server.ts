@@ -1,9 +1,11 @@
-import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
+import { error, redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import { env } from '$env/dynamic/public';
 import {
 	detectLocale,
+	DEFAULT_LOCALE,
+	isLocale,
 	LOCALE_COOKIE,
-	localeFromPath,
+	publicLocaleFromPath,
 	rememberLocale,
 	stripLocale,
 	withLocale
@@ -12,6 +14,7 @@ import { resolveHostReroute } from '$lib/hostRouting';
 import { getSessionUser, isAdminEmail, SESSION_COOKIE } from '$lib/server/auth';
 import { recordError, shouldRecordError } from '$lib/server/error-log';
 import { getOwnerSessionUser, OWNER_SESSION_COOKIE } from '$lib/server/ownerAuth';
+import { isActivePublicLocale } from '$lib/server/publicLocales';
 import { recordRequestProbe } from '$lib/server/requestProbes';
 
 const LOCALIZED_PUBLIC_PATHS = new Set([
@@ -41,30 +44,39 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const owner = getOwnerSessionUser(event.cookies.get(OWNER_SESSION_COOKIE));
 	const user = owner ?? getSessionUser(event.cookies.get(SESSION_COOKIE));
 	event.locals.user = user ? { ...user, isAdmin: owner ? true : isAdminEmail(user.email) } : null;
-	const pathLocale = localeFromPath(event.url.pathname);
+	const localeCandidate = publicLocaleFromPath(event.url.pathname);
+	const pathLocale =
+		localeCandidate && isActivePublicLocale(localeCandidate) ? localeCandidate : null;
+	if (localeCandidate && !pathLocale && isLocalizedPublicPath(stripLocale(event.url.pathname))) {
+		error(404, 'Language not published');
+	}
 	// Precedence: an explicit locale-prefixed URL always wins, then a saved account
 	// preference (only ever written by the authenticated-chrome switcher — visiting
 	// a stray locale-prefixed marketing link while logged in must not silently
 	// change it), then the existing cookie/header/default chain.
-	const locale =
-		pathLocale ??
+	const detectedLocale =
+		(pathLocale && isLocale(pathLocale) ? pathLocale : null) ??
 		event.locals.user?.locale ??
 		detectLocale(
 			event.request.headers.get('accept-language'),
 			event.cookies.get(LOCALE_COOKIE),
 			event.request.headers.get('cf-ipcountry') ?? event.request.headers.get('x-vercel-ip-country')
 		);
-	event.locals.locale = locale;
+	event.locals.locale = detectedLocale ?? DEFAULT_LOCALE;
+	event.locals.publicLocale = pathLocale ?? detectedLocale ?? DEFAULT_LOCALE;
 	event.locals.unprefixedPath = stripLocale(event.url.pathname);
 	event.locals.isTenantHost = Boolean(resolveHostReroute(event.url, env.PUBLIC_APP_HOST));
 	if (pathLocale) rememberLocale(event.cookies, pathLocale);
 
 	if (!pathLocale && event.request.method === 'GET' && isLocalizedPublicPath(event.url.pathname)) {
-		redirect(307, withLocale(locale, `${event.url.pathname}${event.url.search}`));
+		redirect(
+			307,
+			withLocale(event.locals.publicLocale, `${event.url.pathname}${event.url.search}`)
+		);
 	}
 
 	const response = await resolve(event, {
-		transformPageChunk: ({ html }) => html.replace('%lang%', locale)
+		transformPageChunk: ({ html }) => html.replace('%lang%', event.locals.publicLocale)
 	});
 	response.headers.set('X-Content-Type-Options', 'nosniff');
 	response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');

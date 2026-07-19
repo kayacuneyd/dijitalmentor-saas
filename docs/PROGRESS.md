@@ -1,7 +1,16 @@
-tüm# Progress — saaskaya
+# Progress — saaskaya
 
 Running memory of the project. **Update after every task** so any fresh AI session knows exactly what is
 done and _why_. This file is the antidote to forgetting completed steps.
+
+## 2026-07-19 — Owner public içerik merkezi, dinamik public diller ve blog kapakları
+
+- Platform wordmark'i açıkça Aleo display fontuna bağlandı; mobil footer alt boşluğu üst ritimle eşitlendi. Hakkımızda ve Organization/Blog JSON-LD içindeki kişisel ad kaldırıldı; footer attribution alanı bilinçli olarak korundu.
+- `/admin/copy`, public header/footer, pazarlama sayfaları, hata ekranları ve yasal dokümanlar için taslak → admin preview → sayfa/dil bazlı yayın akışına geçirildi. Yasal gövde override'ları yalnız kontrollü başlık/paragraf/liste dokümanına dönüşür; raw HTML/CSS kabul edilmez.
+- Owner yeni bir public locale ekleyebilir. Yeni dil tüm zorunlu public alanlar ve yayınlanmış blog çevirileri tamamlanmadan aktif edilemez; aktif diller route çözümleme, switcher, canonical/hreflang ve sitemap tarafından kullanılır. Tenant `Site` locale sözleşmesi değişmedi.
+- Blog editörüne doğrudan R2 kapak yükleme ve üç/dinamik dil için ayrı alt metin eklendi. Kart ve tekil yazı aynı kapağı kullanır; değiştirilen R2 nesnesi best-effort temizlenir. Varsayılan ve mevcut kişisel blog yazarı `saaskaya Editorial` olarak taşındı.
+- Hata kaydı: test setup her test öncesi `public_locales` tablosunu temizlediği için aktif dil doğrulaması boş liste görüyordu. Kök neden migration seed'inin testler arasında yeniden kurulmamış olmasıydı; core locale kayıtları idempotent read-time guard ile garanti altına alındı. Migration, public-copy ve blog testleri bu davranışı kapsıyor.
+- Doğrulama: migration 37 uygulandı; `npm run check` 0 hata/uyarı, hedeflenen 6 test dosyası 24/24 test ve production build başarılı. Preview rotaları TR About/EN Blog/TR Privacy/Sitemap için 200, pasif `/fr/about` için 404 ve yetkisiz `/admin/copy` için login yönlendirmesi verdi. Playwright ile 320/375/414/768/1280 px ölçümlerinde yatay taşma görülmedi; Hakkımızda ana içeriğinde kişisel ad bulunmadı, header/footer wordmark hesaplanan fontu Aleo ve mobil copyright alt padding'i 16 px olarak ölçüldü.
 
 ## 2026-07-18 — Editor araç yoğunluğu, AI top-up yüzeyi ve ortak 404
 

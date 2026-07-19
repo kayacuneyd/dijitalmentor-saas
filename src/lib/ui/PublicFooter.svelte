@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { withLocale, type Locale } from '$lib/i18n';
+	import { mergeCopy } from '$lib/publicCopy';
 
-	let { locale }: { locale: Locale } = $props();
-	const l = (path: string) => withLocale(locale, path);
+	let { locale, publicLocale = locale }: { locale: Locale; publicLocale?: string } = $props();
+	const l = (path: string) => withLocale(publicLocale, path);
 	const logoUrl = $derived(
 		page.data.platformBranding?.logoUrl ?? '/do-more-with-less-download-free-ebook.svg'
 	);
 	const brandName = $derived(page.data.platformBranding?.brandName ?? 'saaskaya');
 	const showWordmark = $derived(page.data.platformBranding?.showWordmark ?? true);
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			en: {
 				product: 'Product',
@@ -33,7 +34,8 @@
 				login: 'Login',
 				dashboard: 'Dashboard',
 				tagline: 'AI-assisted websites for professionals, built from safe structured data.',
-				location: 'Operated from Kornwestheim, Germany.'
+				location: 'Operated from Kornwestheim, Germany.',
+				credit: ''
 			},
 			tr: {
 				product: 'Ürün',
@@ -56,7 +58,8 @@
 				login: 'Giriş',
 				dashboard: 'Dashboard',
 				tagline: 'Uzmanlar için güvenli yapısal veriden üretilen AI destekli web siteleri.',
-				location: 'Kornwestheim, Almanya merkezli yürütülür.'
+				location: 'Kornwestheim, Almanya merkezli yürütülür.',
+				credit: ''
 			},
 			de: {
 				product: 'Produkt',
@@ -79,10 +82,12 @@
 				login: 'Login',
 				dashboard: 'Dashboard',
 				tagline: 'AI-gestützte Websites für Profis, aus sicherer strukturierter Datenbasis.',
-				location: 'Betrieben aus Kornwestheim, Deutschland.'
+				location: 'Betrieben aus Kornwestheim, Deutschland.',
+				credit: ''
 			}
 		}[locale]
 	);
+	const copy = $derived(mergeCopy(baseCopy, page.data.publicCopy?.footer));
 
 	const columns = $derived([
 		{
@@ -128,7 +133,8 @@
 		<div>
 			<div class="flex items-center gap-3">
 				<img src={logoUrl} alt="saaskaya" class="size-10 rounded-[9px] object-contain" />
-				{#if showWordmark}<span class="text-lg font-semibold tracking-[-0.02em]">{brandName}</span
+				{#if showWordmark}<span class="sk-display text-lg font-bold tracking-[-0.02em]"
+						>{brandName}</span
 					>{/if}
 			</div>
 			<p class="mt-3 max-w-xs text-sm leading-6 text-[var(--sk-muted)]">{copy.tagline}</p>
@@ -155,12 +161,18 @@
 		</div>
 	</div>
 	<div
-		class="border-t border-[var(--sk-line)] px-4 pt-4 pb-[calc(4.5rem+env(safe-area-inset-bottom))] text-center text-xs text-[var(--sk-muted)]"
+		class="border-t border-[var(--sk-line)] px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-xs text-[var(--sk-muted)]"
 	>
-		Built & developed in Kornwestheim by
-		<a class="sk-link text-[var(--sk-ink)]" href="https://kayacuneyt.com" rel="noopener noreferrer"
-			>Cüneyt Kaya</a
-		>
-		with love
+		{#if copy.credit}
+			{copy.credit}
+		{:else}
+			Built & developed in Kornwestheim by
+			<a
+				class="sk-link text-[var(--sk-ink)]"
+				href="https://kayacuneyt.com"
+				rel="noopener noreferrer">Cüneyt Kaya</a
+			>
+			with love
+		{/if}
 	</div>
 </footer>

@@ -6,7 +6,7 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { mergeCopy } from '$lib/publicCopy';
+	import { baseLocaleForPublic, mergeCopy } from '$lib/publicCopy';
 
 	type ContactFormValues = {
 		name?: string;
@@ -16,8 +16,9 @@
 	};
 
 	let { data, form } = $props();
-	const locale: Locale = $derived(data.locale);
-	const l = (path: string) => withLocale(locale, path);
+	const publicLocale = $derived(data.publicLocale ?? data.locale);
+	const locale: Locale = $derived(baseLocaleForPublic(publicLocale));
+	const l = (path: string) => withLocale(publicLocale, path);
 	const formValues = $derived(
 		(form && 'values' in form ? form.values : undefined) as ContactFormValues | undefined
 	);
@@ -95,7 +96,7 @@
 			}
 		}[locale]
 	);
-	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
+	const copy = $derived(mergeCopy(baseCopy, data.publicCopy?.contact));
 
 	const contactJsonLd = $derived({
 		'@context': 'https://schema.org',
@@ -117,6 +118,7 @@
 
 <PublicShell
 	{locale}
+	{publicLocale}
 	currentPath="/contact"
 	userEmail={data.user?.email ?? null}
 	label="saaskaya.com / contact"

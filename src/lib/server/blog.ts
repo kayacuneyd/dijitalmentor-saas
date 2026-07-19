@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { and, desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { LOCALES, type Locale } from '$lib/i18n';
+import { DeleteObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { LOCALES } from '$lib/i18n';
 import {
 	blogDocSchema,
 	blogDocText,
@@ -13,6 +14,8 @@ import {
 import { blogPosts as seedPosts } from '$lib/public/blog';
 import { db } from '$lib/server/db';
 import { blogPosts, blogPostTranslations } from '$lib/server/db/schema';
+import { MAX_MEDIA_BYTES, prepareStoredMedia, r2Client, r2Config } from '$lib/server/media';
+import { listPublicLocales, normalizePublicLocaleCode } from '$lib/server/publicLocales';
 
 export const BLOG_STATUSES = ['draft', 'published', 'archived'] as const;
 export type BlogStatus = (typeof BLOG_STATUSES)[number];
@@ -26,17 +29,17 @@ export type PublicBlogPost = {
 	readingMinutes: number;
 	authorName: string;
 	coverImageUrl: string | null;
-	coverAlt: string | null;
-	title: Record<Locale, string>;
-	description: Record<Locale, string>;
-	category: Record<Locale, string>;
-	seoTitle: Record<Locale, string>;
-	seoDescription: Record<Locale, string>;
-	body: Record<Locale, BlogDoc>;
+	coverAlt: Record<string, string>;
+	title: Record<string, string>;
+	description: Record<string, string>;
+	category: Record<string, string>;
+	seoTitle: Record<string, string>;
+	seoDescription: Record<string, string>;
+	body: Record<string, BlogDoc>;
 };
 
 export type BlogLocaleCompleteness = {
-	locale: Locale;
+	locale: string;
 	complete: boolean;
 	missing: string[];
 };
@@ -56,18 +59,18 @@ const saveSchema = z.object({
 	slug: slugSchema,
 	status: z.enum(BLOG_STATUSES),
 	coverImageUrl: z.string().trim().max(700).optional(),
-	coverAlt: z.string().trim().max(220).optional(),
 	readingMinutes: z.coerce.number().int().min(1).max(30),
 	authorName: z.string().trim().min(2).max(120),
 	publishedAt: z.string().trim().optional(),
 	translations: z.record(
-		z.enum(LOCALES),
+		z.string().refine((value) => Boolean(normalizePublicLocaleCode(value))),
 		z.object({
-			title: z.string().trim().min(3).max(140),
-			description: z.string().trim().min(20).max(280),
-			category: z.string().trim().min(2).max(60),
+			title: z.string().trim().max(140),
+			description: z.string().trim().max(280),
+			category: z.string().trim().max(60),
 			seoTitle: z.string().trim().max(160).optional(),
 			seoDescription: z.string().trim().max(280).optional(),
+			coverAlt: z.string().trim().max(220).optional(),
 			body: blogDocSchema
 		})
 	)
@@ -94,10 +97,10 @@ const importSchema = z.object({
 	date: z.string().trim().optional(),
 	publishedAt: z.string().trim().optional(),
 	readingMinutes: z.coerce.number().int().min(1).max(30).default(4),
-	authorName: z.string().trim().min(2).max(120).default('Cüneyt Kaya'),
+	authorName: z.string().trim().min(2).max(120).default('saaskaya Editorial'),
 	coverImageUrl: z.string().trim().max(700).optional(),
 	coverAlt: z.string().trim().max(220).optional(),
-	translations: z.record(z.enum(LOCALES), importTranslationSchema)
+	translations: z.record(z.string(), importTranslationSchema)
 });
 
 export type BlogSaveInput = {
@@ -105,18 +108,18 @@ export type BlogSaveInput = {
 	slug: unknown;
 	status: unknown;
 	coverImageUrl?: unknown;
-	coverAlt?: unknown;
 	readingMinutes: unknown;
 	authorName: unknown;
 	publishedAt?: unknown;
 	translations: Record<
-		Locale,
+		string,
 		{
 			title: unknown;
 			description: unknown;
 			category: unknown;
 			seoTitle?: unknown;
 			seoDescription?: unknown;
+			coverAlt?: unknown;
 			body: unknown;
 		}
 	>;
@@ -133,8 +136,13 @@ function isoDate(value: Date | null): string {
 	return (value ?? new Date()).toISOString().slice(0, 10);
 }
 
-function emptyLocalized<T>(factory: () => T): Record<Locale, T> {
-	return Object.fromEntries(LOCALES.map((locale) => [locale, factory()])) as Record<Locale, T>;
+function blogLocaleCodes(includeDrafts = true): string[] {
+	const configured = listPublicLocales({ includeDrafts }).map((locale) => locale.code);
+	return [...new Set([...LOCALES, ...configured])];
+}
+
+function emptyLocalized<T>(factory: () => T): Record<string, T> {
+	return Object.fromEntries(blogLocaleCodes().map((locale) => [locale, factory()]));
 }
 
 function shapePost(row: BlogPostRow, translations: BlogTranslationRow[]): PublicBlogPost {
@@ -144,16 +152,16 @@ function shapePost(row: BlogPostRow, translations: BlogTranslationRow[]): Public
 	const category = emptyLocalized(() => '');
 	const seoTitle = emptyLocalized(() => '');
 	const seoDescription = emptyLocalized(() => '');
+	const coverAlt = emptyLocalized(() => '');
 	const body = emptyLocalized(emptyBlogDoc);
 
-	for (const locale of LOCALES) {
-		const translation = byLocale.get(locale);
-		if (!translation) continue;
+	for (const [locale, translation] of byLocale) {
 		title[locale] = translation.title;
 		description[locale] = translation.description;
 		category[locale] = translation.category;
 		seoTitle[locale] = translation.seoTitle || translation.title;
 		seoDescription[locale] = translation.seoDescription || translation.description;
+		coverAlt[locale] = translation.coverAlt || row.coverAlt || translation.title;
 		body[locale] = parseBlogDoc(translation.body);
 	}
 
@@ -166,7 +174,7 @@ function shapePost(row: BlogPostRow, translations: BlogTranslationRow[]): Public
 		readingMinutes: row.readingMinutes,
 		authorName: row.authorName,
 		coverImageUrl: row.coverImageUrl,
-		coverAlt: row.coverAlt,
+		coverAlt,
 		title,
 		description,
 		category,
@@ -186,7 +194,7 @@ function translationsFor(postIds: string[]): BlogTranslationRow[] {
 }
 
 export function blogCompleteness(post: PublicBlogPost): BlogLocaleCompleteness[] {
-	return LOCALES.map((locale) => {
+	return blogLocaleCodes().map((locale) => {
 		const missing: string[] = [];
 		if (!post.title[locale]?.trim()) missing.push('title');
 		if (!post.description[locale]?.trim()) missing.push('description');
@@ -199,7 +207,7 @@ export function blogCompleteness(post: PublicBlogPost): BlogLocaleCompleteness[]
 function validatePublishedInput(input: z.infer<typeof saveSchema>): string[] {
 	if (input.status !== 'published') return [];
 	const issues: string[] = [];
-	for (const locale of LOCALES) {
+	for (const locale of blogLocaleCodes(false)) {
 		const translation = input.translations[locale];
 		if (!translation?.title?.trim()) issues.push(`${locale}: title is required`);
 		if (!translation?.description?.trim()) issues.push(`${locale}: description is required`);
@@ -227,7 +235,7 @@ export function ensureBlogSeeded(): void {
 				slug: seed.slug,
 				status: 'published',
 				readingMinutes: seed.readingMinutes,
-				authorName: 'Cüneyt Kaya',
+				authorName: 'saaskaya Editorial',
 				publishedAt,
 				createdAt: publishedAt,
 				updatedAt: now
@@ -310,12 +318,12 @@ export function createDraftBlogPost(): PublicBlogPost {
 			slug,
 			status: 'draft',
 			readingMinutes: 3,
-			authorName: 'Cüneyt Kaya',
+			authorName: 'saaskaya Editorial',
 			createdAt: now,
 			updatedAt: now
 		})
 		.run();
-	for (const locale of LOCALES) {
+	for (const locale of blogLocaleCodes()) {
 		db.insert(blogPostTranslations)
 			.values({
 				postId: id,
@@ -350,7 +358,7 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 		return {
 			ok: false,
 			field: 'status',
-			message: `Published posts require complete EN/TR/DE translations. ${publishIssues.join('; ')}`
+			message: `Published posts require every active public language. ${publishIssues.join('; ')}`
 		};
 	}
 
@@ -380,7 +388,6 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 		slug: parsed.data.slug,
 		status: parsed.data.status,
 		coverImageUrl: parsed.data.coverImageUrl || null,
-		coverAlt: parsed.data.coverAlt || null,
 		readingMinutes: parsed.data.readingMinutes,
 		authorName: parsed.data.authorName,
 		publishedAt,
@@ -394,7 +401,6 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 				slug: postValues.slug,
 				status: postValues.status,
 				coverImageUrl: postValues.coverImageUrl,
-				coverAlt: postValues.coverAlt,
 				readingMinutes: postValues.readingMinutes,
 				authorName: postValues.authorName,
 				publishedAt: postValues.publishedAt,
@@ -411,7 +417,7 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 			.run();
 	}
 
-	for (const locale of LOCALES) {
+	for (const locale of Object.keys(parsed.data.translations)) {
 		const translation = parsed.data.translations[locale];
 		db.insert(blogPostTranslations)
 			.values({
@@ -422,6 +428,7 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 				category: translation.category,
 				seoTitle: translation.seoTitle || null,
 				seoDescription: translation.seoDescription || null,
+				coverAlt: translation.coverAlt || null,
 				body: translation.body
 			})
 			.onConflictDoUpdate({
@@ -432,6 +439,7 @@ export function saveBlogPost(input: BlogSaveInput): BlogSaveResult {
 					category: translation.category,
 					seoTitle: translation.seoTitle || null,
 					seoDescription: translation.seoDescription || null,
+					coverAlt: translation.coverAlt || null,
 					body: translation.body
 				}
 			})
@@ -479,7 +487,7 @@ export function importBlogPostJson(
 	}
 
 	const translations = {} as BlogSaveInput['translations'];
-	for (const locale of LOCALES) {
+	for (const locale of Object.keys(parsed.data.translations)) {
 		const translation = parsed.data.translations[locale];
 		translations[locale] = {
 			title: translation.title,
@@ -487,6 +495,7 @@ export function importBlogPostJson(
 			category: translation.category,
 			seoTitle: translation.seoTitle ?? '',
 			seoDescription: translation.seoDescription ?? '',
+			coverAlt: parsed.data.coverAlt ?? '',
 			body: importBody(translation)
 		};
 	}
@@ -496,7 +505,6 @@ export function importBlogPostJson(
 		slug: parsed.data.slug,
 		status: parsed.data.status,
 		coverImageUrl: parsed.data.coverImageUrl ?? '',
-		coverAlt: parsed.data.coverAlt ?? '',
 		readingMinutes: parsed.data.readingMinutes,
 		authorName: parsed.data.authorName,
 		publishedAt: parsed.data.publishedAt ?? parsed.data.date ?? '',
@@ -504,4 +512,39 @@ export function importBlogPostJson(
 	});
 	if (!result.ok) return result;
 	return { ok: true, post: result.post, updatedExisting: Boolean(existing) };
+}
+
+export async function uploadBlogCover(input: {
+	postId: string;
+	fileName: string;
+	mimeType: string;
+	bytes: Uint8Array;
+}) {
+	if (input.bytes.byteLength > MAX_MEDIA_BYTES)
+		throw new Error('Cover image must be 8 MB or smaller.');
+	const current = db.select().from(blogPosts).where(eq(blogPosts.id, input.postId)).get();
+	if (!current) throw new Error('Blog post not found.');
+	const stored = await prepareStoredMedia(input.bytes, input.mimeType, input.fileName);
+	const config = r2Config();
+	const objectKey = `blog/${input.postId}/${randomUUID()}.${stored.extension}`;
+	const url = `${config.publicBaseUrl.replace(/\/$/, '')}/${objectKey}`;
+	await r2Client(config).send(
+		new PutObjectCommand({
+			Bucket: config.bucket,
+			Key: objectKey,
+			Body: stored.bytes,
+			ContentType: stored.mimeType,
+			CacheControl: 'public, max-age=31536000, immutable'
+		})
+	);
+	db.update(blogPosts)
+		.set({ coverImageUrl: url, coverObjectKey: objectKey, updatedAt: new Date() })
+		.where(eq(blogPosts.id, input.postId))
+		.run();
+	if (current.coverObjectKey && current.coverObjectKey !== objectKey) {
+		await r2Client(config)
+			.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: current.coverObjectKey }))
+			.catch(() => undefined);
+	}
+	return { url, objectKey };
 }

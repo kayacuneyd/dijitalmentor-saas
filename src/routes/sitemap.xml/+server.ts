@@ -1,6 +1,7 @@
 import type { RequestHandler } from './$types';
-import { LOCALES, withLocale } from '$lib/i18n';
+import { withLocale } from '$lib/i18n';
 import { listBlogPosts } from '$lib/server/blog';
+import { listPublicLocales } from '$lib/server/publicLocales';
 
 const BASE = 'https://saaskaya.com';
 const now = new Date().toISOString();
@@ -30,7 +31,7 @@ function pages() {
 
 function buildSitemap() {
 	const localizedPages = pages().flatMap((page) =>
-		LOCALES.map((locale) => ({ ...page, loc: withLocale(locale, page.loc) }))
+		listPublicLocales().map(({ code }) => ({ ...page, loc: withLocale(code, page.loc) }))
 	);
 	return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

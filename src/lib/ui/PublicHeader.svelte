@@ -5,18 +5,22 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import { BarsOutline, CloseOutline } from 'flowbite-svelte-icons';
 	import { withLocale, type Locale } from '$lib/i18n';
+	import { mergeCopy } from '$lib/publicCopy';
+	import { page } from '$app/state';
 
 	let {
 		locale,
+		routeLocale = locale,
 		currentPath = '/',
 		userEmail = null
 	}: {
 		locale: Locale;
+		routeLocale?: string;
 		currentPath?: string;
 		userEmail?: string | null;
 	} = $props();
 
-	const l = (path: string) => withLocale(locale, path);
+	const l = (path: string) => withLocale(routeLocale, path);
 	const normalizedCurrent = $derived(currentPath === '' ? '/' : currentPath);
 	const isActive = (path: string) =>
 		path === '/'
@@ -37,7 +41,7 @@
 
 	afterNavigate(() => closeMenu());
 
-	const labels = $derived(
+	const baseLabels = $derived(
 		{
 			en: {
 				nav: [
@@ -83,6 +87,7 @@
 			}
 		}[locale]
 	);
+	const labels = $derived(mergeCopy(baseLabels, page.data.publicCopy?.header));
 </script>
 
 <header class="border-b border-[var(--sk-line)] bg-[rgb(251_250_247/.86)]">
@@ -106,7 +111,7 @@
 		</nav>
 
 		<div class="hidden flex-wrap items-center gap-2 lg:flex">
-			<LanguageSwitcher {locale} variant="dropdown" />
+			<LanguageSwitcher {locale} publicLocale={routeLocale} variant="dropdown" />
 			{#if userEmail}
 				<FlowbiteButton href="/dashboard" variant="secondary" size="sm"
 					>{labels.dashboard}</FlowbiteButton
@@ -120,7 +125,7 @@
 		</div>
 
 		<div class="flex items-center gap-2 lg:hidden">
-			<LanguageSwitcher {locale} variant="dropdown" />
+			<LanguageSwitcher {locale} publicLocale={routeLocale} variant="dropdown" />
 			<button
 				type="button"
 				class="inline-flex h-10 w-10 items-center justify-center rounded-[9px] border border-[var(--sk-line)] bg-[rgb(251_250_247/.68)] text-[var(--sk-ink)] transition hover:bg-white"

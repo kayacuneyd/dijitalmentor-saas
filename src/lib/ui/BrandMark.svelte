@@ -28,7 +28,7 @@
 	>
 		<img src={logoUrl} alt={label} class="h-full w-full object-contain" />
 	</span>
-	{#if showWordmark}<span class="text-base font-semibold tracking-[-0.02em] lg:text-xl"
+	{#if showWordmark}<span class="sk-display text-base font-bold tracking-[-0.02em] lg:text-xl"
 			>{brandName}</span
 		>{/if}
 </a>

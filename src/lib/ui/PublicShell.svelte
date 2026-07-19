@@ -9,6 +9,7 @@
 	let {
 		children,
 		locale,
+		publicLocale = locale,
 		currentPath = '/',
 		userEmail = null,
 		label = 'saaskaya.com',
@@ -17,6 +18,7 @@
 	}: {
 		children: import('svelte').Snippet;
 		locale: Locale;
+		publicLocale?: string;
 		currentPath?: string;
 		userEmail?: string | null;
 		label?: string;
@@ -27,12 +29,12 @@
 
 <AppCanvasShell {label} {max} {contentClass} flush chrome={false}>
 	<div class="flex min-h-full flex-col">
-		<PublicHeader {locale} {currentPath} {userEmail} />
+		<PublicHeader {locale} routeLocale={publicLocale} {currentPath} {userEmail} />
 		<div class="min-w-0 flex-1">
 			{@render children()}
 		</div>
 	</div>
 </AppCanvasShell>
-<PublicFooter {locale} />
+<PublicFooter {locale} {publicLocale} />
 <SiteAssistantDock {locale} {currentPath} userEmail={userEmail ?? ''} />
 <ScrollToTop />

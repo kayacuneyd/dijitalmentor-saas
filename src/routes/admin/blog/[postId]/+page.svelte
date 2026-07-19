@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { LOCALES, localeNames } from '$lib/i18n';
 	import RichTextEditor from '$lib/admin/RichTextEditor.svelte';
 	import AdminShell from '$lib/ui/AdminShell.svelte';
 	import AppCard from '$lib/ui/AppCard.svelte';
@@ -37,9 +36,48 @@
 
 	{#if form?.saved}
 		<div class="sk-alert sk-alert-success">{t('admin.blog.saved')}</div>
+	{:else if form?.coverUploaded}
+		<div class="sk-alert sk-alert-success">Cover image uploaded.</div>
 	{:else if form?.message}
 		<div class="sk-alert sk-alert-error">{form.message}</div>
 	{/if}
+
+	<AppCard class="p-4">
+		<div class="grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-center">
+			{#if data.post.coverImageUrl}
+				<img
+					src={data.post.coverImageUrl}
+					alt=""
+					class="aspect-[16/9] w-full rounded-[var(--sk-radius-sm)] border border-[var(--sk-line)] object-cover"
+				/>
+			{:else}
+				<div
+					class="flex aspect-[16/9] items-center justify-center rounded-[var(--sk-radius-sm)] border border-dashed border-[var(--sk-line-strong)] text-xs text-[var(--sk-faint)]"
+				>
+					No cover
+				</div>
+			{/if}
+			<form method="POST" action="?/uploadCover" enctype="multipart/form-data" class="grid gap-2">
+				<div>
+					<h2 class="text-sm font-semibold">Article cover</h2>
+					<p class="mt-1 text-xs leading-5 text-[var(--sk-muted)]">
+						JPEG, PNG, GIF, WebP or safe SVG · maximum 8 MB. The image appears on cards and above
+						the article.
+					</p>
+				</div>
+				<div class="flex flex-wrap items-center gap-2">
+					<input
+						name="cover"
+						type="file"
+						accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+						required
+						class="block max-w-full text-sm"
+					/>
+					<FlowbiteButton type="submit" variant="secondary" size="sm">Upload cover</FlowbiteButton>
+				</div>
+			</form>
+		</div>
+	</AppCard>
 
 	<form method="POST" action="?/save" use:enhance class="grid gap-5">
 		<AppCard class="p-4">
@@ -82,12 +120,6 @@
 					/>
 				</div>
 				<div class="grid gap-1">
-					<label for="coverAlt" class="text-xs text-[var(--sk-faint)]"
-						>{t('admin.blog.coverAlt')}</label
-					>
-					<input id="coverAlt" name="coverAlt" class="sk-input" value={data.post.coverAlt ?? ''} />
-				</div>
-				<div class="grid gap-1">
 					<label for="readingMinutes" class="text-xs text-[var(--sk-faint)]"
 						>{t('admin.blog.readingMinutes')}</label
 					>
@@ -111,11 +143,12 @@
 		</AppCard>
 
 		<div class="grid gap-5">
-			{#each LOCALES as locale (locale)}
+			{#each data.locales as localeRow (localeRow.code)}
+				{@const locale = localeRow.code}
 				<AppCard class="p-4">
 					<div class="grid gap-4">
 						<div class="flex flex-wrap items-center justify-between gap-3">
-							<h2 class="text-lg font-semibold">{localeNames[locale]}</h2>
+							<h2 class="text-lg font-semibold">{localeRow.name}</h2>
 							<span class="sk-mono text-[10px] text-[var(--sk-faint)]">{locale}</span>
 						</div>
 						<div class="grid gap-4 lg:grid-cols-2">
@@ -124,7 +157,7 @@
 								<input
 									id={`title_${locale}`}
 									name={`title_${locale}`}
-									required
+									required={localeRow.active}
 									class="sk-input"
 									value={data.post.title[locale]}
 								/>
@@ -136,7 +169,7 @@
 								<input
 									id={`category_${locale}`}
 									name={`category_${locale}`}
-									required
+									required={localeRow.active}
 									class="sk-input"
 									value={data.post.category[locale]}
 								/>
@@ -148,10 +181,21 @@
 								<textarea
 									id={`description_${locale}`}
 									name={`description_${locale}`}
-									required
+									required={localeRow.active}
 									rows="2"
 									class="sk-textarea">{data.post.description[locale]}</textarea
 								>
+							</div>
+							<div class="grid gap-1 lg:col-span-2">
+								<label for={`coverAlt_${locale}`} class="text-xs text-[var(--sk-faint)]">
+									Cover alt text
+								</label>
+								<input
+									id={`coverAlt_${locale}`}
+									name={`coverAlt_${locale}`}
+									class="sk-input"
+									value={data.post.coverAlt[locale]}
+								/>
 							</div>
 							<div class="grid gap-1">
 								<label for={`seoTitle_${locale}`} class="text-xs text-[var(--sk-faint)]"
@@ -181,7 +225,7 @@
 							<RichTextEditor
 								name={`body_${locale}`}
 								value={data.post.body[locale]}
-								placeholder={`Write the ${localeNames[locale]} article...`}
+								placeholder={`Write the ${localeRow.name} article...`}
 							/>
 						</div>
 					</div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import BlogBody from '$lib/blog/BlogBody.svelte';
 	import { withLocale, type Locale } from '$lib/i18n';
+	import { baseLocaleForPublic } from '$lib/publicCopy';
 	import { absoluteUrl, organizationJsonLd, SITE_ORIGIN } from '$lib/seo';
 	import MarketingSection from '$lib/ui/MarketingSection.svelte';
 	import PublicShell from '$lib/ui/PublicShell.svelte';
@@ -8,9 +9,12 @@
 	import StatusPill from '$lib/ui/StatusPill.svelte';
 
 	let { data } = $props();
-	const locale: Locale = $derived(data.locale);
+	const publicLocale = $derived(data.publicLocale ?? data.locale);
+	const locale: Locale = $derived(baseLocaleForPublic(publicLocale));
 	const post = $derived(data.post);
-	const l = (path: string) => withLocale(locale, path);
+	const l = (path: string) => withLocale(publicLocale, path);
+	const postTitle = $derived(post.title[publicLocale] || post.title[locale]);
+	const postDescription = $derived(post.description[publicLocale] || post.description[locale]);
 
 	const copy = $derived(
 		{
@@ -31,18 +35,18 @@
 	const postJsonLd = $derived({
 		'@context': 'https://schema.org',
 		'@type': 'BlogPosting',
-		headline: post.seoTitle[locale] || post.title[locale],
-		description: post.seoDescription[locale] || post.description[locale],
+		headline: post.seoTitle[publicLocale] || postTitle,
+		description: post.seoDescription[publicLocale] || postDescription,
 		datePublished: post.date,
 		dateModified: post.updatedDate,
-		inLanguage: locale,
-		url: absoluteUrl(locale, `/blog/${post.slug}`),
+		inLanguage: publicLocale,
+		url: absoluteUrl(publicLocale, `/blog/${post.slug}`),
 		image: seoImage,
 		publisher: organizationJsonLd(data.platformBranding?.logoUrl),
 		author: {
-			'@type': 'Person',
+			'@type': 'Organization',
 			name: post.authorName,
-			url: 'https://kayacuneyt.com'
+			url: 'https://saaskaya.com'
 		}
 	});
 
@@ -54,19 +58,19 @@
 				'@type': 'ListItem',
 				position: 1,
 				name: copy.home,
-				item: absoluteUrl(locale, '/')
+				item: absoluteUrl(publicLocale, '/')
 			},
 			{
 				'@type': 'ListItem',
 				position: 2,
 				name: copy.blog,
-				item: absoluteUrl(locale, '/blog')
+				item: absoluteUrl(publicLocale, '/blog')
 			},
 			{
 				'@type': 'ListItem',
 				position: 3,
-				name: post.title[locale],
-				item: absoluteUrl(locale, `/blog/${post.slug}`)
+				name: postTitle,
+				item: absoluteUrl(publicLocale, `/blog/${post.slug}`)
 			}
 		]
 	});
@@ -75,8 +79,8 @@
 <SeoHead
 	{locale}
 	path={`/blog/${post.slug}`}
-	title={`${post.seoTitle[locale] || post.title[locale]} · saaskaya Blog`}
-	description={post.seoDescription[locale] || post.description[locale]}
+	title={`${post.seoTitle[publicLocale] || postTitle} · saaskaya Blog`}
+	description={post.seoDescription[publicLocale] || postDescription}
 	type="article"
 	image={seoImage}
 	jsonLd={[organizationJsonLd(data.platformBranding?.logoUrl), postJsonLd, breadcrumbJsonLd]}
@@ -84,6 +88,7 @@
 
 <PublicShell
 	{locale}
+	{publicLocale}
 	currentPath="/blog"
 	userEmail={data.user?.email ?? null}
 	label="saaskaya.com / blog"
@@ -99,24 +104,24 @@
 				<a href={l('/blog')} class="sk-link">{copy.blog}</a>
 				<span class="text-[var(--sk-faint)]">/</span>
 				<span aria-current="page" class="max-w-full truncate text-[var(--sk-faint)]">
-					{post.title[locale]}
+					{postTitle}
 				</span>
 			</nav>
 
 			<header class="mt-8 max-w-3xl">
 				<div class="flex flex-wrap items-center gap-2">
-					<StatusPill>{post.category[locale]}</StatusPill>
+					<StatusPill>{post.category[publicLocale] || post.category[locale]}</StatusPill>
 					<span class="text-xs text-[var(--sk-faint)]">{post.readingMinutes} {copy.min}</span>
 					<span class="text-xs text-[var(--sk-faint)]">{post.date}</span>
 				</div>
-				<h1 class="sk-display mt-5 text-4xl leading-tight sm:text-[46px]">{post.title[locale]}</h1>
-				<p class="mt-4 text-[17px] leading-8 text-[var(--sk-muted)]">{post.description[locale]}</p>
+				<h1 class="sk-display mt-5 text-4xl leading-tight sm:text-[46px]">{postTitle}</h1>
+				<p class="mt-4 text-[17px] leading-8 text-[var(--sk-muted)]">{postDescription}</p>
 			</header>
 
 			{#if post.coverImageUrl}
 				<img
 					src={post.coverImageUrl}
-					alt={post.coverAlt ?? post.title[locale]}
+					alt={post.coverAlt[publicLocale] || post.coverAlt[locale] || postTitle}
 					class="mt-8 aspect-[16/8] w-full rounded-[12px] border border-[var(--sk-line)] object-cover"
 					loading="eager"
 					decoding="async"
@@ -124,7 +129,7 @@
 			{/if}
 
 			<div class="mt-10 max-w-3xl">
-				<BlogBody doc={post.body[locale]} />
+				<BlogBody doc={post.body[publicLocale] || post.body[locale]} />
 			</div>
 		</article>
 	</MarketingSection>

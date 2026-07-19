@@ -129,6 +129,36 @@ export const messageOverrides = sqliteTable(
 	(table) => [primaryKey({ columns: [table.key, table.locale] })]
 );
 
+// Owner-authored public copy is staged here before it is promoted to
+// message_overrides. This keeps ordinary editing from changing production copy.
+export const publicCopyDrafts = sqliteTable(
+	'public_copy_drafts',
+	{
+		key: text('key').notNull(),
+		locale: text('locale').notNull(),
+		value: text('value').notNull(),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date())
+	},
+	(table) => [primaryKey({ columns: [table.key, table.locale] })]
+);
+
+// Public platform locales are independent from tenant Site locales. New
+// languages can be prepared by the owner without widening the tenant Zod schema.
+export const publicLocales = sqliteTable('public_locales', {
+	code: text('code').primaryKey(),
+	name: text('name').notNull(),
+	active: integer('active', { mode: 'boolean' }).notNull().default(false),
+	sortOrder: integer('sort_order').notNull().default(0),
+	createdAt: integer('created_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date()),
+	updatedAt: integer('updated_at', { mode: 'timestamp' })
+		.notNull()
+		.$defaultFn(() => new Date())
+});
+
 // Contact-form submissions from published tenant sites (PLAN §7).
 export const contactSubmissions = sqliteTable('contact_submissions', {
 	id: text('id').primaryKey(),
@@ -717,9 +747,10 @@ export const blogPosts = sqliteTable(
 		slug: text('slug').notNull(),
 		status: text('status').notNull().default('draft'),
 		coverImageUrl: text('cover_image_url'),
+		coverObjectKey: text('cover_object_key'),
 		coverAlt: text('cover_alt'),
 		readingMinutes: integer('reading_minutes').notNull().default(3),
-		authorName: text('author_name').notNull().default('Cüneyt Kaya'),
+		authorName: text('author_name').notNull().default('saaskaya Editorial'),
 		publishedAt: integer('published_at', { mode: 'timestamp' }),
 		createdAt: integer('created_at', { mode: 'timestamp' })
 			.notNull()
@@ -744,6 +775,7 @@ export const blogPostTranslations = sqliteTable(
 		category: text('category').notNull(),
 		seoTitle: text('seo_title'),
 		seoDescription: text('seo_description'),
+		coverAlt: text('cover_alt'),
 		body: text('body', { mode: 'json' }).notNull()
 	},
 	(table) => [primaryKey({ columns: [table.postId, table.locale] })]

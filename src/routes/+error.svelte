@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { withLocale, type Locale } from '$lib/i18n';
+	import { mergeCopy } from '$lib/publicCopy';
 	import BrandMark from '$lib/ui/BrandMark.svelte';
 	import FlowbiteButton from '$lib/ui/primitives/FlowbiteButton.svelte';
 
-	const copy = $derived(
+	const baseCopy = $derived(
 		{
 			tr: {
 				notFound: {
@@ -41,8 +42,21 @@
 			}
 		}[(page.data.locale as Locale | undefined) ?? 'en']
 	);
+	const overrides = $derived(page.data.publicCopy?.error);
+	const copy = $derived(
+		mergeCopy(baseCopy, {
+			notFound: {
+				label: overrides?.notFoundTitle,
+				body: overrides?.notFoundBody
+			},
+			failed: { label: overrides?.failedTitle, body: overrides?.failedBody },
+			cta: overrides?.cta
+		})
+	);
 	const message = $derived(page.status === 404 ? copy.notFound : copy.failed);
-	const home = $derived(withLocale((page.data.locale as Locale | undefined) ?? 'en', '/'));
+	const home = $derived(
+		withLocale((page.data.publicLocale as string | undefined) ?? page.data.locale ?? 'en', '/')
+	);
 </script>
 
 <main class="flex min-h-dvh flex-col bg-[var(--sk-card)] text-[var(--sk-ink)]">

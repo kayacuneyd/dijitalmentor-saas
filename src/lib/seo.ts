@@ -5,16 +5,16 @@ export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og.jpg`;
 export const DEFAULT_LOGO = `${SITE_ORIGIN}/logo.svg`;
 
 export type SeoAlternate = {
-	locale: Locale | 'x-default';
+	locale: string | 'x-default';
 	href: string;
 };
 
-export function absoluteUrl(locale: Locale, path: string): string {
+export function absoluteUrl(locale: string, path: string): string {
 	return `${SITE_ORIGIN}${withLocale(locale, path)}`;
 }
 
-export function seoAlternates(path: string): SeoAlternate[] {
-	const alternates = LOCALES.map((locale) => ({
+export function seoAlternates(path: string, locales: readonly string[] = LOCALES): SeoAlternate[] {
+	const alternates = locales.map((locale) => ({
 		locale,
 		href: absoluteUrl(locale, path)
 	}));
@@ -36,11 +36,6 @@ export function organizationJsonLd(logo = DEFAULT_LOGO) {
 		name: 'saaskaya',
 		url: SITE_ORIGIN,
 		logo: absoluteAssetUrl(logo),
-		founder: {
-			'@type': 'Person',
-			name: 'Cüneyt Kaya',
-			url: 'https://kayacuneyt.com'
-		},
 		address: {
 			'@type': 'PostalAddress',
 			addressLocality: 'Kornwestheim',

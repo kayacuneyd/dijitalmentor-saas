@@ -914,6 +914,47 @@ export const migrations: Migration[] = [
 			ensureColumn(client, 'sites', 'previous_public_handle', 'text');
 			ensureColumn(client, 'sites', 'public_handle_change_count', 'integer NOT NULL DEFAULT 0');
 		}
+	},
+	{
+		version: 37,
+		name: 'owner-public-content-and-blog-media',
+		up(client) {
+			client.exec(`CREATE TABLE IF NOT EXISTS public_copy_drafts (
+				key text NOT NULL,
+				locale text NOT NULL,
+				value text NOT NULL,
+				updated_at integer NOT NULL,
+				PRIMARY KEY (key, locale)
+			)`);
+			client.exec(`CREATE TABLE IF NOT EXISTS public_locales (
+				code text PRIMARY KEY,
+				name text NOT NULL,
+				active integer NOT NULL DEFAULT 0,
+				sort_order integer NOT NULL DEFAULT 0,
+				created_at integer NOT NULL,
+				updated_at integer NOT NULL
+			)`);
+			const now = Date.now();
+			const insertLocale = client.prepare(
+				`INSERT OR IGNORE INTO public_locales
+				 (code, name, active, sort_order, created_at, updated_at)
+				 VALUES (?, ?, 1, ?, ?, ?)`
+			);
+			insertLocale.run('en', 'English', 0, now, now);
+			insertLocale.run('tr', 'Türkçe', 1, now, now);
+			insertLocale.run('de', 'Deutsch', 2, now, now);
+			ensureColumn(client, 'blog_posts', 'cover_object_key', 'text');
+			ensureColumn(client, 'blog_post_translations', 'cover_alt', 'text');
+			client.exec(`UPDATE blog_post_translations
+				SET cover_alt = (SELECT cover_alt FROM blog_posts WHERE blog_posts.id = blog_post_translations.post_id)
+				WHERE cover_alt IS NULL`);
+			client.exec(`UPDATE blog_posts SET author_name = 'saaskaya Editorial'
+				WHERE lower(author_name) = 'cüneyt kaya'`);
+			client.exec(`DELETE FROM message_overrides
+				WHERE key = 'marketing.about.trustBody' AND value LIKE '%Cüneyt Kaya%'`);
+			client.exec(`DELETE FROM public_copy_drafts
+				WHERE key = 'marketing.about.trustBody' AND value LIKE '%Cüneyt Kaya%'`);
+		}
 	}
 ];
 

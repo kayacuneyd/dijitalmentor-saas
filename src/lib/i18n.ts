@@ -15,14 +15,20 @@ export function localeFromPath(pathname: string): Locale | null {
 	return isLocale(first) ? first : null;
 }
 
+export function publicLocaleFromPath(pathname: string): string | null {
+	const first = pathname.split('/').filter(Boolean)[0];
+	if (!first) return null;
+	return /^[a-z]{2}(?:-[A-Z]{2})?$/.test(first) ? first : null;
+}
+
 export function stripLocale(pathname: string): string {
-	const locale = localeFromPath(pathname);
+	const locale = publicLocaleFromPath(pathname);
 	if (!locale) return pathname;
 	const stripped = pathname.slice(locale.length + 1);
 	return stripped.startsWith('/') ? stripped || '/' : `/${stripped}`;
 }
 
-export function withLocale(locale: Locale, path: string): string {
+export function withLocale(locale: string, path: string): string {
 	if (/^https?:\/\//.test(path) || path.startsWith('#') || path.startsWith('mailto:')) return path;
 	const normalized = path.startsWith('/') ? path : `/${path}`;
 	const [pathname, suffix = ''] = normalized.split(/(?=[?#])/);
@@ -52,7 +58,7 @@ export function detectLocale(
 	return DEFAULT_LOCALE;
 }
 
-export function rememberLocale(cookies: Cookies, locale: Locale): void {
+export function rememberLocale(cookies: Cookies, locale: string): void {
 	cookies.set(LOCALE_COOKIE, locale, {
 		path: '/',
 		httpOnly: false,

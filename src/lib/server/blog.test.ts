@@ -35,7 +35,7 @@ describe('blog CMS publishing and import', () => {
 		});
 
 		expect(result.ok).toBe(false);
-		if (!result.ok) expect(result.message).toContain('complete EN/TR/DE translations');
+		if (!result.ok) expect(result.message).toContain('every active public language');
 	});
 
 	it('imports a complete multilingual JSON file as a published post', () => {

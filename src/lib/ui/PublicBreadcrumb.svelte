@@ -8,13 +8,15 @@
 
 	let {
 		locale,
+		routeLocale = locale,
 		items
 	}: {
 		locale: Locale;
+		routeLocale?: string;
 		items: Crumb[];
 	} = $props();
 
-	const l = (path: string) => withLocale(locale, path);
+	const l = (path: string) => withLocale(routeLocale, path);
 </script>
 
 <nav

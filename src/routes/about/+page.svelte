@@ -6,11 +6,12 @@
 	import PublicShell from '$lib/ui/PublicShell.svelte';
 	import SeoHead from '$lib/ui/SeoHead.svelte';
 	import StatusPill from '$lib/ui/StatusPill.svelte';
-	import { mergeCopy } from '$lib/publicCopy';
+	import { baseLocaleForPublic, mergeCopy } from '$lib/publicCopy';
 
 	let { data } = $props();
-	const locale: Locale = $derived(data.locale);
-	const l = (path: string) => withLocale(locale, path);
+	const publicLocale = $derived(data.publicLocale ?? data.locale);
+	const locale: Locale = $derived(baseLocaleForPublic(publicLocale));
+	const l = (path: string) => withLocale(publicLocale, path);
 
 	const baseCopy = $derived(
 		{
@@ -40,7 +41,7 @@
 				],
 				trustTitle: 'Built with clear responsibility',
 				trustBody:
-					'saaskaya is operated from Kornwestheim by Cüneyt Kaya. The launch focus is intentionally narrow: professional profiles, multilingual websites, predictable publishing, and practical support.'
+					'saaskaya is operated from Kornwestheim, Germany. The launch focus is intentionally narrow: professional profiles, multilingual websites, predictable publishing, and practical support.'
 			},
 			tr: {
 				title: 'saaskaya hakkında · Uzmanlar için sade çok dilli web siteleri',
@@ -68,7 +69,7 @@
 				],
 				trustTitle: 'Sorumluluğu belli bir ürün',
 				trustBody:
-					'saaskaya Kornwestheim merkezli olarak Cüneyt Kaya tarafından yürütülür. İlk odak bilinçli olarak dar tutulur: uzman profilleri, çok dilli web siteleri, öngörülebilir yayınlama ve pratik destek.'
+					'saaskaya Almanya’nın Kornwestheim kentinden yürütülür. İlk odak bilinçli olarak dar tutulur: uzman profilleri, çok dilli web siteleri, öngörülebilir yayınlama ve pratik destek.'
 			},
 			de: {
 				title: 'Über saaskaya · Einfache mehrsprachige Websites für Fachleute',
@@ -96,11 +97,11 @@
 				],
 				trustTitle: 'Mit klarer Verantwortung gebaut',
 				trustBody:
-					'saaskaya wird von Cüneyt Kaya aus Kornwestheim betrieben. Der Start ist bewusst fokussiert: berufliche Profile, mehrsprachige Websites, berechenbares Publishing und praktische Unterstützung.'
+					'saaskaya wird aus Kornwestheim, Deutschland, betrieben. Der Start ist bewusst fokussiert: berufliche Profile, mehrsprachige Websites, berechenbares Publishing und praktische Unterstützung.'
 			}
 		}[locale]
 	);
-	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
+	const copy = $derived(mergeCopy(baseCopy, data.publicCopy?.about));
 </script>
 
 <SeoHead
@@ -117,6 +118,7 @@
 
 <PublicShell
 	{locale}
+	{publicLocale}
 	currentPath="/about"
 	userEmail={data.user?.email ?? null}
 	label="saaskaya.com / about"

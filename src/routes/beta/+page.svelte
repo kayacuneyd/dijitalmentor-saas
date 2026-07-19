@@ -7,12 +7,13 @@
 	import LanguageSwitcher from '$lib/ui/LanguageSwitcher.svelte';
 	import SiteAssistantDock from '$lib/ui/SiteAssistantDock.svelte';
 	import { ArrowRightOutline, HomeOutline } from 'flowbite-svelte-icons';
-	import { mergeCopy } from '$lib/publicCopy';
+	import { baseLocaleForPublic, mergeCopy } from '$lib/publicCopy';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data, form } = $props();
-	const locale: Locale = $derived(data.locale);
-	const l = (path: string) => withLocale(locale, path);
+	const publicLocale = $derived(data.publicLocale ?? data.locale);
+	const locale: Locale = $derived(baseLocaleForPublic(publicLocale));
+	const l = (path: string) => withLocale(publicLocale, path);
 	let busy = $state(false);
 
 	const baseCopy = $derived(
@@ -77,7 +78,7 @@
 			}
 		}[locale]
 	);
-	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
+	const copy = $derived(mergeCopy(baseCopy, data.publicCopy?.beta));
 </script>
 
 <svelte:head>
@@ -93,7 +94,7 @@
 		<FlowbiteButton href={l('/')} variant="secondary" size="sm"
 			><HomeOutline size="xs" />{copy.home}</FlowbiteButton
 		>
-		<LanguageSwitcher {locale} />
+		<LanguageSwitcher {locale} {publicLocale} />
 	{/snippet}
 
 	<div class="mx-auto flex w-full max-w-2xl flex-col gap-8">

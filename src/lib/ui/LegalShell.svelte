@@ -25,6 +25,7 @@
 
 	const t = getTranslate();
 	const locale: Locale = $derived((page.data.locale as Locale | undefined) ?? 'tr');
+	const publicLocale = $derived((page.data.publicLocale as string | undefined) ?? locale);
 	const dateLocales: Record<Locale, string> = { en: 'en-US', tr: 'tr-TR', de: 'de-DE' };
 	const resolvedUpdated = $derived(
 		updated ??
@@ -34,7 +35,7 @@
 				year: 'numeric'
 			})
 	);
-	const l = (path: string) => withLocale(locale, path);
+	const l = (path: string) => withLocale(publicLocale, path);
 	const currentPath = $derived(stripLocale(page.url.pathname));
 	const labels = $derived(
 		{
@@ -91,12 +92,13 @@
 	<meta name="robots" content="index,follow" />
 </svelte:head>
 
-<PublicShell {locale} currentPath="/legal" label="saaskaya.com / legal">
+<PublicShell {locale} {publicLocale} currentPath="/legal" label="saaskaya.com / legal">
 	<MarketingSection class="py-10 sm:py-14">
 		<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
 			<article class="min-w-0">
 				<PublicBreadcrumb
 					{locale}
+					routeLocale={publicLocale}
 					items={[
 						{ label: labels.home, href: '/' },
 						{ label: labels.legal, href: '/legal/privacy' },

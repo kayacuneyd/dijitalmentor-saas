@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { DEFAULT_OG_IMAGE, absoluteUrl, seoAlternates, stringifyJsonLd } from '$lib/seo';
 	import type { Locale } from '$lib/i18n';
 
@@ -20,8 +21,12 @@
 		jsonLd?: unknown[];
 	} = $props();
 
-	const canonical = $derived(absoluteUrl(locale, path));
-	const alternates = $derived(seoAlternates(path));
+	const publicLocale = $derived((page.data.publicLocale as string | undefined) ?? locale);
+	const publicLocales = $derived(
+		(page.data.publicLocales as { code: string }[] | undefined)?.map((item) => item.code)
+	);
+	const canonical = $derived(absoluteUrl(publicLocale, path));
+	const alternates = $derived(seoAlternates(path, publicLocales));
 	const jsonLdScripts = $derived(
 		jsonLd
 			.map((item) => `<script type="application/ld+json">${stringifyJsonLd(item)}<${'/'}script>`)
@@ -41,7 +46,7 @@
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
 	<meta property="og:image" content={image} />
-	<meta property="og:locale" content={locale} />
+	<meta property="og:locale" content={publicLocale} />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />

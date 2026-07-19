@@ -14,6 +14,9 @@ declare global {
 				locale: import('$lib/i18n').Locale | null;
 			} | null;
 			locale: import('$lib/i18n').Locale;
+			/** Locale used by the public saaskaya site. It may be owner-added and
+			 * therefore wider than the typed application UI locale. */
+			publicLocale: string;
 			unprefixedPath: string;
 			/** True when the request's Host is a tenant site (subdomain/custom domain),
 			 *  not the SaaS app — PWA manifest/meta/SW must never ship to tenants. */

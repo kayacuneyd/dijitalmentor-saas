@@ -16,13 +16,14 @@
 		PenOutline,
 		WandMagicSparklesOutline
 	} from 'flowbite-svelte-icons';
-	import { mergeCopy } from '$lib/publicCopy';
+	import { baseLocaleForPublic, mergeCopy } from '$lib/publicCopy';
 	import { reveal } from '$lib/actions/reveal';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
-	const locale: Locale = $derived(data.locale);
-	const l = (path: string) => withLocale(locale, path);
+	const publicLocale = $derived(data.publicLocale ?? data.locale);
+	const locale: Locale = $derived(baseLocaleForPublic(publicLocale));
+	const l = (path: string) => withLocale(publicLocale, path);
 	const seeds = Object.entries(seedSites);
 
 	const swatches = {
@@ -526,7 +527,7 @@
 			}
 		}[locale]
 	);
-	const copy = $derived(mergeCopy(baseCopy, data.copyOverrides?.[locale]));
+	const copy = $derived(mergeCopy(baseCopy, data.publicCopy?.home));
 
 	const steps = $derived(
 		copy.steps.map(([title, desc], index) => ({ n: String(index + 1), title, desc }))
@@ -560,7 +561,13 @@
 	]}
 />
 
-<PublicShell {locale} currentPath="/" userEmail={data.user?.email ?? null} label="saaskaya.com">
+<PublicShell
+	{locale}
+	{publicLocale}
+	currentPath="/"
+	userEmail={data.user?.email ?? null}
+	label="saaskaya.com"
+>
 	<!-- Hero -->
 	<MarketingSection class="flex flex-col items-center gap-4 pt-10 text-center sm:pt-14">
 		<h1 class="sk-display max-w-[24ch] text-4xl leading-[1.08] sm:text-[2.75rem] lg:text-[3.25rem]">

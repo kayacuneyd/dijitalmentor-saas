@@ -1,4 +1,4 @@
-import { localeFromPath, stripLocale } from '$lib/i18n';
+import { publicLocaleFromPath, stripLocale } from '$lib/i18n';
 import { resolveHostReroute } from '$lib/hostRouting';
 
 const LOCALIZED_PUBLIC_PATHS = new Set([
@@ -28,7 +28,7 @@ export function resolveAppReroute(url: URL, appHost: string | undefined): string
 	const hostRoute = resolveHostReroute(url, appHost);
 	if (hostRoute) return hostRoute;
 
-	const locale = localeFromPath(url.pathname);
+	const locale = publicLocaleFromPath(url.pathname);
 	if (!locale) return undefined;
 	const stripped = stripLocale(url.pathname);
 	return isLocalizedPublicPath(stripped) ? stripped : undefined;

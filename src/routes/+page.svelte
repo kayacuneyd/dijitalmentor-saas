@@ -116,14 +116,6 @@
 				finalTitle: 'Ready?',
 				finalBody:
 					'Describe your work, review the first multilingual draft, then decide whether it is ready to publish.',
-				legal: {
-					privacy: 'Privacy',
-					terms: 'Terms',
-					kvkk: 'KVKK',
-					acceptable: 'Acceptable use',
-					refund: 'Cancellation and refund',
-					disclaimer: 'Disclaimer'
-				},
 				steps: [
 					[
 						'Describe',
@@ -287,14 +279,6 @@
 				finalTitle: 'Hazır mısın?',
 				finalBody:
 					'Mesleğini anlat, ilk çok dilli taslağı incele, yayına hazır olup olmadığına sonra karar ver.',
-				legal: {
-					privacy: 'Gizlilik',
-					terms: 'Şartlar',
-					kvkk: 'KVKK',
-					acceptable: 'Kabul edilebilir kullanım',
-					refund: 'İptal ve iade',
-					disclaimer: 'Sorumluluk reddi'
-				},
 				steps: [
 					['Anlat', 'Uzmanlığını, hizmetlerini, hedef kitleni ve tonunu birkaç cümlede yaz.'],
 					['Üret', 'AI bu briefi sabit güvenli yapı içinde çok dilli site taslağına dönüştürür.'],
@@ -455,14 +439,6 @@
 				finalTitle: 'Bereit?',
 				finalBody:
 					'Beschreibe dein berufliches Profil, prüfe den ersten mehrsprachigen Entwurf und entscheide dann.',
-				legal: {
-					privacy: 'Datenschutz',
-					terms: 'Bedingungen',
-					kvkk: 'KVKK',
-					acceptable: 'Zulässige Nutzung',
-					refund: 'Kündigung und Erstattung',
-					disclaimer: 'Haftungsausschluss'
-				},
 				steps: [
 					[
 						'Beschreiben',
@@ -599,7 +575,9 @@
 			>
 			<FlowbiteButton href="#ornekler" variant="secondary" size="lg">{copy.examples}</FlowbiteButton
 			>
-			<FlowbiteButton href={l('/pricing')} variant="ghost" size="lg">{copy.pricing}</FlowbiteButton>
+			<FlowbiteButton href={l('/pricing')} variant="secondary" size="lg"
+				>{copy.pricing}</FlowbiteButton
+			>
 		</div>
 	</MarketingSection>
 
@@ -612,38 +590,31 @@
 	</MarketingSection>
 
 	<!-- Problem band -->
-	<MarketingSection class="mt-8">
-		<div class="sk-soft p-4 sm:p-5 lg:p-6">
-			<div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-				<div class="sk-eyebrow">{copy.problemsLabel}</div>
-				<div class="hidden h-px flex-1 bg-[var(--sk-line)] sm:block"></div>
-			</div>
-			<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
-				{copy.sectionTitles.problems}
-			</h2>
-			<ul class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-				{#each problemItems as item (item.title)}
-					<li
-						class="flex min-h-[6.25rem] gap-3 rounded-[10px] border border-[var(--sk-line)] bg-white/70 p-3.5"
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
+		<div class="sk-eyebrow">{copy.problemsLabel}</div>
+		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
+			{copy.sectionTitles.problems}
+		</h2>
+		<ul class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+			{#each problemItems as item (item.title)}
+				<li class="sk-card flex min-h-[6.25rem] gap-3 p-3.5">
+					<span
+						class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--sk-accent-soft)] text-[var(--sk-accent)]"
+						aria-hidden="true"
 					>
-						<span
-							class="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--sk-accent-soft)] text-[var(--sk-accent)]"
-							aria-hidden="true"
-						>
-							<CheckOutline size="xs" />
+						<CheckOutline size="xs" />
+					</span>
+					<span class="min-w-0">
+						<span class="block text-sm font-semibold leading-5 text-[var(--sk-ink)]">
+							{item.title}
 						</span>
-						<span class="min-w-0">
-							<span class="block text-sm font-semibold leading-5 text-[var(--sk-ink)]">
-								{item.title}
-							</span>
-							<span class="mt-1 block text-[13px] leading-5 text-[var(--sk-muted)]">
-								{item.body}
-							</span>
+						<span class="mt-1 block text-[13px] leading-5 text-[var(--sk-muted)]">
+							{item.body}
 						</span>
-					</li>
-				{/each}
-			</ul>
-		</div>
+					</span>
+				</li>
+			{/each}
+		</ul>
 	</MarketingSection>
 
 	<!-- Process -->
@@ -903,7 +874,7 @@
 	</MarketingSection>
 
 	<!-- Trust -->
-	<MarketingSection band="paper" class="py-10">
+	<MarketingSection class="mt-12 border-t border-[var(--sk-line)] pt-7">
 		<div class="sk-eyebrow">{copy.trust}</div>
 		<h2 class="sk-display mt-3 max-w-3xl text-2xl leading-tight sm:text-3xl">
 			{copy.sectionTitles.trust}
@@ -915,23 +886,6 @@
 					<p class="mt-1.5 text-[13px] leading-5 text-[var(--sk-muted)]">{card.desc}</p>
 				</div>
 			{/each}
-		</div>
-		<div class="mt-4 flex flex-wrap gap-3 text-xs">
-			<a href={l('/legal/privacy')} class="sk-link text-[var(--sk-muted)]">{copy.legal.privacy}</a>
-			<span class="text-[var(--sk-faint)]">·</span>
-			<a href={l('/legal/terms')} class="sk-link text-[var(--sk-muted)]">{copy.legal.terms}</a>
-			<span class="text-[var(--sk-faint)]">·</span>
-			<a href={l('/legal/kvkk')} class="sk-link text-[var(--sk-muted)]">{copy.legal.kvkk}</a>
-			<span class="text-[var(--sk-faint)]">·</span>
-			<a href={l('/legal/acceptable-use')} class="sk-link text-[var(--sk-muted)]"
-				>{copy.legal.acceptable}</a
-			>
-			<span class="text-[var(--sk-faint)]">·</span>
-			<a href={l('/legal/refund')} class="sk-link text-[var(--sk-muted)]">{copy.legal.refund}</a>
-			<span class="text-[var(--sk-faint)]">·</span>
-			<a href={l('/legal/disclaimer')} class="sk-link text-[var(--sk-muted)]"
-				>{copy.legal.disclaimer}</a
-			>
 		</div>
 	</MarketingSection>
 

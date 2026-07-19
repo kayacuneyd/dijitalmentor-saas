@@ -134,7 +134,7 @@
 			<p class="mt-3 max-w-xs text-sm leading-6 text-[var(--sk-muted)]">{copy.tagline}</p>
 			<p class="mt-2 text-xs text-[var(--sk-faint)]">{copy.location}</p>
 		</div>
-		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+		<div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
 			{#each columns as column (column.title)}
 				<div>
 					<h2 class="sk-eyebrow">{column.title}</h2>

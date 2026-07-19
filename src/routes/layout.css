@@ -1037,6 +1037,12 @@ select {
 	pointer-events: auto;
 }
 
+@media (min-width: 1024px) {
+	.sk-assistant-dock {
+		bottom: calc(8.5rem + env(safe-area-inset-bottom));
+	}
+}
+
 .sk-assistant-shell,
 .sk-assistant-pill {
 	border: 1px solid var(--sk-line-strong);

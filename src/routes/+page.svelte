@@ -573,8 +573,6 @@
 			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
 				>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
 			>
-			<FlowbiteButton href="#ornekler" variant="secondary" size="lg">{copy.examples}</FlowbiteButton
-			>
 			<FlowbiteButton href={l('/pricing')} variant="secondary" size="lg"
 				>{copy.pricing}</FlowbiteButton
 			>
@@ -584,7 +582,7 @@
 	<!-- Flow animation: the whole product story in ~20s, as the hero's visual continuation -->
 	<MarketingSection class="mt-10">
 		<div class="sk-eyebrow text-center">{copy.flowLabel}</div>
-		<div class="mx-auto mt-4 w-full max-w-4xl">
+		<div class="mt-4 w-full">
 			<FlowAnimation sceneLabels={copy.flowScenes} loopCaption="" reducedMotionCaption="" />
 		</div>
 	</MarketingSection>

@@ -4591,3 +4591,9 @@ provider/model ayarı veya prompt/schema uyumu ayrıca ele alınmalı.
 - Assistant dock bottom offset raised to 8.5rem on desktop (≥1024px media query in `layout.css`); mobile stays at the safe-area value.
 - Footer link columns now flow 2×2 on mobile (`grid-cols-2` below lg) per the user's screenshot feedback.
 - Verification: `npm run check` 0 errors/warnings; build succeeds; SSR confirms only card+ink bands remain and no legal links inside `<main>`; Playwright: dock computed bottom 136px (8.5rem), wordmark 20px on desktop, footer renders 2×2 at 375px, zero overflow and console errors at both widths. Screenshots visually confirmed. Prettier run. Still uncommitted with rounds 1–2.
+
+## 2026-07-19 — Homepage round 4: animation width + hero CTA simplification
+
+- Widened the flow-animation section from max-w-4xl to the full section content width (max-w-7xl, matching the problem band) — the phone/tablet scenes inside the fixed-design stage were too small at the narrower width; measured 1200px at 1440 viewport, edges aligned with the section below.
+- Removed the "Örnek siteleri gör" hero button (it only anchored to #ornekler two sections down; the examples section has its own H2). The hero now carries the classic pair: primary "İlk siteyi oluştur" + bordered "Fiyatlandırma" — no third style needed. The `examples` copy key stays (still listed in admin copy fields).
+- Verification: `npm run check` 0 errors/warnings; build succeeds; SSR shows no #ornekler anchor button; Playwright at 1440px: zero overflow, zero console errors, screenshot confirmed. Uncommitted with rounds 1–3.

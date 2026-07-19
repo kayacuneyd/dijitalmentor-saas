@@ -123,7 +123,7 @@
 	]);
 </script>
 
-<footer class="border-t border-[var(--sk-line)] bg-[rgb(251_250_247/.82)]">
+<footer class="border-t border-[var(--sk-line)] bg-[var(--sk-card)]">
 	<div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.2fr_2.8fr]">
 		<div>
 			<div class="flex items-center gap-3">
@@ -137,7 +137,7 @@
 		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 			{#each columns as column (column.title)}
 				<div>
-					<h2 class="sk-mono text-[10.5px] text-[var(--sk-faint)]">{column.title}</h2>
+					<h2 class="sk-eyebrow">{column.title}</h2>
 					<ul class="mt-3 space-y-1">
 						{#each column.links as [label, href] (`${column.title}-${href}`)}
 							<li>

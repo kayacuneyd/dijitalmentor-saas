@@ -31,8 +31,8 @@
 		<div class="min-w-0 flex-1">
 			{@render children()}
 		</div>
-		<PublicFooter {locale} />
 	</div>
 </AppCanvasShell>
+<PublicFooter {locale} />
 <SiteAssistantDock {locale} {currentPath} userEmail={userEmail ?? ''} />
 <ScrollToTop />

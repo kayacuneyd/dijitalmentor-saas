@@ -14,10 +14,10 @@
 		GlobeOutline,
 		MessagesOutline,
 		PenOutline,
-		ShieldCheckOutline,
 		WandMagicSparklesOutline
 	} from 'flowbite-svelte-icons';
 	import { mergeCopy } from '$lib/publicCopy';
+	import { reveal } from '$lib/actions/reveal';
 	import { withLocale, type Locale } from '$lib/i18n';
 
 	let { data } = $props();
@@ -49,13 +49,6 @@
 					{ title: 'Translation', body: 'TR, EN and DE versions can be prepared together.' },
 					{ title: 'Technical setup', body: 'Domain, SSL and hosting steps become clear.' },
 					{ title: 'AI risk', body: 'AI does not write code; the site structure stays protected.' }
-				],
-				heroTrust: [
-					[
-						'AI writes no code',
-						'Every output is validated before rendering — your site cannot break.'
-					],
-					['You own your site', 'Pro sites include full export support. No losing your work.']
 				],
 				examples: 'See example sites',
 				pricing: 'Pricing',
@@ -224,10 +217,6 @@
 					{ title: 'Teknik kurulum', body: 'Domain, SSL ve hosting yolu netleşir.' },
 					{ title: 'AI riski', body: 'AI kod yazmaz; site yapısı korunur.' }
 				],
-				heroTrust: [
-					['AI kod yazmaz', 'Her çıktı yayınlanmadan doğrulanır — sitenin bozulma riski yok.'],
-					['Site senin', 'Pro sitelerde tam export desteği var. Kilit yok, emeğin kaybolmaz.']
-				],
 				examples: 'Örnek siteleri gör',
 				pricing: 'Fiyatlandırma',
 				process: 'Nasıl çalışır',
@@ -395,13 +384,6 @@
 					{ title: 'Übersetzen', body: 'TR, EN und DE können gemeinsam vorbereitet werden.' },
 					{ title: 'Technik einrichten', body: 'Domain, SSL und Hosting werden greifbar.' },
 					{ title: 'AI-Risiko', body: 'AI schreibt keinen Code; die Struktur bleibt geschützt.' }
-				],
-				heroTrust: [
-					[
-						'AI schreibt keinen Code',
-						'Jede Ausgabe wird vor dem Rendern validiert — deine Website kann nicht kaputtgehen.'
-					],
-					['Deine Website gehört dir', 'Pro-Websites enthalten vollständigen Export-Support.']
 				],
 				examples: 'Beispiele ansehen',
 				pricing: 'Preise',
@@ -585,7 +567,6 @@
 	const features = $derived(copy.featureItems.map(([title, desc]) => ({ title, desc })));
 	const faqs = $derived(copy.faqs.map(([q, a]) => ({ q, a })));
 	const trustCards = $derived(copy.trustCards.map(([title, desc]) => ({ title, desc })));
-	const heroTrust = $derived(copy.heroTrust.map(([title, desc]) => ({ title, desc })));
 	const problemItems = $derived(copy.problemItems);
 
 	const stepIcons = [MessagesOutline, WandMagicSparklesOutline, PenOutline, GlobeOutline];
@@ -605,45 +586,27 @@
 
 <PublicShell {locale} currentPath="/" userEmail={data.user?.email ?? null} label="saaskaya.com">
 	<!-- Hero -->
-	<MarketingSection
-		class="grid gap-8 pt-8 sm:pt-10 lg:grid-cols-[minmax(0,1fr)_minmax(30rem,1.05fr)] lg:items-start"
-	>
-		<div class="flex max-w-3xl flex-col items-start gap-4 lg:pt-1">
-			<h1
-				class="sk-display max-w-[24ch] text-4xl leading-[1.08] sm:text-[2.75rem] lg:text-[3.25rem]"
+	<MarketingSection class="flex flex-col items-center gap-4 pt-10 text-center sm:pt-14">
+		<h1 class="sk-display max-w-[24ch] text-4xl leading-[1.08] sm:text-[2.75rem] lg:text-[3.25rem]">
+			{copy.h1}
+		</h1>
+		<p class="max-w-2xl text-base leading-7 text-[var(--sk-muted)] sm:text-[17px]">
+			{copy.lead}
+		</p>
+		<div class="flex flex-wrap items-center justify-center gap-3">
+			<FlowbiteButton href={l('/new')} variant="primary" size="lg"
+				>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
 			>
-				{copy.h1}
-			</h1>
-			<p class="max-w-2xl text-base leading-7 text-[var(--sk-muted)] sm:text-[17px]">
-				{copy.lead}
-			</p>
-			<div class="flex flex-wrap items-center gap-3">
-				<FlowbiteButton href={l('/new')} variant="primary" size="lg"
-					>{copy.primary}<ArrowRightOutline size="sm" /></FlowbiteButton
-				>
-				<FlowbiteButton href="#ornekler" variant="secondary" size="lg"
-					>{copy.examples}</FlowbiteButton
-				>
-				<FlowbiteButton href={l('/pricing')} variant="ghost" size="lg"
-					>{copy.pricing}</FlowbiteButton
-				>
-			</div>
-			<!-- The two decisive trust answers, before the fold (full Trust section stays below) -->
-			<div class="mt-1 grid w-full gap-3 sm:grid-cols-2">
-				{#each heroTrust as card (card.title)}
-					<div class="flex min-h-24 items-start gap-2.5 border-t border-[var(--sk-line)] pt-3">
-						<ShieldCheckOutline size="sm" class="mt-0.5 shrink-0 text-[var(--sk-accent)]" />
-						<div>
-							<h3 class="text-sm font-semibold">{card.title}</h3>
-							<p class="mt-0.5 text-[13px] leading-5 text-[var(--sk-muted)]">{card.desc}</p>
-						</div>
-					</div>
-				{/each}
-			</div>
+			<FlowbiteButton href="#ornekler" variant="secondary" size="lg">{copy.examples}</FlowbiteButton
+			>
+			<FlowbiteButton href={l('/pricing')} variant="ghost" size="lg">{copy.pricing}</FlowbiteButton>
 		</div>
+	</MarketingSection>
 
-		<!-- Flow animation: the whole product story in ~20s -->
-		<div class="w-full lg:pt-1">
+	<!-- Flow animation: the whole product story in ~20s, as the hero's visual continuation -->
+	<MarketingSection class="mt-10">
+		<div class="sk-eyebrow text-center">{copy.flowLabel}</div>
+		<div class="mx-auto mt-4 w-full max-w-4xl">
 			<FlowAnimation sceneLabels={copy.flowScenes} loopCaption="" reducedMotionCaption="" />
 		</div>
 	</MarketingSection>
@@ -972,12 +935,12 @@
 		</div>
 	</MarketingSection>
 
-	<!-- Final CTA -->
-	<MarketingSection class="mt-12 pb-12">
-		<div class="sk-card flex flex-col items-center gap-3 p-6 text-center">
-			<MascotBee size="md" label="SaasKaya bee mascot" />
-			<h2 class="sk-display text-2xl">{copy.finalTitle}</h2>
-			<p class="max-w-md text-sm text-[var(--sk-muted)]">
+	<!-- Final CTA: the page's one dark moment -->
+	<MarketingSection band="ink" class="py-14 sm:py-16">
+		<div use:reveal class="flex flex-col items-center gap-4 text-center">
+			<MascotBee size="lg" label="SaasKaya bee mascot" class="sk-cta-bee" />
+			<h2 class="sk-display text-3xl text-[var(--sk-paper)] sm:text-4xl">{copy.finalTitle}</h2>
+			<p class="max-w-md text-base leading-7 text-[rgba(243,236,221,0.75)]">
 				{copy.finalBody}
 			</p>
 			<FlowbiteButton href={l('/new')} variant="primary" size="lg"

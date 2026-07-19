@@ -101,6 +101,94 @@ select {
 	background: var(--sk-paper);
 }
 
+/* The one dark moment on the page: the closing CTA band before the footer. */
+.sk-band--ink {
+	border-block-color: rgb(23 22 20 / 0.3);
+	background: var(--sk-ink);
+	color: var(--sk-paper);
+}
+
+.sk-band--ink .sk-flowbite-btn--primary {
+	background: var(--sk-paper) !important;
+	color: var(--sk-ink) !important;
+}
+
+.sk-band--ink .sk-flowbite-btn--primary:hover {
+	background: #e7ddc8 !important;
+}
+
+.sk-band--ink .sk-flowbite-btn:focus-visible {
+	outline-color: var(--sk-paper) !important;
+}
+
+/* Scroll reveal (class pair applied only client-side by the reveal action). */
+.sk-reveal > * {
+	opacity: 0;
+	transform: translateY(14px);
+}
+
+.sk-reveal--visible > * {
+	opacity: 1;
+	transform: none;
+	transition:
+		opacity 0.6s ease-out,
+		transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sk-reveal--visible > *:nth-child(2) {
+	transition-delay: 0.08s;
+}
+
+.sk-reveal--visible > *:nth-child(3) {
+	transition-delay: 0.16s;
+}
+
+.sk-reveal--visible > *:nth-child(4) {
+	transition-delay: 0.24s;
+}
+
+.sk-reveal--visible .sk-cta-bee {
+	animation:
+		sk-bee-arrive 0.9s ease-out both,
+		sk-bee-float 3.4s ease-in-out 1s infinite;
+}
+
+@keyframes sk-bee-arrive {
+	0% {
+		transform: translate3d(-1.25rem, 0.75rem, 0) rotate(-6deg);
+		opacity: 0;
+	}
+	60% {
+		transform: translate3d(0.2rem, -0.3rem, 0) rotate(3deg);
+		opacity: 1;
+	}
+	100% {
+		transform: translate3d(0, 0, 0) rotate(0);
+	}
+}
+
+@keyframes sk-bee-float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-0.25rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sk-reveal > * {
+		opacity: 1;
+		transform: none;
+		transition: none;
+	}
+
+	.sk-reveal--visible .sk-cta-bee {
+		animation: none;
+	}
+}
+
 .sk-page {
 	min-height: 100svh;
 	background:

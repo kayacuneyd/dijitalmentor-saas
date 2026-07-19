@@ -10,7 +10,7 @@
 		id?: string;
 		class?: string;
 		as?: 'div' | 'section' | 'article' | 'header';
-		band?: 'card' | 'paper';
+		band?: 'card' | 'paper' | 'ink';
 	} = $props();
 </script>
 
